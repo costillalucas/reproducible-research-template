@@ -1,0 +1,34 @@
+# scripts.yaml -- registry of every critical-path script behind the
+# deliverable. Nothing the deliverable depends on may be absent from this
+# list; scripts/check_provenance.py enforces that every `path` exists.
+
+scripts:
+  - id: compute_numbers
+    path: scripts/compute_numbers.py
+    description: >
+      SOLE WRITER of data/numbers.json; recomputes every number quoted in
+      report/report.md from src/example_pkg, with a fixed seed.
+    command: python scripts/compute_numbers.py
+    outputs: [data/numbers.json]
+
+  - id: checks
+    path: scripts/checks.py
+    description: >
+      correctness suite -- the positive convergence checks (P1, P2) and the
+      negative control (D1) that must be caught disagreeing.
+    command: python scripts/checks.py
+    outputs: [data/checks_results.json]
+
+  - id: check_provenance
+    path: scripts/check_provenance.py
+    description: >
+      provenance gate -- verifies every claim/number/script/output
+      cross-reference resolves, and every displayed numeric literal in the
+      report agrees with the registry at its own displayed precision.
+    command: python scripts/check_provenance.py report/report.md
+
+  - id: pi_estimator
+    path: src/example_pkg/pi_estimator.py
+    description: >
+      the estimator under test (estimate_pi) and the deliberately wrong one
+      used as the negative control (constant_estimator).

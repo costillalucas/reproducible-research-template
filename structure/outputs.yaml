@@ -1,0 +1,10 @@
+# outputs.yaml -- every artifact the deliverable shows (a figure, a table,
+# a results file -- anything, not only LaTeX figures), mapped to the script
+# that produced it and the claims it supports. Generalizes
+# pta-gwb-anisotropy's figures.yaml beyond the LaTeX-figure-specific case.
+
+outputs:
+  - label: checks_results
+    source: scripts/checks.py
+    file: data/checks_results.json
+    supports_claims: [mc_pi_converges, check_catches_a_wrong_estimator]

@@ -1,0 +1,9 @@
+name: repro-template
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - numpy
+  - pyyaml
+  - pytest
+  - pip
