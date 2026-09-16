@@ -1,0 +1,38 @@
+# claims.yaml -- frozen reference copy, see examples/pi_estimator/README.md.
+# This is the original template worked example's argument graph, kept
+# standalone for reference. It is not read by the live scripts/
+# check_provenance.py (that only reads structure/claims.yaml at repo root).
+
+claims:
+  - id: mc_pi_converges
+    statement: >
+      A Monte Carlo estimate of pi, from the fraction of uniform random
+      points in [-1,1]^2 landing inside the unit circle, has error that
+      shrinks as N^-1/2 and lands inside its own predicted standard error.
+    file: examples/pi_estimator/report.md
+    numbers: [pi_true, pi_estimate_n200000, pi_estimate_se_n200000,
+              pi_abs_error_n200000]
+    evidence:
+      - id: ev_convergence_check
+        description: error-vs-N log-log slope (P1), single-point SE check (P2)
+        data_refs:
+          - examples/pi_estimator/checks.py
+          - examples/pi_estimator/pi_estimator.py
+    depends_on: []
+    status: established
+
+  - id: check_catches_a_wrong_estimator
+    statement: >
+      The identical convergence check, run on a deliberately wrong
+      "estimator" that ignores its input, does NOT shrink with N --
+      proving the check is capable of failing, not merely capable of
+      passing.
+    file: examples/pi_estimator/report.md
+    numbers: [suite_coverage]
+    evidence:
+      - id: ev_negative_control
+        description: constant_estimator() run through the identical slope check (D1)
+        data_refs:
+          - examples/pi_estimator/checks.py
+    depends_on: [mc_pi_converges]
+    status: established

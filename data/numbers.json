@@ -1,32 +1,8 @@
 {
-  "pi_abs_error_n200000": {
+  "template_wired": {
     "reproduce": "scripts/compute_numbers.py::main",
-    "statement": "absolute error of the n=200000 estimate against the analytic value",
-    "type": "script",
-    "value": 0.0005326535897931528
-  },
-  "pi_estimate_n200000": {
-    "detail": "seed=42, n=200000",
-    "reproduce": "scripts/compute_numbers.py::main",
-    "statement": "Monte Carlo estimate of pi from n=200000 uniform points in [-1,1]^2, 4 * (fraction landing inside the unit circle)",
-    "type": "script",
-    "value": 3.14106
-  },
-  "pi_estimate_se_n200000": {
-    "reproduce": "src/example_pkg/pi_estimator.py::estimate_pi",
-    "statement": "predicted 1-sigma standard error of that estimate, from the binomial variance of the inside/outside fraction",
+    "statement": "placeholder: the provenance pipeline is wired end to end",
     "type": "derivation",
-    "value": 0.0036728613344366814
-  },
-  "pi_true": {
-    "reproduce": "math.pi",
-    "statement": "the analytic value of pi",
-    "type": "derivation",
-    "value": 3.141592653589793
-  },
-  "suite_coverage": {
-    "reproduce": "scripts/checks.py",
-    "statement": "checks.py pass/fail coverage for this example (positive checks + the negative control)",
-    "type": "check"
+    "value": 1
   }
 }

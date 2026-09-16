@@ -1,4 +1,4 @@
-name: repro-template
+name: ptyco-full-simulator
 channels:
   - conda-forge
 dependencies:

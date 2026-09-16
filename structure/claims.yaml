@@ -4,43 +4,27 @@
 #
 # Rules, enforced by scripts/check_provenance.py:
 #   - every `data_ref` must be a path that exists in this repo (a citation
-#     key would also be valid here if you add a bibliography; this toy
-#     example has none).
+#     key would also be valid here if you add a bibliography).
 #   - `numbers` are keys in data/numbers.json, written solely by
 #     scripts/compute_numbers.py.
 #   - `depends_on` lists other claim ids this one relies on -- this is a
 #     graph, not a flat list, and every edge is checked to resolve.
+#
+# TODO: replace the placeholder claim below with the real argument of your
+# deliverable -- see the repo README's "Adapting this to a real project"
+# for why this file is usually worth writing before the code.
 
 claims:
-  - id: mc_pi_converges
+  - id: template_wired
     statement: >
-      A Monte Carlo estimate of pi, from the fraction of uniform random
-      points in [-1,1]^2 landing inside the unit circle, has error that
-      shrinks as N^-1/2 and lands inside its own predicted standard error.
+      Placeholder claim proving the provenance pipeline (compute -> check
+      -> gate) is wired end to end for this project.
     file: report/report.md
-    numbers: [pi_true, pi_estimate_n200000, pi_estimate_se_n200000,
-              pi_abs_error_n200000]
+    numbers: [template_wired]
     evidence:
-      - id: ev_convergence_check
-        description: error-vs-N log-log slope (P1), single-point SE check (P2)
+      - id: ev_pipeline_wired
+        description: compute_numbers.py writes the registry entry consumed by report.md
         data_refs:
-          - scripts/checks.py
-          - src/example_pkg/pi_estimator.py
+          - scripts/compute_numbers.py
     depends_on: []
-    status: established
-
-  - id: check_catches_a_wrong_estimator
-    statement: >
-      The identical convergence check, run on a deliberately wrong
-      "estimator" that ignores its input, does NOT shrink with N --
-      proving the check is capable of failing, not merely capable of
-      passing.
-    file: report/report.md
-    numbers: [suite_coverage]
-    evidence:
-      - id: ev_negative_control
-        description: constant_estimator() run through the identical slope check (D1)
-        data_refs:
-          - scripts/checks.py
-    depends_on: [mc_pi_converges]
-    status: established
+    status: placeholder

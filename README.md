@@ -1,4 +1,4 @@
-# Reproducible research template
+# ptyco-full-simulator
 
 A minimal, **runnable** skeleton for a deliverable where every number
 carries a provenance tag that traces back to the code that computed it, and
@@ -10,29 +10,29 @@ The pattern is lifted from
 can fork for anything: a paper, a report, a blog post, a decision memo —
 anywhere a reader needs to trust that a number wasn't just typed by hand.
 
-This is not empty scaffolding. `report/report.md` is a real (if trivial)
-worked example — a Monte Carlo estimate of pi — with a correctness suite
-that includes a deliberate negative control, so you can run the whole
-pipeline on a fresh clone and watch every stage actually pass, then watch
-it actually fail when you break something on purpose.
+This project started from that template's own worked example — a Monte
+Carlo estimate of pi with a deliberate negative control — which is kept as
+a frozen, runnable reference at `examples/pi_estimator/`. Read it while
+building the real thing out below.
 
 ## Quick start
 
 ```bash
-git clone <this-repo-url> && cd reproducible-research-template
-conda env create -f environment.yml -n repro-template   # or: pip install -r requirements.txt
-conda activate repro-template
+git clone <this-repo-url> && cd ptyco-full-simulator
+conda env create -f environment.yml -n ptyco-full-simulator   # or: pip install -r requirements.txt
+conda activate ptyco-full-simulator
 
 bash scripts/reproduce.sh   # compute -> check -> provenance gate, in order
 pytest tests/ -v             # unit tests, plus an automated negative control on the gate itself
 ```
 
-Try breaking it: open `report/report.md`, change `[srcnum:pi_true:3.14159]`
-to `[srcnum:pi_true:4.00000]`, and rerun
-`python scripts/check_provenance.py report/report.md`. It refuses to pass,
-and tells you exactly which tag disagrees with the registry and by how
-much. `tests/test_check_provenance.py` does this automatically so the gate
-stays honest as the template evolves.
+`report/report.md` currently carries just one placeholder tag
+(`template_wired`) proving the pipeline is wired end to end. Try breaking
+it: change `[srcnum:template_wired:1]` to `[srcnum:template_wired:2]`, and
+rerun `python scripts/check_provenance.py report/report.md`. It refuses to
+pass, and tells you exactly which tag disagrees with the registry and by
+how much. `tests/test_check_provenance.py` does this automatically so the
+gate stays honest as the project evolves.
 
 ## The mechanism
 
@@ -85,12 +85,11 @@ above and exits nonzero the moment anything doesn't resolve.
 |   |-- scripts.yaml
 |   `-- outputs.yaml
 |
-|-- src/example_pkg/           # the analysis code (swap this out)
-|   `-- pi_estimator.py        # estimate_pi() under test, constant_estimator() as negative control
+|-- src/ptyco_full_simulator/  # the real analysis code -- currently just a placeholder
 |
 |-- scripts/
 |   |-- compute_numbers.py     # SOLE WRITER of data/numbers.json
-|   |-- checks.py              # correctness suite: positive checks + one negative control
+|   |-- checks.py              # correctness suite: positive checks + at least one negative control
 |   |-- check_provenance.py    # the gate
 |   `-- reproduce.sh           # compute -> check -> gate, in that order
 |
@@ -102,21 +101,28 @@ above and exits nonzero the moment anything doesn't resolve.
 |   |                          #   clone can run check_provenance.py immediately)
 |   `-- checks_results.json    # machine-readable checks.py output
 |
-`-- tests/
-    |-- test_pi_estimator.py       # unit tests of the example code
-    `-- test_check_provenance.py   # PROVES the gate can fail: corrupts a copy of
-                                    #   the report and asserts it's rejected
+|-- tests/
+|   `-- test_check_provenance.py   # PROVES the gate can fail: corrupts a copy of
+|                                   #   the report and asserts it's rejected
+|
+`-- examples/pi_estimator/     # frozen reference: the template's original worked
+                                #   example (Monte Carlo pi), fully self-contained --
+                                #   see examples/pi_estimator/README.md
 ```
 
 ## Adapting this to a real project
 
-1. Replace `src/example_pkg/` with your actual analysis code.
+This project already went through steps 1 and 4-6 below in placeholder
+form (see `src/ptyco_full_simulator/`, `report/report.md`'s
+`template_wired` tag, and `structure/claims.yaml`'s `template_wired`
+claim) so the pipeline is runnable from the first commit. Fill it in:
+
+1. Write your actual analysis code into `src/ptyco_full_simulator/`.
 2. Rewrite `scripts/compute_numbers.py` to compute your real numbers, keep
    it the sole writer of `data/numbers.json`.
 3. Rewrite `scripts/checks.py` with your real positive checks, and **keep
    at least one negative control** — a case built to disagree on purpose,
-   so a passing suite means something. See
-   `objective.txt`-style disciplines: pick negative controls that would
+   so a passing suite means something. Pick negative controls that would
    expose a real error in your method, not ones chosen to flatter it.
 4. Rewrite `report/report.md` (or swap it for LaTeX + `paperclaims.sty`-
    style macros, if you're writing a paper) with `[src:]` / `[srcnum:]`
@@ -126,6 +132,10 @@ above and exits nonzero the moment anything doesn't resolve.
    before the code, because it forces you to state what you're going to
    need evidence for.
 6. `bash scripts/reproduce.sh` end to end before you call anything done.
+
+`examples/pi_estimator/` is the original template worked example, kept as
+a running reference for the tag/registry/structure mechanism — it is not
+wired into the live scripts above.
 
 ## What this template deliberately leaves out
 

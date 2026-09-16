@@ -1,0 +1,18 @@
+{
+  "results": [
+    {
+      "name": "P1  MC error of pi_hat shrinks as N^-1/2",
+      "passed": true
+    },
+    {
+      "name": "P2  pi_hat at n=200000 lands within 4 predicted standard errors",
+      "passed": true
+    },
+    {
+      "name": "D1  NEGATIVE CONTROL: an estimator that ignores its input must NOT shrink",
+      "passed": true
+    }
+  ],
+  "passed": 3,
+  "total": 3
+}

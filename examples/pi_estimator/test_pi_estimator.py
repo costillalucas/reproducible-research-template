@@ -2,8 +2,8 @@ import math
 import os
 import sys
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
-from example_pkg.pi_estimator import constant_estimator, estimate_pi
+sys.path.insert(0, os.path.dirname(__file__))
+from pi_estimator import constant_estimator, estimate_pi
 
 
 def test_estimate_pi_is_seed_reproducible():

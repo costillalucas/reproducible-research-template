@@ -1,0 +1,37 @@
+# scripts.yaml -- frozen reference copy, see examples/pi_estimator/README.md.
+# Not read by the live check_provenance.py (which only reads
+# structure/scripts.yaml at repo root).
+
+scripts:
+  - id: compute_numbers
+    path: examples/pi_estimator/compute_numbers.py
+    description: >
+      SOLE WRITER of examples/pi_estimator/numbers.json; recomputes every
+      number quoted in examples/pi_estimator/report.md, with a fixed seed.
+    command: python examples/pi_estimator/compute_numbers.py
+    outputs: [examples/pi_estimator/numbers.json]
+
+  - id: checks
+    path: examples/pi_estimator/checks.py
+    description: >
+      correctness suite -- the positive convergence checks (P1, P2) and the
+      negative control (D1) that must be caught disagreeing.
+    command: python examples/pi_estimator/checks.py
+    outputs: [examples/pi_estimator/checks_results.json]
+
+  - id: check_provenance
+    path: scripts/check_provenance.py
+    description: >
+      provenance gate -- verifies every claim/number/script/output
+      cross-reference resolves, and every displayed numeric literal in the
+      report agrees with the registry at its own displayed precision. NOTE:
+      its registry/structure paths are hardcoded to the repo root
+      (data/numbers.json, structure/), so it cannot be pointed at this
+      frozen copy directly -- see examples/pi_estimator/README.md.
+    command: python scripts/check_provenance.py <deliverable> (repo-root paths only)
+
+  - id: pi_estimator
+    path: examples/pi_estimator/pi_estimator.py
+    description: >
+      the estimator under test (estimate_pi) and the deliberately wrong one
+      used as the negative control (constant_estimator).

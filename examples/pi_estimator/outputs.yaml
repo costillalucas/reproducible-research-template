@@ -1,0 +1,9 @@
+# outputs.yaml -- frozen reference copy, see examples/pi_estimator/README.md.
+# Not read by the live check_provenance.py (which only reads
+# structure/outputs.yaml at repo root).
+
+outputs:
+  - label: checks_results
+    source: examples/pi_estimator/checks.py
+    file: examples/pi_estimator/checks_results.json
+    supports_claims: [mc_pi_converges, check_catches_a_wrong_estimator]
