@@ -51,15 +51,18 @@ python pipelines/simulate_and_reconstruct.py \
 
 # script 2: real lab captures -> reconstructed HR, no ground truth available
 python pipelines/reconstruct_real_images.py \
-    --data-root /path/to/lab_captures --channel green --grid-size 9 \
-    --objective current --crop 200 --output-dir results/real_run1
+    --data-root /path/to/data --channel green --grid-size 9 \
+    --objective current --crop 400 --output-dir results/real_run1
 ```
 
-`reconstruct_real_images.py` expects `<data-root>/<channel>/fila<row>_columna<col>.tiff`
-(the lab's raster-scan naming) — see `src/ptyco_full_simulator/io_utils.py`'s
-module docstring if your real capture layout differs. Setup values (LED
-pitch, z-distance, NA, magnification, pixel size) live in
-`src/ptyco_full_simulator/config.py`.
+`reconstruct_real_images.py` expects the lab's own folder convention:
+`<data-root>/<channel>/<N>x<N>_recortada_<crop>/fila<row>_columna<col>.tiff`,
+where `N` (`--grid-size`) is the number of LEDs used per side and `crop`
+(`--crop`) is the center-crop size already applied when the TIFFs were
+saved (e.g. `data/green/9x9_recortada_400/fila12_columna9.tiff`) — see
+`src/ptyco_full_simulator/io_utils.py`'s module docstring if your real
+capture layout differs. Setup values (LED pitch, z-distance, NA,
+magnification, pixel size) live in `src/ptyco_full_simulator/config.py`.
 
 **Current limitation, not a bug:** the reconstructor is the *baseline*
 Wirtinger flow algorithm only — no pupil recovery, no LED self-calibration,

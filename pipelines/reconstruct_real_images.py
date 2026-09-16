@@ -3,15 +3,15 @@
 reconstruction, same algorithm as simulate_and_reconstruct.py but with no
 ground truth to compare against (only internal convergence diagnostics).
 
-Expects <data-root>/<channel>/fila<row>_columna<col>.tiff -- see
-src/ptyco_full_simulator/io_utils.py's module docstring for the layout
-assumption (one subfolder per color channel) and how to change it if your
-real capture layout differs.
+Expects <data-root>/<channel>/<grid-size>x<grid-size>_recortada_<crop>/
+fila<row>_columna<col>.tiff -- the lab's own folder naming. See
+src/ptyco_full_simulator/io_utils.py's module docstring if your real
+capture layout differs.
 
 Usage:
     python pipelines/reconstruct_real_images.py \\
-        --data-root /path/to/lab_captures --channel green \\
-        --grid-size 9 --objective current --crop 200 \\
+        --data-root /path/to/data --channel green \\
+        --grid-size 9 --objective current --crop 400 \\
         --output-dir results/real_run1
 """
 from __future__ import annotations
@@ -28,12 +28,13 @@ from ptyco_full_simulator import config, io_utils, led_array, metrics, optics, r
 
 def parse_args(argv=None):
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--data-root", required=True, help="folder containing <channel>/fila*_columna*.tiff")
+    p.add_argument("--data-root", required=True,
+                    help="folder containing <channel>/<grid>x<grid>_recortada_<crop>/fila*_columna*.tiff")
     p.add_argument("--channel", choices=sorted(config.CHANNEL_WAVELENGTH_NM), default="green")
     p.add_argument("--grid-size", type=int, default=9, help="LED grid is grid_size x grid_size (must be odd)")
     p.add_argument("--objective", choices=sorted(config.OBJECTIVES), default="current")
-    p.add_argument("--crop", type=int, default=200,
-                    help="center-crop each raw capture to crop x crop before reconstructing")
+    p.add_argument("--crop", type=int, default=400,
+                    help="the crop size named in the lab's own folder naming (...recortada_<crop>)")
     p.add_argument("--iterations", type=int, default=20)
     p.add_argument("--output-dir", default="results/reconstruct_real_images")
     return p.parse_args(argv)
@@ -47,11 +48,13 @@ def main(argv=None) -> int:
         resolution_px=(args.crop, args.crop),
     )
     lr_images = io_utils.load_real_lr_stack(
-        args.data_root, args.channel, args.grid_size,
-        index_base=setup.led_array.index_base, crop_to=(args.crop, args.crop),
+        args.data_root, args.channel, args.grid_size, args.crop,
+        index_base=setup.led_array.index_base,
     )
     n_expected = args.grid_size * args.grid_size
-    print(f"loaded {len(lr_images)}/{n_expected} LR images from {args.data_root}/{args.channel}")
+    subdir = f"{args.grid_size}x{args.grid_size}_recortada_{args.crop}"
+    print(f"loaded {len(lr_images)}/{n_expected} LR images from "
+          f"{args.data_root}/{args.channel}/{subdir}")
     if len(lr_images) < n_expected:
         print("  (scan looks incomplete -- reconstructing with what's available, "
               "at reduced synthetic-aperture resolution/SNR)")

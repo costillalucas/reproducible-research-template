@@ -5,9 +5,10 @@
 2. A real captured LR stack for script 2 (reconstruct_real_images), TIFFs
    named fila<R>_columna<C>.tiff (the lab's own raster-scan convention).
 
-ASSUMPTION about the real capture layout, since the images we have don't
-carry a color tag in their filename: one subfolder per channel --
-<root>/<channel>/fila<R>_columna<C>.tiff, e.g. lab_data/red/fila12_columna9.tiff.
+Real capture layout (the lab's own convention):
+<root>/<channel>/<grid_size>x<grid_size>_recortada_<crop>/fila<R>_columna<C>.tiff
+e.g. data/green/9x9_recortada_400/fila12_columna9.tiff -- "recortada_<crop>"
+names the center-crop size already applied when the lab saved the TIFFs.
 If your real layout differs, adjust `real_image_path()` below -- everything
 else in this module and in reconstruct_real_images.py is layout-agnostic.
 """
@@ -69,26 +70,30 @@ def save_complex_as_images(obj: np.ndarray, output_dir: str | Path, prefix: str)
     Image.fromarray(phase_img).save(output_dir / f"{prefix}_phase.png")
 
 
-def real_image_path(root: str | Path, channel: str, row: int, col: int) -> Path:
-    return Path(root) / channel / f"fila{row}_columna{col}.tiff"
+def real_image_path(root: str | Path, channel: str, grid_size: int, crop: int,
+                     row: int, col: int) -> Path:
+    subdir = f"{grid_size}x{grid_size}_recortada_{crop}"
+    return Path(root) / channel / subdir / f"fila{row}_columna{col}.tiff"
 
 
-def load_real_lr_stack(root: str | Path, channel: str, grid_size: int,
+def load_real_lr_stack(root: str | Path, channel: str, grid_size: int, crop: int,
                         index_base: int = 1,
                         crop_to: tuple[int, int] | None = None
                         ) -> dict[tuple[int, int], np.ndarray]:
-    """Load every fila<row>_columna<col>.tiff under root/channel/ for
-    row, col in [index_base, index_base + grid_size - 1]. Missing files
-    are skipped (so a partial/interrupted scan still reconstructs with
-    fewer LEDs, at reduced resolution/SNR). `crop_to` center-crops each
-    image to (h, w), matching how the lab crops 1120x1120 raw captures
-    down to 400x400 / 200x200 for memory.
+    """Load every fila<row>_columna<col>.tiff under
+    root/channel/<grid_size>x<grid_size>_recortada_<crop>/ for row, col in
+    [index_base, index_base + grid_size - 1]. Missing files are skipped
+    (so a partial/interrupted scan still reconstructs with fewer LEDs, at
+    reduced resolution/SNR). The TIFFs are already cropped to `crop` per
+    the lab's own folder naming; `crop_to`, if given, center-crops further
+    (a no-op if the file is already exactly that size) -- use it only if
+    the on-disk images turn out bigger than their folder name says.
     """
     stack = {}
     hi = index_base + grid_size - 1
     for row in range(index_base, hi + 1):
         for col in range(index_base, hi + 1):
-            path = real_image_path(root, channel, row, col)
+            path = real_image_path(root, channel, grid_size, crop, row, col)
             if not path.exists():
                 continue
             img = _load_grayscale(path)
@@ -97,7 +102,8 @@ def load_real_lr_stack(root: str | Path, channel: str, grid_size: int,
             stack[(row, col)] = img
     if not stack:
         raise FileNotFoundError(
-            f"no fila*_columna*.tiff files found under {Path(root) / channel}"
+            f"no fila*_columna*.tiff files found under "
+            f"{Path(root) / channel / f'{grid_size}x{grid_size}_recortada_{crop}'}"
         )
     return stack
 
