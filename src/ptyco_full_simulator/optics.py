@@ -1,9 +1,11 @@
 """optics.py -- pupil function and HR/LR sampling geometry.
 
-The pupil is a static circular low-pass mask (NA-limited coherent
-transfer function), no aberration term. Updating it in place from data
-is EPRY (Ou 2014) -- references/bibliography.yaml id `ou2014`, the
-current #1 priority gap -- not implemented yet.
+`circular_pupil` is a static circular low-pass mask (NA-limited coherent
+transfer function), no aberration term -- it is only the *initial guess*
+and support constraint for reconstruction now. EPRY (Ou 2014 --
+references/bibliography.yaml id `ou2014`) refines it in place from data;
+see reconstruction.reconstruct's `update_pupil` option and module
+docstring.
 """
 from __future__ import annotations
 

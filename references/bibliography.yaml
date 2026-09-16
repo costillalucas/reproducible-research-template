@@ -30,6 +30,7 @@ priority_focus:
     gap: "pupil recovery / aberration correction (EPRY, 2014)"
     why: >
       `create_pupil()` arma una mascara circular fija que nunca se refina dentro del loop; agregar la actualizacion de pupila al mismo bucle de Wirtinger flow existente no es un cambio de arquitectura.
+      **Implementado**: `reconstruction.reconstruct(update_pupil=True, ...)` (default) ahora actualiza la pupila en el mismo bucle por LED, reusando el gradiente de Wirtinger ya calculado para el objeto (ver docstring del modulo y tests/test_ptyco_simulator.py::test_epry_pupil_update_improves_reconstruction_with_aberrated_pupil).
   - rank: 2
     paper: eckert2018
     gap: "auto-calibracion de angulos LED con datos reales (Eckert/Waller, 2018)"
@@ -99,7 +100,7 @@ papers:
     local_file: references/papers/2014/oe-22-5-4960.pdf
     role: theory
     applicable_to_gap: true
-    notes: "Base de facto de casi todas las implementaciones FPM posteriores a 2014. *Aplicable:* la `pupil` en `common.py` es estática; EPRY agrega una actualización de pupila con el mismo gradiente que ya se calcula para `z`."
+    notes: "Base de facto de casi todas las implementaciones FPM posteriores a 2014. **Ya en uso**: `reconstruction.reconstruct` implementa la actualización de pupila EPRY (`update_pupil=True` por default) dentro del mismo bucle de Wirtinger flow, con el mismo gradiente ya calculado para el objeto."
 
   - id: tian2014
     title: 'Multiplexed Coded Illumination for FP with an LED Array Microscope'

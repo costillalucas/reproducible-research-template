@@ -14,9 +14,20 @@ shape as the ramp notebook.md found already in use, adapted to this
 module's Fourier-domain-normalized gradient (grad_field is divided by
 lr_n_px -- see the adjoint-of-ifft2 comment below -- so step_max isn't
 bounded to [0, 1] the way the original real-space-domain ramp was).
-Known gaps to layer on top of this, ranked in
-references/bibliography.yaml's `priority_focus` (pupil recovery, LED
-self-calibration, adaptive step size, ...), are NOT implemented yet.
+
+Pupil recovery (EPRY, Ou et al. 2014, references/bibliography.yaml id
+`ou2014`, `priority_focus` rank 1): patch = obj_window * pupil is an
+elementwise product of two complex Fourier-domain arrays, so the same
+Wirtinger adjoint used to correct obj_window (dL/d(patch)* times conj of
+the *other* factor) applies symmetrically to pupil -- swap obj_window and
+pupil in that product rule and reuse the identical per-LED gradient
+(`adjoint_field` below). The pupil update is normalized by
+max(|obj_window|^2) (the standard ePIE/EPRY probe-update normalization --
+without it, pupil's O(1) magnitude vs. obj_window's much larger spectrum
+values would blow up) and re-masked to the static NA support each step,
+since the physical pupil is exactly zero outside the objective's cutoff.
+Remaining gaps ranked in references/bibliography.yaml's `priority_focus`
+(LED self-calibration, adaptive step size, ...) are NOT implemented yet.
 """
 from __future__ import annotations
 
@@ -43,16 +54,26 @@ def reconstruct(lr_images: dict[tuple[int, int], np.ndarray],
                  led_grid: list[dict], hr_pixel_um: float, lr_pixel_um: float,
                  na: float, wavelength_um: float, factor: int,
                  iterations: int = 40, step_max: float = 20.0,
-                 step_alpha: float = 0.3) -> dict:
-    """Returns {"object": complex HR array, "history": [{"iteration",
-    "recovery_error"} per epoch]}. `recovery_error` is the RMS amplitude
-    residual across all LEDs used that epoch -- the same quantity
-    scripts/checks.py-style correctness checks should track for
-    convergence (it must go down; a negative control must show it does
-    NOT go down, see tests/test_reconstruction.py).
+                 step_alpha: float = 0.3, update_pupil: bool = True,
+                 pupil_step_max: float = 50.0,
+                 pupil_update_start: int = 3) -> dict:
+    """Returns {"object": complex HR array, "pupil": complex LR-shaped
+    array, "history": [{"iteration", "recovery_error"} per epoch]}.
+    `recovery_error` is the RMS amplitude residual across all LEDs used
+    that epoch -- the same quantity scripts/checks.py-style correctness
+    checks should track for convergence (it must go down; a negative
+    control must show it does NOT go down, see tests/test_reconstruction.py).
+
+    `update_pupil` turns on the EPRY pupil-recovery step (see module
+    docstring); disable it to fall back to the original static-pupil
+    Wirtinger flow. `pupil_update_start` delays the first pupil update by
+    a few epochs so the object has a chance to leave its crude initial
+    guess first -- updating an aberration estimate against a still-wrong
+    object is the classic EPRY failure mode.
     """
     lr_shape = next(iter(lr_images.values())).shape
-    pupil = circular_pupil(lr_shape, lr_pixel_um, na, wavelength_um)
+    pupil_support = circular_pupil(lr_shape, lr_pixel_um, na, wavelength_um)
+    pupil = pupil_support.astype(complex)
     used_leds = [e for e in led_grid if (e["row"], e["col"]) in lr_images]
     if not used_leds:
         raise ValueError("none of led_grid's (row, col) keys are present in lr_images")
@@ -65,12 +86,15 @@ def reconstruct(lr_images: dict[tuple[int, int], np.ndarray],
     history = []
     for it in range(iterations):
         step = step_max * (1.0 - np.exp(-step_alpha * it))
+        pupil_step = pupil_step_max * (1.0 - np.exp(-step_alpha * it))
+        do_pupil = update_pupil and it >= pupil_update_start
         sq_err_sum = 0.0
         for entry in used_leds:
             key = (entry["row"], entry["col"])
             ys, xs = led_crop_window(hr_shape, hr_pixel_um, lr_shape,
                                       entry["fx"], entry["fy"])
-            patch = obj_spectrum[ys, xs] * pupil
+            obj_window = obj_spectrum[ys, xs]
+            patch = obj_window * pupil
             est_field = np.fft.ifft2(np.fft.ifftshift(patch))
             est_amp = np.abs(est_field)
             meas_amp = np.sqrt(np.clip(lr_images[key], 0, None))
@@ -83,9 +107,19 @@ def reconstruct(lr_images: dict[tuple[int, int], np.ndarray],
             # ifft2 carries the 1/N normalization that fft2 doesn't, so
             # this factor is required or the effective step size scales
             # with LR image size (verified: omitting it diverges as
-            # lr_size grows).
-            grad_spectrum = np.fft.fftshift(np.fft.fft2(grad_field)) * pupil / lr_n_px
-            obj_spectrum[ys, xs] -= step * grad_spectrum
+            # lr_size grows). This is dL/d(patch)*, shared by both the
+            # object and pupil updates below (see module docstring).
+            adjoint_field = np.fft.fftshift(np.fft.fft2(grad_field)) / lr_n_px
+
+            obj_spectrum[ys, xs] = obj_window - step * adjoint_field * np.conj(pupil)
+
+            if do_pupil:
+                # ePIE/EPRY probe-update normalization: divide by the
+                # object window's peak intensity so the update magnitude
+                # doesn't depend on the (much larger) HR spectrum scale.
+                denom = max(float(np.max(np.abs(obj_window) ** 2)), 1e-12)
+                pupil = pupil - pupil_step * adjoint_field * np.conj(obj_window) / denom
+                pupil = pupil * pupil_support
 
         n_px = lr_shape[0] * lr_shape[1] * len(used_leds)
         history.append({
@@ -94,4 +128,4 @@ def reconstruct(lr_images: dict[tuple[int, int], np.ndarray],
         })
 
     obj = np.fft.ifft2(np.fft.ifftshift(obj_spectrum))
-    return {"object": obj, "history": history}
+    return {"object": obj, "pupil": pupil, "history": history}

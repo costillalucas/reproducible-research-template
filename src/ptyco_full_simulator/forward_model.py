@@ -19,15 +19,21 @@ def simulate_lr_stack(hr_object: np.ndarray, hr_pixel_um: float,
                        led_grid: list[dict], lr_shape: tuple[int, int],
                        lr_pixel_um: float, na: float, wavelength_um: float,
                        peak_photon_count: float | None = None,
-                       rng: np.random.Generator | None = None
+                       rng: np.random.Generator | None = None,
+                       pupil: np.ndarray | None = None
                        ) -> dict[tuple[int, int], np.ndarray]:
     """Returns {(row, col): intensity_image} for every entry in led_grid.
 
     `peak_photon_count`, if set, adds Poisson shot noise scaled so the
     brightest pixel across the whole stack has that many expected counts
     -- pass None for a noiseless simulation.
+
+    `pupil`, if given, overrides the default NA-limited circular pupil --
+    used by tests to simulate an aberrated pupil (e.g. for exercising
+    EPRY pupil recovery in reconstruction.reconstruct).
     """
-    pupil = circular_pupil(lr_shape, lr_pixel_um, na, wavelength_um)
+    if pupil is None:
+        pupil = circular_pupil(lr_shape, lr_pixel_um, na, wavelength_um)
     hr_spectrum = np.fft.fftshift(np.fft.fft2(hr_object))
 
     raw = {}
