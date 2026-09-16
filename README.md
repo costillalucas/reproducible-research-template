@@ -34,6 +34,44 @@ pass, and tells you exactly which tag disagrees with the registry and by
 how much. `tests/test_check_provenance.py` does this automatically so the
 gate stays honest as the project evolves.
 
+## The FPM simulator/reconstructor
+
+`src/ptyco_full_simulator/` implements Fourier Ptychographic Microscopy
+(FPM): a forward model that simulates the low-resolution image stack an
+LED-array microscope would capture, and a ptychographic Wirtinger flow
+reconstructor (Bian et al. 2015, `references/bibliography.yaml` id
+`bian2015`) that recovers a high-resolution complex (amplitude + phase)
+image from that stack. Two runnable entry points:
+
+```bash
+# script 1: known object -> simulated LR -> reconstructed HR, compared to ground truth
+python pipelines/simulate_and_reconstruct.py \
+    --amplitude-image path/to/amplitude.png --phase-image path/to/phase.png \
+    --channel green --grid-size 9 --objective current --output-dir results/sim_run1
+
+# script 2: real lab captures -> reconstructed HR, no ground truth available
+python pipelines/reconstruct_real_images.py \
+    --data-root /path/to/lab_captures --channel green --grid-size 9 \
+    --objective current --crop 200 --output-dir results/real_run1
+```
+
+`reconstruct_real_images.py` expects `<data-root>/<channel>/fila<row>_columna<col>.tiff`
+(the lab's raster-scan naming) — see `src/ptyco_full_simulator/io_utils.py`'s
+module docstring if your real capture layout differs. Setup values (LED
+pitch, z-distance, NA, magnification, pixel size) live in
+`src/ptyco_full_simulator/config.py`.
+
+**Current limitation, not a bug:** the reconstructor is the *baseline*
+Wirtinger flow algorithm only — no pupil recovery, no LED self-calibration,
+no adaptive step size. `tests/test_ptyco_simulator.py` confirms it reliably
+recovers phase for a moderate object, and that a single-LED negative
+control reliably fails to (proving the test can catch a bad
+reconstruction). A large or high-spatial-frequency phase object on a small
+LED grid can converge to the wrong local minimum instead — exactly the
+kind of gap `references/bibliography.yaml`'s `priority_focus` list ranks
+improvements for (pupil recovery, LED self-calibration, adaptive step
+size, ...), to be layered on top as they're implemented.
+
 ## The mechanism
 
 **One registry, one writer.** `data/numbers.json` holds every number the
@@ -85,7 +123,13 @@ above and exits nonzero the moment anything doesn't resolve.
 |   |-- scripts.yaml
 |   `-- outputs.yaml
 |
-|-- src/ptyco_full_simulator/  # the real analysis code -- currently just a placeholder
+|-- src/ptyco_full_simulator/  # FPM forward model + Wirtinger flow reconstruction
+|   |-- config.py, led_array.py, optics.py, spectral_ops.py
+|   |-- forward_model.py, reconstruction.py, metrics.py, io_utils.py
+|
+|-- pipelines/                 # the two main entry-point scripts
+|   |-- simulate_and_reconstruct.py   # data_source -> simulated LR -> reconstructed HR (has ground truth)
+|   `-- reconstruct_real_images.py    # real lab LR TIFFs -> reconstructed HR (no ground truth)
 |
 |-- scripts/
 |   |-- compute_numbers.py     # SOLE WRITER of data/numbers.json
@@ -102,8 +146,10 @@ above and exits nonzero the moment anything doesn't resolve.
 |   `-- checks_results.json    # machine-readable checks.py output
 |
 |-- tests/
-|   `-- test_check_provenance.py   # PROVES the gate can fail: corrupts a copy of
-|                                   #   the report and asserts it's rejected
+|   |-- test_check_provenance.py   # PROVES the gate can fail: corrupts a copy of
+|   |                               #   the report and asserts it's rejected
+|   `-- test_ptyco_simulator.py    # multi-LED reconstruction recovers phase; a
+|                                   #   single-LED negative control proves it can fail
 |
 |-- references/                # papers this project draws on
 |   |-- bibliography.yaml      # metadata + role (theory / comparison / both) per paper
