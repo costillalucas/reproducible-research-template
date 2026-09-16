@@ -1,0 +1,461 @@
+# bibliography.yaml -- every paper this project draws on, compiled from
+# references/papers/notebook.md's reading pass over ~37 Fourier
+# Ptychographic Microscopy (FPM) papers (2013-2026). See notebook.md for
+# the full prose version and the reasoning behind `priority_focus` below.
+#
+# Field meaning:
+#   role          theory (grounds a method/claim) | comparison (a baseline
+#                 or published number to check computed results against)
+#   applicable_to_gap  true if notebook.md flagged this paper (marked with
+#                 the wrench in the original notes) as addressing a
+#                 concrete gap in the current ptyco_full_simulator code
+#   local_file    set only for papers actually downloaded to papers/ --
+#                 most are open access; a couple are cited by DOI only
+#                 (paywalled or blocked automatic download)
+#
+# How this plugs into the provenance mechanism (see references/README.md):
+#   - cite `local_file` directly as a `data_ref` in structure/claims.yaml
+#     for a claim resting on a paper's theory/method.
+#   - for a claim COMPARING a computed number against a value published in
+#     one of these papers, add that value to data/numbers.json with
+#     "type": "source" and "reproduce" set to a citation string (e.g.
+#     "zuo2016, Fig. 3") -- source/derivation entries are exempt from the
+#     on-disk path check, since a citation isn't a repo path.
+
+# The six gaps notebook.md identified as the highest-value place to start,
+# ranked, each pointing at one paper below by id.
+priority_focus:
+  - rank: 1
+    paper: ou2014
+    gap: "pupil recovery / aberration correction (EPRY, 2014)"
+    why: >
+      `create_pupil()` arma una mascara circular fija que nunca se refina dentro del loop; agregar la actualizacion de pupila al mismo bucle de Wirtinger flow existente no es un cambio de arquitectura.
+  - rank: 2
+    paper: eckert2018
+    gap: "auto-calibracion de angulos LED con datos reales (Eckert/Waller, 2018)"
+    why: >
+      `led_offset_incorporated` / `led_spacing_error_incorporated` simulan error pero `reconstruct_real_images` no lo corrige; el metodo de correlacion espectral refina angulos dentro del propio solver.
+  - rank: 3
+    paper: zuo2016
+    gap: "step-size adaptativo por convergencia, no por rampa fija (Zuo/Sun/Chen, 2016)"
+    why: >
+      `mu = min(1-exp(-alpha*ndx), mu_max)` es una rampa fija hardcodeada; reducir mu solo cuando la convergencia se estanca.
+  - rank: 4
+    paper: zhou2023
+    gap: "acelerar reconstruccion con implicit neural representations (FPM-INR, 2023)"
+    why: >
+      corridas largas con snapshots cada 100 iteraciones sugieren reconstrucciones costosas; reporta hasta 25x mas velocidad y 80x menos memoria.
+  - rank: 5
+    paper: tian2014
+    gap: "multiplexado de LEDs para acortar la captura (Tian/Waller, 2014)"
+    why: >
+      `toma_muchas_imagenes.py` / `iluminacion_con_toma_de_imagene.py` capturan un LED a la vez; prender varios LEDs random por captura reduce el numero de imagenes.
+  - rank: 6
+    paper: chen2025
+    gap: "cuantificar la confianza de la reconstruccion (Uncertainty-aware FP, 2025)"
+    why: >
+      las metricas de error solo existen cuando hay target (simulacion); estima un mapa de confianza por region sin ground truth.
+
+papers:
+  - id: zheng2013
+    title: 'Wide-field, high-resolution Fourier ptychographic microscopy'
+    authors: ['Guoan Zheng', 'Roarke Horstmeyer', 'Changhuei Yang']
+    year: 2013
+    venue: 'Nature Photonics'
+    doi: "10.1038/nphoton.2013.187"
+    local_file: references/papers/nphoton.2013.187.pdf
+    role: theory
+    applicable_to_gap: false
+    notes: "El paper que inventa FPM."
+
+  - id: ou2013
+    title: 'Quantitative phase imaging via Fourier ptychographic microscopy'
+    authors: ['Xiaoze Ou', 'Roarke Horstmeyer', 'Changhuei Yang', 'Guoan Zheng']
+    year: 2013
+    venue: 'Optics Letters'
+    doi: "10.1364/OL.38.004845"
+    local_file: references/papers/1309.7516v1.pdf
+    role: theory
+    applicable_to_gap: false
+    notes: "Foco en recuperación de fase cuantitativa (OPD)."
+
+  - id: xu2024
+    title: 'Fourier Ptychographic Microscopy 10 Years on: A Review'
+    authors: ['Fannuo Xu', 'Zipei Wu', 'Chao Tan', 'Yizheng Liao', 'Zhiping Wang', 'Keru Chen', 'An Pan']
+    year: 2024
+    venue: 'Cells'
+    doi: "10.3390/cells13040324"
+    local_file: references/papers/cells-13-00324-v2.pdf
+    role: theory
+    applicable_to_gap: false
+    notes: "Mapa de toda la década."
+
+  - id: ou2014
+    title: 'Embedded Pupil Function Recovery for FPM (EPRY)'
+    authors: ['Xiaoze Ou', 'Guoan Zheng', 'Changhuei Yang']
+    year: 2014
+    venue: 'Optics Express'
+    doi: "10.1364/OE.22.004960"
+    local_file: references/papers/2014/oe-22-5-4960.pdf
+    role: theory
+    applicable_to_gap: true
+    notes: "Base de facto de casi todas las implementaciones FPM posteriores a 2014. *Aplicable:* la `pupil` en `common.py` es estática; EPRY agrega una actualización de pupila con el mismo gradiente que ya se calcula para `z`."
+
+  - id: tian2014
+    title: 'Multiplexed Coded Illumination for FP with an LED Array Microscope'
+    authors: ['Lei Tian', 'Xiao Li', 'Kannan Ramchandran', 'Laura Waller']
+    year: 2014
+    venue: 'Biomedical Optics Express'
+    doi: "10.1364/BOE.5.002376"
+    local_file: references/papers/2014/MultiplexedCodedIllumination_Tian_BOE5-2376.pdf
+    role: theory
+    applicable_to_gap: true
+    notes: "*Aplicable:* cambia el esquema de `toma_muchas_imagenes.py` de 'un LED → una imagen' a 'subconjunto de LEDs → una imagen'."
+
+  - id: bian2015
+    title: 'Fourier Ptychographic Reconstruction Using Wirtinger Flow Optimization'
+    authors: ['Liheng Bian', 'Jinli Suo', 'Guoan Zheng', 'KaiKai Guo', 'Feng Chen', 'Qionghai Dai']
+    year: 2015
+    venue: 'Optics Express'
+    doi: "10.1364/OE.23.004856"
+    local_file: references/papers/2015/WirtingerFlow_Bian_1411.6431.pdf
+    role: theory
+    applicable_to_gap: false
+    notes: "**Ya en uso**: el framework que `reconstruct()`/`reconstruct_test()` implementan casi literalmente."
+
+  - id: yeh2015
+    title: 'Experimental Robustness of FP Phase Retrieval Algorithms'
+    authors: ['Li-Hao Yeh', 'Jonathan Dong', 'Jingshan Zhong', 'Lei Tian', 'Michael Chen', 'Gongguo Tang', 'Mahdi Soltanolkotabi', 'Laura Waller']
+    year: 2015
+    venue: 'Optics Express'
+    doi: "10.1364/OE.23.033214"
+    local_file: references/papers/2015/ExperimentalRobustness_Yeh_1511.02986.pdf
+    role: theory
+    applicable_to_gap: false
+    notes: "Checklist para diagnosticar por qué una reconstrucción real sale peor que la simulada."
+
+  - id: zuo2016
+    title: 'Adaptive Step-Size Strategy for Noise-Robust FPM'
+    authors: ['Chao Zuo', 'Jiasong Sun', 'Qian Chen']
+    year: 2016
+    venue: 'Optics Express'
+    doi: "10.1364/OE.24.020724"
+    local_file: references/papers/2016/oe-24-18-20724.pdf
+    role: theory
+    applicable_to_gap: true
+    notes: "*Aplicable:* contrastar contra la rampa fija de `mu` en `reconstruct()`; condicionar la reducción de `mu` al `recovery_errs[ndx]` ya trackeado."
+
+  - id: horstmeyer2016
+    title: 'Diffraction Tomography with Fourier Ptychography'
+    authors: ['Roarke Horstmeyer', 'Jaebum Chung', 'Xiaoze Ou', 'Guoan Zheng', 'Changhuei Yang']
+    year: 2016
+    venue: 'Optica'
+    doi: "10.1364/OPTICA.3.000827"
+    local_file: references/papers/2016/DiffractionTomography_Horstmeyer_1510.08756.pdf
+    role: theory
+    applicable_to_gap: false
+    notes: "Extiende FPM a 3D. Relevante solo si se quiere ir más allá de fase 2D/OPD."
+
+  - id: zhang2017
+    title: 'FPM with Sparse Representation'
+    authors: ['Yongbing Zhang', 'Pengming Song', 'Jian Zhang', 'Qionghai Dai']
+    year: 2017
+    venue: 'Scientific Reports'
+    doi: "10.1038/s41598-017-09090-8"
+    local_file: references/papers/2017/SparseRepresentation_Zhang_s41598-017-09090-8.pdf
+    role: theory
+    applicable_to_gap: true
+    notes: "*Aplicable:* sumar un término extra a `Cz` en el update de `z` dentro de `reconstruct()`."
+
+  - id: sun2017
+    title: 'Resolution-Enhanced FPM Based on High-NA Illuminations'
+    authors: ['Jiasong Sun', 'Chao Zuo', 'Liang Zhang', 'Qian Chen']
+    year: 2017
+    venue: 'Scientific Reports'
+    doi: "10.1038/s41598-017-01346-7"
+    local_file: references/papers/2017/ResolutionEnhancedHighNA_Sun_s41598-017-01346-7.pdf
+    role: theory
+    applicable_to_gap: false
+    notes: "Relevante si el montaje admite inmersión en aceite."
+
+  - id: eckert2018
+    title: 'Efficient Illumination Angle Self-Calibration in FP'
+    authors: ['Regina Eckert', 'Zachary F. Phillips', 'Laura Waller']
+    year: 2018
+    venue: 'Applied Optics'
+    doi: "10.1364/AO.57.005434"
+    local_file: references/papers/2018/SelfCalibration_Eckert_1804.03299.pdf
+    role: theory
+    applicable_to_gap: true
+    notes: "*Aplicable:* corrige las posiciones LED asumidas en `calculate_k_vectors_k_indices` a partir de los propios datos capturados."
+
+  - id: sun2018
+    title: 'High-Speed FPM Based on Programmable Annular Illuminations'
+    authors: ['Jiasong Sun', 'Chao Zuo', 'Jialin Zhang', 'Yao Fan', 'Qian Chen']
+    year: 2018
+    venue: 'Scientific Reports'
+    doi: "10.1038/s41598-018-25797-8"
+    local_file: references/papers/2018/HighSpeedAnnular_Sun_s41598-018-25797-8.pdf
+    role: theory
+    applicable_to_gap: false
+    notes: "Acelera adquisición con patrones anulares programables."
+
+  - id: cheng2019
+    title: 'Illumination Pattern Design with Deep Learning for Single-Shot FPM'
+    authors: ['Yifei Cheng', 'Megan Strachan', 'Zachary Weiss', 'Moniher Deb', 'Dawn Carone', 'Vidya Ganapati']
+    year: 2019
+    venue: 'Optics Express'
+    doi: "10.1364/OE.27.000644"
+    local_file: references/papers/2019/IlluminationPatternDL_Cheng_1810.03481.pdf
+    role: theory
+    applicable_to_gap: false
+    notes: "Hasta 69× menos tiempo de adquisición."
+
+  - id: kellman2019
+    title: 'Data-Driven Design for FPM'
+    authors: ['Michael Kellman', 'Emrah Bostan', 'Michael Chen', 'Laura Waller']
+    year: 2019
+    venue: 'IEEE ICCP 2019'
+    doi: "10.1109/ICCPHOT.2019.8747339"
+    local_file: references/papers/2019/DataDrivenDesign_Kellman_1904.04175.pdf
+    role: theory
+    applicable_to_gap: false
+    notes: "Aprende el patrón de fuente óptimo vía red 'physics-based'."
+
+  - id: pan2020
+    title: 'High-Resolution and Large FOV FPM and Its Applications in Biomedicine'
+    authors: ['Pan', 'Zuo', 'Yao']
+    year: 2020
+    venue: 'Reports on Progress in Physics'
+    doi: "10.1088/1361-6633/aba6f0"
+    role: theory
+    applicable_to_gap: false
+    notes: "Review de referencia muy citado. (sin PDF descargado en este repo)"
+
+  - id: konda2020
+    title: 'Fourier Ptychography: Current Applications and Future Promises'
+    authors: ['Pavan Chandra Konda', 'Lars Loetgering', 'Kevin C. Zhou', 'Shiqi Xu', 'Andrew R. Harvey', 'Roarke Horstmeyer']
+    year: 2020
+    venue: 'Optics Express'
+    doi: "10.1364/OE.386168"
+    local_file: references/papers/2020/oe-28-7-9603.pdf
+    role: theory
+    applicable_to_gap: false
+    notes: "Con Roarke Horstmeyer, coautor del fundacional."
+
+  - id: zhang2020
+    title: 'Forward Imaging NN with Correction of Positional Misalignment for FPM'
+    authors: ['Jinlei Zhang', 'Xiao Tao', 'Lin Yang', 'Rengmao Wu', 'Peng Sun', 'Chang Wang', 'Zhenrong Zheng']
+    year: 2020
+    venue: 'Optics Express'
+    doi: "10.1364/OE.398951"
+    local_file: references/papers/2020/oe-28-16-23164.pdf
+    role: theory
+    applicable_to_gap: true
+    notes: "*Aplicable:* alternativa basada en NN al método de auto-calibración de Eckert/Waller (2018) — mismo problema, enfoque de aprendizaje en vez de correlación espectral."
+
+  - id: xiao2021
+    title: 'High-Speed FPM for Quantitative Phase Imaging'
+    authors: ['Xiao', 'Wei', 'Xue', 'Kuang', 'Yang', 'Wei', 'Lin', 'Zhou']
+    year: 2021
+    venue: 'Optics Letters'
+    doi: "10.1364/OL.428731"
+    role: theory
+    applicable_to_gap: false
+    notes: "Láser + DMD, >42 fps. Sin copia de acceso abierto disponible. (sin copia de acceso abierto disponible (ver notebook.md, 2021))"
+
+  - id: zhang2021
+    title: 'NN Model Assisted FP with Zernike Aberration Recovery and TV Constraint'
+    authors: ['Yongbing Zhang', 'Yangzhe Liu', 'Shaowei Jiang', 'Krishna Dixit', 'Pengming Song', 'Xinfeng Zhang', 'Xiangyang Ji', 'Xiu Li']
+    year: 2021
+    venue: 'J. Biomedical Optics'
+    doi: "10.1117/1.JBO.26.3.036502"
+    local_file: references/papers/2021/JBO-026-036502.pdf
+    role: theory
+    applicable_to_gap: true
+    notes: "*Aplicable:* tercer enfoque para el mismo hueco de pupila/aberraciones que EPRY (2014), con parametrización de Zernike y entrenamiento por gradiente — útil si se migra parte del solver a un framework diferenciable (PyTorch/JAX)."
+
+  - id: wang2022a
+    title: 'FPM via Alternating Direction Method of Multipliers (ADMM-FPM)'
+    authors: ['Aiye Wang', 'Zhuoqun Zhang', 'Siqi Wang', 'An Pan', 'Caiwen Ma', 'Baoli Yao']
+    year: 2022
+    venue: 'Cells'
+    doi: "10.3390/cells11091512"
+    local_file: references/papers/2022/cells-11-01512.pdf
+    role: comparison
+    applicable_to_gap: true
+    notes: "*Aplicable:* punto de comparación directo para `reconstruct()` si el TWF actual se estanca con datos muy ruidosos."
+
+  - id: chen2022a
+    title: 'Integration of FP with Machine Learning: An Alternative Scheme'
+    authors: ['Yiwen Chen', 'Tingfa Xu', 'Haixin Sun', 'Jizhou Zhang', 'Bo Huang', 'Jinhua Zhang', 'Jianan Li']
+    year: 2022
+    venue: 'Biomedical Optics Express'
+    doi: "10.1364/BOE.464001"
+    local_file: references/papers/2022/boe-13-8-4278.pdf
+    role: theory
+    applicable_to_gap: false
+    notes: "Discusión de trade-offs, no un método nuevo específico."
+
+  - id: wang2022b
+    title: 'Deep Multi-Feature Transfer Network for FPM Reconstruction'
+    authors: ['Xiaoli Wang', 'Yan Piao', 'Jinyang Yu', 'Jie Li', 'Haixin Sun', 'Yuanshang Jin', 'Limin Liu', 'Tingfa Xu']
+    year: 2022
+    venue: 'Sensors'
+    doi: "10.3390/s22031237"
+    local_file: references/papers/2022/sensors-22-01237-v2.pdf
+    role: theory
+    applicable_to_gap: false
+    notes: "Transfer learning de tres redes preentrenadas fusionadas."
+
+  - id: chen2022b
+    title: 'Rapid Full-Color FPM via Spatially Filtered Color Transfer'
+    authors: ['Jiurun Chen', 'Aiye Wang', 'An Pan', 'Guoan Zheng', 'Caiwen Ma', 'Baoli Yao']
+    year: 2022
+    venue: 'Photonics Research'
+    doi: "10.1364/PRJ.473038"
+    local_file: references/papers/2022/2410.pdf
+    role: theory
+    applicable_to_gap: false
+    notes: "Relevante solo si el sensor/pipeline es a color."
+
+  - id: zhou2023
+    title: 'FPM-INR: Reconstrucción con Implicit Neural Representations'
+    authors: ['Haowen Zhou', 'Brandon Y. Feng', 'Haiyun Guo', 'Siyu Lin', 'Mingshu Liang', 'Christopher A. Metzler', 'Changhuei Yang']
+    year: 2023
+    venue: 'Optica'
+    doi: "10.1364/OPTICA.505283"
+    local_file: references/papers/2023/FPM-INR_2310.18529.pdf
+    role: theory
+    applicable_to_gap: true
+    notes: "*Aplicable:* si el tiempo/memoria de `reconstruct()` es un límite, esta es la mejora de mayor impacto de toda la lista."
+
+  - id: jiang2023
+    title: 'Long-Range FP Imaging of the Dynamic Object with a Single Camera'
+    authors: ['Runbo Jiang', 'Dongfeng Shi', 'Yingjian Wang']
+    year: 2023
+    venue: 'Optics Express'
+    doi: "10.1364/OE.498226"
+    local_file: references/papers/2023/oe-31-21-33815.pdf
+    role: theory
+    applicable_to_gap: false
+    notes: "Solo relevante para objetivos no estáticos."
+
+  - id: li2023
+    title: 'FPM Reconstruction Based on Residual Hybrid Attention Network'
+    authors: ['Jie Li', 'Jingzi Hao', 'Xiaoli Wang', 'Yongshan Wang', 'Yan Wang', 'Hao Wang', 'Xinbo Wang']
+    year: 2023
+    venue: 'Sensors'
+    doi: "10.3390/s23167301"
+    local_file: references/papers/2023/sensors-23-07301.pdf
+    role: theory
+    applicable_to_gap: false
+
+  - id: bouchama2023
+    title: 'Physics-Inspired DL Framework for FPM Under Low Overlap Conditions'
+    authors: ['Lyes Bouchama', 'Bernadette Dorizzi', 'Jacques Klossa', 'Yaneck Gottesman']
+    year: 2023
+    venue: 'Sensors'
+    doi: "10.3390/s23156829"
+    local_file: references/papers/2023/sensors-23-06829-v2.pdf
+    role: theory
+    applicable_to_gap: true
+    notes: "*Aplicable:* revisar el espaciado de LEDs — si el solapamiento entre iluminaciones vecinas es bajo por geometría del array, esto podría evitar rediseñar el hardware."
+
+  - id: wang2024
+    title: 'Spatially-Coded Fourier Ptychography (scFP)'
+    authors: ['Ruihai Wang', 'Liming Yang', 'Yujin Lee', 'Kevin Sun', 'Kuangyu Shen', 'Qianhao Zhao', 'Tianbo Wang', 'Xincheng Zhang', 'Jiayi Liu', 'Pengming Song', 'Guoan Zheng']
+    year: 2024
+    venue: 'Advanced Optical Materials'
+    doi: "10.1002/adom.202303028"
+    local_file: references/papers/2024/scFP_2311.17619.pdf
+    role: theory
+    applicable_to_gap: false
+    notes: "Requiere modificación física del sensor."
+
+  - id: wu2024
+    title: 'Fast FP Quantitative Phase Microscopy (FQP-FPM)'
+    authors: ['Ruofei Wu', 'Zicong Luo', 'Mingdi Liu', 'Haiqi Zhang', 'Junrui Zhen', 'Lisong Yan', 'Jiaxiong Luo', 'Yanxiong Wu']
+    year: 2024
+    venue: 'Biomedical Optics Express'
+    doi: "10.1364/BOE.505267"
+    local_file: references/papers/2024/boe-15-1-95.pdf
+    role: theory
+    applicable_to_gap: false
+    notes: "10 imágenes crudas en vez de cientos."
+
+  - id: bianco2024
+    title: 'Multi-Scale Fractal FPM'
+    authors: ['Vittorio Bianco', 'Lisa Miccio', 'Daniele Pirone', 'Elena Cavalletti', 'Jaromir Behal', 'Pasquale Memmolo', 'Angela Sardo', 'Pietro Ferraro']
+    year: 2024
+    venue: 'Scientific Reports'
+    doi: "10.1038/s41598-024-52184-3"
+    local_file: references/papers/2024/fractal-FPM-diatoms_s41598-024-52184-3.pdf
+    role: theory
+    applicable_to_gap: false
+    notes: "Paper de aplicación (diatomeas)."
+
+  - id: zach2025
+    title: 'Perturbative FPM for Fast Quantitative Phase Imaging'
+    authors: ['Martin Zach', 'Kuan-Chen Shen', 'Ruiming Cao', 'Michael Unser', 'Laura Waller', 'Jonathan Dong']
+    year: 2025
+    venue: 'Optics Express'
+    doi: "10.1364/OE.560811"
+    local_file: references/papers/2025/Perturbative-Fourier-ptychographic-microscopy-for-fast-quantitative-phase-imaging.pdf
+    role: comparison
+    applicable_to_gap: true
+    notes: "*Aplicable:* del mismo grupo (Waller) que Wirtinger flow — buen candidato para comparar convergencia/velocidad directamente."
+
+  - id: chen2025
+    title: 'Uncertainty-Aware Fourier Ptychography'
+    authors: ['Ni Chen', 'Yang Wu', 'Chao Tan', 'Liangcai Cao', 'Jun Wang', 'Edmund Y. Lam']
+    year: 2025
+    venue: 'Light: Science & Applications'
+    doi: "10.1038/s41377-025-01915-w"
+    local_file: references/papers/2025/UncertaintyAwareFP_s41377-025-01915-w.pdf
+    role: theory
+    applicable_to_gap: false
+    notes: "Ver prioridad 6 arriba."
+
+  - id: rogalski2025
+    title: 'FPM Aided with Transport of Intensity Equation'
+    authors: ['Mikołaj Rogalski', 'Juan Martinez-Carranza', 'Bartosz Górski', 'Piotr Arcab', 'Michał Józwik', 'Piotr Zdańkowski', 'Magdalena Sobień', 'Marzena Stefaniuk', 'Shun Zhou', 'Chao Zuo', 'Maciej Trusiak']
+    year: 2025
+    venue: 'Photonics Research'
+    doi: "10.1364/PRJ.569444"
+    local_file: references/papers/2025/2505.24322v1.pdf
+    role: theory
+    applicable_to_gap: false
+
+  - id: chan2026
+    title: 'Inverse Synthetic Aperture Fourier Ptychography'
+    authors: ['Matthew A. Chan', 'Casey J. Pellizzari', 'Christopher A. Metzler']
+    year: 2026
+    venue: 'Optics Express'
+    doi: "10.1364/OE.571892"
+    local_file: references/papers/2025/2507.03733v2.pdf
+    role: theory
+    applicable_to_gap: false
+    notes: "Pensado para sensado remoto, poco relevante para microscopio de banco."
+
+  - id: wang2026a
+    title: 'Video-Rate Gigapixel Ptychography via Space-Time Neural Field Representations'
+    authors: ['Ruihai Wang', 'Qianhao Zhao', 'Zhixuan Hong', 'Qiong Ma', 'Tianbo Wang', 'Lingzhi Jiang', 'Liming Yang', 'Shaowei Jiang', 'Feifei Huang', 'Thanh D. Nguyen', 'Leslie Shor', 'Daniel Gage', 'Mary Lipton', 'Christopher Anderton', 'Arunima Bhattacharjee', 'David Brady', 'Guoan Zheng']
+    year: 2026
+    venue: 'Nature Communications'
+    doi: "10.1038/s41467-026-75092-8"
+    local_file: references/papers/2025/2511.06126v1.pdf
+    role: theory
+    applicable_to_gap: false
+    notes: "El techo actual de la rama 'reconstrucción vía redes neuronales implícitas'."
+
+  - id: wang2026b
+    title: 'A Residual-Subspace Constraint Framework for FPM'
+    authors: ['Sui-Peng Wang', 'Si-Yi Xie', 'Chang-Tao Cai', 'Zhun Wei', 'Rui Chen']
+    year: 2026
+    venue: 'Optica Open'
+    doi: "10.1364/opticaopen.32346429.v2"
+    local_file: references/papers/2025/2605.22197v1.pdf
+    role: theory
+    applicable_to_gap: false
+

@@ -105,6 +105,10 @@ above and exits nonzero the moment anything doesn't resolve.
 |   `-- test_check_provenance.py   # PROVES the gate can fail: corrupts a copy of
 |                                   #   the report and asserts it's rejected
 |
+|-- references/                # papers this project draws on
+|   |-- bibliography.yaml      # metadata + role (theory / comparison / both) per paper
+|   `-- papers/                # the actual PDFs
+|
 `-- examples/pi_estimator/     # frozen reference: the template's original worked
                                 #   example (Monte Carlo pi), fully self-contained --
                                 #   see examples/pi_estimator/README.md
