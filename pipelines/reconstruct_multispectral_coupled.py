@@ -44,6 +44,7 @@ from reconstruct_multispectral_independent import CHANNEL_ORDER, reconstruct_all
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "agents"))
 import qc_agent  # noqa: E402
+import report_agent  # noqa: E402
 
 
 def parse_args(argv=None):
@@ -115,6 +116,29 @@ def main(argv=None) -> int:
             print(f"  QC flagged: {qc_out['decision']['flagged_issues']}")
         with open(os.path.join(args.output_dir, "qc_review.json"), "w") as fh:
             json.dump(qc_out, fh, indent=2)
+
+        if qc_out["decision"]["recommendation"] == "report":
+            report_numbers = {
+                k: {"value": v} for k, v in qc_out["diagnostics"]["pairs"].items()
+            }
+            if coupled["resolved"] is not None:
+                report_numbers["thickness_um_mean"] = {"value": float(np.mean(coupled["resolved"]["thickness_um"]))}
+            draft = report_agent.draft_claim_and_report(
+                report_numbers,
+                f"A milestone-2b coupled multispectral run on real data (grid={args.grid_size}, "
+                f"objective={args.objective}) passed QC review with confidence="
+                f"{qc_out['decision']['confidence']}.",
+                existing_claim_ids=[],  # unknown here -- draft is for a human to reconcile against
+                # structure/claims.yaml themselves, this pipeline doesn't read that file
+                dry_run=not args.qc_live,
+            )
+            print(f"  report draft: worth_reporting={draft['worth_reporting']}  "
+                  f"claim_id={draft.get('claim_id')}")
+            with open(os.path.join(args.output_dir, "report_draft.json"), "w") as fh:
+                json.dump(draft, fh, indent=2)
+            print("  NOTE: report_draft.json's numbers are NOT yet in data/numbers.json -- "
+                  "this is a draft for a human to formalize into scripts/compute_numbers.py and "
+                  "structure/claims.yaml, not something applied automatically.")
 
     np.savez(
         os.path.join(args.output_dir, "coupled_opl.npz"),

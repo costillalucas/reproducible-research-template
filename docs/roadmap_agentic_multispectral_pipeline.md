@@ -789,9 +789,27 @@ antes de construir la capa de orquestación, y siguiendo el ranking de
    más que los otros dos agentes, prompt más largo).
 
    Con esto, los 3 agentes de la sección 2 (orquestación de
-   reconstrucción, QC/consistencia, reporte) existen y están probados —
-   falta integrarlos en un solo flujo automático (hoy cada uno se llama
-   por separado, a mano).
+   reconstrucción, QC/consistencia, reporte) existen y están probados.
+
+   **[HECHO — 2026-09-17] Conectados en un solo flujo, al menos QC→reporte.**
+   `pipelines/reconstruct_multispectral_coupled.py --qc` ahora, si el
+   agente de QC recomienda `"report"`, llama automáticamente a
+   `report_agent.draft_claim_and_report` con las estadísticas de
+   desacuerdo entre canales y el espesor medio, y guarda el borrador en
+   `report_draft.json` — **no lo aplica solo**, queda explícito en el
+   output que un humano debe formalizarlo en `compute_numbers.py`/
+   `claims.yaml` (los números de una corrida real con datos del lab no
+   están en el registro automáticamente; ese paso sigue siendo manual a
+   propósito). Probado end-to-end con datos falsos en
+   `tests/test_reconstruct_multispectral_coupled_cli.py`.
+
+   **Corrección al escribir esto**: el agente orquestador de
+   reconstrucción (`reconstruction_orchestrator.py`) todavía **no está
+   conectado a ningún pipeline real** — ni a este ni a
+   `simulate_and_reconstruct.py` ni a ningún otro. Solo existe probado de
+   forma aislada (`tests/test_reconstruction_orchestrator.py`, con stub,
+   más la llamada real de validación documentada en milestone 3). Sigue
+   pendiente conectarlo a un pipeline de verdad.
 
 (Gaps #1 pupil recovery/`ou2014` y #4 FPM-INR/`zhou2023` quedan fuera de
 este roadmap por ahora — mejoran calidad/velocidad del solver monocromático
