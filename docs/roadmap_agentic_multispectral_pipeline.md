@@ -694,6 +694,23 @@ antes de construir la capa de orquestación, y siguiendo el ranking de
    las cosas" a propósito, porque no es cierto de forma confiable
    todavía).
 
+   **[HECHO — 2026-09-17, sesión de seguimiento] RANSAC agregado, pero no
+   ataca este problema específico.** `fit_similarity_transform_ransac`
+   (nuevo, `tests/test_ransac_similarity_fit.py`, 3 tests) reemplaza el
+   ajuste por mínimos cuadrados simple cuando se le pasa
+   `ransac_inlier_threshold` a `calibrate_led_grid`/`brightfield_calibration`
+   — recupera la transformación correcta incluso con ~10% de LEDs
+   corregidos a posiciones muy erróneas, donde el ajuste simple se
+   desviaba por completo (probado: signo de rotación invertido sin
+   RANSAC, exacto con RANSAC). **Pero esto no es lo que le falla a BF con
+   la geometría real de este lab** — ahí el problema no son unos pocos
+   LEDs corregidos mal (outliers), es que *todos* los ~5 LEDs brightfield
+   disponibles están dispuestos en una cruz geométricamente pobre para
+   estimar rotación/escala — RANSAC no puede inventar información
+   geométrica que no está. Sigue siendo un problema abierto, con RANSAC
+   como mejora real pero para un modo de falla distinto (outliers
+   puntuales, no escasez geométrica sistemática).
+
    **Capa de agente (la decisión "¿esto es ruido o desalineación
    sistemática?" de la sección 2) todavía no está implementada** — lo que
    existe es la matemática determinística de corrección (SC + ahora

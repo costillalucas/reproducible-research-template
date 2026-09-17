@@ -175,22 +175,92 @@ def apply_similarity_transform(fxfy: np.ndarray, transform: dict) -> np.ndarray:
     return np.stack([w.real, w.imag], axis=1)
 
 
+def fit_similarity_transform_ransac(nominal_fxfy: np.ndarray, corrected_fxfy: np.ndarray,
+                                     inlier_threshold: float, n_iterations: int = 200,
+                                     min_inliers: int = 2, rng: np.random.Generator | None = None) -> dict:
+    """`fit_similarity_transform`, but robust to a minority of grossly
+    wrong (row, col) corrections -- e.g. a genuinely noisy/darkfield LED
+    that `spectral_correlation_correction`/`find_circle_center` corrected
+    to an implausible position. Plain least squares has NO resistance to
+    this (previously documented as a known simplification/limitation of
+    `calibrate_led_grid`/`brightfield_calibration` -- see their
+    docstrings and docs/roadmap_agentic_multispectral_pipeline.md
+    milestone 4): a single bad point can pull scale/rotation/shift far
+    from the true transform, confirmed with an injected-outlier test
+    while adding this function (a 10%-outlier scenario flipped the
+    fitted rotation's sign entirely under plain least squares).
+
+    Standard RANSAC: repeatedly fit the exact 2-point solution from a
+    random minimal sample, count how many of ALL the points that
+    candidate transform predicts within `inlier_threshold` (same units as
+    the input points, i.e. cycles/um for LED calibration), keep the
+    candidate with the most inliers, then refit
+    `fit_similarity_transform` using only ITS inlier set for the final,
+    refined answer (the standard "refit on the winning consensus set"
+    step -- more accurate than the minimal 2-point sample alone).
+
+    Returns `fit_similarity_transform`'s own dict, plus "inlier_mask" (a
+    boolean array over the input points) and "n_inliers" -- a natural
+    per-point confidence signal an agent could use, same role as
+    `search_wrap_numbers`'s "disagreement" in multispectral.py.
+    """
+    n = len(nominal_fxfy)
+    if n < 2:
+        raise ValueError("need at least 2 points to fit a similarity transform")
+    rng = rng if rng is not None else np.random.default_rng()
+
+    best_inliers, best_mask = 0, np.zeros(n, dtype=bool)
+    for _ in range(n_iterations):
+        sample = rng.choice(n, size=2, replace=False)
+        if nominal_fxfy[sample[0]].tolist() == nominal_fxfy[sample[1]].tolist():
+            continue  # degenerate sample, two identical points can't fix a similarity transform
+        candidate = fit_similarity_transform(nominal_fxfy[sample], corrected_fxfy[sample])
+        predicted = apply_similarity_transform(nominal_fxfy, candidate)
+        errors = np.hypot(*(predicted - corrected_fxfy).T)
+        mask = errors < inlier_threshold
+        if mask.sum() > best_inliers:
+            best_inliers, best_mask = int(mask.sum()), mask
+
+    if best_inliers < min_inliers:
+        raise ValueError(
+            f"RANSAC found only {best_inliers} inliers (need >= {min_inliers}) after "
+            f"{n_iterations} iterations -- either inlier_threshold is too tight, or the data "
+            "genuinely has no consistent rigid transform"
+        )
+
+    refined = fit_similarity_transform(nominal_fxfy[best_mask], corrected_fxfy[best_mask])
+    return {**refined, "inlier_mask": best_mask, "n_inliers": best_inliers}
+
+
 def calibrate_led_grid(led_grid_nominal: list[dict], obj_spectrum: np.ndarray, hr_pixel_um: float,
                         lr_images: dict, lr_pixel_um: float, na: float, wavelength_um: float,
-                        delta_k: float, search_range: tuple = (-1, 0, 1)) -> dict:
+                        delta_k: float, search_range: tuple = (-1, 0, 1),
+                        ransac_inlier_threshold: float | None = None) -> dict:
     """The full milestone 4 pipeline step: SC-correct every imaged LED's
     position, fit one similarity transform from nominal to corrected
     positions, and project ALL nominal LED positions (imaged or not)
     through it -- giving a corrected LED grid usable for a second,
     better-calibrated reconstruction pass.
 
+    `ransac_inlier_threshold`, if given (in cycles/um, same units as
+    `delta_k`), uses `fit_similarity_transform_ransac` instead of the
+    plain least-squares `fit_similarity_transform` -- robust to a
+    minority of LEDs the per-LED search corrected to an implausible
+    position (a genuinely noisy/darkfield image gives `search_wrap_numbers`-
+    style search nothing reliable to lock onto). A reasonable starting
+    point is a small multiple of `delta_k` itself, since that's already
+    this pipeline's own notion of "how far a single correction step
+    moves a point". Omit for the original plain-least-squares behavior
+    (no outlier resistance).
+
     Returns {"led_grid": corrected grid (same entries as
     `led_grid_nominal`, "fx"/"fy" replaced), "transform": the fitted
-    `fit_similarity_transform` result -- its magnitude is the natural
-    per-pixel diagnostic for a Calibration agent (docs/roadmap...
-    section 2) deciding whether real misalignment was found (large,
-    consistent shift/rotation/scale) or this looks like noise (transform
-    close to identity: scale~1, rotation~0, shift~0)}.
+    transform result -- its magnitude is the natural per-pixel diagnostic
+    for a Calibration agent (docs/roadmap... section 2) deciding whether
+    real misalignment was found (large, consistent shift/rotation/scale)
+    or this looks like noise (transform close to identity: scale~1,
+    rotation~0, shift~0); with RANSAC, also carries "inlier_mask" and
+    "n_inliers"}.
     """
     corrected_by_key = spectral_correlation_correction(
         obj_spectrum, hr_pixel_um, led_grid_nominal, lr_images,
@@ -200,7 +270,11 @@ def calibrate_led_grid(led_grid_nominal: list[dict], obj_spectrum: np.ndarray, h
     nominal_fxfy = np.array([[e["fx"], e["fy"]] for e in imaged_entries])
     corrected_fxfy = np.array([corrected_by_key[(e["row"], e["col"])] for e in imaged_entries])
 
-    transform = fit_similarity_transform(nominal_fxfy, corrected_fxfy)
+    transform = (
+        fit_similarity_transform_ransac(nominal_fxfy, corrected_fxfy, ransac_inlier_threshold)
+        if ransac_inlier_threshold is not None
+        else fit_similarity_transform(nominal_fxfy, corrected_fxfy)
+    )
 
     all_fxfy = np.array([[e["fx"], e["fy"]] for e in led_grid_nominal])
     projected_fxfy = apply_similarity_transform(all_fxfy, transform)
@@ -228,11 +302,14 @@ def calibrate_led_grid(led_grid_nominal: list[dict], obj_spectrum: np.ndarray, h
 # (Eqs 3-5) -- both are ultimately looking for the same thing, a sharp
 # step in spectrum magnitude at radius R from the true center, and this
 # metric detects that directly without needing the intermediate
-# derivative formalism. Also simplified: no RANSAC outlier rejection (see
-# `fit_similarity_transform`'s own docstring for that same caveat,
-# reused here), and no darkfield extrapolation beyond applying the fitted
-# transform to every LED (which IS what the paper does too, per its
-# Fig. 1c / Algorithm 1 lines 9-12 -- this part is faithful).
+# derivative formalism. RANSAC outlier rejection (2026-09-17,
+# `fit_similarity_transform_ransac`) is now available via
+# `ransac_inlier_threshold` on both `calibrate_led_grid` and
+# `brightfield_calibration` -- opt-in, not the default, since it needs a
+# threshold tuned to the data's own units. No darkfield extrapolation
+# beyond applying the fitted transform to every LED (which IS what the
+# paper does too, per its Fig. 1c / Algorithm 1 lines 9-12 -- this part
+# is faithful).
 # ---------------------------------------------------------------------------
 
 
@@ -360,7 +437,8 @@ def find_circle_center(lr_image: np.ndarray, lr_pixel_um: float, na: float, wave
 
 def brightfield_calibration(lr_images: dict, led_grid_nominal: list[dict], lr_pixel_um: float,
                              na: float, wavelength_um: float,
-                             search_radius_px: float = 3.0) -> dict:
+                             search_radius_px: float = 3.0,
+                             ransac_inlier_threshold: float | None = None) -> dict:
     """The full milestone-4 bootstrap step: run `find_circle_center` on
     every BRIGHTFIELD LED (illumination NA < objective NA -- the only ones
     with a clean circle edge, per the paper's own Fig. 1b: darkfield
@@ -375,10 +453,18 @@ def brightfield_calibration(lr_images: dict, led_grid_nominal: list[dict], lr_pi
     bootstrap (see this section's docstring for why SC-only calibration
     can't play that role on its own).
 
+    `ransac_inlier_threshold`: see `calibrate_led_grid`'s parameter of
+    the same name -- same robust-fit option, same units (cycles/um).
+    Especially relevant here given how few brightfield LEDs this
+    project's own lab geometry has (docs/roadmap_agentic_multispectral_pipeline.md
+    milestone 4 -- as few as 1, or 5 with the "future" objective): with a
+    minimal point count, a single bad `find_circle_center` result is an
+    even larger fraction of the data than in `calibrate_led_grid`'s case.
+
     Returns {"led_grid": corrected grid, "transform": the fitted
-    `fit_similarity_transform` result, "edge_strengths": {(row,col):
-    score} for every brightfield LED used -- a confidence diagnostic,
-    same role as `calibrate_led_grid`'s "transform" magnitude}.
+    transform result, "edge_strengths": {(row,col): score} for every
+    brightfield LED used -- a confidence diagnostic, same role as
+    `calibrate_led_grid`'s "transform" magnitude}.
     """
     brightfield_entries = [
         e for e in led_grid_nominal
@@ -400,7 +486,12 @@ def brightfield_calibration(lr_images: dict, led_grid_nominal: list[dict], lr_pi
         nominal_fxfy.append([entry["fx"], entry["fy"]])
         edge_strengths[key] = found["edge_strength"]
 
-    transform = fit_similarity_transform(np.array(nominal_fxfy), np.array(found_fxfy))
+    nominal_fxfy_arr, found_fxfy_arr = np.array(nominal_fxfy), np.array(found_fxfy)
+    transform = (
+        fit_similarity_transform_ransac(nominal_fxfy_arr, found_fxfy_arr, ransac_inlier_threshold)
+        if ransac_inlier_threshold is not None
+        else fit_similarity_transform(nominal_fxfy_arr, found_fxfy_arr)
+    )
 
     all_fxfy = np.array([[e["fx"], e["fy"]] for e in led_grid_nominal])
     projected_fxfy = apply_similarity_transform(all_fxfy, transform)
