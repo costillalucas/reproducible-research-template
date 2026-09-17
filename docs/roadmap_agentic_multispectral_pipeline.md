@@ -279,11 +279,21 @@ independientes (una por canal) y nunca comparte información entre ellas.
    `initial_object=None` no cambia el comportamiento existente
    (`reconstruction.reconstruct` sigue siendo retrocompatible).
 
-   **Qué falta de verdad (para la próxima sesión)**: decidir la política
-   de cuántas iteraciones correr después de la inicialización con TIE
-   (o construir un diagnóstico mejor que `recovery_error` para decidirlo
-   en vivo), y agregar una captura desenfocada simulada/real a
-   `pipelines/` para que esto sea usable end-to-end, no solo en tests.
+   **[HECHO — 2026-09-17] Conectado a `pipelines/`.**
+   `simulate_and_reconstruct.py` ahora acepta `--tie-defocus-um`: simula
+   el par de capturas on-axis desenfocadas del mismo objeto conocido,
+   resuelve TIE, y usa esa fase para inicializar el solver en vez de
+   cero. Probado end-to-end vía CLI real (no solo llamando a las
+   funciones de librería) en
+   `tests/test_simulate_and_reconstruct_tie.py`: mismo objeto,
+   `phase_correlation` pasa de <0.3 (roto) a >0.8 con el flag. El JSON
+   de métricas guarda `tie_defocus_um` para que quede trazable qué
+   corrida usó qué inicialización.
+
+   **Sigue sin resolver (ver arriba)**: la política de cuántas
+   iteraciones correr después de la inicialización con TIE. El CLI hoy
+   simplemente corre `--iterations` completas con la advertencia impresa
+   de revisar `metrics.json`'s history a mano — no decide nada todavía.
 
 7. **[NUEVO — 2026-09-17, investigado en vivo con el usuario a partir de
    un análisis propio suyo] Altura del arreglo de LEDs (`z_distance_mm`):

@@ -25,7 +25,8 @@ import numpy as np
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
 
-from ptyco_full_simulator import config, forward_model, io_utils, led_array, metrics, optics, reconstruction  # noqa: E402
+from ptyco_full_simulator import config, forward_model, io_utils, led_array, metrics, optics  # noqa: E402
+from ptyco_full_simulator import propagation as prop, reconstruction  # noqa: E402
 
 
 def parse_args(argv=None):
@@ -40,6 +41,17 @@ def parse_args(argv=None):
     p.add_argument("--peak-photon-count", type=float, default=None,
                     help="add Poisson shot noise at this peak count; omit for noiseless")
     p.add_argument("--seed", type=int, default=0)
+    p.add_argument("--tie-defocus-um", type=float, default=None,
+                    help="if set, also simulate a +/- this many um on-axis defocused capture pair, "
+                         "solve Transport of Intensity Equation (propagation.solve_tie), and use "
+                         "that phase (instead of the default zero) to initialize the FPM solver -- "
+                         "see docs/roadmap_agentic_multispectral_pipeline.md section 1 point 6 for "
+                         "why the default initialization fails on weak/low-spatial-frequency phase "
+                         "objects, and tests/test_tie_informed_initialization.py for how reliably "
+                         "this fixes it. CAVEAT (same doc): whether running the full --iterations "
+                         "after this better start further helps or slowly hurts is inconsistent -- "
+                         "not resolved yet, inspect metrics.json's history yourself rather than "
+                         "trusting it blindly for this mode.")
     p.add_argument("--output-dir", default="results/simulate_and_reconstruct")
     return p.parse_args(argv)
 
@@ -74,9 +86,26 @@ def main(argv=None) -> int:
     )
     print(f"simulated {len(lr_images)} LR images")
 
+    initial_object = None
+    if args.tie_defocus_um is not None:
+        dz = args.tie_defocus_um
+        i_focus = np.abs(hr_object) ** 2
+        i_plus = np.abs(prop.angular_spectrum_propagate(hr_object, dz, hr_pixel_um, setup.wavelength_um)) ** 2
+        i_minus = np.abs(prop.angular_spectrum_propagate(hr_object, -dz, hr_pixel_um, setup.wavelength_um)) ** 2
+        di_dz = (i_plus - i_minus) / (2 * dz)
+        tie_phase = prop.solve_tie(di_dz, i_focus, hr_pixel_um, setup.wavelength_um)
+
+        center = led_grid[0]
+        center_image = lr_images[(center["row"], center["col"])]
+        amp0 = np.sqrt(np.clip(center_image, 0, None))
+        amp0_hr = np.kron(amp0, np.ones((factor, factor)))
+        initial_object = (amp0_hr * np.exp(1j * tie_phase)).astype(complex)
+        print(f"TIE-informed init: defocus=+/-{dz}um, on-axis pair simulated from the same known object")
+
     result = reconstruction.reconstruct(
         lr_images, led_grid, hr_pixel_um, setup.lr_pixel_size_um,
         setup.objective.na, setup.wavelength_um, factor, iterations=args.iterations,
+        initial_object=initial_object,
     )
 
     gt_metrics = metrics.compare_to_ground_truth(result["object"], hr_object)
@@ -97,7 +126,7 @@ def main(argv=None) -> int:
                 "lr_size": args.lr_size, "upsampling_factor": factor,
                 "hr_pixel_um": hr_pixel_um, "lr_pixel_um": setup.lr_pixel_size_um,
                 "iterations": args.iterations, "peak_photon_count": args.peak_photon_count,
-                "seed": args.seed,
+                "seed": args.seed, "tie_defocus_um": args.tie_defocus_um,
             },
         }, fh, indent=2)
     print(f"wrote results to {args.output_dir}")

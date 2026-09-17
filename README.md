@@ -48,6 +48,8 @@ image from that stack. Two runnable entry points:
 python pipelines/simulate_and_reconstruct.py \
     --amplitude-image path/to/amplitude.png --phase-image path/to/phase.png \
     --channel green --grid-size 9 --objective current --output-dir results/sim_run1
+    # add --tie-defocus-um 30 to fix weak/low-frequency phase objects (see the
+    # "Current limitation" note below) via a simulated defocused capture + TIE
 
 # script 2: real lab captures -> reconstructed HR, no ground truth available
 python pipelines/reconstruct_real_images.py \
@@ -90,7 +92,14 @@ for a uniform object. Just 5-10% amplitude contrast recovers most of the
 achievable quality. This matters more than a test detail: this project's
 target (near-transparent biological samples) is exactly the low-contrast
 regime where this is worst -- see `docs/roadmap_agentic_multispectral_pipeline.md`
-section 1, point 6.
+section 1, point 6. **Fix available:** `reconstruction.reconstruct`'s
+`initial_object` parameter, combined with a Transport of Intensity
+Equation phase estimate (`propagation.solve_tie`) from one extra
+defocused capture, reliably escapes this failure mode --
+`pipelines/simulate_and_reconstruct.py --tie-defocus-um <um>` wires this
+up end to end; see `tests/test_tie_informed_initialization.py` for the
+measured improvement and its own honest caveat about how many iterations
+to run afterward.
 
 **Multispectral roadmap:** the project's next goal is a multispectral
 (RGB) FPM pipeline orchestrated by AI agents —
