@@ -767,11 +767,31 @@ antes de construir la capa de orquestación, y siguiendo el ranking de
    sin fallar (`all checks pass — 6 \src tag(s), 5 \srcnum tag(s), 6
    registry entry(ies), 4 claim(s)`).
 
-   Lo que falta: esto se armó a mano en esta sesión, no hay todavía un
-   agente que decida QUÉ números/reclamos vale la pena reportar a partir
-   de una corrida nueva y escriba `claims.yaml`/`report.md` él solo — ese
-   es el verdadero milestone 7 "agente". Buen candidato para la próxima
-   sesión, reusando el patrón `claude -p` ya establecido.
+   **[HECHO — 2026-09-17, sesión de seguimiento] El agente en sí,
+   construido.** `agents/report_agent.py`: dado un hallazgo (números ya
+   en el registro + una descripción) y los ids de reclamos existentes,
+   `draft_claim_and_report` pide al agente un borrador estructurado —
+   `claim_id`, `claim_statement`, `depends_on`, `report_markdown` (con
+   los tags `[srcnum:]`/`[src:]` ya insertados), y `worth_reporting`
+   (puede decidir que no vale la pena reportarlo). **No escribe los
+   archivos reales** — el borrador se valida a mano (o con
+   `scripts/check_provenance.py`) antes de aplicarlo, mismo criterio de
+   "no confiar ciegamente" que el resto de los agentes de este proyecto.
+
+   Probado con 3 tests con stub (`tests/test_report_agent.py`, sin gasto
+   real) más **una llamada real** de validación (mismo criterio que los
+   otros 2 agentes): pedí un borrador para el hallazgo de RANSAC de esta
+   misma sesión — devolvió un `claim_statement` razonable, un
+   `report_markdown` con los tags bien formados, y hasta una nota honesta
+   sobre que el valor 0.0 "parece sospechosamente perfecto" pero refleja
+   lo que se computó — buen indicio de que el agente entiende el estilo
+   de honestidad que este proyecto viene manteniendo. Tardó ~15s (un poco
+   más que los otros dos agentes, prompt más largo).
+
+   Con esto, los 3 agentes de la sección 2 (orquestación de
+   reconstrucción, QC/consistencia, reporte) existen y están probados —
+   falta integrarlos en un solo flujo automático (hoy cada uno se llama
+   por separado, a mano).
 
 (Gaps #1 pupil recovery/`ou2014` y #4 FPM-INR/`zhou2023` quedan fuera de
 este roadmap por ahora — mejoran calidad/velocidad del solver monocromático
