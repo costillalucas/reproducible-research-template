@@ -43,13 +43,23 @@ def reconstruct(lr_images: dict[tuple[int, int], np.ndarray],
                  led_grid: list[dict], hr_pixel_um: float, lr_pixel_um: float,
                  na: float, wavelength_um: float, factor: int,
                  iterations: int = 40, step_max: float = 20.0,
-                 step_alpha: float = 0.3) -> dict:
+                 step_alpha: float = 0.3, initial_object: np.ndarray | None = None) -> dict:
     """Returns {"object": complex HR array, "history": [{"iteration",
     "recovery_error"} per epoch]}. `recovery_error` is the RMS amplitude
     residual across all LEDs used that epoch -- the same quantity
     scripts/checks.py-style correctness checks should track for
     convergence (it must go down; a negative control must show it does
     NOT go down, see tests/test_reconstruction.py).
+
+    `initial_object`, if given, overrides the default `initial_hr_guess`
+    (on-axis LED amplitude, zero phase) starting point -- added
+    specifically so a Transport-of-Intensity-Equation phase estimate
+    (`propagation.solve_tie`) can be used to initialize the phase instead
+    of zero, which reliably escapes the degenerate saddle point the
+    default initialization sits at for weak/low-spatial-frequency phase
+    objects (see tests/test_weak_phase_object_limitation.py and
+    tests/test_tie_informed_initialization.py). Must already be shaped
+    like the target HR canvas (`optics.hr_shape`).
     """
     lr_shape = next(iter(lr_images.values())).shape
     pupil = circular_pupil(lr_shape, lr_pixel_um, na, wavelength_um)
@@ -57,7 +67,7 @@ def reconstruct(lr_images: dict[tuple[int, int], np.ndarray],
     if not used_leds:
         raise ValueError("none of led_grid's (row, col) keys are present in lr_images")
 
-    obj0 = initial_hr_guess(lr_images, used_leds, factor)
+    obj0 = initial_object if initial_object is not None else initial_hr_guess(lr_images, used_leds, factor)
     hr_shape = obj0.shape
     obj_spectrum = np.fft.fftshift(np.fft.fft2(obj0))
     lr_n_px = lr_shape[0] * lr_shape[1]

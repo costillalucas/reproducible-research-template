@@ -207,12 +207,52 @@ independientes (una por canal) y nunca comparte información entre ellas.
      >0.99 a partir de dos capturas desenfocadas simuladas — exactamente
      la fase de baja frecuencia que FPM no puede ver.
 
-   **Qué falta (para la próxima sesión)**: fusionar el resultado TIE
-   (fase de baja frecuencia) con la reconstrucción FPM (fase de alta
-   frecuencia) en un solo pipeline, y agregar una captura desenfocada
-   simulada/real a `pipelines/`. Este módulo se probó de forma aislada
-   (`tests/test_propagation.py`, 4 tests) — nunca se corrió junto al
-   solver FPM todavía.
+   **[ACTUALIZADO — 2026-09-17, misma sesión, fusión FPM+TIE probada] La
+   fusión post-hoc NO funciona de forma confiable; inicializar FPM con la
+   fase de TIE sí.** Se probaron dos estrategias:
+   - **Empalme espectral post-hoc** (`propagation.merge_low_and_high_frequency_phase`,
+     bajo+TIE / alto+FPM combinados después de que ambos terminaron): **no
+     superó de forma confiable usar TIE solo** en los objetos de prueba —
+     la recuperación de alta frecuencia de FPM se degrada cuando también
+     hay una componente de baja frecuencia mal manejada en el mismo
+     objeto (el solver acopla frecuencias de forma no lineal a través del
+     estimado de amplitud compartido; no son canales independientes como
+     asumía el diseño original). Queda implementada como utilidad general
+     pero con esta salvedad documentada en su propio docstring.
+   - **Inicializar el solver FPM con la fase de TIE** (en vez de fase
+     cero) — `reconstruction.reconstruct` ahora acepta un parámetro
+     `initial_object` para esto. **Funciona de forma mucho más
+     confiable**: en los 3 objetos de prueba, siempre superó
+     dramáticamente a la inicialización estándar (ej. 0.99 vs -0.01,
+     0.85 vs 0.66, 0.99 vs -0.008). Tiene sentido con el hallazgo del
+     punto silla de la sección 1.6: TIE le da a FPM un punto de partida
+     que no es el punto degenerado, y desde ahí el propio gradiente de
+     FPM funciona bien (como ya se había probado con perturbaciones
+     chicas alrededor de la verdad).
+
+     **Salvedad honesta, no oculta**: si seguir iterando FPM después de
+     partir de TIE *mejora* o *empeora* el resultado más allá de lo que
+     TIE ya dio, es inconsistente entre objetos — en un caso mejoró de
+     forma monótona en las 40 iteraciones (0.976→0.986), en otro empeoró
+     de forma igual de monótona (0.925→0.850). Ambas tendencias son
+     suaves dentro de su propia corrida (no ruido), pero la dirección no
+     se puede predecir de antemano sin verdad conocida. No hay un punto
+     de corte universal seguro ("pocas iteraciones" no alcanza en el caso
+     que mejora gradualmente). Esto es un candidato genuino para que el
+     agente de milestone 3 decida (comparando algo más informativo que
+     `recovery_error` solo, que ya sabemos que no sirve para esto) —
+     no resuelto todavía.
+
+   Probado en `tests/test_tie_informed_initialization.py` (2 tests): la
+   mejora de TIE-informado sobre el arranque estándar, y que
+   `initial_object=None` no cambia el comportamiento existente
+   (`reconstruction.reconstruct` sigue siendo retrocompatible).
+
+   **Qué falta de verdad (para la próxima sesión)**: decidir la política
+   de cuántas iteraciones correr después de la inicialización con TIE
+   (o construir un diagnóstico mejor que `recovery_error` para decidirlo
+   en vivo), y agregar una captura desenfocada simulada/real a
+   `pipelines/` para que esto sea usable end-to-end, no solo en tests.
 
 7. **[NUEVO — 2026-09-17, investigado en vivo con el usuario a partir de
    un análisis propio suyo] Altura del arreglo de LEDs (`z_distance_mm`):
