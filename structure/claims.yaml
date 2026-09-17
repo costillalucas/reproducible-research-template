@@ -93,3 +93,40 @@ claims:
           - scripts/compute_numbers.py
     depends_on: []
     status: established
+
+  - id: tie_informed_initialization_fixes_weak_phase
+    statement: >
+      Initializing the FPM solver with a Transport of Intensity Equation
+      phase estimate (from one simulated extra defocused capture pair)
+      instead of the default zero phase reliably escapes the degenerate
+      saddle point identified in phase_only_solver_limitation, on a
+      mixed-low/high-spatial-frequency phase object.
+    file: report/report.md
+    numbers: [tie_informed_init_baseline_phase_correlation, tie_informed_init_phase_correlation]
+    evidence:
+      - id: ev_tie_initialization_gain
+        description: phase_correlation with default vs. TIE-informed initialization, same object
+        data_refs:
+          - src/ptyco_full_simulator/propagation.py
+          - src/ptyco_full_simulator/reconstruction.py
+          - scripts/compute_numbers.py
+    depends_on: [phase_only_solver_limitation]
+    status: established
+
+  - id: ransac_rejects_calibration_outliers
+    statement: >
+      A plain least-squares fit of the LED calibration similarity
+      transform is thrown badly off by a minority (10%) of grossly
+      miscorrected points; fit_similarity_transform_ransac recovers the
+      true transform accurately from the same corrupted data by
+      identifying and excluding those outliers.
+    file: report/report.md
+    numbers: [ransac_plain_fit_rotation_error_rad, ransac_robust_fit_rotation_error_rad]
+    evidence:
+      - id: ev_ransac_vs_plain_fit
+        description: rotation error (radians) of plain vs. RANSAC fit on the same corrupted point set
+        data_refs:
+          - src/ptyco_full_simulator/led_calibration.py
+          - scripts/compute_numbers.py
+    depends_on: [led_calibration_recovers_misalignment]
+    status: established

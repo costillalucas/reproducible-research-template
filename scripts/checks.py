@@ -53,6 +53,26 @@ check(
     numbers["led_calibration_scale_recovery_error"]["value"] < 0.01,
     f"got {numbers['led_calibration_scale_recovery_error']['value']:.5f}",
 )
+check(
+    "TIE-informed solver initialization beats the default zero-phase start by at least 0.5 "
+    "phase_correlation on a weak/mixed-frequency phase object",
+    numbers["tie_informed_init_phase_correlation"]["value"]
+    > numbers["tie_informed_init_baseline_phase_correlation"]["value"] + 0.5,
+    f"baseline={numbers['tie_informed_init_baseline_phase_correlation']['value']:.4f}  "
+    f"TIE-informed={numbers['tie_informed_init_phase_correlation']['value']:.4f}",
+)
+
+# Negative control: the SAME 30-point similarity-transform fit, with the SAME 10% of points
+# corrupted, MUST have a much smaller rotation error under RANSAC than under plain least
+# squares -- proving this check can catch the plain fit's known outlier sensitivity.
+check(
+    "NEGATIVE CONTROL: RANSAC recovers the true rotation far more accurately than plain "
+    "least squares when 10% of calibration points are corrupted outliers",
+    numbers["ransac_robust_fit_rotation_error_rad"]["value"]
+    < numbers["ransac_plain_fit_rotation_error_rad"]["value"] / 10,
+    f"plain={numbers['ransac_plain_fit_rotation_error_rad']['value']:.4f}rad  "
+    f"RANSAC={numbers['ransac_robust_fit_rotation_error_rad']['value']:.6f}rad",
+)
 
 # Negative control: the SAME phase field, reconstructed with only 5% amplitude contrast
 # instead of 0%, MUST score meaningfully higher -- proving this check is capable of

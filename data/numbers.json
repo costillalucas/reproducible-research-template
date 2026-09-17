@@ -24,10 +24,34 @@
     "type": "script",
     "value": -0.04392648011055793
   },
+  "ransac_plain_fit_rotation_error_rad": {
+    "reproduce": "scripts/compute_numbers.py::ransac_outlier_rejection_rotation_error",
+    "statement": "absolute rotation error (radians) of a plain least-squares similarity-transform fit with 10% of points corrupted to implausible positions",
+    "type": "script",
+    "value": 0.18000993651347047
+  },
+  "ransac_robust_fit_rotation_error_rad": {
+    "reproduce": "scripts/compute_numbers.py::ransac_outlier_rejection_rotation_error",
+    "statement": "same scenario, same points, fit with fit_similarity_transform_ransac instead -- the outlier-rejection improvement added to LED calibration",
+    "type": "script",
+    "value": 4.163336342344337e-17
+  },
   "suite_coverage": {
     "reproduce": "scripts/checks.py",
     "statement": "checks.py pass/fail coverage for this project's correctness suite",
     "type": "check"
+  },
+  "tie_informed_init_baseline_phase_correlation": {
+    "reproduce": "scripts/compute_numbers.py::tie_informed_initialization_phase_correlation_gain",
+    "statement": "phase_correlation for a mixed-low/high-spatial-frequency phase object with the default zero-phase solver initialization",
+    "type": "script",
+    "value": 0.312596384224454
+  },
+  "tie_informed_init_phase_correlation": {
+    "reproduce": "scripts/compute_numbers.py::tie_informed_initialization_phase_correlation_gain",
+    "statement": "phase_correlation for the SAME object, initializing the solver with a Transport of Intensity Equation phase estimate instead of zero -- fixes the degenerate saddle point found in docs/roadmap_agentic_multispectral_pipeline.md section 1 point 6",
+    "type": "script",
+    "value": 0.9862445094142002
   },
   "unwrapping_error_reduction_factor": {
     "reproduce": "scripts/compute_numbers.py::unwrapping_error_reduction_factor",

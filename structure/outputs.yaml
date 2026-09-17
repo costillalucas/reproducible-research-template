@@ -11,3 +11,5 @@ outputs:
       - unwrapping_beats_naive
       - phase_only_solver_limitation
       - led_calibration_recovers_misalignment
+      - tie_informed_initialization_fixes_weak_phase
+      - ransac_rejects_calibration_outliers

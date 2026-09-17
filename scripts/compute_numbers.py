@@ -31,7 +31,8 @@ sys.path.insert(0, os.path.join(ROOT, "agents"))
 import numpy as np  # noqa: E402
 
 from ptyco_full_simulator import config, forward_model, led_array, metrics, optics  # noqa: E402
-from ptyco_full_simulator import led_calibration as cal, multispectral as ms, reconstruction  # noqa: E402
+from ptyco_full_simulator import led_calibration as cal, multispectral as ms  # noqa: E402
+from ptyco_full_simulator import propagation as prop, reconstruction  # noqa: E402
 
 WAVELENGTHS_UM = {ch: config.CHANNEL_WAVELENGTH_NM[ch] / 1000.0 for ch in ("red", "green", "blue")}
 A_BASELINE = 1.34   # plausible biological-sample baseline refractive index, see tests/test_dispersion_fit.py
@@ -208,11 +209,99 @@ def led_calibration_scale_recovery_error():
     return abs(calib["transform"]["scale"] - true_scale)
 
 
+def tie_informed_initialization_phase_correlation_gain():
+    """Same scenario as
+    tests/test_tie_informed_initialization.py::test_tie_informed_initialization_massively_beats_the_standard_zero_phase_start:
+    a mixed-low/high-spatial-frequency phase object, reconstructed with
+    the default zero-phase start vs. a Transport-of-Intensity-Equation
+    phase estimate (`propagation.solve_tie`) used to initialize the
+    solver instead. Returns (baseline phase_correlation, TIE-informed
+    phase_correlation).
+    """
+    grid_size, crop, iterations = 9, 32, 40
+    setup = config.default_setup(channel="green", grid_size=grid_size, objective="current",
+                                  resolution_px=(crop, crop))
+    factor = optics.upsampling_factor(setup)
+    hr_pixel_um = optics.actual_hr_pixel_size_um(setup, factor)
+    hr_shape = optics.hr_shape((crop, crop), factor)
+    h, w = hr_shape
+    y, x = np.mgrid[0:h, 0:w].astype(float)
+    yc, xc = y / h - 0.5, x / w - 0.5
+
+    amp = _amplitude_blob(hr_shape)
+    phase_true = 0.3 * np.sin(2 * np.pi * 1 * xc) + 0.15 * np.sin(2 * np.pi * 6 * xc)
+    obj = amp * np.exp(1j * phase_true)
+
+    led_grid = led_array.build_led_grid(setup.led_array, setup.wavelength_um)
+    lr_images = forward_model.simulate_lr_stack(
+        obj, hr_pixel_um, led_grid, (crop, crop), setup.lr_pixel_size_um,
+        setup.objective.na, setup.wavelength_um,
+    )
+
+    def phase_corr(recon_phase):
+        return float(np.corrcoef((recon_phase - recon_phase.mean()).ravel(),
+                                  (phase_true - phase_true.mean()).ravel())[0, 1])
+
+    baseline = reconstruction.reconstruct(
+        lr_images, led_grid, hr_pixel_um, setup.lr_pixel_size_um,
+        setup.objective.na, setup.wavelength_um, factor, iterations=iterations,
+    )
+    baseline_corr = phase_corr(np.angle(baseline["object"]))
+
+    dz = 30.0
+    i_focus = np.abs(obj) ** 2
+    i_plus = np.abs(prop.angular_spectrum_propagate(obj, dz, hr_pixel_um, setup.wavelength_um)) ** 2
+    i_minus = np.abs(prop.angular_spectrum_propagate(obj, -dz, hr_pixel_um, setup.wavelength_um)) ** 2
+    di_dz = (i_plus - i_minus) / (2 * dz)
+    tie_phase = prop.solve_tie(di_dz, i_focus, hr_pixel_um, setup.wavelength_um)
+    center = led_grid[0]
+    center_image = lr_images[(center["row"], center["col"])]
+    amp0 = np.sqrt(np.clip(center_image, 0, None))
+    amp0_hr = np.kron(amp0, np.ones((factor, factor)))
+    initial_object = (amp0_hr * np.exp(1j * tie_phase)).astype(complex)
+
+    tie_informed = reconstruction.reconstruct(
+        lr_images, led_grid, hr_pixel_um, setup.lr_pixel_size_um,
+        setup.objective.na, setup.wavelength_um, factor, iterations=iterations,
+        initial_object=initial_object,
+    )
+    tie_corr = phase_corr(np.angle(tie_informed["object"]))
+    return baseline_corr, tie_corr
+
+
+def ransac_outlier_rejection_rotation_error():
+    """Same scenario as
+    tests/test_ransac_similarity_fit.py::test_ransac_recovers_true_transform_despite_outliers_where_plain_fit_fails:
+    30 similarity-transform points, 3 (10%) corrupted to implausible
+    positions. Returns (plain least-squares rotation error,
+    RANSAC-recovered rotation error), both in radians vs. the known true
+    rotation.
+    """
+    rng = np.random.default_rng(0)
+    nominal = rng.uniform(-0.5, 0.5, (30, 2))
+    scale, rotation_rad, shift = 1.03, 0.05, (0.02, -0.01)
+    a = scale * np.exp(1j * rotation_rad)
+    b = shift[0] + 1j * shift[1]
+    z = nominal[:, 0] + 1j * nominal[:, 1]
+    corrected = np.stack([(a * z + b).real, (a * z + b).imag], axis=1)
+
+    corrupted = corrected.copy()
+    for i in (2, 10, 20):
+        corrupted[i] += rng.uniform(-2, 2, 2)
+
+    plain = cal.fit_similarity_transform(nominal, corrupted)
+    ransac = cal.fit_similarity_transform_ransac(nominal, corrupted, inlier_threshold=0.1,
+                                                  rng=np.random.default_rng(1))
+    return abs(plain["rotation_rad"] - rotation_rad), abs(ransac["rotation_rad"] - rotation_rad)
+
+
 def main():
     thickness_corr = multispectral_thickness_correlation()
     unwrap_factor = unwrapping_error_reduction_factor()
     phase_corr_uniform, phase_corr_contrast = phase_only_object_correlation_drop()
     calib_scale_err = led_calibration_scale_recovery_error()
+    tie_baseline_corr, tie_informed_corr = tie_informed_initialization_phase_correlation_gain()
+    ransac_plain_error, ransac_robust_error = ransac_outlier_rejection_rotation_error()
 
     registry = {
         "multispectral_thickness_correlation": {
@@ -267,6 +356,43 @@ def main():
             "type": "script",
             "reproduce": "scripts/compute_numbers.py::led_calibration_scale_recovery_error",
         },
+        "tie_informed_init_baseline_phase_correlation": {
+            "value": tie_baseline_corr,
+            "statement": (
+                "phase_correlation for a mixed-low/high-spatial-frequency phase object with the "
+                "default zero-phase solver initialization"
+            ),
+            "type": "script",
+            "reproduce": "scripts/compute_numbers.py::tie_informed_initialization_phase_correlation_gain",
+        },
+        "tie_informed_init_phase_correlation": {
+            "value": tie_informed_corr,
+            "statement": (
+                "phase_correlation for the SAME object, initializing the solver with a Transport of "
+                "Intensity Equation phase estimate instead of zero -- fixes the degenerate saddle "
+                "point found in docs/roadmap_agentic_multispectral_pipeline.md section 1 point 6"
+            ),
+            "type": "script",
+            "reproduce": "scripts/compute_numbers.py::tie_informed_initialization_phase_correlation_gain",
+        },
+        "ransac_plain_fit_rotation_error_rad": {
+            "value": ransac_plain_error,
+            "statement": (
+                "absolute rotation error (radians) of a plain least-squares similarity-transform fit "
+                "with 10% of points corrupted to implausible positions"
+            ),
+            "type": "script",
+            "reproduce": "scripts/compute_numbers.py::ransac_outlier_rejection_rotation_error",
+        },
+        "ransac_robust_fit_rotation_error_rad": {
+            "value": ransac_robust_error,
+            "statement": (
+                "same scenario, same points, fit with fit_similarity_transform_ransac instead -- "
+                "the outlier-rejection improvement added to LED calibration"
+            ),
+            "type": "script",
+            "reproduce": "scripts/compute_numbers.py::ransac_outlier_rejection_rotation_error",
+        },
         "suite_coverage": {
             "statement": "checks.py pass/fail coverage for this project's correctness suite",
             "type": "check",
@@ -284,6 +410,10 @@ def main():
     print(f"  phase_only_object_phase_correlation         = {phase_corr_uniform:.4f}")
     print(f"  five_percent_contrast_object_phase_correlation = {phase_corr_contrast:.4f}")
     print(f"  led_calibration_scale_recovery_error        = {calib_scale_err:.5f}")
+    print(f"  tie_informed_init_baseline_phase_correlation = {tie_baseline_corr:.4f}")
+    print(f"  tie_informed_init_phase_correlation          = {tie_informed_corr:.4f}")
+    print(f"  ransac_plain_fit_rotation_error_rad          = {ransac_plain_error:.4f}")
+    print(f"  ransac_robust_fit_rotation_error_rad         = {ransac_robust_error:.6f}")
 
 
 if __name__ == "__main__":

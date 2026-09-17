@@ -13,10 +13,18 @@
       "passed": true
     },
     {
+      "name": "TIE-informed solver initialization beats the default zero-phase start by at least 0.5 phase_correlation on a weak/mixed-frequency phase object",
+      "passed": true
+    },
+    {
+      "name": "NEGATIVE CONTROL: RANSAC recovers the true rotation far more accurately than plain least squares when 10% of calibration points are corrupted outliers",
+      "passed": true
+    },
+    {
       "name": "NEGATIVE CONTROL: uniform-amplitude (phase-only) object reconstructs far worse than the same phase field with 5% amplitude contrast",
       "passed": true
     }
   ],
-  "passed": 4,
-  "total": 4
+  "passed": 6,
+  "total": 6
 }

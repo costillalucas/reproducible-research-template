@@ -40,6 +40,22 @@ this project's target samples (near-transparent biological specimens) are
 exactly in the low-contrast regime where this baseline is weakest — see
 `docs/roadmap_agentic_multispectral_pipeline.md` section 1, point 6.
 
+## Fixing the low-contrast limitation: TIE-informed initialization
+
+Initializing the solver with a Transport of Intensity Equation phase
+estimate (`propagation.solve_tie`, from one extra simulated defocused
+capture) instead of the default zero phase reliably escapes the
+degenerate saddle point behind the limitation above. On a mixed
+low/high-spatial-frequency phase object, phase correlation goes from
+[srcnum:tie_informed_init_baseline_phase_correlation:0.31]
+[src:tie_informed_init_baseline_phase_correlation] with the default
+initialization to
+[srcnum:tie_informed_init_phase_correlation:0.99]
+[src:tie_informed_init_phase_correlation] with TIE-informed
+initialization. Wired into both `pipelines/simulate_and_reconstruct.py`
+(`--tie-defocus-um`) and `pipelines/reconstruct_multispectral_independent.py`
+(per channel).
+
 ## Milestone 4: LED position self-calibration
 
 Given a good object-spectrum estimate, the spectral-correlation LED
@@ -53,6 +69,16 @@ misalignment (see `tests/test_led_calibration.py`'s documented negative
 result) — the paper's own brightfield pre-calibration bootstrap stage,
 not implemented here, is a real prerequisite for this to help on real
 data, not an optional extra.
+
+A plain least-squares fit of that calibration transform has no
+resistance to a minority of badly miscorrected LEDs: with 10% of points
+corrupted, its rotation error is
+[srcnum:ransac_plain_fit_rotation_error_rad:0.18]
+[src:ransac_plain_fit_rotation_error_rad] rad. `fit_similarity_transform_ransac`,
+added to reject exactly this kind of outlier, recovers the true rotation
+to within
+[srcnum:ransac_robust_fit_rotation_error_rad:0.000000]
+[src:ransac_robust_fit_rotation_error_rad] rad on the same corrupted data.
 
 ## Correctness suite
 
