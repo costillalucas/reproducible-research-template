@@ -28,15 +28,22 @@ import numpy as np
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
 
-from ptyco_full_simulator import config, io_utils, led_array, metrics, optics, reconstruction  # noqa: E402
+from ptyco_full_simulator import config, io_utils, led_array, metrics, optics  # noqa: E402
+from ptyco_full_simulator import propagation as prop, reconstruction  # noqa: E402
 
 CHANNEL_ORDER = ("red", "green", "blue")
 
 
 def reconstruct_all_channels(data_root, grid_size: int, objective: str = "current",
                               crop: int = 400, iterations: int = 20,
-                              index_base: int = 1) -> dict:
+                              index_base: int = 1, tie_defocus_um: float | None = None) -> dict:
     """Reconstruct red/green/blue independently on one shared HR grid.
+
+    `tie_defocus_um`, if given, initializes each channel's solver with a
+    Transport-of-Intensity-Equation phase estimate instead of the default
+    zero phase -- see `propagation.solve_tie` and
+    `io_utils.load_defocus_pair` (the extra capture this needs, per
+    channel, that most existing capture sets won't have yet).
 
     Returns {"factor": int, "hr_pixel_um": float, "hr_shape": (h, w),
              "channels": {channel: {"object": complex ndarray,
@@ -62,9 +69,22 @@ def reconstruct_all_channels(data_root, grid_size: int, objective: str = "curren
             data_root, channel, grid_size, crop, index_base=index_base,
         )
         led_grid = led_array.build_led_grid(setup.led_array, setup.wavelength_um)
+
+        initial_object = None
+        if tie_defocus_um is not None:
+            center = led_grid[0]
+            i_focus = lr_images[(center["row"], center["col"])]
+            i_plus, i_minus = io_utils.load_defocus_pair(data_root, channel, grid_size, crop)
+            di_dz = (i_plus - i_minus) / (2 * tie_defocus_um)
+            tie_phase = prop.solve_tie(di_dz, i_focus, hr_pixel_um, setup.wavelength_um)
+            amp0 = np.sqrt(np.clip(i_focus, 0, None))
+            amp0_hr = np.kron(amp0, np.ones((factor, factor)))
+            initial_object = (amp0_hr * np.exp(1j * tie_phase)).astype(complex)
+
         result = reconstruction.reconstruct(
             lr_images, led_grid, hr_pixel_um, setup.lr_pixel_size_um,
             setup.objective.na, setup.wavelength_um, factor, iterations=iterations,
+            initial_object=initial_object,
         )
         channels[channel] = {
             "object": result["object"],
@@ -106,6 +126,14 @@ def parse_args(argv=None):
     p.add_argument("--crop", type=int, default=400,
                     help="the crop size named in the lab's own folder naming (...recortada_<crop>)")
     p.add_argument("--iterations", type=int, default=20)
+    p.add_argument("--tie-defocus-um", type=float, default=None,
+                    help="if set, initialize each channel's solver with a Transport of Intensity "
+                         "Equation phase estimate instead of the default zero -- requires an extra "
+                         "on-axis defocus_plus.tiff/defocus_minus.tiff pair per channel, see "
+                         "io_utils.load_defocus_pair's docstring for the (new, proposed) file "
+                         "convention. See docs/roadmap_agentic_multispectral_pipeline.md section 1 "
+                         "point 6 for why this matters, especially for weak-phase/low-contrast "
+                         "samples.")
     p.add_argument("--output-dir", default="results/reconstruct_multispectral_independent")
     return p.parse_args(argv)
 
@@ -116,7 +144,7 @@ def main(argv=None) -> int:
 
     run = reconstruct_all_channels(
         args.data_root, args.grid_size, objective=args.objective,
-        crop=args.crop, iterations=args.iterations,
+        crop=args.crop, iterations=args.iterations, tie_defocus_um=args.tie_defocus_um,
     )
     print(f"grid={args.grid_size}x{args.grid_size}  objective={args.objective}  "
           f"shared_upsampling_factor={run['factor']}  hr_shape={run['hr_shape']}  "
@@ -124,7 +152,7 @@ def main(argv=None) -> int:
 
     metrics_out = {
         "factor": run["factor"], "hr_pixel_um": run["hr_pixel_um"], "hr_shape": list(run["hr_shape"]),
-        "channels": {},
+        "tie_defocus_um": args.tie_defocus_um, "channels": {},
     }
     complex_objects = {}
     for channel in CHANNEL_ORDER:

@@ -108,6 +108,39 @@ def load_real_lr_stack(root: str | Path, channel: str, grid_size: int, crop: int
     return stack
 
 
+def defocus_image_path(root: str | Path, channel: str, grid_size: int, crop: int,
+                        sign: str) -> Path:
+    """New convention introduced alongside `propagation.solve_tie`
+    (docs/roadmap_agentic_multispectral_pipeline.md section 1 point 6's
+    fix): two EXTRA on-axis captures per channel, one defocused each
+    direction, next to the normal LED-grid scan folder --
+    `defocus_plus.tiff` / `defocus_minus.tiff`. Not something the lab's
+    existing capture protocol produces yet -- this is a proposed
+    convention, matching `real_image_path`'s folder layout, for whoever
+    adds this capture step. `sign` is "plus" or "minus".
+    """
+    if sign not in ("plus", "minus"):
+        raise ValueError(f"sign must be 'plus' or 'minus', got {sign!r}")
+    subdir = f"{grid_size}x{grid_size}_recortada_{crop}"
+    return Path(root) / channel / subdir / f"defocus_{sign}.tiff"
+
+
+def load_defocus_pair(root: str | Path, channel: str, grid_size: int, crop: int
+                       ) -> tuple[np.ndarray, np.ndarray]:
+    """Load the (intensity_plus, intensity_minus) on-axis defocused
+    capture pair for one channel -- see `defocus_image_path` for the
+    (proposed) file convention. Raises FileNotFoundError with both
+    expected paths if either is missing, since TIE needs both.
+    """
+    path_plus = defocus_image_path(root, channel, grid_size, crop, "plus")
+    path_minus = defocus_image_path(root, channel, grid_size, crop, "minus")
+    if not path_plus.exists() or not path_minus.exists():
+        raise FileNotFoundError(
+            f"TIE needs both defocus captures; missing one or both of {path_plus}, {path_minus}"
+        )
+    return _load_grayscale(path_plus), _load_grayscale(path_minus)
+
+
 def _center_crop(img: np.ndarray, shape: tuple[int, int]) -> np.ndarray:
     h, w = shape
     y0 = (img.shape[0] - h) // 2

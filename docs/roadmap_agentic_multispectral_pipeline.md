@@ -290,10 +290,24 @@ independientes (una por canal) y nunca comparte información entre ellas.
    de métricas guarda `tie_defocus_um` para que quede trazable qué
    corrida usó qué inicialización.
 
+   **[HECHO — 2026-09-17] También conectado al pipeline multiespectral
+   real** (`reconstruct_multispectral_independent.py`), no solo al de un
+   canal simulado. Como acá se usan capturas reales (no un objeto
+   conocido para simular el desenfoque), se definió una convención nueva
+   de archivo — `io_utils.load_defocus_pair` espera
+   `defocus_plus.tiff`/`defocus_minus.tiff` junto al escaneo normal de
+   cada canal (no es algo que el laboratorio ya capture hoy; queda
+   propuesta para quien agregue ese paso de captura). Con `--tie-defocus-um`,
+   cada canal usa su propia fase de TIE para inicializar. Probado en
+   `tests/test_reconstruct_multispectral_tie.py` con capturas falsas
+   generadas del mismo objeto para los 3 canales — mejora en los 3, en
+   distinta magnitud por canal (consistente con que cada longitud de
+   onda tiene su propia sensibilidad, ya visto en milestone 2a).
+
    **Sigue sin resolver (ver arriba)**: la política de cuántas
-   iteraciones correr después de la inicialización con TIE. El CLI hoy
-   simplemente corre `--iterations` completas con la advertencia impresa
-   de revisar `metrics.json`'s history a mano — no decide nada todavía.
+   iteraciones correr después de la inicialización con TIE. Los CLIs hoy
+   simplemente corren `--iterations` completas con la advertencia impresa
+   de revisar `metrics.json`'s history a mano — no deciden nada todavía.
 
 7. **[NUEVO — 2026-09-17, investigado en vivo con el usuario a partir de
    un análisis propio suyo] Altura del arreglo de LEDs (`z_distance_mm`):
