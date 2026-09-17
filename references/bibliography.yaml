@@ -23,7 +23,9 @@
 #     on-disk path check, since a citation isn't a repo path.
 
 # The six gaps notebook.md identified as the highest-value place to start,
-# ranked, each pointing at one paper below by id.
+# ranked, each pointing at one paper below by id. Rank 7 was added later
+# (2026-09-17, see its own "added" field) after being found empirically
+# during development, not from notebook.md's original reading pass.
 priority_focus:
   - rank: 1
     paper: ou2014
@@ -55,6 +57,23 @@ priority_focus:
     gap: "cuantificar la confianza de la reconstruccion (Uncertainty-aware FP, 2025)"
     why: >
       las metricas de error solo existen cuando hay target (simulacion); estima un mapa de confianza por region sin ground truth.
+  - rank: 7
+    paper: rogalski2025
+    gap: "recuperacion de fase de baja frecuencia espacial / objetos de fase debil (FPM+TIE, 2025)"
+    added: "2026-09-17 -- no estaba en el analisis original de notebook.md; agregado tras encontrar el gap empiricamente, ver abajo"
+    why: >
+      tests/test_weak_phase_object_limitation.py y docs/roadmap_agentic_multispectral_pipeline.md seccion 1 punto 6:
+      un objeto de amplitud uniforme (fase pura) o de fase de baja frecuencia espacial hace que
+      `reconstruction.reconstruct` diverja de forma determinista desde la inicializacion estandar
+      (el LED on-axis no tiene casi ningun contraste de amplitud para este tipo de objeto -- std/mean=0.0008
+      medido directamente). Se confirmo que el problema es un punto silla degenerado, no que el objeto
+      sea irrecuperable en principio (perturbaciones chicas alrededor de la solucion verdadera convergen
+      bien); tambien se descarto una solucion barata (reintentar con multiples inits al azar y quedarse
+      con el de menor recovery_error) porque ese metrica interna no predice la precision real para este
+      tipo de objeto. El abstract del paper describe exactamente esta limitacion de FPM y propone agregar
+      una imagen desenfocada on-axis + Transport of Intensity Equation como arreglo -- candidato concreto
+      para la proxima sesion, posiblemente mas urgente que los gaps #1/#3 para el objetivo real del
+      proyecto (muestras biologicas casi transparentes).
 
 papers:
   - id: zheng2013
@@ -425,7 +444,18 @@ papers:
     doi: "10.1364/PRJ.569444"
     local_file: references/papers/2025/2505.24322v1.pdf
     role: theory
-    applicable_to_gap: false
+    applicable_to_gap: true
+    notes: "*Aplicable, reclasificado 2026-09-17:* su propio abstract describe exactamente un hallazgo encontrado empiricamente en este proyecto (docs/roadmap_agentic_multispectral_pipeline.md seccion 1 punto 6, tests/test_weak_phase_object_limitation.py) antes de leer el paper -- 'FPM remains fundamentally limited in retrieving low spatial frequency phase information due to the absence of phase encoding in all on-axis and slightly-off-axis (brightfield) illumination angles.' Su solucion: una imagen extra desenfocada on-axis + Transport of Intensity Equation para recuperar la fase de baja frecuencia espacial que FPM no puede ver, combinada con la reconstruccion FPM normal para el detalle de alta frecuencia. Candidato concreto para el proximo gap a implementar -- mas urgente que pupil recovery/adaptive step size para el objetivo real del proyecto (muestras biologicas casi transparentes)."
+
+  - id: shen2025
+    title: 'Dual-wavelength Fourier Ptychographic Topography'
+    authors: ['Yi Shen', 'Tongyu Li', 'Hao Wang', 'Jinyong Kim', 'Hojun Lee', 'Wookrae Kim', 'Jonghyeok Park', 'Junho Shin', 'Seungbeam Park', 'Lei Tian']
+    year: 2025
+    venue: 'arXiv preprint (physics.optics), sin revista todavía'
+    doi: "arXiv:2512.08883"
+    role: theory
+    applicable_to_gap: true
+    notes: "*Aplicable (roadmap multiespectral, milestone 2b):* extiende Fourier Ptychographic Topography (mismo marco que FPM, pero mide altura de superficie en vez de fase de un objeto transparente) a dos longitudes de onda simultáneas. Calcula una longitud de onda sintética/'batido' λ_s = λ1·λ2/|λ1-λ2| para ampliar el rango sin ambigüedad de unwrapping a λ_s/2, y resuelve el número de envolvimiento por píxel con una búsqueda robusta a ruido + regularización TV circular global. Validado en silicio estructurado (metrología de semiconductores), no en muestras biológicas ni para recuperar dispersión n(λ). Es el algoritmo de referencia para el unwrapping multi-wavelength del milestone 2b -- adaptar de 'altura de superficie' a 'fase de objeto', no reinventar. (sin PDF descargado en este repo -- preprint reciente, ver docs/literature_check_multispectral_dispersion.md para el detalle completo)"
 
   - id: chan2026
     title: 'Inverse Synthetic Aperture Fourier Ptychography'

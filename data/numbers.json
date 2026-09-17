@@ -1,8 +1,38 @@
 {
-  "template_wired": {
-    "reproduce": "scripts/compute_numbers.py::main",
-    "statement": "placeholder: the provenance pipeline is wired end to end",
-    "type": "derivation",
-    "value": 1
+  "five_percent_contrast_object_phase_correlation": {
+    "reproduce": "scripts/compute_numbers.py::phase_only_object_correlation_drop",
+    "statement": "reconstruction phase_correlation for the SAME phase field with just 5% amplitude contrast added -- demonstrates how much a small amount of amplitude structure matters to this solver",
+    "type": "script",
+    "value": 0.6455176368211378
+  },
+  "led_calibration_scale_recovery_error": {
+    "reproduce": "scripts/compute_numbers.py::led_calibration_scale_recovery_error",
+    "statement": "absolute error between the LED spectral-correlation calibration's fitted scale factor and a known injected misalignment's true scale factor, given a good object spectrum estimate",
+    "type": "script",
+    "value": 0.0015145095007105258
+  },
+  "multispectral_thickness_correlation": {
+    "detail": "see tests/test_multispectral_end_to_end.py for the identical scenario as an assertion",
+    "reproduce": "scripts/compute_numbers.py::multispectral_thickness_correlation",
+    "statement": "correlation between the milestone-2 coupled pipeline's recovered sample-thickness field and the true field, on a synthetic 3-channel dispersion object reconstructed through the actual Wirtinger flow solver (not injected phase)",
+    "type": "script",
+    "value": 0.876419619155994
+  },
+  "phase_only_object_phase_correlation": {
+    "reproduce": "scripts/compute_numbers.py::phase_only_object_correlation_drop",
+    "statement": "reconstruction phase_correlation for a UNIFORM-amplitude (pure phase) object -- the baseline solver's known weak point, see docs/roadmap_agentic_multispectral_pipeline.md section 1 point 6",
+    "type": "script",
+    "value": -0.04392648011055793
+  },
+  "suite_coverage": {
+    "reproduce": "scripts/checks.py",
+    "statement": "checks.py pass/fail coverage for this project's correctness suite",
+    "type": "check"
+  },
+  "unwrapping_error_reduction_factor": {
+    "reproduce": "scripts/compute_numbers.py::unwrapping_error_reduction_factor",
+    "statement": "how many times smaller the coupled (unwrap + dispersion-fit) pipeline's thickness RMSE is than a naive baseline that treats each channel's raw wrapped phase as already-unwrapped OPL, on a synthetic dispersion signal large enough to require real unwrapping",
+    "type": "script",
+    "value": 182.76168452701063
   }
 }

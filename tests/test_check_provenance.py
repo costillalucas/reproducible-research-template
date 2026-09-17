@@ -30,18 +30,19 @@ def test_gate_passes_on_the_real_report():
 def test_gate_rejects_a_wrong_literal(tmp_path):
     with open(os.path.join(ROOT, "report", "report.md")) as fh:
         text = fh.read()
-    # template_wired's registry value is 1 -- change the displayed literal
-    # and nothing else.
+    # multispectral_thickness_correlation's registry value is ~0.876,
+    # displayed as 0.88 -- change the displayed literal and nothing else.
     broken, n = re.subn(
-        r"\[srcnum:template_wired:[^\]]+\]", "[srcnum:template_wired:2]", text
+        r"\[srcnum:multispectral_thickness_correlation:[^\]]+\]",
+        "[srcnum:multispectral_thickness_correlation:0.99]", text,
     )
-    assert n == 1, "fixture assumption broke: template_wired tag not found as expected"
+    assert n == 1, "fixture assumption broke: multispectral_thickness_correlation tag not found as expected"
     broken_report = tmp_path / "report.md"
     broken_report.write_text(broken)
 
     result = _run_gate(str(broken_report))
     assert result.returncode == 1
-    assert "template_wired" in result.stdout
+    assert "multispectral_thickness_correlation" in result.stdout
     assert "does not match" in result.stdout
 
 

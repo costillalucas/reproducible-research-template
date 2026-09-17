@@ -59,3 +59,30 @@ def actual_hr_pixel_size_um(setup: SetupConfig, factor: int) -> float:
     use this value, not the target, or the two won't share a Fourier grid.
     """
     return setup.lr_pixel_size_um / factor
+
+
+def shared_upsampling_factor(setups: list[SetupConfig], safety_factor: float = 2.0) -> int:
+    """A single odd integer upsampling factor safe for every setup in
+    `setups` -- e.g. one SetupConfig per RGB channel, same LED grid /
+    objective / sensor, only `channel` (and so `wavelength_um`) differing.
+
+    Calling `upsampling_factor` per channel independently gives a
+    *different* factor per wavelength: `hr_pixel_size_um`'s Nyquist target
+    scales with `wavelength_um` in its numerator while `na_synthetic` (the
+    denominator) is purely geometric and wavelength-independent, so the
+    shortest wavelength always demands the finest (largest) factor. Since
+    `actual_hr_pixel_size_um` = `lr_pixel_size_um / factor` and
+    `lr_pixel_size_um` doesn't depend on wavelength at all, three channels
+    reconstructed with three different per-channel factors end up on three
+    different HR grids (different pixel size, different `hr_shape` for the
+    same `lr_shape`) -- not comparable pixel-for-pixel, let alone fusable.
+
+    Using the max factor across channels puts every channel on the *same*
+    HR grid: the shortest wavelength's requirement (typically blue) drives
+    the shared factor, and longer wavelengths end up slightly oversampled
+    relative to their own bare Nyquist need, which only costs a bit of
+    unnecessary resolution -- harmless, unlike under-sampling.
+    """
+    if not setups:
+        raise ValueError("setups must be non-empty")
+    return max(upsampling_factor(s, safety_factor) for s in setups)

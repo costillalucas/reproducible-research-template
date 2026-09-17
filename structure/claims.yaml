@@ -9,22 +9,87 @@
 #     scripts/compute_numbers.py.
 #   - `depends_on` lists other claim ids this one relies on -- this is a
 #     graph, not a flat list, and every edge is checked to resolve.
-#
-# TODO: replace the placeholder claim below with the real argument of your
-# deliverable -- see the repo README's "Adapting this to a real project"
-# for why this file is usually worth writing before the code.
 
 claims:
-  - id: template_wired
+  - id: multispectral_thickness_recovery
     statement: >
-      Placeholder claim proving the provenance pipeline (compute -> check
-      -> gate) is wired end to end for this project.
+      The milestone-2 coupled multispectral pipeline (shared HR grid ->
+      independent per-channel reconstruction -> piston removal ->
+      synthetic-wavelength unwrapping -> Cauchy dispersion fit) recovers a
+      synthetic sample's thickness field, reconstructed through the actual
+      Wirtinger flow solver, not injected phase.
     file: report/report.md
-    numbers: [template_wired]
+    numbers: [multispectral_thickness_correlation]
     evidence:
-      - id: ev_pipeline_wired
-        description: compute_numbers.py writes the registry entry consumed by report.md
+      - id: ev_thickness_correlation
+        description: correlation between recovered and true thickness field
         data_refs:
+          - src/ptyco_full_simulator/multispectral.py
+          - src/ptyco_full_simulator/reconstruction.py
           - scripts/compute_numbers.py
     depends_on: []
-    status: placeholder
+    status: established
+
+  - id: unwrapping_beats_naive
+    statement: >
+      On a dispersion signal large enough to require real multi-wavelength
+      unwrapping (exceeds a single channel's own unambiguous OPL range),
+      the coupled pipeline's thickness recovery is dramatically more
+      accurate than a naive baseline that assumes every channel's wrap
+      number is 0.
+    file: report/report.md
+    numbers: [unwrapping_error_reduction_factor]
+    evidence:
+      - id: ev_naive_vs_coupled_comparison
+        description: RMSE ratio between the naive (k=0) baseline and the coupled pipeline
+        data_refs:
+          - src/ptyco_full_simulator/multispectral.py
+          - scripts/compute_numbers.py
+    depends_on: [multispectral_thickness_recovery]
+    status: established
+
+  - id: phase_only_solver_limitation
+    statement: >
+      The baseline Wirtinger flow reconstructor is far more sensitive to
+      amplitude contrast than previously documented: a uniform-amplitude
+      (pure phase) object reconstructs worse than random, while the
+      identical phase field with only 5% amplitude contrast reconstructs
+      acceptably -- a real limitation directly relevant to this project's
+      near-transparent biological-sample target.
+    file: report/report.md
+    numbers: [phase_only_object_phase_correlation, five_percent_contrast_object_phase_correlation]
+    evidence:
+      - id: ev_amplitude_contrast_sensitivity
+        description: >
+          identical phase field reconstructed at 0% and 5% amplitude
+          contrast, same solver, same iterations -- the negative control
+          proving the check can catch this failure mode, not just praise
+          a working case
+        data_refs:
+          - src/ptyco_full_simulator/reconstruction.py
+          - scripts/compute_numbers.py
+    depends_on: []
+    status: established
+
+  - id: led_calibration_recovers_misalignment
+    statement: >
+      Given a good object-spectrum estimate, the spectral-correlation LED
+      position calibration (adapted from eckert2018) recovers a known
+      injected rigid misalignment's scale factor closely. It does NOT,
+      however, reliably rescue a reconstruction already corrupted by an
+      uncorrected misalignment -- the paper's brightfield pre-calibration
+      stage, not implemented here, is a real prerequisite, not an optional
+      extra (see tests/test_led_calibration.py's documented negative
+      result, not itself in this registry since it's a qualitative,
+      not numeric, finding).
+    file: report/report.md
+    numbers: [led_calibration_scale_recovery_error]
+    evidence:
+      - id: ev_calibration_recovery_error
+        description: absolute error between fitted and true injected scale factor
+        data_refs:
+          - src/ptyco_full_simulator/led_calibration.py
+          - references/papers/2018/SelfCalibration_Eckert_1804.03299.pdf
+          - scripts/compute_numbers.py
+    depends_on: []
+    status: established

@@ -6,4 +6,8 @@ outputs:
   - label: checks_results
     source: scripts/checks.py
     file: data/checks_results.json
-    supports_claims: [template_wired]
+    supports_claims:
+      - multispectral_thickness_recovery
+      - unwrapping_beats_naive
+      - phase_only_solver_limitation
+      - led_calibration_recovers_misalignment

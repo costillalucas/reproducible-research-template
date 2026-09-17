@@ -1,10 +1,22 @@
 {
   "results": [
     {
-      "name": "PLACEHOLDER  pipeline is wired end to end",
+      "name": "multispectral pipeline recovers sample thickness shape (correlation > 0.5)",
+      "passed": true
+    },
+    {
+      "name": "unwrapping+dispersion fit beats naive (k=0) baseline by at least 20x on a large dispersion signal",
+      "passed": true
+    },
+    {
+      "name": "LED spectral-correlation calibration recovers a known misalignment's scale within 0.01",
+      "passed": true
+    },
+    {
+      "name": "NEGATIVE CONTROL: uniform-amplitude (phase-only) object reconstructs far worse than the same phase field with 5% amplitude contrast",
       "passed": true
     }
   ],
-  "passed": 1,
-  "total": 1
+  "passed": 4,
+  "total": 4
 }

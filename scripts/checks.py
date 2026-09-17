@@ -9,8 +9,11 @@ Two kinds of check, same discipline as the template's worked example
     check is capable of failing, not just capable of passing. A suite with
     no negative control cannot be trusted when it passes.
 
-TODO: replace the placeholder check below with your real positive checks
-and at least one negative control.
+These checks re-derive the same thresholds already asserted in
+tests/test_multispectral_end_to_end.py, tests/test_led_calibration.py --
+this script exists for the provenance report, the pytest files are the
+development-time source of truth. See scripts/compute_numbers.py for how
+the numbers themselves are computed.
 
 Run: python scripts/checks.py
 """
@@ -32,8 +35,37 @@ def check(name, ok, detail=""):
         print(f"       {detail}")
 
 
-# ---- placeholder: replace with real checks --------------------------------
-check("PLACEHOLDER  pipeline is wired end to end", True)
+with open(os.path.join(ROOT, "data", "numbers.json")) as fh:
+    numbers = json.load(fh)
+
+check(
+    "multispectral pipeline recovers sample thickness shape (correlation > 0.5)",
+    numbers["multispectral_thickness_correlation"]["value"] > 0.5,
+    f"got {numbers['multispectral_thickness_correlation']['value']:.4f}",
+)
+check(
+    "unwrapping+dispersion fit beats naive (k=0) baseline by at least 20x on a large dispersion signal",
+    numbers["unwrapping_error_reduction_factor"]["value"] > 20,
+    f"got {numbers['unwrapping_error_reduction_factor']['value']:.2f}x",
+)
+check(
+    "LED spectral-correlation calibration recovers a known misalignment's scale within 0.01",
+    numbers["led_calibration_scale_recovery_error"]["value"] < 0.01,
+    f"got {numbers['led_calibration_scale_recovery_error']['value']:.5f}",
+)
+
+# Negative control: the SAME phase field, reconstructed with only 5% amplitude contrast
+# instead of 0%, MUST score meaningfully higher -- proving this check is capable of
+# catching the phase-only failure mode (docs/roadmap_agentic_multispectral_pipeline.md
+# section 1 point 6), not just praising a working reconstruction.
+check(
+    "NEGATIVE CONTROL: uniform-amplitude (phase-only) object reconstructs far worse "
+    "than the same phase field with 5% amplitude contrast",
+    numbers["five_percent_contrast_object_phase_correlation"]["value"]
+    > numbers["phase_only_object_phase_correlation"]["value"] + 0.5,
+    f"uniform={numbers['phase_only_object_phase_correlation']['value']:.4f}  "
+    f"5%_contrast={numbers['five_percent_contrast_object_phase_correlation']['value']:.4f}",
+)
 
 passed = sum(1 for _, ok in results if ok)
 total = len(results)

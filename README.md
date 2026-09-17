@@ -53,6 +53,11 @@ python pipelines/simulate_and_reconstruct.py \
 python pipelines/reconstruct_real_images.py \
     --data-root /path/to/data --channel green --grid-size 9 \
     --objective current --crop 400 --output-dir results/real_run1
+
+# script 3: real lab captures, all 3 RGB channels independently, one shared HR grid
+python pipelines/reconstruct_multispectral_independent.py \
+    --data-root /path/to/data --grid-size 9 \
+    --objective current --crop 400 --output-dir results/multispectral_run1
 ```
 
 `reconstruct_real_images.py` expects the lab's own folder convention:
@@ -73,7 +78,26 @@ reconstruction). A large or high-spatial-frequency phase object on a small
 LED grid can converge to the wrong local minimum instead — exactly the
 kind of gap `references/bibliography.yaml`'s `priority_focus` list ranks
 improvements for (pupil recovery, LED self-calibration, adaptive step
-size, ...), to be layered on top as they're implemented.
+size, ...), to be layered on top as they're implemented. This local-minimum
+risk is also **channel-dependent**: `tests/test_reconstruct_multispectral_pipeline.py`
+found the `red` channel (630nm, the longest wavelength) gets stuck at a
+noticeably lower phase magnitude than green/blue on the same small LED
+grid — see `docs/roadmap_agentic_multispectral_pipeline.md` milestone 2a.
+**More severe:** a UNIFORM-amplitude (pure phase) object breaks the
+solver almost completely -- `initial_hr_guess` bootstraps from the
+on-axis LED's amplitude image, which carries no spatial structure at all
+for a uniform object. Just 5-10% amplitude contrast recovers most of the
+achievable quality. This matters more than a test detail: this project's
+target (near-transparent biological samples) is exactly the low-contrast
+regime where this is worst -- see `docs/roadmap_agentic_multispectral_pipeline.md`
+section 1, point 6.
+
+**Multispectral roadmap:** the project's next goal is a multispectral
+(RGB) FPM pipeline orchestrated by AI agents —
+`docs/roadmap_agentic_multispectral_pipeline.md` tracks the gap analysis,
+agent-layer design, and phased milestones (registering the 3 channels onto
+one HR grid, independent vs. coupled reconstruction, unwrapping + sample
+dispersion estimation, then the agent orchestration layer on top).
 
 ## The mechanism
 
@@ -129,10 +153,20 @@ above and exits nonzero the moment anything doesn't resolve.
 |-- src/ptyco_full_simulator/  # FPM forward model + Wirtinger flow reconstruction
 |   |-- config.py, led_array.py, optics.py, spectral_ops.py
 |   |-- forward_model.py, reconstruction.py, metrics.py, io_utils.py
+|   |-- multispectral.py       # unwrapping (2b.i) + dispersion fit (2b.ii)
+|   |-- led_calibration.py     # LED position self-calibration (milestone 4, eckert2018)
+|   `-- propagation.py         # defocus propagation + TIE phase retrieval (not yet wired into FPM)
 |
-|-- pipelines/                 # the two main entry-point scripts
+|-- agents/                    # claude -p wrappers: reconstruction retry/accept, QC/confidence review
+|
+|-- pipelines/                 # entry-point scripts
 |   |-- simulate_and_reconstruct.py   # data_source -> simulated LR -> reconstructed HR (has ground truth)
-|   `-- reconstruct_real_images.py    # real lab LR TIFFs -> reconstructed HR (no ground truth)
+|   |-- reconstruct_real_images.py    # real lab LR TIFFs, one channel -> reconstructed HR (no ground truth)
+|   |-- reconstruct_multispectral_independent.py  # real lab LR TIFFs, all 3 RGB channels, one shared HR grid
+|   `-- reconstruct_multispectral_coupled.py      # + piston removal, unwrapping, dispersion fit (2b)
+|
+|-- docs/
+|   `-- roadmap_agentic_multispectral_pipeline.md  # multispectral + AI-agent orchestration roadmap
 |
 |-- scripts/
 |   |-- compute_numbers.py     # SOLE WRITER of data/numbers.json

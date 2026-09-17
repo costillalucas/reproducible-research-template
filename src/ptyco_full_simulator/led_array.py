@@ -66,3 +66,39 @@ def max_illumination_na(cfg: LEDArrayConfig) -> float:
     corner_dx, corner_dy = led_position_mm(hi, hi, cfg)
     distance = np.sqrt(corner_dx**2 + corner_dy**2 + cfg.z_distance_mm**2)
     return float(np.hypot(corner_dx, corner_dy) / distance)
+
+
+def adjacent_led_overlap_ratio(cfg: LEDArrayConfig, wavelength_um: float, na: float) -> float:
+    """Fraction of the pupil's own area (radius na/wavelength_um in
+    cycles/um) shared between two NEAREST-NEIGHBOR LEDs' sub-aperture
+    circles in Fourier space -- the standard FPM design quantity
+    (`eckert2018`'s introduction: "requires at least 35% overlap between
+    adjacent angles of illumination [...] providing significant
+    redundancy in the dataset", citing it as the widely-used minimum for
+    phase retrieval to work at all).
+
+    Found empirically while investigating why reconstruction quality
+    jumps sharply at a specific `LEDArrayConfig.z_distance_mm` for a
+    fixed objective/grid (2026-09-17, see
+    docs/roadmap_agentic_multispectral_pipeline.md): the jump lands
+    almost exactly at this ratio crossing 35%, on this project's own
+    simulator -- a solver-independent confirmation that this simulator
+    reproduces a real, well-known ptychography constraint, not a
+    solver-specific quirk.
+
+    Standard two-equal-circles overlap-area formula: for circles of
+    radius R separated by center distance d < 2R,
+    area = 2*R^2*acos(d/2R) - (d/2)*sqrt(4R^2 - d^2); returned as a
+    fraction of one circle's own area (pi*R^2). Returns 0.0 if the
+    circles don't overlap at all (d >= 2R) -- e.g. a synthetic aperture
+    scan with big enough LED spacing to have gaps, not full coverage.
+    """
+    grid = build_led_grid(cfg, wavelength_um)
+    center = grid[0]  # on-axis, radial_mm == 0.0 by construction (build_led_grid sorts by it)
+    neighbor = grid[1]  # nearest ring of LEDs to the center, by radial_mm
+    d = np.hypot(neighbor["fx"] - center["fx"], neighbor["fy"] - center["fy"])
+    radius = na / wavelength_um
+    if d >= 2 * radius:
+        return 0.0
+    area = 2 * radius**2 * np.arccos(d / (2 * radius)) - (d / 2) * np.sqrt(4 * radius**2 - d**2)
+    return float(area / (np.pi * radius**2))
