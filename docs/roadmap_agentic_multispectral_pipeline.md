@@ -238,10 +238,41 @@ independientes (una por canal) y nunca comparte información entre ellas.
      suaves dentro de su propia corrida (no ruido), pero la dirección no
      se puede predecir de antemano sin verdad conocida. No hay un punto
      de corte universal seguro ("pocas iteraciones" no alcanza en el caso
-     que mejora gradualmente). Esto es un candidato genuino para que el
-     agente de milestone 3 decida (comparando algo más informativo que
-     `recovery_error` solo, que ya sabemos que no sirve para esto) —
-     no resuelto todavía.
+     que mejora gradualmente).
+
+     **[ACTUALIZADO — 2026-09-17, se probaron 3 diagnósticos candidatos,
+     ninguno sirve todavía]** Antes de dejarle esto al agente de
+     milestone 3 sin más, se probó si existía algún diagnóstico interno
+     (sin verdad conocida) que distinguiera el caso que mejora del que
+     empeora:
+     1. **Residuo en LEDs de validación** (dejar ~15% de LEDs fuera del
+        ajuste, medir el error solo ahí — validación cruzada clásica):
+        en el caso que empeora, el residuo de validación *mejora* de
+        forma monótona (0.64→0.23) mientras la precisión real de fase
+        *empeora* (0.92→0.85) — va en la dirección **contraria**. No
+        sirve.
+     2. **Correlación de la componente de baja frecuencia actual contra
+        la fase de TIE** (ya confiable, fija): en ambos casos se
+        mantiene altísima y casi constante (0.994-1.0) — hay una
+        diferencia real pero mínima (el caso que empeora se aleja un
+        poco más de TIE), demasiado chica para ser un umbral práctico
+        sin más ruido de por medio.
+     3. `recovery_error` (ya descartado antes, sección 1.6).
+
+     **Por qué importa que los tres fallen de la misma manera**: todos
+     se derivan de mediciones de **intensidad/amplitud** — exactamente
+     lo que ya se estableció como casi insensible a la fase en el
+     régimen de fase débil (sección 1.6). Ningún diagnóstico construido
+     *solo* a partir de ese mismo tipo de medición va a poder discriminar
+     bien acá, sin importar cuán ingenioso sea el diseño (entrenamiento,
+     validación, comparación con un prior externo) — es una limitación de
+     información, no de falta de una métrica más inteligente. Vale
+     intentar algo que traiga información genuinamente nueva (ej. una
+     segunda medición de TIE a mitad de la corrida de FPM, no solo al
+     principio) en vez de seguir buscando un diagnóstico más clever sobre
+     los mismos datos de intensidad. Sigue sin resolver — sigue siendo un
+     candidato para el agente de milestone 3, pero con el espacio de
+     soluciones ya acotado por estos tres intentos fallidos.
 
    Probado en `tests/test_tie_informed_initialization.py` (2 tests): la
    mejora de TIE-informado sobre el arranque estándar, y que
