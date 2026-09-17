@@ -65,3 +65,36 @@ def test_tie_defocus_flag_massively_improves_phase_correlation(tmp_path):
     assert baseline_metrics["setup"]["tie_defocus_um"] is None
     assert baseline_corr < 0.3, f"baseline should still be clearly broken here, got {baseline_corr}"
     assert tie_corr > baseline_corr + 0.5, (tie_corr, baseline_corr)
+
+
+def test_use_reconstruction_agent_flag_dry_run_matches_plain_call(tmp_path):
+    """`--use-reconstruction-agent` without `--agent-live` uses a canned
+    dry-run decision (accept on the first attempt, see
+    agents/reconstruction_orchestrator.py's `call_agent_decision`) -- the
+    result should be identical to not using the agent at all, since
+    "accept first attempt" is exactly what the plain call already does.
+    No real (billed) API call happens here, same discipline as every
+    other agent test in this project.
+    """
+    amp_path, phase_path = _write_mixed_frequency_images(tmp_path)
+    common_args = [
+        "--amplitude-image", amp_path, "--phase-image", phase_path,
+        "--channel", "green", "--grid-size", "9", "--objective", "current",
+        "--lr-size", "32", "--iterations", "10",
+    ]
+
+    plain_dir = tmp_path / "plain"
+    pipeline.main(common_args + ["--output-dir", str(plain_dir)])
+    with open(plain_dir / "metrics.json") as fh:
+        plain_metrics = json.load(fh)
+
+    agent_dir = tmp_path / "agent"
+    pipeline.main(common_args + ["--use-reconstruction-agent", "--output-dir", str(agent_dir)])
+    with open(agent_dir / "metrics.json") as fh:
+        agent_metrics = json.load(fh)
+
+    assert agent_metrics["setup"]["use_reconstruction_agent"] is True
+    assert plain_metrics["setup"]["use_reconstruction_agent"] is False
+    assert len(agent_metrics["agent_attempts"]) == 1
+    assert agent_metrics["agent_attempts"][0]["decision"]["action"] == "accept"
+    assert agent_metrics["vs_ground_truth"] == plain_metrics["vs_ground_truth"]

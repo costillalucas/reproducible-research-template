@@ -803,13 +803,27 @@ antes de construir la capa de orquestación, y siguiendo el ranking de
    propósito). Probado end-to-end con datos falsos en
    `tests/test_reconstruct_multispectral_coupled_cli.py`.
 
-   **Corrección al escribir esto**: el agente orquestador de
-   reconstrucción (`reconstruction_orchestrator.py`) todavía **no está
-   conectado a ningún pipeline real** — ni a este ni a
-   `simulate_and_reconstruct.py` ni a ningún otro. Solo existe probado de
-   forma aislada (`tests/test_reconstruction_orchestrator.py`, con stub,
-   más la llamada real de validación documentada en milestone 3). Sigue
-   pendiente conectarlo a un pipeline de verdad.
+   **[HECHO — 2026-09-17, mismo día] El tercer agente, conectado.**
+   `orchestrate_reconstruction` ahora acepta `initial_object` (pasante,
+   sin cambiar su lógica de decisión) para poder combinarse con la
+   inicialización de TIE. `simulate_and_reconstruct.py` tiene
+   `--use-reconstruction-agent` (+ `--agent-live`, `--max-attempts`) que
+   lo usa en vez de una llamada directa a `reconstruction.reconstruct` —
+   guarda el log completo de intentos/decisiones en `metrics.json`.
+   Probado en `tests/test_simulate_and_reconstruct_tie.py`: en modo
+   dry-run (decisión enlatada "accept" en el primer intento) el resultado
+   es idéntico a no usar el agente, como corresponde. **Nota honesta**:
+   pasar `initial_object` no le da al agente ninguna información nueva
+   sobre si TIE se usó — sigue sin resolverse cómo decidir cuántas
+   iteraciones correr después de un arranque informado por TIE (ver más
+   arriba, los 3 diagnósticos descartados), esto solo deja la tubería
+   lista para cuando eso se resuelva.
+
+   Con esto, los 3 agentes están conectados a pipelines reales: QC→reporte
+   en el pipeline multiespectral acoplado, y orquestación de
+   reconstrucción en `simulate_and_reconstruct.py` — aunque los dos
+   flujos siguen siendo independientes entre sí (no hay un único pipeline
+   que use los 3 agentes juntos todavía).
 
 (Gaps #1 pupil recovery/`ou2014` y #4 FPM-INR/`zhou2023` quedan fuera de
 este roadmap por ahora — mejoran calidad/velocidad del solver monocromático

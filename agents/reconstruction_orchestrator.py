@@ -118,7 +118,7 @@ def call_agent_decision(prompt: str, model: str = "claude-haiku-4-5-20251001",
 def orchestrate_reconstruction(lr_images, led_grid, hr_pixel_um, lr_pixel_um, na, wavelength_um,
                                 factor, initial_step_max: float = 20.0, iterations: int = 40,
                                 max_attempts: int = 3, dry_run: bool = False,
-                                agent_fn=call_agent_decision) -> dict:
+                                agent_fn=call_agent_decision, initial_object=None) -> dict:
     """The milestone 3 deliverable: run `reconstruction.reconstruct`, ask
     the agent whether to retry with a different `step_max`, and repeat up
     to `max_attempts`. Each attempt restarts from scratch (reconstruct()
@@ -127,6 +127,22 @@ def orchestrate_reconstruction(lr_images, led_grid, hr_pixel_um, lr_pixel_um, na
 
     `agent_fn` is injected (defaults to the real `call_agent_decision`) so
     tests can pass a stub instead -- see this module's docstring for why.
+
+    `initial_object`, if given, is passed through to every attempt's
+    `reconstruction.reconstruct` call unchanged (e.g. a Transport-of-
+    Intensity-Equation phase estimate from `propagation.solve_tie` --
+    see `pipelines/simulate_and_reconstruct.py`'s `--tie-defocus-um` for
+    where that comes from). Combining the two is exactly the open
+    question docs/roadmap_agentic_multispectral_pipeline.md flags under
+    milestone 3/section 1 point 6: whether continuing iteration after a
+    TIE-informed start helps or hurts is inconsistent, and no internal
+    diagnostic tried so far (recovery_error, held-out residual, low-freq
+    drift from TIE) can tell the agent which -- so `build_decision_prompt`
+    is NOT currently told whether `initial_object` was used, and the
+    agent's retry/step_max decisions here are no more informed about that
+    open question than before. Wiring `initial_object` through is a
+    prerequisite for eventually closing that gap, not a claim that it's
+    closed.
 
     Returns {"result": the winning attempt's reconstruction.reconstruct()
     return value, "attempts": [{"step_max", "history", "decision"} per
@@ -140,7 +156,7 @@ def orchestrate_reconstruction(lr_images, led_grid, hr_pixel_um, lr_pixel_um, na
     for attempt in range(max_attempts):
         result = reconstruction.reconstruct(
             lr_images, led_grid, hr_pixel_um, lr_pixel_um, na, wavelength_um, factor,
-            iterations=iterations, step_max=step_max,
+            iterations=iterations, step_max=step_max, initial_object=initial_object,
         )
         prompt = build_decision_prompt(result["history"], step_max, attempt, max_attempts)
         decision = agent_fn(prompt, dry_run=dry_run)

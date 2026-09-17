@@ -28,6 +28,9 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."
 from ptyco_full_simulator import config, forward_model, io_utils, led_array, metrics, optics  # noqa: E402
 from ptyco_full_simulator import propagation as prop, reconstruction  # noqa: E402
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "agents"))
+import reconstruction_orchestrator  # noqa: E402
+
 
 def parse_args(argv=None):
     p = argparse.ArgumentParser(description=__doc__)
@@ -52,6 +55,18 @@ def parse_args(argv=None):
                          "after this better start further helps or slowly hurts is inconsistent -- "
                          "not resolved yet, inspect metrics.json's history yourself rather than "
                          "trusting it blindly for this mode.")
+    p.add_argument("--use-reconstruction-agent", action="store_true",
+                    help="use agents/reconstruction_orchestrator.py's milestone-3 agent instead of a "
+                         "single reconstruction.reconstruct call: it decides accept/retry-with-"
+                         "different-step_max/give_up after each attempt, up to --max-attempts. "
+                         "Defaults to a canned dry-run decision (accept-first-attempt, matching a "
+                         "single plain call); pass --agent-live for a real (billed) claude -p call, "
+                         "see agents/reconstruction_orchestrator.py's docstring for measured cost.")
+    p.add_argument("--agent-live", action="store_true",
+                    help="make --use-reconstruction-agent call the real agent instead of a dry-run "
+                         "stub -- COSTS MONEY per attempt, see agents/reconstruction_orchestrator.py")
+    p.add_argument("--max-attempts", type=int, default=3,
+                    help="only used with --use-reconstruction-agent")
     p.add_argument("--output-dir", default="results/simulate_and_reconstruct")
     return p.parse_args(argv)
 
@@ -102,11 +117,25 @@ def main(argv=None) -> int:
         initial_object = (amp0_hr * np.exp(1j * tie_phase)).astype(complex)
         print(f"TIE-informed init: defocus=+/-{dz}um, on-axis pair simulated from the same known object")
 
-    result = reconstruction.reconstruct(
-        lr_images, led_grid, hr_pixel_um, setup.lr_pixel_size_um,
-        setup.objective.na, setup.wavelength_um, factor, iterations=args.iterations,
-        initial_object=initial_object,
-    )
+    agent_attempts = None
+    if args.use_reconstruction_agent:
+        orchestrated = reconstruction_orchestrator.orchestrate_reconstruction(
+            lr_images, led_grid, hr_pixel_um, setup.lr_pixel_size_um,
+            setup.objective.na, setup.wavelength_um, factor,
+            iterations=args.iterations, max_attempts=args.max_attempts,
+            dry_run=not args.agent_live, initial_object=initial_object,
+        )
+        result = orchestrated["result"]
+        agent_attempts = orchestrated["attempts"]
+        for i, attempt in enumerate(agent_attempts):
+            print(f"agent attempt {i + 1}/{len(agent_attempts)}: step_max={attempt['step_max']}  "
+                  f"decision={attempt['decision']['action']}  reasoning={attempt['decision']['reasoning']!r}")
+    else:
+        result = reconstruction.reconstruct(
+            lr_images, led_grid, hr_pixel_um, setup.lr_pixel_size_um,
+            setup.objective.na, setup.wavelength_um, factor, iterations=args.iterations,
+            initial_object=initial_object,
+        )
 
     gt_metrics = metrics.compare_to_ground_truth(result["object"], hr_object)
     conv = metrics.convergence_summary(result["history"])
@@ -118,7 +147,7 @@ def main(argv=None) -> int:
     with open(os.path.join(args.output_dir, "metrics.json"), "w") as fh:
         json.dump({
             "convergence": conv, "vs_ground_truth": gt_metrics,
-            "history": result["history"],
+            "history": result["history"], "agent_attempts": agent_attempts,
             "setup": {
                 "channel": args.channel, "wavelength_nm": setup.wavelength_nm,
                 "grid_size": args.grid_size, "objective": args.objective,
@@ -127,6 +156,7 @@ def main(argv=None) -> int:
                 "hr_pixel_um": hr_pixel_um, "lr_pixel_um": setup.lr_pixel_size_um,
                 "iterations": args.iterations, "peak_photon_count": args.peak_photon_count,
                 "seed": args.seed, "tie_defocus_um": args.tie_defocus_um,
+                "use_reconstruction_agent": args.use_reconstruction_agent,
             },
         }, fh, indent=2)
     print(f"wrote results to {args.output_dir}")
