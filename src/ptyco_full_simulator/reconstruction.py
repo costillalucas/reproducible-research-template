@@ -43,37 +43,37 @@ def initial_hr_guess(lr_images: dict[tuple[int, int], np.ndarray],
     return amp_hr.astype(complex)
 
 
-def _next_adaptive_step(history: list[dict], step: float, step_max: float,
-                         shrink_factor: float = 0.7, patience: int = 3,
+def _next_adaptive_step(history: list[dict], step: float, eta: float = 0.01,
                          min_step: float = 1e-3) -> float:
     """zuo2016 (Adaptive Step-Size Strategy for Noise-Robust FPM, Zuo/
-    Sun/Chen 2016, `references/papers/2016/oe-24-18-20724.pdf`): the
-    paper's core idea is to stop growing (or actively shrink) the step
-    size once `recovery_error` stops improving, instead of a step that
-    grows on a fixed schedule regardless of whether it's still helping --
-    a plateaued/increasing error under a fixed-growing step is exactly
-    the noise-amplification failure mode the paper targets (their
-    section 2/3, using a per-iteration residual-based criterion in the
-    same spirit as `recovery_error` here).
-
-    Simplified rule actually implemented here (their full method
-    additionally reasons per-LED about individual image noise levels,
-    which this project's `history` does not track -- only the pooled
-    per-epoch `recovery_error` is available, see `reconstruct`'s
-    docstring): grow toward `step_max` on the same ramp as the fixed
-    schedule while error keeps improving; once `recovery_error` fails to
-    improve for `patience` consecutive epochs, multiply the step by
-    `shrink_factor` (floored at `min_step`) instead of continuing to grow
-    -- and keep shrinking on every further non-improving epoch, so a
-    genuinely stuck run doesn't hover at a step that's still too large.
+    Sun/Chen 2016, `references/papers/2016/oe-24-18-20724.pdf`) Eq. 16,
+    implemented as written, not approximated: given the global error
+    metric epsilon(O^k) each full cycle (`recovery_error` in `history`
+    already plays this role, see `reconstruct`'s docstring), keep the
+    step-size unchanged while the previous cycle's relative improvement
+    exceeds `eta`, otherwise HALVE it:
+        alpha^k = alpha^(k-1)     if (eps(O^k)-eps(O^(k-1)))/eps(O^(k-1)) > eta
+                = alpha^(k-1)/2   otherwise
+    The paper starts alpha^0=1 (no ramp-up, same convention this
+    project's `reconstruct` follows for `adaptive_step=True`: step starts
+    at `step_max` on iteration 0, see below) and only ever shrinks --
+    Eq. 16 has no branch that grows the step back up, unlike this
+    module's own default fixed-ramp schedule. `min_step` is an
+    engineering floor NOT in the paper's equation, added only so a
+    long-stuck run's step can't underflow to exactly 0 and stall the
+    optimizer entirely; `eta=0.01` matches the paper's own stated
+    default ("a reasonably good result can always be obtained by fixing
+    eta=0.01").
     """
-    if len(history) < patience + 1:
+    if len(history) < 2:
         return step
-    recent = [h["recovery_error"] for h in history[-(patience + 1):]]
-    improved = any(recent[i + 1] < recent[i] - 1e-12 for i in range(len(recent) - 1))
-    if improved:
-        return min(step * 1.05, step_max)
-    return max(step * shrink_factor, min_step)
+    prev_error, curr_error = history[-2]["recovery_error"], history[-1]["recovery_error"]
+    if prev_error <= 0:
+        return step
+    relative_improvement = (prev_error - curr_error) / prev_error
+    if relative_improvement > eta:
+        return step
+    return max(step / 2.0, min_step)
 
 
 def reconstruct(lr_images: dict[tuple[int, int], np.ndarray],
@@ -117,10 +117,16 @@ def reconstruct(lr_images: dict[tuple[int, int], np.ndarray],
     hard circular cutoff, not something EPRY needs to also infer).
 
     `adaptive_step` (`zuo2016`): if True (and `recover_pupil` is False),
-    replaces the fixed exponential-ramp step schedule with
-    `_next_adaptive_step` -- see that function's docstring for the
-    (simplified) rule and honest caveat about what it does and doesn't
-    capture from the paper.
+    replaces the fixed exponential-ramp step schedule with the paper's
+    Eq. 16 rule (`_next_adaptive_step` -- read in full from
+    `references/papers/2016/oe-24-18-20724.pdf`, see that function's
+    docstring for the exact equation and an honest note on its one
+    non-paper addition, a numerical-safety floor). Step starts at
+    `step_max` on iteration 0 (the paper's alpha^0=1 convention -- this
+    module's step is already gradient-normalized, see the module
+    docstring, so `step_max` plays the role of "no extra scaling", same
+    as the fixed-ramp schedule's step approaches `step_max` from below)
+    and only ever shrinks, per Eq. 16.
     """
     lr_shape = next(iter(lr_images.values())).shape
     pupil_mask = circular_pupil(lr_shape, lr_pixel_um, na, wavelength_um)
@@ -135,12 +141,12 @@ def reconstruct(lr_images: dict[tuple[int, int], np.ndarray],
     lr_n_px = lr_shape[0] * lr_shape[1]
 
     history = []
-    step = step_max * (1.0 - np.exp(-step_alpha * 0))
+    step = step_max  # zuo2016 Eq. 16 convention: alpha^0 = 1 (see reconstruct's docstring)
     for it in range(iterations):
         if recover_pupil:
             pass  # EPRY's per-pixel normalization is its own step; see docstring.
         elif adaptive_step:
-            step = _next_adaptive_step(history, step, step_max)
+            step = _next_adaptive_step(history, step)
         else:
             step = step_max * (1.0 - np.exp(-step_alpha * it))
         sq_err_sum = 0.0
@@ -184,6 +190,7 @@ def reconstruct(lr_images: dict[tuple[int, int], np.ndarray],
         history.append({
             "iteration": it,
             "recovery_error": float(np.sqrt(sq_err_sum / n_px)),
+            "step": None if recover_pupil else float(step),
         })
 
     obj = np.fft.ifft2(np.fft.ifftshift(obj_spectrum))
