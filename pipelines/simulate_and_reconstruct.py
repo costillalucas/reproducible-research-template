@@ -67,12 +67,33 @@ def parse_args(argv=None):
                          "stub -- COSTS MONEY per attempt, see agents/reconstruction_orchestrator.py")
     p.add_argument("--max-attempts", type=int, default=3,
                     help="only used with --use-reconstruction-agent")
+    p.add_argument("--recover-pupil", action="store_true",
+                    help="use agents/../reconstruction.reconstruct's EPRY pupil-recovery mode "
+                         "(ou2014) instead of assuming the ideal NA-limited pupil -- see that "
+                         "function's docstring and tests/test_epry_pupil_recovery.py for what it "
+                         "does and its honest, modest measured benefit. Mutually exclusive with "
+                         "--use-reconstruction-agent (not wired together yet) and with "
+                         "--adaptive-step (EPRY has its own self-scaling step).")
+    p.add_argument("--adaptive-step", action="store_true",
+                    help="use reconstruction.reconstruct's zuo2016 adaptive step-size mode instead "
+                         "of the fixed ramp -- see that function's docstring and "
+                         "tests/test_adaptive_step_size.py for the exact rule and its honest, "
+                         "not-clearly-better-on-small-test-problems finding. Mutually exclusive "
+                         "with --use-reconstruction-agent (not wired together yet) and with "
+                         "--recover-pupil.")
     p.add_argument("--output-dir", default="results/simulate_and_reconstruct")
     return p.parse_args(argv)
 
 
 def main(argv=None) -> int:
     args = parse_args(argv)
+    if (args.recover_pupil or args.adaptive_step) and args.use_reconstruction_agent:
+        raise SystemExit("--recover-pupil/--adaptive-step are not wired together with "
+                          "--use-reconstruction-agent yet -- pick one or the other")
+    if args.recover_pupil and args.adaptive_step:
+        raise SystemExit("--recover-pupil and --adaptive-step are mutually exclusive "
+                          "(reconstruction.reconstruct ignores step_max/adaptive_step when "
+                          "recover_pupil=True -- see that function's docstring)")
     rng = np.random.default_rng(args.seed)
 
     setup = config.default_setup(
@@ -134,8 +155,12 @@ def main(argv=None) -> int:
         result = reconstruction.reconstruct(
             lr_images, led_grid, hr_pixel_um, setup.lr_pixel_size_um,
             setup.objective.na, setup.wavelength_um, factor, iterations=args.iterations,
-            initial_object=initial_object,
+            initial_object=initial_object, recover_pupil=args.recover_pupil,
+            adaptive_step=args.adaptive_step,
         )
+        if args.recover_pupil:
+            print("EPRY pupil recovery: recovered pupil phase range "
+                  f"[{np.angle(result['pupil']).min():.3f}, {np.angle(result['pupil']).max():.3f}] rad")
 
     gt_metrics = metrics.compare_to_ground_truth(result["object"], hr_object)
     conv = metrics.convergence_summary(result["history"])
@@ -157,6 +182,7 @@ def main(argv=None) -> int:
                 "iterations": args.iterations, "peak_photon_count": args.peak_photon_count,
                 "seed": args.seed, "tie_defocus_um": args.tie_defocus_um,
                 "use_reconstruction_agent": args.use_reconstruction_agent,
+                "recover_pupil": args.recover_pupil, "adaptive_step": args.adaptive_step,
             },
         }, fh, indent=2)
     print(f"wrote results to {args.output_dir}")
