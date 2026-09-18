@@ -1026,6 +1026,47 @@ fase si conviene.)
    recurrir a auto-calibración vía pupil recovery (`ou2014`, gap #1) por
    canal, o a ficha técnica/target físico como último recurso.
 
+   **[HERRAMIENTA CONSTRUIDA — 2026-09-18, sesión autónoma] Sigue sin datos
+   reales en este Codespace (`data/` no tiene capturas TIFF, solo el
+   registro de procedencia) — pero la herramienta ya está lista para
+   correr apenas existan.** Implementado
+   `src/ptyco_full_simulator/chromatic_diagnostics.py`:
+   `measure_lateral_shift_px` (corrimiento lateral sub-píxel entre dos
+   canales, correlación de fase normalizada + ajuste parabólico sub-píxel)
+   y `measure_focus_offset_um` (offset de foco relativo, buscando sobre
+   distancias de desenfoque candidatas con
+   `propagation.angular_spectrum_propagate` cuál hace que un canal
+   coincida mejor con el otro), combinados en
+   `chromatic_registration_report` (red-green y blue-green, con green
+   como referencia).
+
+   Validado contra corrimientos/desenfoques sintéticos conocidos
+   (`tests/test_chromatic_diagnostics.py`, 5 tests): recupera un
+   corrimiento lateral sub-píxel inyectado con error <0.15px sobre campos
+   ideales, un desenfoque de 25µm inyectado con error <3µm, controles
+   negativos en 0 para ambos, y un test de punta a punta que inyecta un
+   corrimiento lateral conocido en el canal blue *antes* de simular su
+   pila LR y reconstruye los 3 canales con el solver Wirtinger flow real
+   (no campos ideales) — lo detecta correctamente (red≈0, blue≈corrimiento
+   inyectado, dentro de ~1.5px de tolerancia, más ancha que con campos
+   ideales por el ruido propio de la reconstrucción).
+
+   **Límite honesto, documentado en el docstring del módulo**: ambas
+   mediciones se validaron contra campos de verdad de referencia (ideales)
+   con precisión de una fracción de píxel / pocos µm; a través de la
+   reconstrucción real de este proyecto (imperfecta), el ruido de medición
+   crece con el error de reconstrucción — este diagnóstico es tan bueno
+   como la reconstrucción que mide, no mejor. Una corrida con su propio
+   problema de fase débil o mínimo local (ver las limitaciones ya
+   documentadas de `reconstruction.py`) va a reportar un corrimiento
+   cromático más ruidoso/menos confiable, no uno silenciosamente
+   incorrecto sin aviso — conviene chequear siempre
+   `metrics.convergence_summary`/`compare_to_ground_truth` (cuando exista
+   verdad de referencia) antes de confiar en este diagnóstico sobre una
+   reconstrucción mal convergida. No cableado todavía como flag de CLI en
+   ningún pipeline (no hay datos reales para correrlo con sentido en este
+   Codespace) — queda como función de librería lista para usar.
+
 3. **[RESUELTO — 2026-09-17]** La capa de agentes es **Opción A: Claude
    Code orquestando** (subagentes/forks/tareas en background invocados
    desde el pipeline, como en esta misma conversación) — no un framework
