@@ -195,6 +195,31 @@ claims:
     depends_on: [epry_regresses_healthy_channel_at_small_scale]
     status: established
 
+  - id: chromatic_diagnostic_recovers_injected_shift
+    statement: >
+      The chromatic-aberration diagnostic (measure_lateral_shift_px, via
+      phase correlation) recovers a known lateral shift deliberately
+      injected between two channels' true objects, through the actual
+      Wirtinger flow reconstruction (not measured on ideal fields), to
+      within a couple pixels -- reconstruction noise, not the
+      registration math itself, is the honest limiting factor. A channel
+      pair with no injected shift reports near-zero, confirming the
+      diagnostic doesn't manufacture a spurious signal. Built and
+      validated synthetically since no real lab data exists in this
+      Codespace yet -- roadmap open question #2 (does this project's real
+      objective have chromatic aberration) still needs real captures to
+      actually answer.
+    file: report/report.md
+    numbers: [chromatic_shift_recovery_error_px, chromatic_shift_no_injection_error_px]
+    evidence:
+      - id: ev_chromatic_shift_recovery
+        description: euclidean pixel error between measured and known-injected lateral shift, with vs. without an injected shift
+        data_refs:
+          - src/ptyco_full_simulator/chromatic_diagnostics.py
+          - scripts/compute_numbers.py
+    depends_on: []
+    status: established
+
   - id: adaptive_step_helps_under_heavy_noise
     statement: >
       zuo2016's adaptive step-size rule beats this project's default

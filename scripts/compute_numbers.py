@@ -30,6 +30,7 @@ sys.path.insert(0, os.path.join(ROOT, "agents"))
 
 import numpy as np  # noqa: E402
 
+from ptyco_full_simulator import chromatic_diagnostics as cd  # noqa: E402
 from ptyco_full_simulator import config, forward_model, led_array, metrics, optics  # noqa: E402
 from ptyco_full_simulator import led_calibration as cal, multispectral as ms  # noqa: E402
 from ptyco_full_simulator import propagation as prop, reconstruction  # noqa: E402
@@ -457,6 +458,78 @@ def adaptive_step_heavy_noise_gain():
     return gt_f["phase_correlation"], gt_a["phase_correlation"]
 
 
+def _fft_shift(image, dy, dx):
+    """Sub-pixel shift via the Fourier shift theorem -- same helper as
+    tests/test_chromatic_diagnostics.py's, used here to inject a KNOWN
+    lateral chromatic shift into a synthetic object before reconstruction.
+    """
+    h, w = image.shape
+    fy = np.fft.fftfreq(h)
+    fx = np.fft.fftfreq(w)
+    FY, FX = np.meshgrid(fy, fx, indexing="ij")
+    phase_ramp = np.exp(-2j * np.pi * (FY * dy + FX * dx))
+    shifted = np.fft.ifft2(np.fft.fft2(image) * phase_ramp)
+    return np.abs(shifted)
+
+
+def chromatic_shift_recovery_error():
+    """Same scenario as
+    tests/test_chromatic_diagnostics.py::test_chromatic_registration_report_detects_injected_shift_through_real_reconstruction:
+    a known lateral chromatic shift injected into blue's true object
+    before simulating its LR stack, all 3 channels reconstructed through
+    the real Wirtinger flow solver, then measured via
+    chromatic_diagnostics.measure_lateral_shift_px (no real lab data
+    exists in this Codespace to validate against yet -- see that module's
+    docstring). Returns (euclidean pixel error for blue_vs_green -- the
+    channel WITH a known injected shift, euclidean pixel error for
+    red_vs_green -- no injected shift, a sanity/negative-control-style
+    number that should stay small).
+    """
+    grid_size, crop, iterations = 9, 16, 40
+    channels = ("red", "green", "blue")
+    setups = {ch: config.default_setup(channel=ch, grid_size=grid_size, objective="current",
+                                        resolution_px=(crop, crop)) for ch in channels}
+    factor = optics.shared_upsampling_factor(list(setups.values()))
+    hr_pixel_um = optics.actual_hr_pixel_size_um(next(iter(setups.values())), factor)
+    hr_shape = optics.hr_shape((crop, crop), factor)
+    # Same phantom as tests/test_chromatic_diagnostics.py's own _synthetic_amplitude
+    # (deliberately NOT this file's _amplitude_blob -- keeping this an exact match to
+    # the test's scenario, not just an approximation of it).
+    h, w = hr_shape
+    y, x = np.mgrid[0:h, 0:w].astype(float)
+    yc, xc = y / h - 0.5, x / w - 0.5
+    amp = 0.4 + 0.6 * np.exp(-((xc - 0.1) ** 2 + (yc + 0.05) ** 2) / (2 * 0.06 ** 2))
+    amp += 0.3 * np.exp(-((xc + 0.15) ** 2 + (yc - 0.1) ** 2) / (2 * 0.04 ** 2))
+    amp = np.clip(amp, 0, 1)
+    phase = 0.1 * np.pi * np.sin(2 * np.pi * np.linspace(-0.5, 0.5, w))[None, :]
+    truth = (amp * np.exp(1j * phase)).astype(complex)
+
+    true_shift_px = (2.0, -1.5)
+    fields = {}
+    for ch in channels:
+        setup = setups[ch]
+        obj = truth if ch != "blue" else (_fft_shift(amp, *true_shift_px) * np.exp(1j * phase)).astype(complex)
+        led_grid = led_array.build_led_grid(setup.led_array, setup.wavelength_um)
+        lr_images = forward_model.simulate_lr_stack(
+            obj, hr_pixel_um, led_grid, (crop, crop), setup.lr_pixel_size_um,
+            setup.objective.na, setup.wavelength_um,
+        )
+        result = reconstruction.reconstruct(
+            lr_images, led_grid, hr_pixel_um, setup.lr_pixel_size_um,
+            setup.objective.na, setup.wavelength_um, factor, iterations=iterations,
+        )
+        fields[ch] = result["object"]
+
+    wavelengths_um = {ch: config.CHANNEL_WAVELENGTH_NM[ch] / 1000.0 for ch in channels}
+    report = cd.chromatic_registration_report(fields, hr_pixel_um, wavelengths_um)
+
+    blue_dy, blue_dx = report["blue_vs_green"]["lateral_shift_px"]
+    red_dy, red_dx = report["red_vs_green"]["lateral_shift_px"]
+    blue_error = float(np.hypot(blue_dy - true_shift_px[0], blue_dx - true_shift_px[1]))
+    red_error = float(np.hypot(red_dy, red_dx))
+    return blue_error, red_error
+
+
 def ransac_outlier_rejection_rotation_error():
     """Same scenario as
     tests/test_ransac_similarity_fit.py::test_ransac_recovers_true_transform_despite_outliers_where_plain_fit_fails:
@@ -494,6 +567,7 @@ def main():
     epry_small_baseline, epry_small_corrected = epry_regresses_unaberrated_channel_small_scale()
     epry_paper_baseline, epry_paper_corrected = epry_regression_not_reproduced_at_paper_scale()
     adaptive_step_fixed_corr, adaptive_step_adaptive_corr = adaptive_step_heavy_noise_gain()
+    chromatic_blue_error, chromatic_red_error = chromatic_shift_recovery_error()
 
     registry = {
         "multispectral_thickness_correlation": {
@@ -680,6 +754,26 @@ def main():
             "type": "script",
             "reproduce": "scripts/compute_numbers.py::adaptive_step_heavy_noise_gain",
         },
+        "chromatic_shift_recovery_error_px": {
+            "value": chromatic_blue_error,
+            "statement": (
+                "euclidean pixel error between chromatic_diagnostics.measure_lateral_shift_px's "
+                "measured blue-vs-green shift and a known 2.0/-1.5px lateral shift injected into "
+                "blue's true object before reconstruction -- validated synthetically since no real "
+                "lab data exists in this Codespace yet"
+            ),
+            "type": "script",
+            "reproduce": "scripts/compute_numbers.py::chromatic_shift_recovery_error",
+        },
+        "chromatic_shift_no_injection_error_px": {
+            "value": chromatic_red_error,
+            "statement": (
+                "same scenario, red-vs-green pair (NO shift injected) -- sanity/negative-control "
+                "number confirming the diagnostic doesn't report a spurious shift when there isn't one"
+            ),
+            "type": "script",
+            "reproduce": "scripts/compute_numbers.py::chromatic_shift_recovery_error",
+        },
     }
 
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
@@ -705,6 +799,8 @@ def main():
     print(f"  epry_paper_scale_corrected_phase_correlation = {epry_paper_corrected:.4f}")
     print(f"  adaptive_step_fixed_ramp_phase_correlation   = {adaptive_step_fixed_corr:.4f}")
     print(f"  adaptive_step_adaptive_phase_correlation     = {adaptive_step_adaptive_corr:.4f}")
+    print(f"  chromatic_shift_recovery_error_px            = {chromatic_blue_error:.4f}")
+    print(f"  chromatic_shift_no_injection_error_px        = {chromatic_red_error:.4f}")
 
 
 if __name__ == "__main__":

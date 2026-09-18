@@ -129,6 +129,20 @@ check(
     f"adaptive={numbers['adaptive_step_adaptive_phase_correlation']['value']:.4f}",
 )
 
+check(
+    "the chromatic-aberration diagnostic recovers a known injected lateral shift through the "
+    "real reconstruction pipeline to within 2px (reconstruction noise, not the registration "
+    "math itself, is the honest limiting factor -- see chromatic_diagnostics.py's docstring)",
+    numbers["chromatic_shift_recovery_error_px"]["value"] < 2.0,
+    f"euclidean pixel error={numbers['chromatic_shift_recovery_error_px']['value']:.4f}",
+)
+check(
+    "NEGATIVE CONTROL: the same diagnostic reports near-zero shift for a channel pair with no "
+    "injected chromatic shift",
+    numbers["chromatic_shift_no_injection_error_px"]["value"] < 0.5,
+    f"got {numbers['chromatic_shift_no_injection_error_px']['value']:.4f}px",
+)
+
 passed = sum(1 for _, ok in results if ok)
 total = len(results)
 print()

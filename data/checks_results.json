@@ -39,8 +39,16 @@
     {
       "name": "adaptive step size (zuo2016) beats the fixed exponential ramp under heavy Poisson noise and enough iterations for the paper's described failure mode to manifest",
       "passed": true
+    },
+    {
+      "name": "the chromatic-aberration diagnostic recovers a known injected lateral shift through the real reconstruction pipeline to within 2px (reconstruction noise, not the registration math itself, is the honest limiting factor -- see chromatic_diagnostics.py's docstring)",
+      "passed": true
+    },
+    {
+      "name": "NEGATIVE CONTROL: the same diagnostic reports near-zero shift for a channel pair with no injected chromatic shift",
+      "passed": true
     }
   ],
-  "passed": 10,
-  "total": 10
+  "passed": 12,
+  "total": 12
 }

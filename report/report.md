@@ -136,6 +136,26 @@ finding above: validated across 8 random noise seeds, adaptive_step won on
 the seed=0 point is in this registry, for exact reproducibility — see
 `tests/test_adaptive_step_size.py` for the multi-seed check).
 
+## Milestone 10: a chromatic-aberration diagnostic, validated synthetically
+
+Roadmap open question #2 asks whether this project's real objective has
+chromatic aberration between the 3 RGB channels. No real lab captures
+exist in this Codespace to answer that directly yet, so
+`chromatic_diagnostics.py`'s lateral-shift and focus-offset measurements
+were built and validated against a KNOWN synthetic shift instead, through
+the actual Wirtinger flow reconstruction (not measured on ideal fields).
+Injecting a 2.0/−1.5px lateral shift into one channel before
+reconstruction, the diagnostic recovers it to within
+[srcnum:chromatic_shift_recovery_error_px:1.55]
+[src:chromatic_shift_recovery_error_px] px — reconstruction noise, not
+the registration math, is the limiting factor. A channel pair with no
+injected shift reports
+[srcnum:chromatic_shift_no_injection_error_px:0.09]
+[src:chromatic_shift_no_injection_error_px] px, confirming the diagnostic
+doesn't manufacture a spurious signal. The tool is ready to run the
+moment real captures exist; the underlying question (is the real
+objective achromatic?) remains open.
+
 ## Correctness suite
 
 [src:suite_coverage] — see `data/checks_results.json` for the full

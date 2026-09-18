@@ -11,6 +11,18 @@
     "type": "script",
     "value": 0.22239249275999584
   },
+  "chromatic_shift_no_injection_error_px": {
+    "reproduce": "scripts/compute_numbers.py::chromatic_shift_recovery_error",
+    "statement": "same scenario, red-vs-green pair (NO shift injected) -- sanity/negative-control number confirming the diagnostic doesn't report a spurious shift when there isn't one",
+    "type": "script",
+    "value": 0.08863668605557422
+  },
+  "chromatic_shift_recovery_error_px": {
+    "reproduce": "scripts/compute_numbers.py::chromatic_shift_recovery_error",
+    "statement": "euclidean pixel error between chromatic_diagnostics.measure_lateral_shift_px's measured blue-vs-green shift and a known 2.0/-1.5px lateral shift injected into blue's true object before reconstruction -- validated synthetically since no real lab data exists in this Codespace yet",
+    "type": "script",
+    "value": 1.5462236480828515
+  },
   "epry_corrected_phase_correlation": {
     "reproduce": "scripts/compute_numbers.py::epry_defocus_aberration_correction",
     "statement": "same scenario, reconstructed with EPRY pupil recovery (recover_pupil=True) instead of assuming the ideal pupil -- a real but modest improvement, not a full fix",
