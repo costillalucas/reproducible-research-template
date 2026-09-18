@@ -1159,9 +1159,27 @@ fase si conviene.)
    incorrecto sin aviso — conviene chequear siempre
    `metrics.convergence_summary`/`compare_to_ground_truth` (cuando exista
    verdad de referencia) antes de confiar en este diagnóstico sobre una
-   reconstrucción mal convergida. No cableado todavía como flag de CLI en
-   ningún pipeline (no hay datos reales para correrlo con sentido en este
-   Codespace) — queda como función de librería lista para usar.
+   reconstrucción mal convergida.
+
+   **[HECHO — 2026-09-18] Formalizado en el registro de procedencia y
+   cableado como flag de CLI.** `scripts/compute_numbers.py` gana
+   `chromatic_shift_recovery_error()`: mismo escenario que el test de
+   punta a punta de arriba (corrimiento 2.0/−1.5px inyectado en blue,
+   reconstruido con el solver real) — recupera el corrimiento con error
+   euclídeo de ~1.55px (ver `report/report.md` milestone 10 para el
+   número exacto vía `[srcnum:chromatic_shift_recovery_error_px]`), y
+   reporta ~0.09px para el par sin corrimiento inyectado (control
+   negativo). Nuevo claim `chromatic_diagnostic_recovers_injected_shift`
+   en `structure/claims.yaml`, nueva sección "Milestone 10" en
+   `report/report.md`. `scripts/reproduce.sh` pasa completo (21 tags
+   `\src`, 20 `\srcnum`, 21 entradas, 11 claims).
+
+   También cableado como `--chromatic-report` en
+   `reconstruct_multispectral_independent.py`/`coupled.py`: corre
+   `chromatic_registration_report` sobre los 3 canales ya reconstruidos y
+   guarda `chromatic_report.json` en `--output-dir` — sigue sin datos
+   reales para correrlo con sentido en este Codespace, pero ya no hace
+   falta escribir código nuevo cuando existan.
 
 3. **[RESUELTO — 2026-09-17]** La capa de agentes es **Opción A: Claude
    Code orquestando** (subagentes/forks/tareas en background invocados

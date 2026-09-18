@@ -28,6 +28,7 @@ import numpy as np
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
 
+from ptyco_full_simulator import chromatic_diagnostics as cd  # noqa: E402
 from ptyco_full_simulator import config, io_utils, led_array, metrics, optics  # noqa: E402
 from ptyco_full_simulator import propagation as prop, reconstruction  # noqa: E402
 
@@ -216,6 +217,13 @@ def parse_args(argv=None):
                          "many iterations (>=400). CAN be combined with --use-reconstruction-agent "
                          "(2026-09-18: resolved, see orchestrate_reconstruction's docstring). "
                          "Mutually exclusive with --recover-pupil.")
+    p.add_argument("--chromatic-report", action="store_true",
+                    help="run src/ptyco_full_simulator/chromatic_diagnostics.py's "
+                         "chromatic_registration_report on the 3 reconstructed channels (roadmap "
+                         "open question #2 -- does the real objective have chromatic aberration) "
+                         "and save chromatic_report.json to --output-dir. See that module's "
+                         "docstring for the honest caveat: accuracy depends on this run's own "
+                         "reconstruction quality, not a silent oracle.")
     p.add_argument("--output-dir", default="results/reconstruct_multispectral_independent")
     return p.parse_args(argv)
 
@@ -263,6 +271,22 @@ def main(argv=None) -> int:
             "convergence": conv, "history": c["history"], "agent_attempts": c["agent_attempts"],
             "n_leds_used": c["n_leds_used"], "n_leds_expected": c["n_leds_expected"],
         }
+
+    if args.chromatic_report:
+        wavelengths_um_cd = {ch: config.CHANNEL_WAVELENGTH_NM[ch] / 1000.0 for ch in CHANNEL_ORDER}
+        chromatic_report = cd.chromatic_registration_report(complex_objects, run["hr_pixel_um"], wavelengths_um_cd)
+        for pair, entry in chromatic_report.items():
+            dy, dx = entry["lateral_shift_px"]
+            print(f"  chromatic {pair}: lateral_shift=({dy:.3f}, {dx:.3f})px  "
+                  f"focus_offset={entry['focus']['offset_um']:.2f}um "
+                  f"(corr_at_offset={entry['focus']['correlation_at_offset']:.3f} vs. "
+                  f"corr_at_zero={entry['focus']['correlation_at_zero']:.3f})")
+        with open(os.path.join(args.output_dir, "chromatic_report.json"), "w") as fh:
+            json.dump(
+                {pair: {"lateral_shift_px": list(entry["lateral_shift_px"]), "focus": entry["focus"]}
+                 for pair, entry in chromatic_report.items()},
+                fh, indent=2,
+            )
 
     _save_rgb_composite(run["channels"], args.output_dir)
     np.savez(os.path.join(args.output_dir, "complex_objects.npz"), **complex_objects)

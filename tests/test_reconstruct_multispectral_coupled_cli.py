@@ -112,3 +112,25 @@ def test_all_three_agents_chained_dry_run(tmp_path):
     with open(output_dir / "qc_review.json") as fh:
         qc_out = json.load(fh)
     assert qc_out["decision"]["reasoning"] == "dry_run=True, no API call made"
+
+
+def test_chromatic_report_flag_writes_report_json(tmp_path):
+    """--chromatic-report (2026-09-18) on the coupled pipeline -- CLI
+    wiring check, not a re-derivation of the diagnostic's own accuracy
+    (already covered with a known injected shift in
+    tests/test_chromatic_diagnostics.py).
+    """
+    _write_fake_lab_data(tmp_path)
+    output_dir = tmp_path / "out"
+
+    pipeline.main([
+        "--data-root", str(tmp_path), "--grid-size", "9", "--crop", "16",
+        "--iterations", "20", "--chromatic-report", "--output-dir", str(output_dir),
+    ])
+
+    with open(output_dir / "chromatic_report.json") as fh:
+        report = json.load(fh)
+    assert set(report) == {"red_vs_green", "blue_vs_green"}
+    for entry in report.values():
+        assert len(entry["lateral_shift_px"]) == 2
+        assert "offset_um" in entry["focus"]

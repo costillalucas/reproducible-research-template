@@ -12,6 +12,7 @@ under the lab's own fila<row>_columna<col>.tiff naming, then drives the
 pipeline's real-data code path (io_utils.load_real_lr_stack) against them
 -- the same path real captures would take.
 """
+import json
 import os
 import sys
 
@@ -184,3 +185,25 @@ def test_adaptive_step_and_reconstruction_agent_can_now_be_combined(tmp_path):
         assert c["agent_attempts"] is not None, channel
         steps = [h["step"] for h in c["history"]]
         assert all(s is not None for s in steps), (channel, "adaptive_step must reach reconstruct()")
+
+
+def test_chromatic_report_flag_writes_report_json(tmp_path):
+    """--chromatic-report (2026-09-18) runs chromatic_diagnostics.py's
+    report on the 3 already-reconstructed channels and saves it -- CLI
+    wiring check, not a re-derivation of the diagnostic's own accuracy
+    (already covered with a known injected shift in
+    tests/test_chromatic_diagnostics.py).
+    """
+    grid_size, crop = 9, 12
+    _write_fake_lab_captures(tmp_path, grid_size, crop)
+    output_dir = tmp_path / "out"
+    pipeline.main([
+        "--data-root", str(tmp_path), "--grid-size", str(grid_size), "--crop", str(crop),
+        "--iterations", "20", "--chromatic-report", "--output-dir", str(output_dir),
+    ])
+    with open(output_dir / "chromatic_report.json") as fh:
+        report = json.load(fh)
+    assert set(report) == {"red_vs_green", "blue_vs_green"}
+    for entry in report.values():
+        assert len(entry["lateral_shift_px"]) == 2
+        assert "offset_um" in entry["focus"]

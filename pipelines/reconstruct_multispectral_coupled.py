@@ -23,9 +23,11 @@ PREREQUISITES for this script to be useful on real large-phase samples,
 not independent nice-to-haves. Both are now available per-channel via
 --recover-pupil/--adaptive-step (2026-09-18), but see
 tests/test_epry_pupil_recovery.py/test_adaptive_step_size.py for their
-honest, measured effect -- EPRY's benefit was real but modest, and
-adaptive_step showed no clean win on this project's small synthetic test
-problems; neither is a proven fix for this caveat yet on a real sample.
+honest, measured effect -- EPRY's benefit was real but modest (and can
+REGRESS an unaberrated channel at this project's small testbed scale, see
+milestone 8 of the roadmap doc), and adaptive_step only shows a clean win
+under heavy noise + many iterations (milestone 9), not on lighter/faster
+runs; neither is a proven fix for this caveat yet on a real sample.
 
 With --use-reconstruction-agent and --qc both passed, this is the one
 pipeline that chains all 3 of this project's agents in a single run:
@@ -53,6 +55,7 @@ import numpy as np
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
 
+from ptyco_full_simulator import chromatic_diagnostics as cd  # noqa: E402
 from ptyco_full_simulator import config, metrics, multispectral as ms  # noqa: E402
 from reconstruct_multispectral_independent import CHANNEL_ORDER, reconstruct_all_channels  # noqa: E402
 
@@ -107,6 +110,13 @@ def parse_args(argv=None):
                          "many iterations (>=400). CAN be combined with --use-reconstruction-agent "
                          "(2026-09-18: resolved, see orchestrate_reconstruction's docstring). "
                          "Mutually exclusive with --recover-pupil.")
+    p.add_argument("--chromatic-report", action="store_true",
+                    help="run src/ptyco_full_simulator/chromatic_diagnostics.py's "
+                         "chromatic_registration_report on the 3 reconstructed channels (roadmap "
+                         "open question #2 -- does the real objective have chromatic aberration) "
+                         "and save chromatic_report.json to --output-dir. See that module's "
+                         "docstring for the honest caveat: accuracy depends on this run's own "
+                         "reconstruction quality, not a silent oracle.")
     p.add_argument("--qc", action="store_true",
                     help="run the milestone-5 QC/confidence agent (agents/qc_agent.py) on this run's "
                          "diagnostics -- defaults to a canned dry-run decision, pass --qc-live for a "
@@ -141,6 +151,24 @@ def main(argv=None) -> int:
         if pupil is not None:
             print(f"  {channel} recovered pupil phase range: "
                   f"[{np.angle(pupil).min():.3f}, {np.angle(pupil).max():.3f}] rad")
+
+    if args.chromatic_report:
+        fields = {ch: run["channels"][ch]["object"] for ch in CHANNEL_ORDER}
+        wavelengths_um_cd = {ch: config.CHANNEL_WAVELENGTH_NM[ch] / 1000.0 for ch in CHANNEL_ORDER}
+        chromatic_report = cd.chromatic_registration_report(fields, run["hr_pixel_um"], wavelengths_um_cd)
+        for pair, entry in chromatic_report.items():
+            dy, dx = entry["lateral_shift_px"]
+            print(f"  chromatic {pair}: lateral_shift=({dy:.3f}, {dx:.3f})px  "
+                  f"focus_offset={entry['focus']['offset_um']:.2f}um "
+                  f"(corr_at_offset={entry['focus']['correlation_at_offset']:.3f} vs. "
+                  f"corr_at_zero={entry['focus']['correlation_at_zero']:.3f})")
+        with open(os.path.join(args.output_dir, "chromatic_report.json"), "w") as fh:
+            json.dump(
+                {pair: {"lateral_shift_px": list(entry["lateral_shift_px"]), "focus": entry["focus"]}
+                 for pair, entry in chromatic_report.items()},
+                fh, indent=2,
+            )
+
     hr_shape = run["hr_shape"]
     background_rows = args.background_rows or max(1, hr_shape[0] // 8)
     background_mask = np.zeros(hr_shape, dtype=bool)
