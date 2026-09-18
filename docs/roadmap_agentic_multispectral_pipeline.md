@@ -842,10 +842,70 @@ antes de construir la capa de orquestación, y siguiendo el ranking de
    (dry-run, sin gasto real, mismo criterio de costo que el resto de los
    agentes) — 64 tests pasando.
 
-(Gaps #1 pupil recovery/`ou2014` y #4 FPM-INR/`zhou2023` quedan fuera de
-este roadmap por ahora — mejoran calidad/velocidad del solver monocromático
-en general, no son específicos de "multiespectral asistido por agentes";
-se pueden intercalar en cualquier fase si conviene.)
+8. **[HECHO — 2026-09-18] Solver monocromático: gaps #1 (pupil recovery)
+   y #3 (adaptive step size) implementados.** No es un milestone
+   multiespectral en sí (mejora `reconstruction.reconstruct`, usado por
+   los tres canales por igual) pero el CAVEAT al inicio de
+   `pipelines/reconstruct_multispectral_coupled.py` los marcaba
+   explícitamente como PREREQUISITOS, no nice-to-haves, para que el
+   pipeline acoplado sirva en muestras reales de fase grande — sin esto,
+   el solver satura mucho antes de necesitar el unwrapping multiespectral
+   que es el corazón del proyecto.
+
+   **Pupil recovery (rank 1, `ou2014`, EPRY)**: `reconstruct()` gana
+   `recover_pupil` — alterna la actualización del parche de espectro del
+   objeto y una estimación de pupila compleja por LED (Eq. 2-4 del paper,
+   leído completo, no solo el abstract). Necesitó agregar infraestructura
+   de testing que no existía: `forward_model.simulate_lr_stack` ahora
+   acepta `pupil_override` (antes siempre usaba la pupila ideal, sin forma
+   de simular una aberración conocida) y `optics.add_defocus_aberration`
+   genera una aberración de defocus sintética (Zernike modo 4, la misma
+   que el paper encontró dominante en un microscopio real) para validar
+   contra verdad de referencia. **Resultado honesto**: en el objeto
+   sintético chico ya usado por `test_ptyco_simulator.py`, con
+   `defocus_rad_amplitude=2.0`, EPRY mejora de forma real pero modesta
+   (correlación de fase 0.687→0.793, correlación de la fase de pupila
+   recuperada con la aberración real inyectada: 0.648) — lejos del arreglo
+   dramático que fue la inicialización TIE para objetos de fase débil. Con
+   aberración mayor (4.0, explorado pero no aserteado en el test) tanto la
+   reconstrucción corregida como la no corregida fallan del todo en este
+   problema chico — EPRY no es una bala de plata sin más imágenes/píxeles,
+   consistente con que el paper mismo necesitó 225 imágenes en su demo real.
+
+   **Adaptive step size (rank 3, `zuo2016`)**: `reconstruct()` gana
+   `adaptive_step`, implementando la Ec. 16 del paper tal cual (no
+   aproximada): mantiene el step mientras la mejora relativa del error
+   global por época supere η=0.01 (el default que el propio paper
+   recomienda), si no lo achica a la mitad — nunca lo vuelve a crecer,
+   arrancando en `step_max` (la convención α⁰=1 del paper). `history`
+   ahora también guarda el `step` usado cada época. **Resultado honesto,
+   a diferencia de EPRY**: no se encontró una ventaja limpia de calidad
+   de reconstrucción sobre la rampa fija ya existente en los problemas
+   sintéticos chicos de este proyecto, probado con varios niveles de
+   ruido Poisson (correlación de fase dentro de pocos puntos porcentuales
+   en cualquier dirección) — la rampa fija ya alcanza un step moderado y
+   sin oscilación en estos tamaños de grilla/iteración chicos, así que el
+   modo de falla por oscilación inducida por ruido que ataca el paper
+   puede no ser lo bastante pronunciado acá para mostrar su beneficio. Lo
+   que sí se verificó: el mecanismo de la Ec. 16 está bien implementado
+   (test unitario directo) y una corrida real con ruido fuerte efectivamente
+   achica el step con el tiempo sin diverger.
+
+   Ambos son opt-in (`recover_pupil`/`adaptive_step` default `False`),
+   comportamiento previo sin cambios (regresión testeada, incluye los
+   valores de `step` por época coincidiendo exactamente con la fórmula
+   cerrada de la rampa fija). 70 tests pasando (eran 64 antes de estos
+   dos). **Pendiente, no hecho todavía**: cablear estos dos flags como
+   CLI en `pipelines/simulate_and_reconstruct.py` (mismo patrón que
+   `--tie-defocus-um`/`--use-reconstruction-agent`) — quedaron probados a
+   nivel de librería (`reconstruction.reconstruct` directo), no expuestos
+   todavía en ningún pipeline end-to-end.
+
+(Gap #4 FPM-INR/`zhou2023` queda fuera de este roadmap por ahora —
+mejora calidad/velocidad del solver monocromático en general por una vía
+de aprendizaje profundo mucho más grande, no es específico de
+"multiespectral asistido por agentes"; se puede intercalar en cualquier
+fase si conviene.)
 
 ## 4. Preguntas abiertas / riesgos
 
