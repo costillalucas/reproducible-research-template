@@ -928,6 +928,28 @@ antes de construir la capa de orquestación, y siguiendo el ranking de
    por canal y no rompen nada) más un test de la exclusión mutua. 73 tests
    pasando (eran 70).
 
+   **[HALLAZGO NEGATIVO — 2026-09-18] `recover_pupil=True` no es seguro
+   prender siempre.** Explorando los 3 canales reales juntos con fase
+   0.15π (el caso que ya hacía caer a red en mínimo local, milestone 2a):
+   `recover_pupil` mejora red modestamente (0.641→0.672) pero **hunde
+   blue** (0.951→0.526) — sin ninguna aberración real presente (pupila
+   ideal). Investigado a fondo: la fase de pupila recuperada queda casi
+   plana (std <0.003 rad, no "inventa" una aberración grande), pero la
+   calidad real empeora monótonamente con más iteraciones (0.625 a 5
+   iters → 0.526 a 40 iters) mientras `recovery_error` mejora todo el
+   tiempo — la propia normalización del update de EPRY (dividir por
+   `max(|P|²)`/`max(|S|²)` en vez del paso de gradiente fijo) puede
+   sobreajustar un canal que ya converge bien, y el `recovery_error` no lo
+   detecta (misma patología que `test_weak_phase_object_limitation.py`,
+   disparada acá por una vía distinta). **Implicación práctica**: no
+   activar `recover_pupil` a ciegas para los 3 canales RGB en la misma
+   corrida — puede ayudar a uno y arruinar a otro simultáneamente, y no
+   existe todavía ningún diagnóstico por canal para distinguir los casos
+   de antemano (mismo tipo de problema abierto que la pregunta de
+   continuar iterando después de TIE). Formalizado en
+   `tests/test_epry_pupil_recovery.py::test_recover_pupil_can_regress_an_already_well_converging_channel`
+   y en el docstring de `reconstruction.reconstruct`. 74 tests pasando.
+
 (Gap #4 FPM-INR/`zhou2023` queda fuera de este roadmap por ahora —
 mejora calidad/velocidad del solver monocromático en general por una vía
 de aprendizaje profundo mucho más grande, no es específico de

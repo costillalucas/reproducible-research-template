@@ -27,6 +27,14 @@ problem -- EPRY is not a silver bullet for arbitrarily large aberration
 on a small synthetic aperture, consistent with ou2014's own real-data
 demonstration needing 225 images (15x15 LEDs) and many more pixels than
 this test's fast/small setup uses.
+
+SECOND, MORE SURPRISING honest finding (2026-09-18, found exploring
+`reconstruct_all_channels(recover_pupil=True)` across all 3 real LED
+channels together -- see `test_recover_pupil_can_regress_an_already_well_
+converging_channel` below): recover_pupil isn't just "modest when it
+helps" -- it can actively REGRESS a channel that already converges fine
+with NO aberration present at all. This means recover_pupil=True is not a
+safe blanket default for all 3 RGB channels in one run.
 """
 import os
 import sys
@@ -136,6 +144,100 @@ def test_epry_pupil_support_stays_inside_na_circle():
     )
     outside = ~pupil_mask
     assert np.all(result["pupil"][outside] == 0)
+
+
+def test_recover_pupil_can_regress_an_already_well_converging_channel():
+    """HONEST NEGATIVE FINDING (2026-09-18, found while exploring
+    reconstruct_all_channels(recover_pupil=True) across all 3 real LED
+    channels together, not just the single aberrated case above): with
+    NO aberration at all (ideal pupil, pupil_override omitted), EPRY can
+    still make an already-well-converging channel's reconstruction WORSE
+    than not using it -- this isn't "EPRY only shines against a real
+    aberration", it's "EPRY isn't a free/safe thing to always turn on".
+
+    Blue (470nm) on this project's real "current" objective/9x9 grid is
+    the reproducer: baseline (recover_pupil=False) already reconstructs
+    this object well (phase_correlation ~0.95); recover_pupil=True
+    degrades it to ~0.5 -- and gets WORSE, not better, the more iterations
+    it runs (checked at 5 vs 40 iterations below), even as `recovery_error`
+    keeps improving the whole time -- the same "recovery_error doesn't
+    track true accuracy" pathology already documented elsewhere in this
+    project (tests/test_weak_phase_object_limitation.py), but triggered
+    here by EPRY's own object-update normalization (division by
+    max(|pupil|^2)/max(|patch|^2) instead of the plain fixed-ramp
+    gradient step), not by the zero-phase initialization or a real pupil
+    aberration -- the recovered pupil's phase stays nearly flat (std well
+    under 0.05 rad) the whole time, ruling out "it invented a large fake
+    aberration" as the explanation.
+
+    Practical implication: recover_pupil=True is not a safe default to
+    turn on for all 3 RGB channels at once in
+    reconstruct_multispectral_*.py -- it can help a channel with a real
+    local-minimum problem (see red's case in
+    tests/test_reconstruct_multispectral_pipeline.py's docstring) while
+    actively hurting a different, already-fine channel in the SAME run.
+    No per-channel diagnostic exists yet to tell these apart in advance
+    (same open problem as the TIE-continued-iteration question in
+    docs/roadmap_agentic_multispectral_pipeline.md) -- don't assume
+    recover_pupil is monotonically safe to enable.
+    """
+    grid_size, crop = 9, 12
+    setup = config.default_setup(channel="blue", grid_size=grid_size, objective="current",
+                                  resolution_px=(crop, crop))
+    factor = optics.upsampling_factor(setup)
+    hr_pixel_um = optics.actual_hr_pixel_size_um(setup, factor)
+    hr_shape = optics.hr_shape((crop, crop), factor)
+    pupil_mask = optics.circular_pupil((crop, crop), setup.lr_pixel_size_um,
+                                        setup.objective.na, setup.wavelength_um)
+    obj_true = _synthetic_object(hr_shape)
+    led_grid = led_array.build_led_grid(setup.led_array, setup.wavelength_um)
+    lr_images = forward_model.simulate_lr_stack(
+        obj_true, hr_pixel_um, led_grid, (crop, crop), setup.lr_pixel_size_um,
+        setup.objective.na, setup.wavelength_um,
+    )
+
+    baseline = reconstruction.reconstruct(
+        lr_images, led_grid, hr_pixel_um, setup.lr_pixel_size_um,
+        setup.objective.na, setup.wavelength_um, factor, iterations=40,
+    )
+    gt_baseline = metrics.compare_to_ground_truth(baseline["object"], obj_true)
+    assert gt_baseline["phase_correlation"] > 0.85, (
+        "premise check: blue should already converge well without any pupil correction here -- "
+        f"got {gt_baseline['phase_correlation']}"
+    )
+
+    short = reconstruction.reconstruct(
+        lr_images, led_grid, hr_pixel_um, setup.lr_pixel_size_um,
+        setup.objective.na, setup.wavelength_um, factor, iterations=5,
+        recover_pupil=True,
+    )
+    long = reconstruction.reconstruct(
+        lr_images, led_grid, hr_pixel_um, setup.lr_pixel_size_um,
+        setup.objective.na, setup.wavelength_um, factor, iterations=40,
+        recover_pupil=True,
+    )
+    gt_short = metrics.compare_to_ground_truth(short["object"], obj_true)
+    gt_long = metrics.compare_to_ground_truth(long["object"], obj_true)
+
+    assert gt_long["phase_correlation"] < gt_baseline["phase_correlation"] - 0.2, (
+        "EPRY should meaningfully regress this already-well-converging channel: "
+        f"baseline={gt_baseline['phase_correlation']}, recover_pupil@40it={gt_long['phase_correlation']}"
+    )
+    assert gt_long["phase_correlation"] < gt_short["phase_correlation"], (
+        "quality should get WORSE with more EPRY iterations here, not better -- "
+        f"5 iters={gt_short['phase_correlation']}, 40 iters={gt_long['phase_correlation']}"
+    )
+    assert long["history"][-1]["recovery_error"] < short["history"][-1]["recovery_error"], (
+        "meanwhile recovery_error keeps IMPROVING -- the metric doesn't track true accuracy here, "
+        "same pathology as test_weak_phase_object_limitation.py, triggered by EPRY's own update rule"
+    )
+
+    pupil_phase_std = float(np.angle(long["pupil"])[pupil_mask].std())
+    assert pupil_phase_std < 0.05, (
+        "the recovered pupil should stay nearly flat (no large fake aberration invented) -- "
+        f"got std={pupil_phase_std} rad, so the regression comes from the object update, "
+        "not a runaway pupil estimate"
+    )
 
 
 def test_recover_pupil_default_off_reproduces_original_behavior():

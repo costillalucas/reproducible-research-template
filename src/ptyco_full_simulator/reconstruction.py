@@ -116,6 +116,18 @@ def reconstruct(lr_images: dict[tuple[int, int], np.ndarray],
     stop should always be zero" -- this project's aperture stop is a
     hard circular cutoff, not something EPRY needs to also infer).
 
+    CAVEAT (2026-09-18, tests/test_epry_pupil_recovery.py): NOT a safe
+    default to always turn on. Under a real injected aberration it helps
+    (modestly, see that test's docstring); with NO aberration present it
+    can instead REGRESS an already-well-converging reconstruction (seen
+    reproducibly for the blue/470nm channel on this project's real LED
+    grid) -- the object update's own normalization can overfit even
+    though the recovered pupil itself stays nearly flat, and
+    `recovery_error` keeps improving throughout while true accuracy gets
+    worse (the metric doesn't catch this, same as elsewhere in this
+    project). No per-channel diagnostic exists yet to predict which case
+    a given run is in ahead of time.
+
     `adaptive_step` (`zuo2016`): if True (and `recover_pupil` is False),
     replaces the fixed exponential-ramp step schedule with the paper's
     Eq. 16 rule (`_next_adaptive_step` -- read in full from
