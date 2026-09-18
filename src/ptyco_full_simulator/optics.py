@@ -27,6 +27,28 @@ def circular_pupil(shape: tuple[int, int], pixel_size_um: float,
     return (FX**2 + FY**2) <= cutoff**2
 
 
+def add_defocus_aberration(pupil_mask: np.ndarray, shape: tuple[int, int],
+                            pixel_size_um: float, na: float, wavelength_um: float,
+                            defocus_rad_amplitude: float) -> np.ndarray:
+    """Complex pupil = `pupil_mask` (boolean support) with a defocus phase
+    term added inside it -- a synthetic, known aberration for testing EPRY
+    pupil recovery (`ou2014`) against ground truth. This is Zernike mode 4
+    (defocus): phase(fx, fy) = defocus_rad_amplitude * (rho/rho_max)^2,
+    where rho is radial spatial frequency and rho_max = na/wavelength_um
+    is the pupil edge -- the same low-order aberration ou2014 Fig. 3(d)
+    found dominant in a real microscope (see the paper's Zernike
+    decomposition discussion, mode 4).
+    """
+    h, w = shape
+    fy = np.fft.fftshift(np.fft.fftfreq(h, d=pixel_size_um))
+    fx = np.fft.fftshift(np.fft.fftfreq(w, d=pixel_size_um))
+    FX, FY = np.meshgrid(fx, fy)
+    rho_max = na / wavelength_um
+    rho_sq_norm = (FX**2 + FY**2) / (rho_max**2)
+    phase = defocus_rad_amplitude * rho_sq_norm
+    return (pupil_mask.astype(complex)) * np.exp(1j * phase)
+
+
 def hr_pixel_size_um(setup: SetupConfig, safety_factor: float = 2.0) -> float:
     """Nyquist-adequate HR pixel size for the synthetic aperture this LED
     grid + objective can achieve: NA_synthetic = NA_objective + NA_illum_max.
