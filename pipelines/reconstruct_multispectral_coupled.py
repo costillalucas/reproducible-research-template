@@ -22,11 +22,20 @@ references/bibliography.yaml's `priority_focus` are effectively
 PREREQUISITES for this script to be useful on real large-phase samples,
 not independent nice-to-haves.
 
+With --use-reconstruction-agent and --qc both passed, this is the one
+pipeline that chains all 3 of this project's agents in a single run:
+agents/reconstruction_orchestrator.py per channel (milestone 3), then
+agents/qc_agent.py on the coupled result (milestone 5), then -- if QC
+recommends it -- agents/report_agent.py drafts a claim/report paragraph
+(milestone 7). All three default to dry-run (no billed API calls); pass
+--agent-live/--qc-live for real calls.
+
 Usage:
     python pipelines/reconstruct_multispectral_coupled.py \\
         --data-root /path/to/data --grid-size 9 --objective current \\
         --crop 400 --background-rows 40 \\
-        --baseline-index 1.34 --output-dir results/coupled_run1
+        --baseline-index 1.34 --use-reconstruction-agent --qc \\
+        --output-dir results/coupled_run1
 """
 from __future__ import annotations
 
@@ -65,6 +74,17 @@ def parse_args(argv=None):
                     help="known refractive index of the sample/medium, to resolve thickness and B "
                          "from the fitted C, D (see multispectral.py's degeneracy note) -- omit to "
                          "only report C, D")
+    p.add_argument("--use-reconstruction-agent", action="store_true",
+                    help="use agents/reconstruction_orchestrator.py's milestone-3 agent per channel "
+                         "instead of a single direct reconstruction call -- combine with --qc to "
+                         "exercise all 3 of this project's agents (reconstruction, QC, report) in "
+                         "one pipeline run. Defaults to a canned dry-run decision; pass --agent-live "
+                         "for a real (billed) claude -p call per channel.")
+    p.add_argument("--agent-live", action="store_true",
+                    help="make --use-reconstruction-agent call the real agent instead of a dry-run "
+                         "stub -- COSTS MONEY per channel, see agents/reconstruction_orchestrator.py")
+    p.add_argument("--max-attempts", type=int, default=3,
+                    help="only used with --use-reconstruction-agent")
     p.add_argument("--qc", action="store_true",
                     help="run the milestone-5 QC/confidence agent (agents/qc_agent.py) on this run's "
                          "diagnostics -- defaults to a canned dry-run decision, pass --qc-live for a "
@@ -84,7 +104,16 @@ def main(argv=None) -> int:
     run = reconstruct_all_channels(
         args.data_root, args.grid_size, objective=args.objective,
         crop=args.crop, iterations=args.iterations,
+        use_reconstruction_agent=args.use_reconstruction_agent,
+        agent_live=args.agent_live, max_attempts=args.max_attempts,
     )
+    for channel in CHANNEL_ORDER:
+        attempts = run["channels"][channel]["agent_attempts"]
+        if attempts is not None:
+            for i, attempt in enumerate(attempts):
+                print(f"  {channel} agent attempt {i + 1}/{len(attempts)}: "
+                      f"step_max={attempt['step_max']}  decision={attempt['decision']['action']}  "
+                      f"reasoning={attempt['decision']['reasoning']!r}")
     hr_shape = run["hr_shape"]
     background_rows = args.background_rows or max(1, hr_shape[0] // 8)
     background_mask = np.zeros(hr_shape, dtype=bool)
@@ -147,6 +176,8 @@ def main(argv=None) -> int:
     )
     metrics_out = {
         "background_rows": background_rows, "baseline_index": args.baseline_index,
+        "use_reconstruction_agent": args.use_reconstruction_agent,
+        "agent_attempts": {ch: run["channels"][ch]["agent_attempts"] for ch in CHANNEL_ORDER},
         "pair_disagreement_mean": {k: float(np.mean(v)) for k, v in coupled["pair_disagreement"].items()},
         "pair_disagreement_max": {k: float(np.max(v)) for k, v in coupled["pair_disagreement"].items()},
     }

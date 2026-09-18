@@ -1,11 +1,14 @@
 """tests/test_reconstruct_multispectral_coupled_cli.py -- CLI-level test
-for pipelines/reconstruct_multispectral_coupled.py, including its
---qc integration (agents/qc_agent.py) and, when QC recommends reporting,
-its report_agent.py integration -- this project's three agents
-(reconstruction orchestration, QC, report drafting) chained together in
-one real pipeline invocation for the first time. Dry-run only (no real
-API calls; see agents/*.py for why that costs real money and isn't done
-in the regular test suite).
+for pipelines/reconstruct_multispectral_coupled.py, including its --qc
+integration (agents/qc_agent.py) and, when QC recommends reporting, its
+report_agent.py integration. `test_qc_and_report_agent_wiring_dry_run`
+exercises 2 of this project's 3 agents (QC, report); test_all_three_agents_
+_chained_dry_run below adds --use-reconstruction-agent to exercise all 3
+(reconstruction orchestration, QC, report) chained in one pipeline
+invocation -- the milestone this file's original docstring described
+before that flag existed on this script. Dry-run only (no real API calls;
+see agents/*.py for why that costs real money and isn't done in the
+regular test suite).
 """
 import json
 import os
@@ -76,3 +79,36 @@ def test_qc_and_report_agent_wiring_dry_run(tmp_path):
         assert draft["reasoning"] == "dry_run=True, no API call made"
     else:
         assert not (output_dir / "report_draft.json").exists()
+
+
+def test_all_three_agents_chained_dry_run(tmp_path):
+    """--use-reconstruction-agent (agent #1) + --qc (agent #2, chaining
+    into agent #3 when QC recommends it) in one invocation -- proves the
+    two previously-independent flows (reconstruction_orchestrator wired
+    into simulate_and_reconstruct.py; QC->report wired into this script)
+    can now run together on the same pipeline, closing the gap the
+    roadmap's milestone 7 write-up flagged as still open.
+    """
+    _write_fake_lab_data(tmp_path)
+    output_dir = tmp_path / "out"
+
+    pipeline.main([
+        "--data-root", str(tmp_path), "--grid-size", "9", "--crop", "16",
+        "--iterations", "40", "--background-rows", "4", "--baseline-index", "1.34",
+        "--use-reconstruction-agent", "--max-attempts", "2",
+        "--qc", "--output-dir", str(output_dir),
+    ])
+
+    with open(output_dir / "coupled_metrics.json") as fh:
+        coupled_metrics = json.load(fh)
+    assert coupled_metrics["use_reconstruction_agent"] is True
+    for channel in ("red", "green", "blue"):
+        attempts = coupled_metrics["agent_attempts"][channel]
+        assert len(attempts) >= 1
+        assert attempts[0]["decision"]["reasoning"] == "dry_run=True, no API call made"
+        # dry-run always canned-accepts on the first attempt, same as a plain call
+        assert attempts[0]["decision"]["action"] == "accept"
+
+    with open(output_dir / "qc_review.json") as fh:
+        qc_out = json.load(fh)
+    assert qc_out["decision"]["reasoning"] == "dry_run=True, no API call made"

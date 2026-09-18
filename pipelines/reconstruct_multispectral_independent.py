@@ -31,12 +31,17 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."
 from ptyco_full_simulator import config, io_utils, led_array, metrics, optics  # noqa: E402
 from ptyco_full_simulator import propagation as prop, reconstruction  # noqa: E402
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "agents"))
+import reconstruction_orchestrator  # noqa: E402
+
 CHANNEL_ORDER = ("red", "green", "blue")
 
 
 def reconstruct_all_channels(data_root, grid_size: int, objective: str = "current",
                               crop: int = 400, iterations: int = 20,
-                              index_base: int = 1, tie_defocus_um: float | None = None) -> dict:
+                              index_base: int = 1, tie_defocus_um: float | None = None,
+                              use_reconstruction_agent: bool = False,
+                              agent_live: bool = False, max_attempts: int = 3) -> dict:
     """Reconstruct red/green/blue independently on one shared HR grid.
 
     `tie_defocus_um`, if given, initializes each channel's solver with a
@@ -45,10 +50,19 @@ def reconstruct_all_channels(data_root, grid_size: int, objective: str = "curren
     `io_utils.load_defocus_pair` (the extra capture this needs, per
     channel, that most existing capture sets won't have yet).
 
+    `use_reconstruction_agent`, if True, runs each channel through
+    `agents/reconstruction_orchestrator.py`'s milestone-3 agent (accept/
+    retry-with-different-step_max/give_up) instead of a single direct
+    `reconstruction.reconstruct` call -- same agent, same dry-run-by-
+    default cost discipline as `pipelines/simulate_and_reconstruct.py`'s
+    `--use-reconstruction-agent`. `agent_live`/`max_attempts` are only
+    used when this is True.
+
     Returns {"factor": int, "hr_pixel_um": float, "hr_shape": (h, w),
              "channels": {channel: {"object": complex ndarray,
                                      "history": [...], "n_leds_used": int,
-                                     "n_leds_expected": int}}}.
+                                     "n_leds_expected": int,
+                                     "agent_attempts": [...] or None}}}.
     """
     setups = {
         channel: config.default_setup(
@@ -81,16 +95,28 @@ def reconstruct_all_channels(data_root, grid_size: int, objective: str = "curren
             amp0_hr = np.kron(amp0, np.ones((factor, factor)))
             initial_object = (amp0_hr * np.exp(1j * tie_phase)).astype(complex)
 
-        result = reconstruction.reconstruct(
-            lr_images, led_grid, hr_pixel_um, setup.lr_pixel_size_um,
-            setup.objective.na, setup.wavelength_um, factor, iterations=iterations,
-            initial_object=initial_object,
-        )
+        agent_attempts = None
+        if use_reconstruction_agent:
+            orchestrated = reconstruction_orchestrator.orchestrate_reconstruction(
+                lr_images, led_grid, hr_pixel_um, setup.lr_pixel_size_um,
+                setup.objective.na, setup.wavelength_um, factor,
+                iterations=iterations, max_attempts=max_attempts,
+                dry_run=not agent_live, initial_object=initial_object,
+            )
+            result = orchestrated["result"]
+            agent_attempts = orchestrated["attempts"]
+        else:
+            result = reconstruction.reconstruct(
+                lr_images, led_grid, hr_pixel_um, setup.lr_pixel_size_um,
+                setup.objective.na, setup.wavelength_um, factor, iterations=iterations,
+                initial_object=initial_object,
+            )
         channels[channel] = {
             "object": result["object"],
             "history": result["history"],
             "n_leds_used": len(lr_images),
             "n_leds_expected": n_expected,
+            "agent_attempts": agent_attempts,
         }
 
     shapes = {ch: c["object"].shape for ch, c in channels.items()}
@@ -134,6 +160,17 @@ def parse_args(argv=None):
                          "convention. See docs/roadmap_agentic_multispectral_pipeline.md section 1 "
                          "point 6 for why this matters, especially for weak-phase/low-contrast "
                          "samples.")
+    p.add_argument("--use-reconstruction-agent", action="store_true",
+                    help="use agents/reconstruction_orchestrator.py's milestone-3 agent per channel "
+                         "instead of a single direct reconstruction.reconstruct call -- see "
+                         "pipelines/simulate_and_reconstruct.py's flag of the same name for details. "
+                         "Defaults to a canned dry-run decision; pass --agent-live for a real "
+                         "(billed) claude -p call per channel.")
+    p.add_argument("--agent-live", action="store_true",
+                    help="make --use-reconstruction-agent call the real agent instead of a dry-run "
+                         "stub -- COSTS MONEY per channel, see agents/reconstruction_orchestrator.py")
+    p.add_argument("--max-attempts", type=int, default=3,
+                    help="only used with --use-reconstruction-agent")
     p.add_argument("--output-dir", default="results/reconstruct_multispectral_independent")
     return p.parse_args(argv)
 
@@ -145,6 +182,8 @@ def main(argv=None) -> int:
     run = reconstruct_all_channels(
         args.data_root, args.grid_size, objective=args.objective,
         crop=args.crop, iterations=args.iterations, tie_defocus_um=args.tie_defocus_um,
+        use_reconstruction_agent=args.use_reconstruction_agent,
+        agent_live=args.agent_live, max_attempts=args.max_attempts,
     )
     print(f"grid={args.grid_size}x{args.grid_size}  objective={args.objective}  "
           f"shared_upsampling_factor={run['factor']}  hr_shape={run['hr_shape']}  "
@@ -152,7 +191,8 @@ def main(argv=None) -> int:
 
     metrics_out = {
         "factor": run["factor"], "hr_pixel_um": run["hr_pixel_um"], "hr_shape": list(run["hr_shape"]),
-        "tie_defocus_um": args.tie_defocus_um, "channels": {},
+        "tie_defocus_um": args.tie_defocus_um,
+        "use_reconstruction_agent": args.use_reconstruction_agent, "channels": {},
     }
     complex_objects = {}
     for channel in CHANNEL_ORDER:
@@ -160,10 +200,15 @@ def main(argv=None) -> int:
         conv = metrics.convergence_summary(c["history"])
         print(f"  {channel}: {c['n_leds_used']}/{c['n_leds_expected']} LEDs  "
               f"convergence={json.dumps(conv)}")
+        if c["agent_attempts"] is not None:
+            for i, attempt in enumerate(c["agent_attempts"]):
+                print(f"    agent attempt {i + 1}/{len(c['agent_attempts'])}: "
+                      f"step_max={attempt['step_max']}  decision={attempt['decision']['action']}  "
+                      f"reasoning={attempt['decision']['reasoning']!r}")
         io_utils.save_complex_as_images(c["object"], args.output_dir, channel)
         complex_objects[channel] = c["object"]
         metrics_out["channels"][channel] = {
-            "convergence": conv, "history": c["history"],
+            "convergence": conv, "history": c["history"], "agent_attempts": c["agent_attempts"],
             "n_leds_used": c["n_leds_used"], "n_leds_expected": c["n_leds_expected"],
         }
 

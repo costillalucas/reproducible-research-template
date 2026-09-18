@@ -825,6 +825,23 @@ antes de construir la capa de orquestación, y siguiendo el ranking de
    flujos siguen siendo independientes entre sí (no hay un único pipeline
    que use los 3 agentes juntos todavía).
 
+   **[HECHO — 2026-09-18] Los dos flujos, unificados en un solo
+   pipeline.** `reconstruct_all_channels()` (usada tanto por
+   `reconstruct_multispectral_independent.py` como por
+   `reconstruct_multispectral_coupled.py`) ahora acepta
+   `use_reconstruction_agent`/`agent_live`/`max_attempts`: cuando está
+   activo, corre `agents/reconstruction_orchestrator.py` (agente #1)
+   por canal en vez de una llamada directa a `reconstruction.reconstruct`,
+   guardando el log de intentos/decisiones por canal
+   (`channels[canal]["agent_attempts"]`). Con esto,
+   `reconstruct_multispectral_coupled.py --use-reconstruction-agent --qc`
+   corre los 3 agentes del proyecto (orquestación de reconstrucción → QC
+   → reporte, encadenado cuando QC recomienda reportar) en una sola
+   invocación real, no dos flujos separados. Probado en
+   `tests/test_reconstruct_multispectral_coupled_cli.py::test_all_three_agents_chained_dry_run`
+   (dry-run, sin gasto real, mismo criterio de costo que el resto de los
+   agentes) — 64 tests pasando.
+
 (Gaps #1 pupil recovery/`ou2014` y #4 FPM-INR/`zhou2023` quedan fuera de
 este roadmap por ahora — mejoran calidad/velocidad del solver monocromático
 en general, no son específicos de "multiespectral asistido por agentes";
