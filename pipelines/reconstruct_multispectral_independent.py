@@ -41,7 +41,8 @@ def reconstruct_all_channels(data_root, grid_size: int, objective: str = "curren
                               crop: int = 400, iterations: int = 20,
                               index_base: int = 1, tie_defocus_um: float | None = None,
                               use_reconstruction_agent: bool = False,
-                              agent_live: bool = False, max_attempts: int = 3) -> dict:
+                              agent_live: bool = False, max_attempts: int = 3,
+                              recover_pupil: bool = False, adaptive_step: bool = False) -> dict:
     """Reconstruct red/green/blue independently on one shared HR grid.
 
     `tie_defocus_um`, if given, initializes each channel's solver with a
@@ -58,12 +59,26 @@ def reconstruct_all_channels(data_root, grid_size: int, objective: str = "curren
     `--use-reconstruction-agent`. `agent_live`/`max_attempts` are only
     used when this is True.
 
+    `recover_pupil`/`adaptive_step` (per-channel EPRY/`ou2014` and
+    zuo2016, see `reconstruction.reconstruct`'s docstring for what each
+    does and their honest, measured effect) are mutually exclusive with
+    `use_reconstruction_agent` -- same restriction as
+    `pipelines/simulate_and_reconstruct.py`'s CLI, for the same reason
+    (the orchestration agent's retry logic is built around `step_max`,
+    which EPRY bypasses and `adaptive_step` already manages itself;
+    combining them is a real design question, not solved here).
+
     Returns {"factor": int, "hr_pixel_um": float, "hr_shape": (h, w),
              "channels": {channel: {"object": complex ndarray,
                                      "history": [...], "n_leds_used": int,
                                      "n_leds_expected": int,
-                                     "agent_attempts": [...] or None}}}.
+                                     "agent_attempts": [...] or None,
+                                     "pupil": complex ndarray or None}}}.
     """
+    if (recover_pupil or adaptive_step) and use_reconstruction_agent:
+        raise ValueError("recover_pupil/adaptive_step are not wired together with "
+                          "use_reconstruction_agent yet -- pass only one of the two modes "
+                          "(same restriction as pipelines/simulate_and_reconstruct.py's CLI)")
     setups = {
         channel: config.default_setup(
             channel=channel, grid_size=grid_size, objective=objective,
@@ -109,7 +124,8 @@ def reconstruct_all_channels(data_root, grid_size: int, objective: str = "curren
             result = reconstruction.reconstruct(
                 lr_images, led_grid, hr_pixel_um, setup.lr_pixel_size_um,
                 setup.objective.na, setup.wavelength_um, factor, iterations=iterations,
-                initial_object=initial_object,
+                initial_object=initial_object, recover_pupil=recover_pupil,
+                adaptive_step=adaptive_step,
             )
         channels[channel] = {
             "object": result["object"],
@@ -117,6 +133,7 @@ def reconstruct_all_channels(data_root, grid_size: int, objective: str = "curren
             "n_leds_used": len(lr_images),
             "n_leds_expected": n_expected,
             "agent_attempts": agent_attempts,
+            "pupil": result.get("pupil"),
         }
 
     shapes = {ch: c["object"].shape for ch, c in channels.items()}
@@ -171,6 +188,18 @@ def parse_args(argv=None):
                          "stub -- COSTS MONEY per channel, see agents/reconstruction_orchestrator.py")
     p.add_argument("--max-attempts", type=int, default=3,
                     help="only used with --use-reconstruction-agent")
+    p.add_argument("--recover-pupil", action="store_true",
+                    help="use reconstruction.reconstruct's EPRY pupil-recovery mode (ou2014) per "
+                         "channel instead of assuming the ideal NA-limited pupil -- see that "
+                         "function's docstring and tests/test_epry_pupil_recovery.py for its honest, "
+                         "modest measured benefit. Mutually exclusive with --use-reconstruction-agent "
+                         "and with --adaptive-step (EPRY has its own self-scaling step).")
+    p.add_argument("--adaptive-step", action="store_true",
+                    help="use reconstruction.reconstruct's zuo2016 adaptive step-size mode per "
+                         "channel instead of the fixed ramp -- see that function's docstring and "
+                         "tests/test_adaptive_step_size.py for the exact rule and its honest, "
+                         "not-clearly-better-on-small-test-problems finding. Mutually exclusive "
+                         "with --use-reconstruction-agent and with --recover-pupil.")
     p.add_argument("--output-dir", default="results/reconstruct_multispectral_independent")
     return p.parse_args(argv)
 
@@ -184,6 +213,7 @@ def main(argv=None) -> int:
         crop=args.crop, iterations=args.iterations, tie_defocus_um=args.tie_defocus_um,
         use_reconstruction_agent=args.use_reconstruction_agent,
         agent_live=args.agent_live, max_attempts=args.max_attempts,
+        recover_pupil=args.recover_pupil, adaptive_step=args.adaptive_step,
     )
     print(f"grid={args.grid_size}x{args.grid_size}  objective={args.objective}  "
           f"shared_upsampling_factor={run['factor']}  hr_shape={run['hr_shape']}  "
@@ -192,9 +222,11 @@ def main(argv=None) -> int:
     metrics_out = {
         "factor": run["factor"], "hr_pixel_um": run["hr_pixel_um"], "hr_shape": list(run["hr_shape"]),
         "tie_defocus_um": args.tie_defocus_um,
-        "use_reconstruction_agent": args.use_reconstruction_agent, "channels": {},
+        "use_reconstruction_agent": args.use_reconstruction_agent,
+        "recover_pupil": args.recover_pupil, "adaptive_step": args.adaptive_step, "channels": {},
     }
     complex_objects = {}
+    pupils = {}
     for channel in CHANNEL_ORDER:
         c = run["channels"][channel]
         conv = metrics.convergence_summary(c["history"])
@@ -205,6 +237,10 @@ def main(argv=None) -> int:
                 print(f"    agent attempt {i + 1}/{len(c['agent_attempts'])}: "
                       f"step_max={attempt['step_max']}  decision={attempt['decision']['action']}  "
                       f"reasoning={attempt['decision']['reasoning']!r}")
+        if c["pupil"] is not None:
+            print(f"    recovered pupil phase range: "
+                  f"[{np.angle(c['pupil']).min():.3f}, {np.angle(c['pupil']).max():.3f}] rad")
+            pupils[channel] = c["pupil"]
         io_utils.save_complex_as_images(c["object"], args.output_dir, channel)
         complex_objects[channel] = c["object"]
         metrics_out["channels"][channel] = {
@@ -214,6 +250,8 @@ def main(argv=None) -> int:
 
     _save_rgb_composite(run["channels"], args.output_dir)
     np.savez(os.path.join(args.output_dir, "complex_objects.npz"), **complex_objects)
+    if pupils:
+        np.savez(os.path.join(args.output_dir, "recovered_pupils.npz"), **pupils)
     with open(os.path.join(args.output_dir, "metrics.json"), "w") as fh:
         json.dump(metrics_out, fh, indent=2)
     print(f"wrote results to {args.output_dir}")

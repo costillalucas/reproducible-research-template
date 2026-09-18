@@ -110,3 +110,60 @@ def test_reconstruct_all_channels_on_fake_lab_captures(tmp_path):
         gt = metrics.compare_to_ground_truth(c["object"], truth)
         assert gt["amplitude_correlation"] > 0.5, (channel, gt)
         assert gt["phase_correlation"] > 0.85, (channel, gt)
+        assert c["pupil"] is None
+
+
+def test_reconstruct_all_channels_recover_pupil_wiring(tmp_path):
+    """Wiring check, not a re-derivation of EPRY's own quality claim
+    (already established at the library level in
+    tests/test_epry_pupil_recovery.py with a known injected aberration --
+    this fake lab data uses the ideal pupil, so there's nothing for EPRY
+    to correct here). Just confirms reconstruct_all_channels(recover_pupil
+    =True) runs per-channel EPRY and returns a per-channel complex pupil
+    of the right shape without breaking anything else.
+    """
+    grid_size, crop = 9, 12
+    truth, hr_shape, hr_pixel_um = _write_fake_lab_captures(tmp_path, grid_size, crop)
+
+    run = pipeline.reconstruct_all_channels(
+        str(tmp_path), grid_size, objective="current", crop=crop, iterations=20,
+        recover_pupil=True,
+    )
+    for channel, c in run["channels"].items():
+        assert c["pupil"] is not None
+        assert c["pupil"].shape == (crop, crop)
+        gt = metrics.compare_to_ground_truth(c["object"], truth)
+        assert gt["phase_correlation"] > 0.5, (channel, gt)
+
+
+def test_reconstruct_all_channels_adaptive_step_wiring(tmp_path):
+    """Same spirit as the pupil-recovery wiring test above: confirms
+    per-channel zuo2016 adaptive stepping runs end to end through this
+    pipeline without breaking reconstruction quality on an easy (noiseless)
+    case -- tests/test_adaptive_step_size.py already covers the mechanism
+    and its honest not-clearly-better finding at the library level.
+    """
+    grid_size, crop = 9, 12
+    truth, hr_shape, hr_pixel_um = _write_fake_lab_captures(tmp_path, grid_size, crop)
+
+    run = pipeline.reconstruct_all_channels(
+        str(tmp_path), grid_size, objective="current", crop=crop, iterations=40,
+        adaptive_step=True,
+    )
+    for channel, c in run["channels"].items():
+        assert c["pupil"] is None
+        gt = metrics.compare_to_ground_truth(c["object"], truth)
+        assert gt["phase_correlation"] > 0.5, (channel, gt)
+
+
+def test_recover_pupil_and_reconstruction_agent_are_mutually_exclusive(tmp_path):
+    grid_size, crop = 9, 12
+    _write_fake_lab_captures(tmp_path, grid_size, crop)
+    try:
+        pipeline.reconstruct_all_channels(
+            str(tmp_path), grid_size, objective="current", crop=crop, iterations=5,
+            recover_pupil=True, use_reconstruction_agent=True,
+        )
+        assert False, "expected ValueError for recover_pupil + use_reconstruction_agent"
+    except ValueError as exc:
+        assert "not wired together" in str(exc)

@@ -912,6 +912,22 @@ antes de construir la capa de orquestación, y siguiendo el ranking de
    (los pipelines multiespectrales) — quedan solo en el pipeline
    mono-objeto por ahora.
 
+   **[HECHO — 2026-09-18] Cableados también en los pipelines
+   multiespectrales.** `reconstruct_all_channels()` (compartida por
+   `reconstruct_multispectral_independent.py` y
+   `reconstruct_multispectral_coupled.py`) gana `recover_pupil`/
+   `adaptive_step`, aplicados por canal, con la misma exclusión mutua con
+   `use_reconstruction_agent` que ya tenía `simulate_and_reconstruct.py`
+   (ahora vive como un `ValueError` dentro de la función compartida, no
+   duplicado en cada CLI). `channels[canal]["pupil"]` guarda la pupila
+   recuperada por canal cuando corresponde (`None` si no). Ambos CLI
+   multiespectrales ganan `--recover-pupil`/`--adaptive-step`. Nuevos
+   tests en `tests/test_reconstruct_multispectral_pipeline.py`: wiring
+   check de cada modo por separado (no re-derivan la calidad de EPRY/
+   step-size, ya probada a nivel de librería — solo confirman que corren
+   por canal y no rompen nada) más un test de la exclusión mutua. 73 tests
+   pasando (eran 70).
+
 (Gap #4 FPM-INR/`zhou2023` queda fuera de este roadmap por ahora —
 mejora calidad/velocidad del solver monocromático en general por una vía
 de aprendizaje profundo mucho más grande, no es específico de

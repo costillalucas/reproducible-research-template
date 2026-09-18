@@ -20,7 +20,12 @@ enough for this script's phase input to be trustworthy -- gap #1 (pupil
 recovery, `ou2014`) and gap #3 (adaptive step size, `zuo2016`) from
 references/bibliography.yaml's `priority_focus` are effectively
 PREREQUISITES for this script to be useful on real large-phase samples,
-not independent nice-to-haves.
+not independent nice-to-haves. Both are now available per-channel via
+--recover-pupil/--adaptive-step (2026-09-18), but see
+tests/test_epry_pupil_recovery.py/test_adaptive_step_size.py for their
+honest, measured effect -- EPRY's benefit was real but modest, and
+adaptive_step showed no clean win on this project's small synthetic test
+problems; neither is a proven fix for this caveat yet on a real sample.
 
 With --use-reconstruction-agent and --qc both passed, this is the one
 pipeline that chains all 3 of this project's agents in a single run:
@@ -85,6 +90,18 @@ def parse_args(argv=None):
                          "stub -- COSTS MONEY per channel, see agents/reconstruction_orchestrator.py")
     p.add_argument("--max-attempts", type=int, default=3,
                     help="only used with --use-reconstruction-agent")
+    p.add_argument("--recover-pupil", action="store_true",
+                    help="use reconstruction.reconstruct's EPRY pupil-recovery mode (ou2014) per "
+                         "channel instead of assuming the ideal NA-limited pupil -- see that "
+                         "function's docstring and tests/test_epry_pupil_recovery.py for its honest, "
+                         "modest measured benefit. Mutually exclusive with --use-reconstruction-agent "
+                         "and with --adaptive-step (EPRY has its own self-scaling step).")
+    p.add_argument("--adaptive-step", action="store_true",
+                    help="use reconstruction.reconstruct's zuo2016 adaptive step-size mode per "
+                         "channel instead of the fixed ramp -- see that function's docstring and "
+                         "tests/test_adaptive_step_size.py for the exact rule and its honest, "
+                         "not-clearly-better-on-small-test-problems finding. Mutually exclusive "
+                         "with --use-reconstruction-agent and with --recover-pupil.")
     p.add_argument("--qc", action="store_true",
                     help="run the milestone-5 QC/confidence agent (agents/qc_agent.py) on this run's "
                          "diagnostics -- defaults to a canned dry-run decision, pass --qc-live for a "
@@ -106,6 +123,7 @@ def main(argv=None) -> int:
         crop=args.crop, iterations=args.iterations,
         use_reconstruction_agent=args.use_reconstruction_agent,
         agent_live=args.agent_live, max_attempts=args.max_attempts,
+        recover_pupil=args.recover_pupil, adaptive_step=args.adaptive_step,
     )
     for channel in CHANNEL_ORDER:
         attempts = run["channels"][channel]["agent_attempts"]
@@ -114,6 +132,10 @@ def main(argv=None) -> int:
                 print(f"  {channel} agent attempt {i + 1}/{len(attempts)}: "
                       f"step_max={attempt['step_max']}  decision={attempt['decision']['action']}  "
                       f"reasoning={attempt['decision']['reasoning']!r}")
+        pupil = run["channels"][channel]["pupil"]
+        if pupil is not None:
+            print(f"  {channel} recovered pupil phase range: "
+                  f"[{np.angle(pupil).min():.3f}, {np.angle(pupil).max():.3f}] rad")
     hr_shape = run["hr_shape"]
     background_rows = args.background_rows or max(1, hr_shape[0] // 8)
     background_mask = np.zeros(hr_shape, dtype=bool)
@@ -177,6 +199,7 @@ def main(argv=None) -> int:
     metrics_out = {
         "background_rows": background_rows, "baseline_index": args.baseline_index,
         "use_reconstruction_agent": args.use_reconstruction_agent,
+        "recover_pupil": args.recover_pupil, "adaptive_step": args.adaptive_step,
         "agent_attempts": {ch: run["channels"][ch]["agent_attempts"] for ch in CHANNEL_ORDER},
         "pair_disagreement_mean": {k: float(np.mean(v)) for k, v in coupled["pair_disagreement"].items()},
         "pair_disagreement_max": {k: float(np.max(v)) for k, v in coupled["pair_disagreement"].items()},
