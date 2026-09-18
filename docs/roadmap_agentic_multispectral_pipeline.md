@@ -950,6 +950,56 @@ antes de construir la capa de orquestación, y siguiendo el ranking de
    `tests/test_epry_pupil_recovery.py::test_recover_pupil_can_regress_an_already_well_converging_channel`
    y en el docstring de `reconstruction.reconstruct`. 74 tests pasando.
 
+   **[FOLLOW-UP — 2026-09-18, mismo día] ¿Está mal implementado EPRY, o
+   es un artefacto del testbed chico de este proyecto? Lo segundo,
+   confirmado con evidencia.** Investigación en 3 pasos, hecha fuera del
+   código del proyecto (scripts sueltos) antes de formalizar nada:
+   1. **Se descartó "normalización mal regularizada"**: se probó el fix
+      estándar de la literatura para inestabilidad de este tipo en la
+      familia PIE (denominador regularizado per-píxel/global, estilo
+      rPIE — Maiden/Muller/Rodenburg 2017) fuera del código principal, y
+      casi no cambió los números a escala chica (blue seguía ~0.57-0.59
+      con cualquier valor de regularización). Bajar `epry_alpha`/
+      `epry_beta` sí mitiga parcialmente (blue mejora a ~0.63 con
+      alpha=beta≈0.1) pero nunca cierra la brecha con el baseline sin
+      corrección (~0.94), y a más iteraciones (160) vuelve a degradarse
+      incluso con el paso chico — confirma que es una dirección de
+      update genuinamente inestable, no solo "el paso por defecto es muy
+      grande".
+   2. **Réplica a escala cercana a la demo real del paper** (225 LEDs =
+      grilla 15x15, imágenes de 64x64px en vez de 12x12px, manteniendo
+      la frecuencia espacial física del objeto comparable — un primer
+      intento sin ese cuidado confundió el resultado empujando el
+      objeto al régimen ya conocido de fase casi-uniforme degenerada).
+      **El colapso catastrófico desaparece por completo a esta escala**
+      (0.840→0.836, estable incluso hasta 300 iteraciones) — confirma
+      que el hallazgo negativo es un artefacto de poca redundancia de
+      datos en los problemas sintéticos chicos de este proyecto (12px,
+      81-441 LEDs), no una falla general de EPRY ni un bug de esta
+      implementación (que además recupera aberraciones reales
+      correctamente, ver el primer test del archivo).
+   3. **Pregunta que quedó abierta, no resuelta**: si EPRY recupera bien
+      una aberración real a esa escala grande. Un primer intento pareció
+      un fallo limpio (correlación de pupila ~0.03 vs. 0.648 a escala
+      chica), pero resultó estar confundido también — el baseline SIN
+      ninguna corrección de pupila tampoco converge en el mismo
+      presupuesto de iteraciones a esta escala más grande y compleja
+      (phase_correlation sigue subiendo a 600 iteraciones: 0.466→0.623,
+      `recovery_error` sigue bajando) — la comparación no fue justa y no
+      se formalizó como test. Requeriría correr ambos casos hasta
+      convergencia real (varios minutos por corrida a esta escala), no
+      hecho todavía.
+
+   Formalizado el paso 2 (el que sí tiene una conclusión sólida) en
+   `tests/test_epry_pupil_recovery.py::test_recover_pupil_regression_is_a_small_testbed_artifact_not_reproduced_at_paper_scale`,
+   con nota honesta sobre el paso 3 en su docstring. **Conclusión
+   práctica actualizada**: `recover_pupil=True` no es "peligroso en
+   general" — es específicamente arriesgado en los problemas sintéticos
+   chicos que usa la suite de tests de este proyecto (que además son más
+   parecidos en tamaño a las grillas reales del labo, 81-441 LEDs, que a
+   las 225+ imágenes de mayor resolución de la demo real del paper). 75
+   tests pasando (eran 74).
+
 (Gap #4 FPM-INR/`zhou2023` queda fuera de este roadmap por ahora —
 mejora calidad/velocidad del solver monocromático en general por una vía
 de aprendizaje profundo mucho más grande, no es específico de

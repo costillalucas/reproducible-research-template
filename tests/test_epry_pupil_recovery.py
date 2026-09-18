@@ -35,6 +35,19 @@ converging_channel` below): recover_pupil isn't just "modest when it
 helps" -- it can actively REGRESS a channel that already converges fine
 with NO aberration present at all. This means recover_pupil=True is not a
 safe blanket default for all 3 RGB channels in one run.
+
+THIRD finding, a follow-up that puts the second one in context (same day,
+see `test_recover_pupil_regression_is_a_small_testbed_artifact_not_
+reproduced_at_paper_scale` below): that regression is specific to this
+project's tiny (12x12px, 81-441 LED) synthetic test problems -- it does
+NOT reproduce at a scale closer to ou2014's own real demonstration (225
+LEDs, 64x64px). Ruled out "EPRY is just badly implemented" as the
+explanation (it correctly recovers real injected aberrations, and the
+literature's standard fix for over-aggressive PIE-family normalization,
+rPIE-style regularization, barely changes the small-scale numbers) in
+favor of "this project's synthetic testbeds are smaller/lower-redundancy
+than what EPRY needs to be stable" -- a real, useful, but more nuanced
+conclusion than "don't use recover_pupil".
 """
 import os
 import sys
@@ -237,6 +250,87 @@ def test_recover_pupil_can_regress_an_already_well_converging_channel():
         "the recovered pupil should stay nearly flat (no large fake aberration invented) -- "
         f"got std={pupil_phase_std} rad, so the regression comes from the object update, "
         "not a runaway pupil estimate"
+    )
+    # See test_recover_pupil_regression_is_a_small_testbed_artifact_not_reproduced_at_paper_scale
+    # below: this regression does NOT reproduce at a scale closer to ou2014's own real demo --
+    # it's a small-testbed/low-data-redundancy artifact, not a general EPRY failure.
+
+
+def test_recover_pupil_regression_is_a_small_testbed_artifact_not_reproduced_at_paper_scale():
+    """FOLLOW-UP to test_recover_pupil_can_regress_an_already_well_converging_channel above
+    (2026-09-18, same day): is EPRY just badly implemented, or is the regression specific to
+    this project's tiny (12x12px, 81-441 LED) synthetic test problems?
+
+    Reproduces the exact same no-aberration setup (blue channel, phase_mag=0.08*pi, the object
+    already known to reconstruct well without any pupil correction) at a scale much closer to
+    ou2014's own real demonstration: 225 LEDs (15x15 grid, matching the paper) and 64x64px LR
+    images instead of 12x12 -- keeping the object's PHYSICAL spatial frequency comparable
+    (n_cycles scaled with crop, not fixed in normalized coordinates: an earlier attempt at this
+    comparison got confounded by accidentally pushing the object into the already-known near-
+    uniform-phase degenerate regime by holding "1 cycle across the field of view" fixed while
+    growing the physical field of view -- see tests/test_weak_phase_object_limitation.py for
+    why near-uniform phase is a known separate failure mode).
+
+    RESULT (asserted below): the catastrophic regression (0.939->0.570 at small scale) does NOT
+    reproduce here -- baseline and recover_pupil land within a few percent of each other,
+    confirming this is a small-testbed/low-data-redundancy artifact, not a general property of
+    EPRY or a bug in this implementation. Also tried, outside the main codebase (not in this
+    test): the literature's standard fix for exactly this kind of instability (rPIE-style
+    regularized per-pixel/global-blend denominator, Maiden/Muller/Rodenburg 2017) barely moved
+    the small-scale numbers -- further evidence the mechanism really is data redundancy, not a
+    fixable normalization choice.
+
+    STILL OPEN, NOT tested here: whether EPRY correctly recovers a REAL aberration at this
+    larger scale. A first attempt looked like a clean failure (pupil phase correlation ~0.03,
+    vs. 0.648 at small scale) but turned out to be confounded too: the plain uncorrected
+    baseline (assuming an ideal pupil) also hasn't converged at this problem size within the
+    iteration budgets tried (phase_correlation still climbing at 600 iterations: 0.466 at 40 ->
+    0.623 at 600, recovery_error still dropping) -- so that comparison wasn't fair and isn't
+    asserted anywhere in this suite. A real answer needs both runs taken to genuine convergence,
+    which costs minutes per run at this scale and wasn't done.
+    """
+    grid_size, crop, iterations = 15, 64, 40
+    n_cycles = round(crop / 12)  # keep physical spatial frequency comparable to the small-scale test
+    setup = config.default_setup(channel="blue", grid_size=grid_size, objective="current",
+                                  resolution_px=(crop, crop))
+    factor = optics.upsampling_factor(setup)
+    hr_pixel_um = optics.actual_hr_pixel_size_um(setup, factor)
+    hr_shape = optics.hr_shape((crop, crop), factor)
+    h, w = hr_shape
+    y, x = np.mgrid[0:h, 0:w].astype(float)
+    y, x = y / h - 0.5, x / w - 0.5
+    amp = 0.4 + 0.6 * np.exp(-((x - 0.1) ** 2 + (y + 0.05) ** 2) / (2 * 0.08 ** 2))
+    amp += 0.3 * np.exp(-((x + 0.15) ** 2 + (y - 0.1) ** 2) / (2 * 0.05 ** 2))
+    amp = np.clip(amp, 0, 1)
+    phase = 0.08 * np.pi * np.sin(2 * np.pi * n_cycles * x) * np.cos(2 * np.pi * n_cycles * y)
+    obj_true = (amp * np.exp(1j * phase)).astype(complex)
+
+    led_grid = led_array.build_led_grid(setup.led_array, setup.wavelength_um)
+    lr_images = forward_model.simulate_lr_stack(
+        obj_true, hr_pixel_um, led_grid, (crop, crop), setup.lr_pixel_size_um,
+        setup.objective.na, setup.wavelength_um,
+    )
+
+    baseline = reconstruction.reconstruct(
+        lr_images, led_grid, hr_pixel_um, setup.lr_pixel_size_um,
+        setup.objective.na, setup.wavelength_um, factor, iterations=iterations,
+    )
+    corrected = reconstruction.reconstruct(
+        lr_images, led_grid, hr_pixel_um, setup.lr_pixel_size_um,
+        setup.objective.na, setup.wavelength_um, factor, iterations=iterations,
+        recover_pupil=True,
+    )
+    gt_baseline = metrics.compare_to_ground_truth(baseline["object"], obj_true)
+    gt_corrected = metrics.compare_to_ground_truth(corrected["object"], obj_true)
+
+    assert gt_baseline["phase_correlation"] > 0.7, (
+        "premise check: this frequency-matched object should already reconstruct well at this "
+        f"larger scale, same as the small-scale test -- got {gt_baseline['phase_correlation']}"
+    )
+    assert abs(gt_corrected["phase_correlation"] - gt_baseline["phase_correlation"]) < 0.1, (
+        "at paper-comparable scale (225 LEDs, 64x64px), recover_pupil should NOT meaningfully "
+        f"regress this channel (unlike the small-scale test): baseline={gt_baseline['phase_correlation']}, "
+        f"recover_pupil={gt_corrected['phase_correlation']}"
     )
 
 
