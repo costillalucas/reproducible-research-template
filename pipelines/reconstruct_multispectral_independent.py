@@ -59,14 +59,22 @@ def reconstruct_all_channels(data_root, grid_size: int, objective: str = "curren
     `--use-reconstruction-agent`. `agent_live`/`max_attempts` are only
     used when this is True.
 
-    `recover_pupil`/`adaptive_step` (per-channel EPRY/`ou2014` and
-    zuo2016, see `reconstruction.reconstruct`'s docstring for what each
-    does and their honest, measured effect) are mutually exclusive with
-    `use_reconstruction_agent` -- same restriction as
-    `pipelines/simulate_and_reconstruct.py`'s CLI, for the same reason
-    (the orchestration agent's retry logic is built around `step_max`,
-    which EPRY bypasses and `adaptive_step` already manages itself;
-    combining them is a real design question, not solved here).
+    `adaptive_step` (per-channel zuo2016) CAN be combined with
+    `use_reconstruction_agent` (2026-09-18, resolved): passed through to
+    `agents/reconstruction_orchestrator.py`'s `orchestrate_reconstruction`,
+    which threads it into every attempt and tells the agent's prompt
+    `step_max` is only a starting point under this mode -- see that
+    function's docstring for why this combination is sound.
+
+    `recover_pupil` (per-channel EPRY/`ou2014`) CANNOT be combined with
+    `use_reconstruction_agent` -- NOT an unimplemented feature, a real
+    information deficit: `reconstruction.reconstruct` ignores `step_max`
+    under `recover_pupil`, so the agent's only lever has nothing to
+    adjust, and `recovery_error` (the agent's only signal) is proven
+    blind to `recover_pupil`'s own small-testbed regression (see
+    `tests/test_epry_pupil_recovery.py` and
+    `agents/reconstruction_orchestrator.py`'s docstring). Same
+    restriction as `pipelines/simulate_and_reconstruct.py`'s CLI.
 
     Returns {"factor": int, "hr_pixel_um": float, "hr_shape": (h, w),
              "channels": {channel: {"object": complex ndarray,
@@ -75,10 +83,12 @@ def reconstruct_all_channels(data_root, grid_size: int, objective: str = "curren
                                      "agent_attempts": [...] or None,
                                      "pupil": complex ndarray or None}}}.
     """
-    if (recover_pupil or adaptive_step) and use_reconstruction_agent:
-        raise ValueError("recover_pupil/adaptive_step are not wired together with "
-                          "use_reconstruction_agent yet -- pass only one of the two modes "
-                          "(same restriction as pipelines/simulate_and_reconstruct.py's CLI)")
+    if recover_pupil and use_reconstruction_agent:
+        raise ValueError("recover_pupil is not wired together with use_reconstruction_agent -- "
+                          "reconstruct() ignores step_max under recover_pupil (nothing for the "
+                          "agent's retry lever to adjust) and recovery_error is proven blind to "
+                          "recover_pupil's own regression, see "
+                          "agents/reconstruction_orchestrator.py's docstring")
     setups = {
         channel: config.default_setup(
             channel=channel, grid_size=grid_size, objective=objective,
@@ -117,6 +127,7 @@ def reconstruct_all_channels(data_root, grid_size: int, objective: str = "curren
                 setup.objective.na, setup.wavelength_um, factor,
                 iterations=iterations, max_attempts=max_attempts,
                 dry_run=not agent_live, initial_object=initial_object,
+                adaptive_step=adaptive_step,
             )
             result = orchestrated["result"]
             agent_attempts = orchestrated["attempts"]
@@ -192,14 +203,19 @@ def parse_args(argv=None):
                     help="use reconstruction.reconstruct's EPRY pupil-recovery mode (ou2014) per "
                          "channel instead of assuming the ideal NA-limited pupil -- see that "
                          "function's docstring and tests/test_epry_pupil_recovery.py for its honest, "
-                         "modest measured benefit. Mutually exclusive with --use-reconstruction-agent "
+                         "modest measured benefit (and its real risk of REGRESSING an already-good "
+                         "channel at this project's small testbed scale). Mutually exclusive with "
+                         "--use-reconstruction-agent (a real information deficit, not just "
+                         "unimplemented -- see agents/reconstruction_orchestrator.py's docstring) "
                          "and with --adaptive-step (EPRY has its own self-scaling step).")
     p.add_argument("--adaptive-step", action="store_true",
                     help="use reconstruction.reconstruct's zuo2016 adaptive step-size mode per "
                          "channel instead of the fixed ramp -- see that function's docstring and "
-                         "tests/test_adaptive_step_size.py for the exact rule and its honest, "
-                         "not-clearly-better-on-small-test-problems finding. Mutually exclusive "
-                         "with --use-reconstruction-agent and with --recover-pupil.")
+                         "tests/test_adaptive_step_size.py: no clean win at light noise/few "
+                         "iterations, but a real gain at heavy noise (peak_photon_count<=3) and "
+                         "many iterations (>=400). CAN be combined with --use-reconstruction-agent "
+                         "(2026-09-18: resolved, see orchestrate_reconstruction's docstring). "
+                         "Mutually exclusive with --recover-pupil.")
     p.add_argument("--output-dir", default="results/reconstruct_multispectral_independent")
     return p.parse_args(argv)
 

@@ -53,19 +53,42 @@ DECISION_SCHEMA = {
 }
 
 
-def build_decision_prompt(history: list[dict], step_max: float, attempt: int, max_attempts: int) -> str:
+def build_decision_prompt(history: list[dict], step_max: float, attempt: int, max_attempts: int,
+                           adaptive_step: bool = False) -> str:
     """The context the agent needs to decide -- deliberately just the
     convergence history and current parameters, nothing about the object
     or image data (the agent reasons about optimization dynamics, not
     image content -- keeps the prompt small and the decision fast/cheap).
+
+    `adaptive_step` (2026-09-18): when True, the run used zuo2016's
+    adaptive step-size rule (`reconstruction.reconstruct`'s
+    `adaptive_step`) instead of the fixed ramp -- `step_max` was only the
+    STARTING step (alpha^0), which the algorithm itself then shrinks over
+    the run. The prompt is worded accordingly so a suggested
+    `new_step_max` on retry is understood as "try a different starting
+    point", not "this fixed step_max was used throughout".
     """
     conv = metrics.convergence_summary(history)
+    step_desc = (
+        f"Current STARTING step_max={step_max} (adaptive_step=True: this project's "
+        "zuo2016 adaptive rule then shrinks the actual step over the run whenever "
+        "per-cycle improvement stalls -- step_max is only where it started, see the "
+        "per-iteration steps below)."
+        if adaptive_step else
+        f"Current step_max={step_max} (fixed for the whole run -- this project's default "
+        "exponential-ramp schedule approaches this value from below)."
+    )
+    step_trace = (
+        f"\nstep per iteration: {[round(h['step'], 4) for h in history if h.get('step') is not None]}\n"
+        if adaptive_step else "\n"
+    )
     return (
         "You are deciding whether an FPM (Fourier Ptychographic Microscopy) phase-retrieval "
         "reconstruction (incremental Wirtinger flow, reconstruction.py) has converged, or is "
         "stuck in a local minimum and should be retried with a different step_max.\n\n"
-        f"Attempt {attempt + 1} of {max_attempts} (max). Current step_max={step_max}.\n"
+        f"Attempt {attempt + 1} of {max_attempts} (max). {step_desc}\n"
         f"recovery_error per iteration: {[round(h['recovery_error'], 6) for h in history]}\n"
+        f"{step_trace}"
         f"Summary: first_error={conv['first_error']:.6g}, last_error={conv['last_error']:.6g}, "
         f"relative_improvement={conv['relative_improvement']:.4f}, "
         f"fraction_of_epochs_that_improved={conv['fraction_of_epochs_that_improved']:.4f}\n\n"
@@ -118,7 +141,8 @@ def call_agent_decision(prompt: str, model: str = "claude-haiku-4-5-20251001",
 def orchestrate_reconstruction(lr_images, led_grid, hr_pixel_um, lr_pixel_um, na, wavelength_um,
                                 factor, initial_step_max: float = 20.0, iterations: int = 40,
                                 max_attempts: int = 3, dry_run: bool = False,
-                                agent_fn=call_agent_decision, initial_object=None) -> dict:
+                                agent_fn=call_agent_decision, initial_object=None,
+                                adaptive_step: bool = False) -> dict:
     """The milestone 3 deliverable: run `reconstruction.reconstruct`, ask
     the agent whether to retry with a different `step_max`, and repeat up
     to `max_attempts`. Each attempt restarts from scratch (reconstruct()
@@ -144,6 +168,36 @@ def orchestrate_reconstruction(lr_images, led_grid, hr_pixel_um, lr_pixel_um, na
     prerequisite for eventually closing that gap, not a claim that it's
     closed.
 
+    `adaptive_step` (2026-09-18, resolves the design question the CLI
+    docstrings flagged as open): if True, passed through to every
+    attempt's `reconstruction.reconstruct` call, and `build_decision_prompt`
+    is told so it frames `step_max` correctly as a starting point, not a
+    fixed value. This combination IS sound, unlike `recover_pupil` below:
+    `step_max` still plays a meaningful, well-defined role as
+    zuo2016's alpha^0 even when the schedule then self-adjusts, so a
+    retry's suggested `new_step_max` remains a real, actionable lever for
+    the agent, and `recovery_error` (what the agent sees) is not known to
+    mislead specifically because of adaptive_step, unlike the case below.
+
+    `recover_pupil` is deliberately NOT a parameter here, still. Reason,
+    now more precise than "an open design question" (2026-09-18, see
+    tests/test_epry_pupil_recovery.py): `reconstruction.reconstruct`
+    ignores `step_max` entirely when `recover_pupil=True`, so the
+    orchestrator's only lever (retry with a new `step_max`) has literally
+    nothing to adjust -- and the one property that WOULD matter
+    (`epry_alpha`/`epry_beta`, found this same day to partially mitigate,
+    not fix, recover_pupil's small-testbed regression) can't safely be
+    tuned by this agent either, because the signal it's given
+    (`recovery_error`) is PROVEN to be blind to that exact failure mode:
+    recovery_error kept improving throughout the small-scale regression
+    while true accuracy got worse. An agent reasoning from recovery_error
+    alone cannot detect the problem it would need to detect to decide
+    anything useful here -- this is a real information deficit, not a
+    missing feature, and forcing a combination anyway would launder a
+    known-blind signal into a false sense of automated safety. Revisit
+    only if a genuinely new, recover_pupil-specific diagnostic signal is
+    found (same open problem noted for TIE-continued-iteration above).
+
     Returns {"result": the winning attempt's reconstruction.reconstruct()
     return value, "attempts": [{"step_max", "history", "decision"} per
     attempt tried] -- a full audit trail of what the agent decided and
@@ -157,8 +211,10 @@ def orchestrate_reconstruction(lr_images, led_grid, hr_pixel_um, lr_pixel_um, na
         result = reconstruction.reconstruct(
             lr_images, led_grid, hr_pixel_um, lr_pixel_um, na, wavelength_um, factor,
             iterations=iterations, step_max=step_max, initial_object=initial_object,
+            adaptive_step=adaptive_step,
         )
-        prompt = build_decision_prompt(result["history"], step_max, attempt, max_attempts)
+        prompt = build_decision_prompt(result["history"], step_max, attempt, max_attempts,
+                                        adaptive_step=adaptive_step)
         decision = agent_fn(prompt, dry_run=dry_run)
         attempts_log.append({"step_max": step_max, "history": result["history"], "decision": decision})
 

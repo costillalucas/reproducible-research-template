@@ -1000,6 +1000,102 @@ antes de construir la capa de orquestación, y siguiendo el ranking de
    las 225+ imágenes de mayor resolución de la demo real del paper). 75
    tests pasando (eran 74).
 
+9. **[HECHO — 2026-09-18, sesión autónoma] Step-size adaptativo
+   (`zuo2016`, rank 3): se le aplicó la misma ablación de escala que a
+   EPRY, con resultado distinto — no era un artefacto de escala, era un
+   artefacto de ruido/iteraciones insuficientes.** El hallazgo original
+   (`tests/test_adaptive_step_size.py`, mismo día temprano) decía "sin
+   diferencia limpia" probado con `peak_photon_count` hasta 20 y hasta 60
+   iteraciones. Releyendo la Sección 4 del paper (Property A): el modo de
+   falla que ataca es de **muchos ciclos bajo ruido fuerte** (el paso
+   constante "deshace" el progreso del ciclo anterior y vuelve a
+   introducir el ruido completo), no de escala del problema (LEDs/píxeles)
+   — esa era la pista equivocada a seguir, distinta de la de EPRY.
+
+   Reprobado con `peak_photon_count=3` (mucho más ruido que antes) y 400
+   iteraciones: **sí aparece una ventaja real y reproducible**. Validado
+   con comparación pareada (mismos datos ruidosos para ambos métodos, 8
+   semillas distintas): adaptive_step gana en 8/8, con ganancia media
+   pareada de 0.060 ± 0.012 SE de `phase_correlation` — no es ruido,
+   es una diferencia real. A `peak_photon_count=1` (ruido extremo) la
+   ventaja desaparece (ambos métodos fallan por igual), así que el efecto
+   tiene un régimen específico: ruido pesado pero no extremo, con
+   suficientes iteraciones — no es una mejora universal como la
+   inicialización TIE.
+
+   A diferencia del hallazgo de EPRY (donde a escala pequeña el resultado
+   era "malo" y a escala grande resultó ser "artefacto, no problema
+   real"), acá el patrón es inverso: el hallazgo original ("sin
+   diferencia") seguía siendo cierto en su régimen (ruido leve, pocas
+   iteraciones), y lo que cambió fue encontrar el régimen correcto donde
+   el efecto real sí se manifiesta — ambos resultados (el nulo y el
+   positivo) quedan documentados, no se descarta el primero.
+
+   Formalizado en el registro de procedencia por primera vez para un
+   hallazgo de step-size (antes excluido a propósito por no ser
+   cuantitativo limpio): `structure/claims.yaml`'s
+   `adaptive_step_helps_under_heavy_noise`, con el punto exacto de
+   semilla=0 como número determinístico reproducible, y la estadística
+   multi-semilla (8/8, 0.060±0.012) documentada en
+   `tests/test_adaptive_step_size.py::test_adaptive_step_beats_fixed_ramp_under_heavy_noise_across_seeds`
+   sin forzarla al registro (no es un número único determinístico).
+   `scripts/reproduce.sh` pasa completo (19 tags `\src`, 18 `\srcnum`, 19
+   entradas, 10 claims). 81 tests pasando (eran 80 tras la tarea 2 de
+   esta misma sesión autónoma).
+
+10. **[HECHO — 2026-09-18, sesión autónoma] Resuelta la exclusión mutua
+    `recover_pupil`/`adaptive_step` vs. `--use-reconstruction-agent` —
+    parcialmente, con una razón mucho más precisa para la parte que
+    sigue excluida.**
+
+    **`adaptive_step` + agente de orquestación: SÍ se pueden combinar,
+    ya cableado.** Análisis: incluso bajo `adaptive_step=True`,
+    `step_max` sigue jugando un rol real y bien definido (es α⁰, el
+    punto de partida del que la Ec. 16 arranca a achicar el paso) — así
+    que cuando el agente sugiere un `new_step_max` en un reintento,
+    sigue siendo una palanca con sentido, no un parámetro ignorado como
+    pasa con `recover_pupil`. `agents/reconstruction_orchestrator.py`'s
+    `orchestrate_reconstruction` gana el parámetro `adaptive_step`
+    (pasado a cada intento), y `build_decision_prompt` ahora avisa
+    explícitamente al agente cuándo está activo (mostrando el trace de
+    `step` real por iteración, no solo el `step_max` inicial, para que
+    no confunda "paso fijo" con "punto de partida de un paso que se
+    autoajusta"). Cableado en los 3 pipelines
+    (`simulate_and_reconstruct.py`,
+    `reconstruct_multispectral_independent.py`/`coupled.py` vía
+    `reconstruct_all_channels`). Tests nuevos (dry-run, sin costo real,
+    mismo criterio que el resto de los agentes de este proyecto):
+    `tests/test_reconstruction_orchestrator.py` (prompt correcto,
+    `adaptive_step` llega a cada intento), CLI end-to-end en
+    `tests/test_simulate_and_reconstruct_tie.py` y
+    `tests/test_reconstruct_multispectral_pipeline.py`.
+
+    **`recover_pupil` + agente de orquestación: sigue excluido, pero
+    ahora con una razón verificada, no solo "pregunta de diseño
+    abierta".** Análisis honesto (no se forzó una combinación falsa):
+    `reconstruction.reconstruct` ignora `step_max` por completo cuando
+    `recover_pupil=True`, así que la única palanca del agente (reintentar
+    con otro `step_max`) no tiene nada que ajustar. La palanca que sí
+    tendría sentido (`epry_alpha`/`epry_beta`, que esta misma sesión
+    encontró que mitiga parcialmente — no arregla — la regresión de
+    EPRY a escala chica) no se le puede dar al agente de forma segura
+    tampoco, porque la única señal que el agente ve (`recovery_error`)
+    está **probada como ciega** exactamente al modo de falla que
+    necesitaría detectar: en el hallazgo de milestone 8, `recovery_error`
+    mejoraba todo el tiempo mientras la precisión real empeoraba. Un
+    agente que solo ve `recovery_error` no puede detectar el problema que
+    necesitaría detectar para decidir algo útil acá — es un déficit de
+    información real, no una funcionalidad faltante, y forzar la
+    combinación igual blanquearía una señal ciega conocida como si fuera
+    seguridad automatizada. Documentado explícitamente en el docstring de
+    `orchestrate_reconstruction` y en los mensajes de error de los 3
+    CLIs — queda como pendiente genuino, a revisar solo si aparece una
+    señal de diagnóstico nueva específica para `recover_pupil` (mismo
+    tipo de problema abierto que la pregunta de continuar iterando
+    después de TIE).
+
+    86 tests pasando (eran 81 antes de esta tarea).
+
 (Gap #4 FPM-INR/`zhou2023` queda fuera de este roadmap por ahora —
 mejora calidad/velocidad del solver monocromático en general por una vía
 de aprendizaje profundo mucho más grande, no es específico de

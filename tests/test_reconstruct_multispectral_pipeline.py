@@ -167,3 +167,20 @@ def test_recover_pupil_and_reconstruction_agent_are_mutually_exclusive(tmp_path)
         assert False, "expected ValueError for recover_pupil + use_reconstruction_agent"
     except ValueError as exc:
         assert "not wired together" in str(exc)
+
+
+def test_adaptive_step_and_reconstruction_agent_can_now_be_combined(tmp_path):
+    """Unlike recover_pupil above, this combination was resolved
+    2026-09-18 -- see agents/reconstruction_orchestrator.py's
+    orchestrate_reconstruction docstring for why it's sound.
+    """
+    grid_size, crop = 9, 12
+    _write_fake_lab_captures(tmp_path, grid_size, crop)
+    run = pipeline.reconstruct_all_channels(
+        str(tmp_path), grid_size, objective="current", crop=crop, iterations=5,
+        adaptive_step=True, use_reconstruction_agent=True,
+    )
+    for channel, c in run["channels"].items():
+        assert c["agent_attempts"] is not None, channel
+        steps = [h["step"] for h in c["history"]]
+        assert all(s is not None for s in steps), (channel, "adaptive_step must reach reconstruct()")

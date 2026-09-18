@@ -98,3 +98,48 @@ def test_use_reconstruction_agent_flag_dry_run_matches_plain_call(tmp_path):
     assert len(agent_metrics["agent_attempts"]) == 1
     assert agent_metrics["agent_attempts"][0]["decision"]["action"] == "accept"
     assert agent_metrics["vs_ground_truth"] == plain_metrics["vs_ground_truth"]
+
+
+def test_adaptive_step_and_reconstruction_agent_can_now_be_combined(tmp_path):
+    """2026-09-18: this combination used to be flatly excluded ("a design
+    question, not resolved here"). Resolved: step_max remains a
+    meaningful starting point for the agent to retry with even under
+    adaptive_step, since the algorithm only self-adjusts FROM there (see
+    agents/reconstruction_orchestrator.py's docstring). No real API call
+    (dry-run), same discipline as every other agent test in this project.
+    """
+    amp_path, phase_path = _write_mixed_frequency_images(tmp_path)
+    pipeline.main([
+        "--amplitude-image", amp_path, "--phase-image", phase_path,
+        "--channel", "green", "--grid-size", "9", "--objective", "current",
+        "--lr-size", "32", "--iterations", "10",
+        "--adaptive-step", "--use-reconstruction-agent",
+        "--output-dir", str(tmp_path / "out"),
+    ])
+    with open(tmp_path / "out" / "metrics.json") as fh:
+        result = json.load(fh)
+    assert result["setup"]["adaptive_step"] is True
+    assert result["setup"]["use_reconstruction_agent"] is True
+    steps = [h["step"] for h in result["history"]]
+    assert all(s is not None for s in steps), "adaptive_step must have reached reconstruct() through the agent"
+
+
+def test_recover_pupil_and_reconstruction_agent_still_excluded(tmp_path):
+    """Unlike adaptive_step above, recover_pupil + the orchestration
+    agent stays excluded -- not an oversight, a real information deficit
+    (see agents/reconstruction_orchestrator.py's docstring): reconstruct()
+    ignores step_max under recover_pupil, and recovery_error is proven
+    blind to recover_pupil's own small-testbed regression.
+    """
+    amp_path, phase_path = _write_mixed_frequency_images(tmp_path)
+    try:
+        pipeline.main([
+            "--amplitude-image", amp_path, "--phase-image", phase_path,
+            "--channel", "green", "--grid-size", "9", "--objective", "current",
+            "--lr-size", "32", "--iterations", "10",
+            "--recover-pupil", "--use-reconstruction-agent",
+            "--output-dir", str(tmp_path / "out"),
+        ])
+        assert False, "expected SystemExit"
+    except SystemExit as exc:
+        assert "recover_pupil" in str(exc) and "recovery_error" in str(exc)

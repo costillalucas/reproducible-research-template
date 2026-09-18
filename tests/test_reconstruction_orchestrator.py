@@ -120,6 +120,54 @@ def test_build_decision_prompt_reports_the_actual_history_and_parameters():
     assert "Attempt 2 of 4" in prompt
 
 
+def test_build_decision_prompt_mentions_adaptive_step_when_active():
+    """2026-09-18: adaptive_step + this agent is now a resolved, supported
+    combination (see orchestrate_reconstruction's docstring for why it's
+    sound, unlike recover_pupil) -- the prompt must say so, framing
+    step_max as a starting point rather than a fixed value, and show the
+    actual per-iteration step trace so the agent isn't misled about what
+    "step_max" meant for this run.
+    """
+    history = [{"iteration": 0, "recovery_error": 3.5, "step": 12.5},
+               {"iteration": 1, "recovery_error": 1.2, "step": 6.25}]
+    prompt = orchestrator.build_decision_prompt(history, step_max=12.5, attempt=0, max_attempts=3,
+                                                 adaptive_step=True)
+    assert "adaptive_step=True" in prompt
+    assert "STARTING step_max" in prompt
+    assert "12.5" in prompt and "6.25" in prompt
+
+    prompt_fixed = orchestrator.build_decision_prompt(history, step_max=12.5, attempt=0, max_attempts=3)
+    assert "adaptive_step=True" not in prompt_fixed
+
+
+def test_orchestrate_reconstruction_threads_adaptive_step_through_every_attempt():
+    """recover_pupil has no orchestrate_reconstruction parameter at all
+    (deliberately, see that function's docstring on why combining it with
+    this agent is unsound) -- adaptive_step does, and must actually reach
+    reconstruction.reconstruct on every attempt, not just the first.
+    """
+    calls = {"n": 0}
+
+    def counting_stub(prompt, dry_run=False):
+        decision = ({"action": "retry", "new_step_max": 7.0, "reasoning": "try again"} if calls["n"] == 0
+                    else {"action": "accept", "new_step_max": None, "reasoning": "good enough"})
+        calls["n"] += 1
+        return decision
+
+    inputs = _small_reconstruction_inputs()
+    out = orchestrator.orchestrate_reconstruction(
+        **inputs, initial_step_max=10.0, iterations=5, max_attempts=3,
+        agent_fn=counting_stub, adaptive_step=True,
+    )
+
+    assert len(out["attempts"]) == 2
+    for attempt in out["attempts"]:
+        steps = [h["step"] for h in attempt["history"]]
+        assert all(s is not None for s in steps), "adaptive_step must have been passed through to reconstruct()"
+        assert steps[0] == attempt["step_max"], "alpha^0 must start at that attempt's step_max"
+    assert out["attempts"][1]["step_max"] == 7.0, "the agent's new starting step_max must be applied on retry"
+
+
 def test_call_agent_decision_dry_run_never_invokes_subprocess(monkeypatch):
     def fail_if_called(*args, **kwargs):
         raise AssertionError("dry_run=True must not call subprocess.run")

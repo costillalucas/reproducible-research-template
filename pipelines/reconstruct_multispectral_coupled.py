@@ -94,14 +94,19 @@ def parse_args(argv=None):
                     help="use reconstruction.reconstruct's EPRY pupil-recovery mode (ou2014) per "
                          "channel instead of assuming the ideal NA-limited pupil -- see that "
                          "function's docstring and tests/test_epry_pupil_recovery.py for its honest, "
-                         "modest measured benefit. Mutually exclusive with --use-reconstruction-agent "
+                         "modest measured benefit (and its real risk of REGRESSING an already-good "
+                         "channel at this project's small testbed scale). Mutually exclusive with "
+                         "--use-reconstruction-agent (a real information deficit, not just "
+                         "unimplemented -- see agents/reconstruction_orchestrator.py's docstring) "
                          "and with --adaptive-step (EPRY has its own self-scaling step).")
     p.add_argument("--adaptive-step", action="store_true",
                     help="use reconstruction.reconstruct's zuo2016 adaptive step-size mode per "
                          "channel instead of the fixed ramp -- see that function's docstring and "
-                         "tests/test_adaptive_step_size.py for the exact rule and its honest, "
-                         "not-clearly-better-on-small-test-problems finding. Mutually exclusive "
-                         "with --use-reconstruction-agent and with --recover-pupil.")
+                         "tests/test_adaptive_step_size.py: no clean win at light noise/few "
+                         "iterations, but a real gain at heavy noise (peak_photon_count<=3) and "
+                         "many iterations (>=400). CAN be combined with --use-reconstruction-agent "
+                         "(2026-09-18: resolved, see orchestrate_reconstruction's docstring). "
+                         "Mutually exclusive with --recover-pupil.")
     p.add_argument("--qc", action="store_true",
                     help="run the milestone-5 QC/confidence agent (agents/qc_agent.py) on this run's "
                          "diagnostics -- defaults to a canned dry-run decision, pass --qc-live for a "

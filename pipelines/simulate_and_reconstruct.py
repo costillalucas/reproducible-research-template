@@ -71,25 +71,39 @@ def parse_args(argv=None):
                     help="use agents/../reconstruction.reconstruct's EPRY pupil-recovery mode "
                          "(ou2014) instead of assuming the ideal NA-limited pupil -- see that "
                          "function's docstring and tests/test_epry_pupil_recovery.py for what it "
-                         "does and its honest, modest measured benefit. Mutually exclusive with "
-                         "--use-reconstruction-agent (not wired together yet) and with "
-                         "--adaptive-step (EPRY has its own self-scaling step).")
+                         "does and its honest, modest measured benefit (and, at this project's "
+                         "small testbed scale with no aberration present, its real risk of "
+                         "REGRESSING an already-good reconstruction). Mutually exclusive with "
+                         "--use-reconstruction-agent -- NOT just unimplemented: reconstruct() "
+                         "ignores step_max under recover_pupil, so the agent's only lever (retry "
+                         "with a new step_max) has nothing to adjust, and recovery_error (the "
+                         "agent's only signal) is proven blind to recover_pupil's own regression "
+                         "(see agents/reconstruction_orchestrator.py's docstring) -- combining them "
+                         "would launder a known-blind signal into a false sense of automated safety. "
+                         "Also mutually exclusive with --adaptive-step (EPRY has its own "
+                         "self-scaling step).")
     p.add_argument("--adaptive-step", action="store_true",
                     help="use reconstruction.reconstruct's zuo2016 adaptive step-size mode instead "
                          "of the fixed ramp -- see that function's docstring and "
-                         "tests/test_adaptive_step_size.py for the exact rule and its honest, "
-                         "not-clearly-better-on-small-test-problems finding. Mutually exclusive "
-                         "with --use-reconstruction-agent (not wired together yet) and with "
-                         "--recover-pupil.")
+                         "tests/test_adaptive_step_size.py: no clean win at light noise/few "
+                         "iterations, but a real, reproducible gain (8/8 seeds) at heavy noise "
+                         "(peak_photon_count<=3) and many iterations (>=400). Can be combined with "
+                         "--use-reconstruction-agent (2026-09-18: resolved -- step_max remains a "
+                         "meaningful starting point for the agent to retry with even when the "
+                         "schedule self-adjusts, see orchestrate_reconstruction's docstring). "
+                         "Mutually exclusive with --recover-pupil.")
     p.add_argument("--output-dir", default="results/simulate_and_reconstruct")
     return p.parse_args(argv)
 
 
 def main(argv=None) -> int:
     args = parse_args(argv)
-    if (args.recover_pupil or args.adaptive_step) and args.use_reconstruction_agent:
-        raise SystemExit("--recover-pupil/--adaptive-step are not wired together with "
-                          "--use-reconstruction-agent yet -- pick one or the other")
+    if args.recover_pupil and args.use_reconstruction_agent:
+        raise SystemExit("--recover-pupil is not wired together with --use-reconstruction-agent "
+                          "-- reconstruct() ignores step_max under recover_pupil (nothing for the "
+                          "agent's retry lever to adjust) and recovery_error is proven blind to "
+                          "recover_pupil's own regression, see "
+                          "agents/reconstruction_orchestrator.py's docstring")
     if args.recover_pupil and args.adaptive_step:
         raise SystemExit("--recover-pupil and --adaptive-step are mutually exclusive "
                           "(reconstruction.reconstruct ignores step_max/adaptive_step when "
@@ -145,6 +159,7 @@ def main(argv=None) -> int:
             setup.objective.na, setup.wavelength_um, factor,
             iterations=args.iterations, max_attempts=args.max_attempts,
             dry_run=not args.agent_live, initial_object=initial_object,
+            adaptive_step=args.adaptive_step,
         )
         result = orchestrated["result"]
         agent_attempts = orchestrated["attempts"]
