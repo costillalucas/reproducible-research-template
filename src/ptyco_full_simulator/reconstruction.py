@@ -150,6 +150,19 @@ def reconstruct(lr_images: dict[tuple[int, int], np.ndarray],
     docstring, so `step_max` plays the role of "no extra scaling", same
     as the fixed-ramp schedule's step approaches `step_max` from below)
     and only ever shrinks, per Eq. 16.
+
+    CAVEAT (2026-09-18, tests/test_adaptive_step_size.py): the advantage
+    over the fixed ramp is real but regime-dependent, NOT unconditional
+    like TIE-informed initialization. At light-to-moderate Poisson noise
+    (`peak_photon_count` >= 20) and modest iteration counts (<=60),
+    quality was within a few percent either way -- no clean win. At
+    heavier noise (`peak_photon_count`=3) and more iterations (400,
+    letting the paper's described noise-driven oscillation actually
+    manifest -- their Section 4, Property A), adaptive_step reproducibly
+    beat the fixed ramp across 8 random seeds (8/8 wins, paired mean gain
+    0.06 phase_correlation). If reconstructing under light noise or few
+    iterations, don't expect adaptive_step to help much; it's the heavy-
+    noise/many-cycle regime where it earns its keep.
     """
     lr_shape = next(iter(lr_images.values())).shape
     pupil_mask = circular_pupil(lr_shape, lr_pixel_um, na, wavelength_um)

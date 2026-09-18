@@ -404,6 +404,59 @@ def epry_regression_not_reproduced_at_paper_scale():
     return gt_b["phase_correlation"], gt_c["phase_correlation"]
 
 
+def adaptive_step_heavy_noise_gain():
+    """Same scenario as
+    tests/test_adaptive_step_size.py::test_adaptive_step_beats_fixed_ramp_under_heavy_noise_across_seeds,
+    fixed to seed=0 for exact reproducibility: the fixed exponential-ramp
+    step schedule vs. zuo2016's adaptive step-size rule
+    (`reconstruction.reconstruct`'s `adaptive_step`), at heavy Poisson
+    noise (peak_photon_count=3) and enough iterations (400) for the
+    paper's own described failure mode (Property A -- a constant step
+    can 'undo' progress and re-loop under noise, a long-run/many-cycle
+    effect) to actually manifest. Earlier the same day, a first pass at
+    small scale only tried peak_photon_count down to 20 and iterations up
+    to 60, and found no clean difference -- the missing variable turned
+    out to be noise severity + iteration count, not problem scale
+    (unlike EPRY's regression, which WAS a scale artifact). Validated
+    across 8 seeds (not run here, this function is the seed=0 point for
+    the registry): 8/8 seeds favored adaptive_step, paired mean gain
+    0.060 +/- 0.012 SE phase_correlation -- see
+    tests/test_adaptive_step_size.py for the multi-seed check itself.
+    Returns (fixed-ramp phase_correlation, adaptive_step phase_correlation).
+    """
+    grid_size, crop, iterations, peak_photon_count = 9, 12, 400, 3
+    setup = config.default_setup(channel="green", grid_size=grid_size, objective="current",
+                                  resolution_px=(crop, crop))
+    factor = optics.upsampling_factor(setup)
+    hr_pixel_um = optics.actual_hr_pixel_size_um(setup, factor)
+    hr_shape = optics.hr_shape((crop, crop), factor)
+    h, w = hr_shape
+    y, x = np.mgrid[0:h, 0:w].astype(float)
+    yc, xc = y / h - 0.5, x / w - 0.5
+    amp = _amplitude_blob(hr_shape)
+    phase = 0.15 * np.pi * np.sin(2 * np.pi * xc) * np.cos(2 * np.pi * yc)
+    obj_true = amp * np.exp(1j * phase)
+
+    led_grid = led_array.build_led_grid(setup.led_array, setup.wavelength_um)
+    rng = np.random.default_rng(0)
+    lr_images = forward_model.simulate_lr_stack(
+        obj_true, hr_pixel_um, led_grid, (crop, crop), setup.lr_pixel_size_um,
+        setup.objective.na, setup.wavelength_um, peak_photon_count=peak_photon_count, rng=rng,
+    )
+    fixed = reconstruction.reconstruct(
+        lr_images, led_grid, hr_pixel_um, setup.lr_pixel_size_um,
+        setup.objective.na, setup.wavelength_um, factor, iterations=iterations, step_max=20.0,
+    )
+    adaptive = reconstruction.reconstruct(
+        lr_images, led_grid, hr_pixel_um, setup.lr_pixel_size_um,
+        setup.objective.na, setup.wavelength_um, factor, iterations=iterations,
+        adaptive_step=True, step_max=20.0,
+    )
+    gt_f = metrics.compare_to_ground_truth(fixed["object"], obj_true)
+    gt_a = metrics.compare_to_ground_truth(adaptive["object"], obj_true)
+    return gt_f["phase_correlation"], gt_a["phase_correlation"]
+
+
 def ransac_outlier_rejection_rotation_error():
     """Same scenario as
     tests/test_ransac_similarity_fit.py::test_ransac_recovers_true_transform_despite_outliers_where_plain_fit_fails:
@@ -440,6 +493,7 @@ def main():
     epry_uncorrected, epry_corrected, epry_pupil_corr = epry_defocus_aberration_correction()
     epry_small_baseline, epry_small_corrected = epry_regresses_unaberrated_channel_small_scale()
     epry_paper_baseline, epry_paper_corrected = epry_regression_not_reproduced_at_paper_scale()
+    adaptive_step_fixed_corr, adaptive_step_adaptive_corr = adaptive_step_heavy_noise_gain()
 
     registry = {
         "multispectral_thickness_correlation": {
@@ -604,6 +658,28 @@ def main():
             "type": "script",
             "reproduce": "scripts/compute_numbers.py::epry_regression_not_reproduced_at_paper_scale",
         },
+        "adaptive_step_fixed_ramp_phase_correlation": {
+            "value": adaptive_step_fixed_corr,
+            "statement": (
+                "phase_correlation with the default fixed exponential-ramp step schedule, at heavy "
+                "Poisson noise (peak_photon_count=3) and 400 iterations -- enough noise/cycles for "
+                "zuo2016's described failure mode to manifest (an earlier pass at lighter noise and "
+                "fewer iterations found no clean difference)"
+            ),
+            "type": "script",
+            "reproduce": "scripts/compute_numbers.py::adaptive_step_heavy_noise_gain",
+        },
+        "adaptive_step_adaptive_phase_correlation": {
+            "value": adaptive_step_adaptive_corr,
+            "statement": (
+                "same scenario, same noisy data, with adaptive_step=True (zuo2016's Eq. 16 rule) "
+                "instead of the fixed ramp -- a real, reproducible improvement at this noise level, "
+                "validated across 8 random seeds (8/8 favored adaptive_step, not itself in this "
+                "registry since a multi-seed statistic isn't a single deterministic number)"
+            ),
+            "type": "script",
+            "reproduce": "scripts/compute_numbers.py::adaptive_step_heavy_noise_gain",
+        },
     }
 
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
@@ -627,6 +703,8 @@ def main():
     print(f"  epry_small_scale_corrected_phase_correlation = {epry_small_corrected:.4f}")
     print(f"  epry_paper_scale_baseline_phase_correlation  = {epry_paper_baseline:.4f}")
     print(f"  epry_paper_scale_corrected_phase_correlation = {epry_paper_corrected:.4f}")
+    print(f"  adaptive_step_fixed_ramp_phase_correlation   = {adaptive_step_fixed_corr:.4f}")
+    print(f"  adaptive_step_adaptive_phase_correlation     = {adaptive_step_adaptive_corr:.4f}")
 
 
 if __name__ == "__main__":

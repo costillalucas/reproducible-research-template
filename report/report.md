@@ -117,6 +117,25 @@ This project's own real lab grids (81–441 LEDs) sit closer to the risky
 small-scale end than to the paper's 225-image demo, so this caveat is
 practically relevant, not just a synthetic-test artifact to dismiss.
 
+## Milestone 9: adaptive step size helps, but only under heavy noise
+
+`reconstruction.reconstruct`'s adaptive step-size mode (`zuo2016`) was
+initially found to show no clean advantage over the fixed exponential-ramp
+schedule — but that exploration only tried noise up to
+`peak_photon_count=20` and up to 60 iterations. At heavier Poisson noise
+(`peak_photon_count=3`) and 400 iterations — enough for the paper's
+described failure mode (a constant step re-introducing noise each cycle)
+to actually manifest — the fixed ramp reconstructs with phase correlation
+[srcnum:adaptive_step_fixed_ramp_phase_correlation:0.22]
+[src:adaptive_step_fixed_ramp_phase_correlation], while adaptive stepping
+reaches [srcnum:adaptive_step_adaptive_phase_correlation:0.32]
+[src:adaptive_step_adaptive_phase_correlation] on the identical noisy data.
+This is a real, reproducible effect, not a scale artifact like the EPRY
+finding above: validated across 8 random noise seeds, adaptive_step won on
+8/8, with a paired mean gain of 0.060 ± 0.012 SE phase correlation (only
+the seed=0 point is in this registry, for exact reproducibility — see
+`tests/test_adaptive_step_size.py` for the multi-seed check).
+
 ## Correctness suite
 
 [src:suite_coverage] — see `data/checks_results.json` for the full

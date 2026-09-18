@@ -1,4 +1,16 @@
 {
+  "adaptive_step_adaptive_phase_correlation": {
+    "reproduce": "scripts/compute_numbers.py::adaptive_step_heavy_noise_gain",
+    "statement": "same scenario, same noisy data, with adaptive_step=True (zuo2016's Eq. 16 rule) instead of the fixed ramp -- a real, reproducible improvement at this noise level, validated across 8 random seeds (8/8 favored adaptive_step, not itself in this registry since a multi-seed statistic isn't a single deterministic number)",
+    "type": "script",
+    "value": 0.3210821823455457
+  },
+  "adaptive_step_fixed_ramp_phase_correlation": {
+    "reproduce": "scripts/compute_numbers.py::adaptive_step_heavy_noise_gain",
+    "statement": "phase_correlation with the default fixed exponential-ramp step schedule, at heavy Poisson noise (peak_photon_count=3) and 400 iterations -- enough noise/cycles for zuo2016's described failure mode to manifest (an earlier pass at lighter noise and fewer iterations found no clean difference)",
+    "type": "script",
+    "value": 0.22239249275999584
+  },
   "epry_corrected_phase_correlation": {
     "reproduce": "scripts/compute_numbers.py::epry_defocus_aberration_correction",
     "statement": "same scenario, reconstructed with EPRY pupil recovery (recover_pupil=True) instead of assuming the ideal pupil -- a real but modest improvement, not a full fix",

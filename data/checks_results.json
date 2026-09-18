@@ -35,8 +35,12 @@
     {
       "name": "that small-testbed regression does NOT reproduce at a scale close to ou2014's own real demonstration (225 LEDs, 64x64px) -- confirms a testbed-scale artifact, not a general EPRY failure",
       "passed": true
+    },
+    {
+      "name": "adaptive step size (zuo2016) beats the fixed exponential ramp under heavy Poisson noise and enough iterations for the paper's described failure mode to manifest",
+      "passed": true
     }
   ],
-  "passed": 9,
-  "total": 9
+  "passed": 10,
+  "total": 10
 }

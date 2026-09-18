@@ -194,3 +194,28 @@ claims:
           - scripts/compute_numbers.py
     depends_on: [epry_regresses_healthy_channel_at_small_scale]
     status: established
+
+  - id: adaptive_step_helps_under_heavy_noise
+    statement: >
+      zuo2016's adaptive step-size rule beats this project's default
+      fixed exponential-ramp schedule under heavy Poisson noise and
+      enough iterations for the paper's described failure mode (a
+      constant step re-introducing noise each cycle) to manifest. An
+      earlier same-day exploration at lighter noise and fewer iterations
+      found no clean difference; the missing variable was noise severity
+      and cycle count, not problem scale (unlike the EPRY finding above,
+      which was a scale artifact) -- validated across 8 random seeds
+      (8/8 favored adaptive_step, paired mean gain 0.060 +/- 0.012 SE
+      phase_correlation), with seed=0 as the exact reproducible number
+      quoted here.
+    file: report/report.md
+    numbers: [adaptive_step_fixed_ramp_phase_correlation, adaptive_step_adaptive_phase_correlation]
+    evidence:
+      - id: ev_adaptive_step_heavy_noise_gain
+        description: phase_correlation with fixed-ramp vs. adaptive step-size, same heavily-noised data, seed=0
+        data_refs:
+          - src/ptyco_full_simulator/reconstruction.py
+          - references/papers/2016/oe-24-18-20724.pdf
+          - scripts/compute_numbers.py
+    depends_on: []
+    status: established

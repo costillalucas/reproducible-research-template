@@ -120,6 +120,15 @@ check(
     f"EPRY={numbers['epry_paper_scale_corrected_phase_correlation']['value']:.4f}",
 )
 
+check(
+    "adaptive step size (zuo2016) beats the fixed exponential ramp under heavy Poisson noise "
+    "and enough iterations for the paper's described failure mode to manifest",
+    numbers["adaptive_step_adaptive_phase_correlation"]["value"]
+    > numbers["adaptive_step_fixed_ramp_phase_correlation"]["value"] + 0.03,
+    f"fixed_ramp={numbers['adaptive_step_fixed_ramp_phase_correlation']['value']:.4f}  "
+    f"adaptive={numbers['adaptive_step_adaptive_phase_correlation']['value']:.4f}",
+)
+
 passed = sum(1 for _, ok in results if ok)
 total = len(results)
 print()
