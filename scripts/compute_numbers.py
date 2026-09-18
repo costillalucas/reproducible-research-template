@@ -269,6 +269,141 @@ def tie_informed_initialization_phase_correlation_gain():
     return baseline_corr, tie_corr
 
 
+def epry_defocus_aberration_correction():
+    """Same scenario as
+    tests/test_epry_pupil_recovery.py::test_epry_beats_uncorrected_under_defocus_aberration:
+    a known defocus aberration (Zernike mode 4) injected into the pupil,
+    reconstructed assuming the ideal pupil vs. with EPRY pupil recovery
+    (ou2014) on. Returns (uncorrected phase_correlation, EPRY-corrected
+    phase_correlation, recovered-pupil-phase vs. true-aberration-phase
+    correlation).
+    """
+    grid_size, crop, iterations, defocus_rad_amplitude = 9, 12, 40, 2.0
+    setup = config.default_setup(channel="green", grid_size=grid_size, objective="current",
+                                  resolution_px=(crop, crop))
+    factor = optics.upsampling_factor(setup)
+    hr_pixel_um = optics.actual_hr_pixel_size_um(setup, factor)
+    hr_shape = optics.hr_shape((crop, crop), factor)
+    pupil_mask = optics.circular_pupil((crop, crop), setup.lr_pixel_size_um,
+                                        setup.objective.na, setup.wavelength_um)
+    true_pupil = optics.add_defocus_aberration(
+        pupil_mask, (crop, crop), setup.lr_pixel_size_um, setup.objective.na,
+        setup.wavelength_um, defocus_rad_amplitude,
+    )
+    h, w = hr_shape
+    y, x = np.mgrid[0:h, 0:w].astype(float)
+    yc, xc = y / h - 0.5, x / w - 0.5
+    amp = _amplitude_blob(hr_shape)
+    phase = 0.15 * np.pi * np.sin(2 * np.pi * xc) * np.cos(2 * np.pi * yc)
+    obj_true = amp * np.exp(1j * phase)
+
+    led_grid = led_array.build_led_grid(setup.led_array, setup.wavelength_um)
+    lr_images = forward_model.simulate_lr_stack(
+        obj_true, hr_pixel_um, led_grid, (crop, crop), setup.lr_pixel_size_um,
+        setup.objective.na, setup.wavelength_um, pupil_override=true_pupil,
+    )
+    uncorrected = reconstruction.reconstruct(
+        lr_images, led_grid, hr_pixel_um, setup.lr_pixel_size_um,
+        setup.objective.na, setup.wavelength_um, factor, iterations=iterations,
+    )
+    corrected = reconstruction.reconstruct(
+        lr_images, led_grid, hr_pixel_um, setup.lr_pixel_size_um,
+        setup.objective.na, setup.wavelength_um, factor, iterations=iterations,
+        recover_pupil=True,
+    )
+    gt_unc = metrics.compare_to_ground_truth(uncorrected["object"], obj_true)
+    gt_cor = metrics.compare_to_ground_truth(corrected["object"], obj_true)
+    true_phase = np.angle(true_pupil)[pupil_mask]
+    rec_phase = np.angle(corrected["pupil"])[pupil_mask]
+    true_phase = true_phase - true_phase.mean()
+    rec_phase = rec_phase - rec_phase.mean()
+    pupil_corr = float(np.corrcoef(true_phase, rec_phase)[0, 1])
+    return gt_unc["phase_correlation"], gt_cor["phase_correlation"], pupil_corr
+
+
+def epry_regresses_unaberrated_channel_small_scale():
+    """Same scenario as
+    tests/test_epry_pupil_recovery.py::test_recover_pupil_can_regress_an_already_well_converging_channel:
+    blue (470nm) channel, 9x9 LED grid, 12x12px crop, NO aberration
+    present (ideal pupil) -- this project's own small/fast synthetic
+    testbed size. Returns (baseline phase_correlation, EPRY-corrected
+    phase_correlation).
+    """
+    grid_size, crop, iterations = 9, 12, 40
+    setup = config.default_setup(channel="blue", grid_size=grid_size, objective="current",
+                                  resolution_px=(crop, crop))
+    factor = optics.upsampling_factor(setup)
+    hr_pixel_um = optics.actual_hr_pixel_size_um(setup, factor)
+    hr_shape = optics.hr_shape((crop, crop), factor)
+    h, w = hr_shape
+    y, x = np.mgrid[0:h, 0:w].astype(float)
+    yc, xc = y / h - 0.5, x / w - 0.5
+    amp = _amplitude_blob(hr_shape)
+    phase = 0.15 * np.pi * np.sin(2 * np.pi * xc) * np.cos(2 * np.pi * yc)
+    obj_true = amp * np.exp(1j * phase)
+
+    led_grid = led_array.build_led_grid(setup.led_array, setup.wavelength_um)
+    lr_images = forward_model.simulate_lr_stack(
+        obj_true, hr_pixel_um, led_grid, (crop, crop), setup.lr_pixel_size_um,
+        setup.objective.na, setup.wavelength_um,
+    )
+    baseline = reconstruction.reconstruct(
+        lr_images, led_grid, hr_pixel_um, setup.lr_pixel_size_um,
+        setup.objective.na, setup.wavelength_um, factor, iterations=iterations,
+    )
+    corrected = reconstruction.reconstruct(
+        lr_images, led_grid, hr_pixel_um, setup.lr_pixel_size_um,
+        setup.objective.na, setup.wavelength_um, factor, iterations=iterations,
+        recover_pupil=True,
+    )
+    gt_b = metrics.compare_to_ground_truth(baseline["object"], obj_true)
+    gt_c = metrics.compare_to_ground_truth(corrected["object"], obj_true)
+    return gt_b["phase_correlation"], gt_c["phase_correlation"]
+
+
+def epry_regression_not_reproduced_at_paper_scale():
+    """Same scenario as
+    tests/test_epry_pupil_recovery.py::test_recover_pupil_regression_is_a_small_testbed_artifact_not_reproduced_at_paper_scale:
+    same no-aberration setup as epry_regresses_unaberrated_channel_small_scale,
+    but at a scale close to ou2014's own real demo (225 LEDs = 15x15 grid,
+    64x64px LR images instead of 12x12), object spatial frequency scaled
+    to stay physically comparable. Returns (baseline phase_correlation,
+    EPRY-corrected phase_correlation) -- should land close together,
+    unlike the small-scale scenario above.
+    """
+    grid_size, crop, iterations = 15, 64, 40
+    n_cycles = round(crop / 12)
+    setup = config.default_setup(channel="blue", grid_size=grid_size, objective="current",
+                                  resolution_px=(crop, crop))
+    factor = optics.upsampling_factor(setup)
+    hr_pixel_um = optics.actual_hr_pixel_size_um(setup, factor)
+    hr_shape = optics.hr_shape((crop, crop), factor)
+    h, w = hr_shape
+    y, x = np.mgrid[0:h, 0:w].astype(float)
+    yc, xc = y / h - 0.5, x / w - 0.5
+    amp = _amplitude_blob(hr_shape)
+    phase = 0.08 * np.pi * np.sin(2 * np.pi * n_cycles * xc) * np.cos(2 * np.pi * n_cycles * yc)
+    obj_true = amp * np.exp(1j * phase)
+
+    led_grid = led_array.build_led_grid(setup.led_array, setup.wavelength_um)
+    lr_images = forward_model.simulate_lr_stack(
+        obj_true, hr_pixel_um, led_grid, (crop, crop), setup.lr_pixel_size_um,
+        setup.objective.na, setup.wavelength_um,
+    )
+    baseline = reconstruction.reconstruct(
+        lr_images, led_grid, hr_pixel_um, setup.lr_pixel_size_um,
+        setup.objective.na, setup.wavelength_um, factor, iterations=iterations,
+    )
+    corrected = reconstruction.reconstruct(
+        lr_images, led_grid, hr_pixel_um, setup.lr_pixel_size_um,
+        setup.objective.na, setup.wavelength_um, factor, iterations=iterations,
+        recover_pupil=True,
+    )
+    gt_b = metrics.compare_to_ground_truth(baseline["object"], obj_true)
+    gt_c = metrics.compare_to_ground_truth(corrected["object"], obj_true)
+    return gt_b["phase_correlation"], gt_c["phase_correlation"]
+
+
 def ransac_outlier_rejection_rotation_error():
     """Same scenario as
     tests/test_ransac_similarity_fit.py::test_ransac_recovers_true_transform_despite_outliers_where_plain_fit_fails:
@@ -302,6 +437,9 @@ def main():
     calib_scale_err = led_calibration_scale_recovery_error()
     tie_baseline_corr, tie_informed_corr = tie_informed_initialization_phase_correlation_gain()
     ransac_plain_error, ransac_robust_error = ransac_outlier_rejection_rotation_error()
+    epry_uncorrected, epry_corrected, epry_pupil_corr = epry_defocus_aberration_correction()
+    epry_small_baseline, epry_small_corrected = epry_regresses_unaberrated_channel_small_scale()
+    epry_paper_baseline, epry_paper_corrected = epry_regression_not_reproduced_at_paper_scale()
 
     registry = {
         "multispectral_thickness_correlation": {
@@ -398,6 +536,74 @@ def main():
             "type": "check",
             "reproduce": "scripts/checks.py",
         },
+        "epry_uncorrected_phase_correlation": {
+            "value": epry_uncorrected,
+            "statement": (
+                "phase_correlation assuming the ideal (unaberrated) pupil, when a real defocus "
+                "aberration (Zernike mode 4, ou2014's own dominant real-microscope aberration) is "
+                "actually present in the optics"
+            ),
+            "type": "script",
+            "reproduce": "scripts/compute_numbers.py::epry_defocus_aberration_correction",
+        },
+        "epry_corrected_phase_correlation": {
+            "value": epry_corrected,
+            "statement": (
+                "same scenario, reconstructed with EPRY pupil recovery (recover_pupil=True) instead "
+                "of assuming the ideal pupil -- a real but modest improvement, not a full fix"
+            ),
+            "type": "script",
+            "reproduce": "scripts/compute_numbers.py::epry_defocus_aberration_correction",
+        },
+        "epry_recovered_pupil_phase_correlation": {
+            "value": epry_pupil_corr,
+            "statement": (
+                "correlation between the EPRY-recovered pupil's phase and the true injected "
+                "aberration's phase -- confirms EPRY identifies the actual aberration, not just "
+                "'helps the object by coincidence'"
+            ),
+            "type": "script",
+            "reproduce": "scripts/compute_numbers.py::epry_defocus_aberration_correction",
+        },
+        "epry_small_scale_baseline_phase_correlation": {
+            "value": epry_small_baseline,
+            "statement": (
+                "phase_correlation for the blue (470nm) channel on this project's small 9x9-LED/"
+                "12x12px synthetic testbed, NO aberration present (ideal pupil) -- already "
+                "reconstructs well without any pupil correction"
+            ),
+            "type": "script",
+            "reproduce": "scripts/compute_numbers.py::epry_regresses_unaberrated_channel_small_scale",
+        },
+        "epry_small_scale_corrected_phase_correlation": {
+            "value": epry_small_corrected,
+            "statement": (
+                "same scenario, with recover_pupil=True -- EPRY REGRESSES this already-healthy "
+                "channel at this small testbed scale, even with no real aberration to correct"
+            ),
+            "type": "script",
+            "reproduce": "scripts/compute_numbers.py::epry_regresses_unaberrated_channel_small_scale",
+        },
+        "epry_paper_scale_baseline_phase_correlation": {
+            "value": epry_paper_baseline,
+            "statement": (
+                "same no-aberration scenario as epry_small_scale_*, but at a scale close to ou2014's "
+                "own real demonstration (225 LEDs, 64x64px instead of 12x12, object spatial "
+                "frequency kept physically comparable)"
+            ),
+            "type": "script",
+            "reproduce": "scripts/compute_numbers.py::epry_regression_not_reproduced_at_paper_scale",
+        },
+        "epry_paper_scale_corrected_phase_correlation": {
+            "value": epry_paper_corrected,
+            "statement": (
+                "same paper-scale scenario, with recover_pupil=True -- the small-scale regression "
+                "does NOT reproduce here, confirming it is a small-testbed/low-data-redundancy "
+                "artifact, not a general EPRY failure or an implementation bug"
+            ),
+            "type": "script",
+            "reproduce": "scripts/compute_numbers.py::epry_regression_not_reproduced_at_paper_scale",
+        },
     }
 
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
@@ -414,6 +620,13 @@ def main():
     print(f"  tie_informed_init_phase_correlation          = {tie_informed_corr:.4f}")
     print(f"  ransac_plain_fit_rotation_error_rad          = {ransac_plain_error:.4f}")
     print(f"  ransac_robust_fit_rotation_error_rad         = {ransac_robust_error:.6f}")
+    print(f"  epry_uncorrected_phase_correlation           = {epry_uncorrected:.4f}")
+    print(f"  epry_corrected_phase_correlation             = {epry_corrected:.4f}")
+    print(f"  epry_recovered_pupil_phase_correlation       = {epry_pupil_corr:.4f}")
+    print(f"  epry_small_scale_baseline_phase_correlation  = {epry_small_baseline:.4f}")
+    print(f"  epry_small_scale_corrected_phase_correlation = {epry_small_corrected:.4f}")
+    print(f"  epry_paper_scale_baseline_phase_correlation  = {epry_paper_baseline:.4f}")
+    print(f"  epry_paper_scale_corrected_phase_correlation = {epry_paper_corrected:.4f}")
 
 
 if __name__ == "__main__":

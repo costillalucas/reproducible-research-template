@@ -1,4 +1,46 @@
 {
+  "epry_corrected_phase_correlation": {
+    "reproduce": "scripts/compute_numbers.py::epry_defocus_aberration_correction",
+    "statement": "same scenario, reconstructed with EPRY pupil recovery (recover_pupil=True) instead of assuming the ideal pupil -- a real but modest improvement, not a full fix",
+    "type": "script",
+    "value": 0.7927977558617662
+  },
+  "epry_paper_scale_baseline_phase_correlation": {
+    "reproduce": "scripts/compute_numbers.py::epry_regression_not_reproduced_at_paper_scale",
+    "statement": "same no-aberration scenario as epry_small_scale_*, but at a scale close to ou2014's own real demonstration (225 LEDs, 64x64px instead of 12x12, object spatial frequency kept physically comparable)",
+    "type": "script",
+    "value": 0.8402668430951649
+  },
+  "epry_paper_scale_corrected_phase_correlation": {
+    "reproduce": "scripts/compute_numbers.py::epry_regression_not_reproduced_at_paper_scale",
+    "statement": "same paper-scale scenario, with recover_pupil=True -- the small-scale regression does NOT reproduce here, confirming it is a small-testbed/low-data-redundancy artifact, not a general EPRY failure or an implementation bug",
+    "type": "script",
+    "value": 0.8363444090719238
+  },
+  "epry_recovered_pupil_phase_correlation": {
+    "reproduce": "scripts/compute_numbers.py::epry_defocus_aberration_correction",
+    "statement": "correlation between the EPRY-recovered pupil's phase and the true injected aberration's phase -- confirms EPRY identifies the actual aberration, not just 'helps the object by coincidence'",
+    "type": "script",
+    "value": 0.6484318034506068
+  },
+  "epry_small_scale_baseline_phase_correlation": {
+    "reproduce": "scripts/compute_numbers.py::epry_regresses_unaberrated_channel_small_scale",
+    "statement": "phase_correlation for the blue (470nm) channel on this project's small 9x9-LED/12x12px synthetic testbed, NO aberration present (ideal pupil) -- already reconstructs well without any pupil correction",
+    "type": "script",
+    "value": 0.9513155833354128
+  },
+  "epry_small_scale_corrected_phase_correlation": {
+    "reproduce": "scripts/compute_numbers.py::epry_regresses_unaberrated_channel_small_scale",
+    "statement": "same scenario, with recover_pupil=True -- EPRY REGRESSES this already-healthy channel at this small testbed scale, even with no real aberration to correct",
+    "type": "script",
+    "value": 0.5256068815503598
+  },
+  "epry_uncorrected_phase_correlation": {
+    "reproduce": "scripts/compute_numbers.py::epry_defocus_aberration_correction",
+    "statement": "phase_correlation assuming the ideal (unaberrated) pupil, when a real defocus aberration (Zernike mode 4, ou2014's own dominant real-microscope aberration) is actually present in the optics",
+    "type": "script",
+    "value": 0.686653517570784
+  },
   "five_percent_contrast_object_phase_correlation": {
     "reproduce": "scripts/compute_numbers.py::phase_only_object_correlation_drop",
     "statement": "reconstruction phase_correlation for the SAME phase field with just 5% amplitude contrast added -- demonstrates how much a small amount of amplitude structure matters to this solver",

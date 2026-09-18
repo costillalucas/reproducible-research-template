@@ -130,3 +130,67 @@ claims:
           - scripts/compute_numbers.py
     depends_on: [led_calibration_recovers_misalignment]
     status: established
+
+  - id: epry_pupil_recovery_corrects_real_aberration
+    statement: >
+      EPRY pupil recovery (adapted from ou2014) gives a real but modest
+      improvement over assuming the ideal pupil when a genuine defocus
+      aberration is present, and the recovered pupil's phase actually
+      correlates with the true injected aberration -- not just "helps
+      the object by coincidence".
+    file: report/report.md
+    numbers: [epry_uncorrected_phase_correlation, epry_corrected_phase_correlation, epry_recovered_pupil_phase_correlation]
+    evidence:
+      - id: ev_epry_defocus_correction
+        description: phase_correlation with/without EPRY under a known injected defocus aberration, plus recovered-vs-true pupil phase correlation
+        data_refs:
+          - src/ptyco_full_simulator/reconstruction.py
+          - src/ptyco_full_simulator/optics.py
+          - references/papers/2014/oe-22-5-4960.pdf
+          - scripts/compute_numbers.py
+    depends_on: []
+    status: established
+
+  - id: epry_regresses_healthy_channel_at_small_scale
+    statement: >
+      On this project's small (9x9 LED, 12x12px) synthetic testbed, EPRY
+      pupil recovery REGRESSES an already-well-converging channel even
+      with no aberration present at all -- recover_pupil=True is not a
+      safe default to enable unconditionally, and the recovered pupil
+      itself stays nearly flat (not "inventing" a fake aberration),
+      pointing at the object update's own normalization overfitting
+      rather than a runaway pupil estimate.
+    file: report/report.md
+    numbers: [epry_small_scale_baseline_phase_correlation, epry_small_scale_corrected_phase_correlation]
+    evidence:
+      - id: ev_epry_small_scale_regression
+        description: phase_correlation with/without EPRY, blue channel, no aberration present
+        data_refs:
+          - src/ptyco_full_simulator/reconstruction.py
+          - scripts/compute_numbers.py
+    depends_on: [epry_pupil_recovery_corrects_real_aberration]
+    status: established
+
+  - id: epry_regression_is_testbed_scale_artifact
+    statement: >
+      The small-scale regression above does NOT reproduce at a scale
+      close to ou2014's own real demonstration (225 LEDs, 64x64px
+      instead of 12x12px) -- ruling out "EPRY is badly implemented" in
+      favor of "this project's synthetic testbeds are smaller/lower-
+      redundancy than EPRY needs to be numerically stable". The
+      literature's standard fix for over-aggressive PIE-family
+      normalization (rPIE-style regularized denominator) was tried in
+      isolation and barely changed the small-scale numbers, further
+      pointing at data redundancy rather than a fixable normalization
+      choice (not itself in this registry -- an exploratory comparison
+      run outside the main codebase, not a maintained script).
+    file: report/report.md
+    numbers: [epry_paper_scale_baseline_phase_correlation, epry_paper_scale_corrected_phase_correlation]
+    evidence:
+      - id: ev_epry_paper_scale_no_regression
+        description: same no-aberration scenario as epry_regresses_healthy_channel_at_small_scale, at 225 LEDs/64x64px instead of 81 LEDs/12x12px
+        data_refs:
+          - src/ptyco_full_simulator/reconstruction.py
+          - scripts/compute_numbers.py
+    depends_on: [epry_regresses_healthy_channel_at_small_scale]
+    status: established

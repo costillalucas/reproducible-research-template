@@ -87,6 +87,39 @@ check(
     f"5%_contrast={numbers['five_percent_contrast_object_phase_correlation']['value']:.4f}",
 )
 
+check(
+    "EPRY pupil recovery (ou2014) meaningfully beats assuming the ideal pupil when a real "
+    "defocus aberration is present",
+    numbers["epry_corrected_phase_correlation"]["value"]
+    > numbers["epry_uncorrected_phase_correlation"]["value"] + 0.05,
+    f"uncorrected={numbers['epry_uncorrected_phase_correlation']['value']:.4f}  "
+    f"EPRY={numbers['epry_corrected_phase_correlation']['value']:.4f}  "
+    f"recovered_pupil_vs_true_aberration_correlation="
+    f"{numbers['epry_recovered_pupil_phase_correlation']['value']:.4f}",
+)
+
+# Negative control: on this project's small synthetic testbed, EPRY MUST regress an
+# already-healthy channel with no aberration present -- proving the checks suite can catch
+# EPRY's own known failure mode (docs/roadmap_agentic_multispectral_pipeline.md milestone 8),
+# not just praise the cases where it helps.
+check(
+    "NEGATIVE CONTROL: at this project's small (9x9 LED, 12x12px) testbed scale, EPRY "
+    "regresses an already-well-converging channel even with no aberration present",
+    numbers["epry_small_scale_corrected_phase_correlation"]["value"]
+    < numbers["epry_small_scale_baseline_phase_correlation"]["value"] - 0.2,
+    f"baseline={numbers['epry_small_scale_baseline_phase_correlation']['value']:.4f}  "
+    f"EPRY={numbers['epry_small_scale_corrected_phase_correlation']['value']:.4f}",
+)
+check(
+    "that small-testbed regression does NOT reproduce at a scale close to ou2014's own real "
+    "demonstration (225 LEDs, 64x64px) -- confirms a testbed-scale artifact, not a general "
+    "EPRY failure",
+    abs(numbers["epry_paper_scale_corrected_phase_correlation"]["value"]
+        - numbers["epry_paper_scale_baseline_phase_correlation"]["value"]) < 0.1,
+    f"baseline={numbers['epry_paper_scale_baseline_phase_correlation']['value']:.4f}  "
+    f"EPRY={numbers['epry_paper_scale_corrected_phase_correlation']['value']:.4f}",
+)
+
 passed = sum(1 for _, ok in results if ok)
 total = len(results)
 print()

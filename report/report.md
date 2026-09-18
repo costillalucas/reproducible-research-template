@@ -80,6 +80,43 @@ to within
 [srcnum:ransac_robust_fit_rotation_error_rad:0.000000]
 [src:ransac_robust_fit_rotation_error_rad] rad on the same corrupted data.
 
+## Milestone 8: pupil recovery (EPRY) and a testbed-scale caveat
+
+Adding EPRY pupil recovery (`ou2014`, `reconstruction.reconstruct`'s
+`recover_pupil`) gives a real but modest improvement when a genuine
+defocus aberration is present: assuming the ideal pupil, phase
+correlation is [srcnum:epry_uncorrected_phase_correlation:0.69]
+[src:epry_uncorrected_phase_correlation]; with EPRY on, it rises to
+[srcnum:epry_corrected_phase_correlation:0.79]
+[src:epry_corrected_phase_correlation]. The recovered pupil's phase
+correlates [srcnum:epry_recovered_pupil_phase_correlation:0.65]
+[src:epry_recovered_pupil_phase_correlation] with the true injected
+aberration — confirming EPRY identifies the actual aberration, not just
+"helps the object by coincidence".
+
+However, on this project's small (9×9 LED, 12×12px) synthetic testbed,
+turning EPRY on for a channel with **no** aberration present regresses an
+already-well-converging reconstruction: phase correlation drops from
+[srcnum:epry_small_scale_baseline_phase_correlation:0.95]
+[src:epry_small_scale_baseline_phase_correlation] to
+[srcnum:epry_small_scale_corrected_phase_correlation:0.53]
+[src:epry_small_scale_corrected_phase_correlation] — `recover_pupil=True`
+is **not** a safe default to enable unconditionally across all 3 RGB
+channels in one run. Investigation ruled out "badly implemented" (EPRY
+correctly recovers real aberrations above, and the literature's standard
+fix for this kind of PIE-family instability barely changes the numbers)
+in favor of "small-testbed/low-data-redundancy artifact": reproducing the
+identical no-aberration scenario at a scale close to `ou2014`'s own real
+demonstration (225 LEDs, 64×64px instead of 12×12px) makes the collapse
+disappear — baseline
+[srcnum:epry_paper_scale_baseline_phase_correlation:0.84]
+[src:epry_paper_scale_baseline_phase_correlation] vs. EPRY
+[srcnum:epry_paper_scale_corrected_phase_correlation:0.84]
+[src:epry_paper_scale_corrected_phase_correlation], within a few percent.
+This project's own real lab grids (81–441 LEDs) sit closer to the risky
+small-scale end than to the paper's 225-image demo, so this caveat is
+practically relevant, not just a synthetic-test artifact to dismiss.
+
 ## Correctness suite
 
 [src:suite_coverage] — see `data/checks_results.json` for the full

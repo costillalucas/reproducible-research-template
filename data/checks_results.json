@@ -23,8 +23,20 @@
     {
       "name": "NEGATIVE CONTROL: uniform-amplitude (phase-only) object reconstructs far worse than the same phase field with 5% amplitude contrast",
       "passed": true
+    },
+    {
+      "name": "EPRY pupil recovery (ou2014) meaningfully beats assuming the ideal pupil when a real defocus aberration is present",
+      "passed": true
+    },
+    {
+      "name": "NEGATIVE CONTROL: at this project's small (9x9 LED, 12x12px) testbed scale, EPRY regresses an already-well-converging channel even with no aberration present",
+      "passed": true
+    },
+    {
+      "name": "that small-testbed regression does NOT reproduce at a scale close to ou2014's own real demonstration (225 LEDs, 64x64px) -- confirms a testbed-scale artifact, not a general EPRY failure",
+      "passed": true
     }
   ],
-  "passed": 6,
-  "total": 6
+  "passed": 9,
+  "total": 9
 }
