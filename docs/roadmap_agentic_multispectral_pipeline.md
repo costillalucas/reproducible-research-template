@@ -895,11 +895,22 @@ antes de construir la capa de orquestación, y siguiendo el ranking de
    comportamiento previo sin cambios (regresión testeada, incluye los
    valores de `step` por época coincidiendo exactamente con la fórmula
    cerrada de la rampa fija). 70 tests pasando (eran 64 antes de estos
-   dos). **Pendiente, no hecho todavía**: cablear estos dos flags como
-   CLI en `pipelines/simulate_and_reconstruct.py` (mismo patrón que
-   `--tie-defocus-um`/`--use-reconstruction-agent`) — quedaron probados a
-   nivel de librería (`reconstruction.reconstruct` directo), no expuestos
-   todavía en ningún pipeline end-to-end.
+   dos).
+
+   **[HECHO — 2026-09-18] Cableados como CLI** en
+   `pipelines/simulate_and_reconstruct.py` (`--recover-pupil`,
+   `--adaptive-step`, mismo patrón que `--tie-defocus-um`), mutuamente
+   excluyentes entre sí y con `--use-reconstruction-agent` (combinarlos
+   con el agente de orquestación de reconstrucción es una pregunta de
+   diseño real, no resuelta acá — su lógica de decisión está armada
+   alrededor de reintentos de `step_max`, que EPRY directamente ignora y
+   que `adaptive_step` ya gestiona por su cuenta). Probado end-to-end a
+   mano contra PNGs sintéticos (no es parte de la suite regular — es
+   plomería de CLI, el algoritmo en sí ya está cubierto por
+   `tests/test_epry_pupil_recovery.py`/`test_adaptive_step_size.py`).
+   Los dos siguen sin estar expuestos en `reconstruct_multispectral_*.py`
+   (los pipelines multiespectrales) — quedan solo en el pipeline
+   mono-objeto por ahora.
 
 (Gap #4 FPM-INR/`zhou2023` queda fuera de este roadmap por ahora —
 mejora calidad/velocidad del solver monocromático en general por una vía
