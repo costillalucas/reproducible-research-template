@@ -1096,6 +1096,43 @@ antes de construir la capa de orquestación, y siguiendo el ranking de
 
     86 tests pasando (eran 81 antes de esta tarea).
 
+11. **[HECHO — 2026-09-21, primera sesión en PC local] Autocalibración
+    conjunta objeto + posiciones LED (AD-SC, You & Liang 2025).**
+    `src/ptyco_full_simulator/joint_calibration.py`, leído el paper
+    completo (`references/papers/complementarios/`). Sin PyTorch (el
+    proyecto es numpy-only): el gradiente del grafo de la Fig. 2 se
+    derivó a mano y se verificó contra diferencias finitas (coincide a
+    ~1e-4 relativo, objeto y posiciones). Modelo directo con k continuo
+    (tilt en espacio real, no recorte a bin entero) — idéntico al modelo
+    de recorte cuando k cae justo en un bin (1e-15). Optimizador Adam
+    como en el paper. `led_model="rigid"` (rotación+escala+traslación,
+    4 parámetros, misma regularización de `eckert2018`) o `"per_led"`
+    (2 parámetros libres por LED, como el paper).
+
+    **Hallazgos** (`tests/test_joint_calibration.py`, 5 tests):
+    - `per_led` **sobreajusta** en crops chicos (16px): con la grilla ya
+      correcta derivó 0.27 bins, y con desalineación rígida no recuperó
+      las posiciones. `rigid` es el modo usable acá.
+    - Dado un buen objeto, una desalineación chica (~0.25 bins de error
+      medio) se recupera **exacta** (<0.01 bins).
+    - Arrancando solo desde la imagen del LED central (sin buen
+      objeto), calibrar mejora frente a fijar las posiciones nominales:
+      `phase_correlation` 0.485→0.861, error de posición 0.248→0.079 bins.
+    - **Límite negativo**: una desalineación de ~0.8 bins **no** se
+      recupera ni siquiera con el objeto verdadero — cae en un mínimo
+      local (terminó peor que al inicio, 1.26 vs 0.80). La cuenca de
+      atracción es menor a ~medio bin en este testbed. Refina una grilla
+      más o menos bien; no arregla una grosera. Esto es consistente con
+      el resultado de `led_calibration.py` (etapa brightfield).
+    - Como efecto lateral: el descenso de gradiente puro (sin
+      calibración) reconstruyó este testbed con `phase_correlation` 0.99
+      con posiciones correctas, bastante mejor que el Wirtinger flow del
+      resto del repo — no se investigó por qué ni se comparó de forma
+      controlada, queda anotado como pista.
+    - No formalizado en el registro de procedencia
+      (`compute_numbers.py`/`claims.yaml`) ni cableado a los pipelines
+      CLI todavía.
+
 (Gap #4 FPM-INR/`zhou2023` queda fuera de este roadmap por ahora —
 mejora calidad/velocidad del solver monocromático en general por una vía
 de aprendizaje profundo mucho más grande, no es específico de
