@@ -1124,11 +1124,22 @@ antes de construir la capa de orquestación, y siguiendo el ranking de
       atracción es menor a ~medio bin en este testbed. Refina una grilla
       más o menos bien; no arregla una grosera. Esto es consistente con
       el resultado de `led_calibration.py` (etapa brightfield).
-    - Como efecto lateral: el descenso de gradiente puro (sin
-      calibración) reconstruyó este testbed con `phase_correlation` 0.99
-      con posiciones correctas, bastante mejor que el Wirtinger flow del
-      resto del repo — no se investigó por qué ni se comparó de forma
-      controlada, queda anotado como pista.
+    - **Efecto lateral, investigado de forma controlada** (mismos datos,
+      k alineado a bin, posiciones conocidas, sin ruido,
+      `tests/test_gradient_descent_vs_wirtinger.py`): el descenso de
+      gradiente Adam reconstruye mejor que el Wirtinger flow del repo en
+      los 3 canales (`phase_correlation`, WF400 vs GD100): green 0.981 vs
+      0.990, red 0.928 vs 0.992, **blue -0.056 vs 0.878** (el Wirtinger
+      flow no converge nunca en blue, ni con 400 épocas). Sirve como
+      referencia para la pregunta abierta de 2a (¿por qué un canal se
+      queda en mínimo local?): en este testbed es propiedad del solver,
+      no del problema. **Salvedades**: con ruido de Poisson la ventaja se
+      achica y no es limpia (una sola semilla; pico 100: blue GD 0.006 vs
+      WF 0.149; pico 10: blue GD 0.38 vs WF -0.03) — falta análisis
+      multi-semilla; un solo objeto/geometría; más costo por iteración.
+      **No arregla** el punto silla de fase pura (sección 1.6): GD
+      -0.215 vs WF -0.044, eso requiere información nueva (TIE), no otro
+      optimizador.
     - No formalizado en el registro de procedencia
       (`compute_numbers.py`/`claims.yaml`) ni cableado a los pipelines
       CLI todavía.
