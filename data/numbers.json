@@ -33,13 +33,13 @@
     "reproduce": "scripts/compute_numbers.py::epry_regression_not_reproduced_at_paper_scale",
     "statement": "same no-aberration scenario as epry_small_scale_*, but at a scale close to ou2014's own real demonstration (225 LEDs, 64x64px instead of 12x12, object spatial frequency kept physically comparable)",
     "type": "script",
-    "value": 0.8402668430951649
+    "value": 0.8402668430951662
   },
   "epry_paper_scale_corrected_phase_correlation": {
     "reproduce": "scripts/compute_numbers.py::epry_regression_not_reproduced_at_paper_scale",
     "statement": "same paper-scale scenario, with recover_pupil=True -- the small-scale regression does NOT reproduce here, confirming it is a small-testbed/low-data-redundancy artifact, not a general EPRY failure or an implementation bug",
     "type": "script",
-    "value": 0.8363444090719238
+    "value": 0.8363444090719342
   },
   "epry_recovered_pupil_phase_correlation": {
     "reproduce": "scripts/compute_numbers.py::epry_defocus_aberration_correction",
@@ -65,17 +65,65 @@
     "type": "script",
     "value": 0.686653517570784
   },
+  "exact_k_gradient_descent_phase_correlation": {
+    "reproduce": "scripts/compute_numbers.py::exact_k_wirtinger_vs_gd",
+    "statement": "same exact-k data, gradient descent with the matched continuous-k model (amplitude loss, 100 iterations, reconstruct_gradient_descent). Conversely, giving it a bin-rounded LED grid on exact-k data drops it to ~0.09 (tests/test_gd_solver_pipelines.py docstring, not in this registry): real LED position accuracy is probably the dominant unknown for any solver",
+    "type": "script",
+    "value": 0.9949144314662981
+  },
+  "exact_k_wirtinger_phase_correlation": {
+    "reproduce": "scripts/compute_numbers.py::exact_k_wirtinger_vs_gd",
+    "statement": "phase_correlation of the Wirtinger flow (200 epochs, bin-rounded k model) on captures simulated with the EXACT unrounded LED k (jc.simulate_lr_stack_continuous), green, 16px crops, noiseless -- the inverse-crime caveat: older fake captures round k to a bin (the very model the Wirtinger flow inverts), which hides this failure on data like real hardware would produce",
+    "type": "script",
+    "value": 0.07649777075830322
+  },
   "five_percent_contrast_object_phase_correlation": {
     "reproduce": "scripts/compute_numbers.py::phase_only_object_correlation_drop",
     "statement": "reconstruction phase_correlation for the SAME phase field with just 5% amplitude contrast added -- demonstrates how much a small amount of amplitude structure matters to this solver",
     "type": "script",
-    "value": 0.6455176368211378
+    "value": 0.6455176368211373
+  },
+  "gd_noise_green_peak20_gradient_descent_amplitude_phase_correlation": {
+    "reproduce": "scripts/compute_numbers.py::gd_amplitude_loss_vs_wirtinger_under_noise",
+    "statement": "same scenario, same noisy data, Adam gradient descent with loss=\"amplitude\" (100 iterations). Across 8 seeds (scripts/sweep_gd_vs_wf_noise.py) the paired gain over the Wirtinger flow is +0.462 +/- 0.026 SE in green (8/8) and +0.472 +/- 0.013 in red (8/8); the intensity-L2 and Poisson-NLL losses do not hold up under noise, and blue fails for every solver at peak <= 20",
+    "type": "script",
+    "value": 0.7590793288841633
+  },
+  "gd_noise_green_peak20_wirtinger_phase_correlation": {
+    "reproduce": "scripts/compute_numbers.py::gd_amplitude_loss_vs_wirtinger_under_noise",
+    "statement": "phase_correlation of the Wirtinger flow (200 epochs), green channel, Poisson noise at peak photon count 20, seed 0, bin-aligned k, 16px crops -- the exact reproducible seed of an 8-seed sweep (not itself in this registry since a multi-seed statistic isn't a single deterministic number)",
+    "type": "script",
+    "value": 0.32744996466480564
+  },
+  "gd_noiseless_blue_gradient_descent_phase_correlation": {
+    "reproduce": "scripts/compute_numbers.py::gd_vs_wirtinger_noiseless_blue",
+    "statement": "same scenario and data, Adam gradient descent on the intensity loss (100 iterations, joint_calibration.reconstruct_and_calibrate, calibrate_leds=False) -- converges where the Wirtinger flow does not. NOISELESS, one object, one geometry: NOT a general advantage (see the amplitude-loss noise entries)",
+    "type": "script",
+    "value": 0.8782656475110204
+  },
+  "gd_noiseless_blue_wirtinger_phase_correlation": {
+    "reproduce": "scripts/compute_numbers.py::gd_vs_wirtinger_noiseless_blue",
+    "statement": "phase_correlation of the Wirtinger flow (400 epochs) on the blue channel, noiseless, 16px crops, 9x9 LEDs, bin-aligned k so both solvers see identical information -- it never converges, even with 4x the iterations (tests/test_gradient_descent_vs_wirtinger.py)",
+    "type": "script",
+    "value": -0.05579492424350947
   },
   "led_calibration_scale_recovery_error": {
     "reproduce": "scripts/compute_numbers.py::led_calibration_scale_recovery_error",
     "statement": "absolute error between the LED spectral-correlation calibration's fitted scale factor and a known injected misalignment's true scale factor, given a good object spectrum estimate",
     "type": "script",
     "value": 0.0015145095007105258
+  },
+  "lena_map_gd_phase_correlation_peak_100": {
+    "reproduce": "scripts/compute_numbers.py::lena_map_gd_phase_correlation_by_photon_count",
+    "statement": "phase_correlation of amplitude-loss gradient descent (100 iterations) on the Lena(amplitude)+Map(phase) object (phase max 0.3*pi), green, 9x9 LEDs, 32px crops, bin-aligned k, Poisson noise at peak photon count 100, seed 0 -- the phase is NOT recovered at this photon budget. Needs the images in test_objects.DEFAULT_DATA_DIR (outside the repo)",
+    "type": "script",
+    "value": 0.21605236498301653
+  },
+  "lena_map_gd_phase_correlation_peak_1000": {
+    "reproduce": "scripts/compute_numbers.py::lena_map_gd_phase_correlation_by_photon_count",
+    "statement": "same scenario at peak photon count 1000 -- the phase starts to become recoverable from ~1000 peak photons (scripts/sweep_lena_map_noise_and_redundancy.py part A; 4 seeds per peak, not in this registry). The redundancy-vs-LED-overlap effect at fixed canvas is not separated here",
+    "type": "script",
+    "value": 0.5260347288343724
   },
   "multispectral_thickness_correlation": {
     "detail": "see tests/test_multispectral_end_to_end.py for the identical scenario as an assertion",
@@ -88,19 +136,19 @@
     "reproduce": "scripts/compute_numbers.py::phase_only_object_correlation_drop",
     "statement": "reconstruction phase_correlation for a UNIFORM-amplitude (pure phase) object -- the baseline solver's known weak point, see docs/roadmap_agentic_multispectral_pipeline.md section 1 point 6",
     "type": "script",
-    "value": -0.04392648011055793
+    "value": -0.04392648011057974
   },
   "ransac_plain_fit_rotation_error_rad": {
     "reproduce": "scripts/compute_numbers.py::ransac_outlier_rejection_rotation_error",
     "statement": "absolute rotation error (radians) of a plain least-squares similarity-transform fit with 10% of points corrupted to implausible positions",
     "type": "script",
-    "value": 0.18000993651347047
+    "value": 0.1800099365134703
   },
   "ransac_robust_fit_rotation_error_rad": {
     "reproduce": "scripts/compute_numbers.py::ransac_outlier_rejection_rotation_error",
     "statement": "same scenario, same points, fit with fit_similarity_transform_ransac instead -- the outlier-rejection improvement added to LED calibration",
     "type": "script",
-    "value": 4.163336342344337e-17
+    "value": 5.551115123125783e-17
   },
   "suite_coverage": {
     "reproduce": "scripts/checks.py",
@@ -117,12 +165,12 @@
     "reproduce": "scripts/compute_numbers.py::tie_informed_initialization_phase_correlation_gain",
     "statement": "phase_correlation for the SAME object, initializing the solver with a Transport of Intensity Equation phase estimate instead of zero -- fixes the degenerate saddle point found in docs/roadmap_agentic_multispectral_pipeline.md section 1 point 6",
     "type": "script",
-    "value": 0.9862445094142002
+    "value": 0.9862445094142
   },
   "unwrapping_error_reduction_factor": {
     "reproduce": "scripts/compute_numbers.py::unwrapping_error_reduction_factor",
     "statement": "how many times smaller the coupled (unwrap + dispersion-fit) pipeline's thickness RMSE is than a naive baseline that treats each channel's raw wrapped phase as already-unwrapped OPL, on a synthetic dispersion signal large enough to require real unwrapping",
     "type": "script",
-    "value": 182.76168452701063
+    "value": 182.76168452701083
   }
 }

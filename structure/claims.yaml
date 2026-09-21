@@ -244,3 +244,98 @@ claims:
           - scripts/compute_numbers.py
     depends_on: []
     status: established
+
+  - id: gd_beats_wirtinger_noiseless
+    statement: >
+      Plain Adam gradient descent (joint_calibration.reconstruct_and_calibrate
+      with calibrate_leds=False) reconstructs this project's standard
+      synthetic object better than the Wirtinger flow, noiseless, same data,
+      LED positions known -- strikingly so on blue, where the Wirtinger flow
+      never converges even at 400 epochs while gradient descent gets there in
+      100 iterations. NOT a general advantage: one object, one geometry, and
+      the same optimizer does not fix the weak pure-phase saddle point of
+      phase_only_solver_limitation (negative test in
+      tests/test_gradient_descent_vs_wirtinger.py).
+    file: docs/roadmap_agentic_multispectral_pipeline.md
+    numbers: [gd_noiseless_blue_wirtinger_phase_correlation, gd_noiseless_blue_gradient_descent_phase_correlation]
+    evidence:
+      - id: ev_gd_vs_wf_noiseless_blue
+        description: phase_correlation of Wirtinger flow (400 epochs) vs gradient descent (100 iterations), blue, bin-aligned k
+        data_refs:
+          - src/ptyco_full_simulator/joint_calibration.py
+          - tests/test_gradient_descent_vs_wirtinger.py
+          - scripts/compute_numbers.py
+    depends_on: [phase_only_solver_limitation]
+    status: established
+
+  - id: gd_amplitude_loss_survives_poisson_noise
+    statement: >
+      The gradient-descent advantage survives Poisson noise ONLY with the
+      amplitude loss (Gaussian noise on |field|); the intensity-L2 and
+      Poisson-NLL losses do not hold up. 8-seed sweeps: green +0.462 +/- 0.026
+      and red +0.472 +/- 0.013 phase_correlation over the Wirtinger flow at
+      peak photon count 20 (8/8 seeds each). Blue is rescued only at peak
+      100 and fails for every solver at peak <= 20. seed=0 of the green
+      sweep is the exact reproducible number quoted here; the diagnostic
+      attempts to decide when to keep iterating after TIE initialization
+      (defocus-pair residual, milestone 12) failed -- a qualitative negative
+      not in this registry. Synthetic only; no real captures yet.
+    file: docs/roadmap_agentic_multispectral_pipeline.md
+    numbers: [gd_noise_green_peak20_wirtinger_phase_correlation, gd_noise_green_peak20_gradient_descent_amplitude_phase_correlation]
+    evidence:
+      - id: ev_gd_amplitude_loss_noise_seed0
+        description: phase_correlation of Wirtinger flow vs amplitude-loss gradient descent, green, peak 20, seed 0
+        data_refs:
+          - src/ptyco_full_simulator/joint_calibration.py
+          - scripts/sweep_gd_vs_wf_noise.py
+          - tests/test_gradient_descent_vs_wirtinger.py
+          - scripts/compute_numbers.py
+    depends_on: [gd_beats_wirtinger_noiseless]
+    status: established
+
+  - id: inverse_crime_hides_wirtinger_failure_on_exact_k
+    statement: >
+      The repo's older fake captures (forward_model.simulate_lr_stack) round
+      each LED's k to a spectrum bin -- exactly the model the Wirtinger flow
+      inverts (an inverse crime). On captures with EXACT k, which is what
+      real hardware produces, the Wirtinger flow fails (bin-rounded k model,
+      ~0.4 bin mean error) while gradient descent with the continuous-k
+      model succeeds; conversely, handing gradient descent a bin-rounded
+      grid on exact-k data drops it to ~0.09. All solver comparisons above
+      used bin-aligned k on purpose (fair, not realistic), so real LED
+      position accuracy is probably the dominant unknown -- to be measured
+      with real captures, which do not exist yet.
+    file: docs/roadmap_agentic_multispectral_pipeline.md
+    numbers: [exact_k_wirtinger_phase_correlation, exact_k_gradient_descent_phase_correlation]
+    evidence:
+      - id: ev_exact_k_wf_vs_gd
+        description: phase_correlation of Wirtinger flow vs continuous-k gradient descent on the same exact-k data, green, 16px crops
+        data_refs:
+          - src/ptyco_full_simulator/joint_calibration.py
+          - tests/test_gd_solver_pipelines.py
+          - scripts/compute_numbers.py
+    depends_on: [gd_beats_wirtinger_noiseless]
+    status: established
+
+  - id: lena_map_phase_recoverable_with_photons
+    statement: >
+      On a real-image test object (Lena as amplitude, aerial-photo Map as
+      phase, phase max 0.3*pi), the phase is not recovered at a low photon
+      budget and becomes recoverable from ~1000 peak photons with the
+      amplitude-loss gradient descent; more LEDs help only at a FIXED HR
+      canvas (an earlier grid-size sweep was confounded by canvas growth).
+      Redundancy vs LED-overlap effects are NOT separated. seed=0 is the
+      exact reproducible number; the multi-seed sweep is in
+      scripts/sweep_lena_map_noise_and_redundancy.py. Synthetic; the source
+      images live outside the repo.
+    file: docs/roadmap_agentic_multispectral_pipeline.md
+    numbers: [lena_map_gd_phase_correlation_peak_100, lena_map_gd_phase_correlation_peak_1000]
+    evidence:
+      - id: ev_lena_map_photon_count
+        description: phase_correlation of amplitude-loss gradient descent at peak photon count 100 vs 1000, green, 9x9 LEDs, 32px crops
+        data_refs:
+          - src/ptyco_full_simulator/test_objects.py
+          - scripts/sweep_lena_map_noise_and_redundancy.py
+          - scripts/compute_numbers.py
+    depends_on: [gd_amplitude_loss_survives_poisson_noise]
+    status: established

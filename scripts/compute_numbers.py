@@ -34,6 +34,7 @@ from ptyco_full_simulator import chromatic_diagnostics as cd  # noqa: E402
 from ptyco_full_simulator import config, forward_model, led_array, metrics, optics  # noqa: E402
 from ptyco_full_simulator import led_calibration as cal, multispectral as ms  # noqa: E402
 from ptyco_full_simulator import propagation as prop, reconstruction  # noqa: E402
+from ptyco_full_simulator import joint_calibration as jc, test_objects  # noqa: E402
 
 WAVELENGTHS_UM = {ch: config.CHANNEL_WAVELENGTH_NM[ch] / 1000.0 for ch in ("red", "green", "blue")}
 A_BASELINE = 1.34   # plausible biological-sample baseline refractive index, see tests/test_dispersion_fit.py
@@ -556,6 +557,138 @@ def ransac_outlier_rejection_rotation_error():
     return abs(plain["rotation_rad"] - rotation_rad), abs(ransac["rotation_rad"] - rotation_rad)
 
 
+def _gd_phantom(shape):
+    """Same phantom as tests/test_led_calibration.py's `_synthetic_object`
+    (re-exported by tests/test_joint_calibration.py), which the milestone
+    11-14 gradient-descent tests all use: `_amplitude_blob` plus a smooth
+    0.15*pi phase.
+    """
+    h, w = shape
+    y, x = np.mgrid[0:h, 0:w].astype(float)
+    y, x = y / h - 0.5, x / w - 0.5
+    return _amplitude_blob(shape) * np.exp(1j * 0.15 * np.pi * np.sin(2 * np.pi * x) * np.cos(2 * np.pi * y))
+
+
+def _gd_case(channel, crop, bin_aligned, truth_fn=_gd_phantom, grid_size=9):
+    """Shared setup of the milestone 11-14 solver comparisons: returns
+    (setup, factor, hr_pixel_um, hr_shape, truth, grid). `bin_aligned`
+    rounds each LED's k to a spectrum bin (the model Wirtinger flow
+    inverts; how tests/test_gradient_descent_vs_wirtinger.py sets up a
+    fair comparison); otherwise the exact k is kept (what real hardware
+    produces).
+    """
+    setup = config.default_setup(channel=channel, grid_size=grid_size, objective="current",
+                                  resolution_px=(crop, crop))
+    factor = optics.upsampling_factor(setup)
+    hr_pixel_um = optics.actual_hr_pixel_size_um(setup, factor)
+    hr_shape = optics.hr_shape((crop, crop), factor)
+    truth = truth_fn(hr_shape)
+    grid = led_array.build_led_grid(setup.led_array, setup.wavelength_um)
+    if bin_aligned:
+        dk = 1 / (hr_shape[1] * hr_pixel_um)
+        grid = [{**e, "fx": round(e["fx"] / dk) * dk, "fy": round(e["fy"] / dk) * dk} for e in grid]
+    return setup, factor, hr_pixel_um, hr_shape, truth, grid
+
+
+def _wf_and_gd(setup, factor, hr_pixel_um, hr_shape, grid, raw, crop, wf_iterations, gd_iterations,
+               truth, loss="amplitude"):
+    """Phase correlation of Wirtinger flow (`reconstruction.reconstruct`)
+    and Adam gradient descent (`joint_calibration.reconstruct_and_calibrate`,
+    calibrate_leds=False), same `raw` bin-model captures, same `grid`.
+    """
+    lp, na, wl = setup.lr_pixel_size_um, setup.objective.na, setup.wavelength_um
+    wf = reconstruction.reconstruct(raw, grid, hr_pixel_um, lp, na, wl, factor,
+                                     iterations=wf_iterations)["object"]
+    scale = (hr_shape[0] * hr_shape[1]) / (crop * crop)
+    meas = {k: v / scale ** 2 for k, v in raw.items()}  # jc's object-unit intensities
+    init = jc.initial_object_from_center_led(meas[(grid[0]["row"], grid[0]["col"])], hr_shape)
+    gd = jc.reconstruct_and_calibrate(meas, grid, hr_shape, hr_pixel_um, (crop, crop), lp, na, wl, init,
+                                       n_iterations=gd_iterations, calibrate_leds=False,
+                                       loss=loss)["object"]
+    return (metrics.compare_to_ground_truth(wf, truth)["phase_correlation"],
+            metrics.compare_to_ground_truth(gd, truth)["phase_correlation"])
+
+
+def gd_vs_wirtinger_noiseless_blue():
+    """Same scenario as
+    tests/test_gradient_descent_vs_wirtinger.py::test_gradient_descent_converges_on_blue_where_wirtinger_flow_does_not:
+    blue channel, 16px crops, 9x9 LEDs, bin-aligned k (identical
+    information for both solvers), noiseless. Returns (Wirtinger flow at
+    400 epochs, Adam gradient descent at 100 iterations) phase correlation.
+    """
+    crop = 16
+    setup, factor, hp, hs, truth, grid = _gd_case("blue", crop, bin_aligned=True)
+    raw = forward_model.simulate_lr_stack(truth, hp, grid, (crop, crop), setup.lr_pixel_size_um,
+                                           setup.objective.na, setup.wavelength_um)
+    return _wf_and_gd(setup, factor, hp, hs, grid, raw, crop, 400, 100, truth, loss="intensity")
+
+
+def gd_amplitude_loss_vs_wirtinger_under_noise():
+    """Same scenario as
+    tests/test_gradient_descent_vs_wirtinger.py::test_amplitude_loss_gradient_descent_beats_wirtinger_flow_under_poisson_noise
+    (green), seed 0 only: peak photon count 20, Wirtinger flow 200 epochs
+    vs gradient descent with the amplitude loss, 100 iterations. The
+    8-seed statistic (scripts/sweep_gd_vs_wf_noise.py) is not a single
+    deterministic number.
+    """
+    crop = 16
+    setup, factor, hp, hs, truth, grid = _gd_case("green", crop, bin_aligned=True)
+    raw = forward_model.simulate_lr_stack(truth, hp, grid, (crop, crop), setup.lr_pixel_size_um,
+                                           setup.objective.na, setup.wavelength_um,
+                                           peak_photon_count=20, rng=np.random.default_rng(0))
+    return _wf_and_gd(setup, factor, hp, hs, grid, raw, crop, 200, 100, truth, loss="amplitude")
+
+
+def exact_k_wirtinger_vs_gd():
+    """Same scenario as
+    tests/test_gd_solver_pipelines.py::test_on_exact_k_data_the_bin_rounded_wirtinger_flow_fails_where_gradient_descent_does_not:
+    green, 16px crops, captures simulated with the EXACT (unrounded) LED k
+    (jc.simulate_lr_stack_continuous), noiseless. Wirtinger flow (bin-rounded
+    k model, 200 epochs) vs gradient descent (continuous-k model, amplitude
+    loss, 100 iterations, via reconstruct_gradient_descent). Returns
+    (wf, gd) phase correlation.
+    """
+    crop = 16
+    setup, factor, hp, hs, truth, grid = _gd_case("green", crop, bin_aligned=False)
+    lp, na, wl = setup.lr_pixel_size_um, setup.objective.na, setup.wavelength_um
+    lr = jc.simulate_lr_stack_continuous(truth, hp, grid, (crop, crop), lp, na, wl)
+    scale = (hs[0] * hs[1]) / (crop * crop)
+    wf = reconstruction.reconstruct({k: v * scale ** 2 for k, v in lr.items()}, grid, hp, lp, na, wl,
+                                     factor, iterations=200)["object"]
+    gd = jc.reconstruct_gradient_descent(lr, grid, hp, lp, na, wl, factor, iterations=100)["object"]
+    return (metrics.compare_to_ground_truth(wf, truth)["phase_correlation"],
+            metrics.compare_to_ground_truth(gd, truth)["phase_correlation"])
+
+
+def lena_map_gd_phase_correlation_by_photon_count():
+    """Milestone 13 experiment (scripts/sweep_lena_map_noise_and_redundancy.py,
+    part A) at seed 0: Lena(amplitude)+Map(phase) object, phase max
+    0.3*pi, green, 9x9 LEDs, 32px crops, bin-aligned k, Poisson noise at
+    peak photon count 100 and 1000; gradient descent with the amplitude
+    loss (100 iterations). Returns {peak: gd phase correlation}. Needs
+    the two images outside the repo (test_objects.DEFAULT_DATA_DIR or
+    $PTYCO_DATA_SOURCE).
+    """
+    crop = 32
+    setup, factor, hp, hs, truth, grid = _gd_case(
+        "green", crop, bin_aligned=True,
+        truth_fn=lambda shape: test_objects.lena_map_object(shape, phase_max_rad=0.3 * np.pi)[0])
+    out = {}
+    for peak in (100.0, 1000.0):
+        raw = forward_model.simulate_lr_stack(truth, hp, grid, (crop, crop), setup.lr_pixel_size_um,
+                                               setup.objective.na, setup.wavelength_um,
+                                               peak_photon_count=peak, rng=np.random.default_rng(0))
+        scale = (hs[0] * hs[1]) / (crop * crop)
+        meas = {k: v / scale ** 2 for k, v in raw.items()}
+        init = jc.initial_object_from_center_led(meas[(grid[0]["row"], grid[0]["col"])], hs)
+        gd = jc.reconstruct_and_calibrate(meas, grid, hs, hp, (crop, crop), setup.lr_pixel_size_um,
+                                           setup.objective.na, setup.wavelength_um, init,
+                                           n_iterations=100, calibrate_leds=False,
+                                           loss="amplitude")["object"]
+        out[peak] = metrics.compare_to_ground_truth(gd, truth)["phase_correlation"]
+    return out
+
+
 def main():
     thickness_corr = multispectral_thickness_correlation()
     unwrap_factor = unwrapping_error_reduction_factor()
@@ -568,6 +701,10 @@ def main():
     epry_paper_baseline, epry_paper_corrected = epry_regression_not_reproduced_at_paper_scale()
     adaptive_step_fixed_corr, adaptive_step_adaptive_corr = adaptive_step_heavy_noise_gain()
     chromatic_blue_error, chromatic_red_error = chromatic_shift_recovery_error()
+    gd_blue_wf, gd_blue_gd = gd_vs_wirtinger_noiseless_blue()
+    gd_noise_wf, gd_noise_gd = gd_amplitude_loss_vs_wirtinger_under_noise()
+    exact_k_wf, exact_k_gd = exact_k_wirtinger_vs_gd()
+    lena_map = lena_map_gd_phase_correlation_by_photon_count()
 
     registry = {
         "multispectral_thickness_correlation": {
@@ -774,6 +911,90 @@ def main():
             "type": "script",
             "reproduce": "scripts/compute_numbers.py::chromatic_shift_recovery_error",
         },
+        "gd_noiseless_blue_wirtinger_phase_correlation": {
+            "value": gd_blue_wf,
+            "statement": (
+                "phase_correlation of the Wirtinger flow (400 epochs) on the blue channel, noiseless, 16px crops, 9x9 LEDs, "
+                "bin-aligned k so both solvers see identical information -- it never converges, even with 4x the "
+                "iterations (tests/test_gradient_descent_vs_wirtinger.py)"
+            ),
+            "type": "script",
+            "reproduce": "scripts/compute_numbers.py::gd_vs_wirtinger_noiseless_blue",
+        },
+        "gd_noiseless_blue_gradient_descent_phase_correlation": {
+            "value": gd_blue_gd,
+            "statement": (
+                "same scenario and data, Adam gradient descent on the intensity loss (100 iterations, "
+                "joint_calibration.reconstruct_and_calibrate, calibrate_leds=False) -- converges where the Wirtinger flow "
+                "does not. NOISELESS, one object, one geometry: NOT a general advantage (see the amplitude-loss noise entries)"
+            ),
+            "type": "script",
+            "reproduce": "scripts/compute_numbers.py::gd_vs_wirtinger_noiseless_blue",
+        },
+        "gd_noise_green_peak20_wirtinger_phase_correlation": {
+            "value": gd_noise_wf,
+            "statement": (
+                "phase_correlation of the Wirtinger flow (200 epochs), green channel, Poisson noise at peak photon count 20, "
+                "seed 0, bin-aligned k, 16px crops -- the exact reproducible seed of an 8-seed sweep (not itself in this "
+                "registry since a multi-seed statistic isn't a single deterministic number)"
+            ),
+            "type": "script",
+            "reproduce": "scripts/compute_numbers.py::gd_amplitude_loss_vs_wirtinger_under_noise",
+        },
+        "gd_noise_green_peak20_gradient_descent_amplitude_phase_correlation": {
+            "value": gd_noise_gd,
+            "statement": (
+                "same scenario, same noisy data, Adam gradient descent with loss=\"amplitude\" (100 iterations). Across 8 seeds "
+                "(scripts/sweep_gd_vs_wf_noise.py) the paired gain over the Wirtinger flow is +0.462 +/- 0.026 SE in green "
+                "(8/8) and +0.472 +/- 0.013 in red (8/8); the intensity-L2 and Poisson-NLL losses do not hold up under noise, "
+                "and blue fails for every solver at peak <= 20"
+            ),
+            "type": "script",
+            "reproduce": "scripts/compute_numbers.py::gd_amplitude_loss_vs_wirtinger_under_noise",
+        },
+        "exact_k_wirtinger_phase_correlation": {
+            "value": exact_k_wf,
+            "statement": (
+                "phase_correlation of the Wirtinger flow (200 epochs, bin-rounded k model) on captures simulated with the "
+                "EXACT unrounded LED k (jc.simulate_lr_stack_continuous), green, 16px crops, noiseless -- the "
+                "inverse-crime caveat: older fake captures round k to a bin (the very model the Wirtinger flow inverts), "
+                "which hides this failure on data like real hardware would produce"
+            ),
+            "type": "script",
+            "reproduce": "scripts/compute_numbers.py::exact_k_wirtinger_vs_gd",
+        },
+        "exact_k_gradient_descent_phase_correlation": {
+            "value": exact_k_gd,
+            "statement": (
+                "same exact-k data, gradient descent with the matched continuous-k model (amplitude loss, 100 iterations, "
+                "reconstruct_gradient_descent). Conversely, giving it a bin-rounded LED grid on exact-k data drops it to "
+                "~0.09 (tests/test_gd_solver_pipelines.py docstring, not in this registry): real LED position accuracy is "
+                "probably the dominant unknown for any solver"
+            ),
+            "type": "script",
+            "reproduce": "scripts/compute_numbers.py::exact_k_wirtinger_vs_gd",
+        },
+        "lena_map_gd_phase_correlation_peak_100": {
+            "value": lena_map[100.0],
+            "statement": (
+                "phase_correlation of amplitude-loss gradient descent (100 iterations) on the Lena(amplitude)+Map(phase) "
+                "object (phase max 0.3*pi), green, 9x9 LEDs, 32px crops, bin-aligned k, Poisson noise at peak photon "
+                "count 100, seed 0 -- the phase is NOT recovered at this photon budget. Needs the images in "
+                "test_objects.DEFAULT_DATA_DIR (outside the repo)"
+            ),
+            "type": "script",
+            "reproduce": "scripts/compute_numbers.py::lena_map_gd_phase_correlation_by_photon_count",
+        },
+        "lena_map_gd_phase_correlation_peak_1000": {
+            "value": lena_map[1000.0],
+            "statement": (
+                "same scenario at peak photon count 1000 -- the phase starts to become recoverable from ~1000 peak photons "
+                "(scripts/sweep_lena_map_noise_and_redundancy.py part A; 4 seeds per peak, not in this registry). The "
+                "redundancy-vs-LED-overlap effect at fixed canvas is not separated here"
+            ),
+            "type": "script",
+            "reproduce": "scripts/compute_numbers.py::lena_map_gd_phase_correlation_by_photon_count",
+        },
     }
 
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
@@ -801,6 +1022,14 @@ def main():
     print(f"  adaptive_step_adaptive_phase_correlation     = {adaptive_step_adaptive_corr:.4f}")
     print(f"  chromatic_shift_recovery_error_px            = {chromatic_blue_error:.4f}")
     print(f"  chromatic_shift_no_injection_error_px        = {chromatic_red_error:.4f}")
+    print(f"  gd_noiseless_blue_wirtinger_phase_correlation = {gd_blue_wf:.4f}")
+    print(f"  gd_noiseless_blue_gradient_descent_phase_correlation = {gd_blue_gd:.4f}")
+    print(f"  gd_noise_green_peak20_wirtinger_phase_correlation = {gd_noise_wf:.4f}")
+    print(f"  gd_noise_green_peak20_gradient_descent_amplitude_phase_correlation = {gd_noise_gd:.4f}")
+    print(f"  exact_k_wirtinger_phase_correlation          = {exact_k_wf:.4f}")
+    print(f"  exact_k_gradient_descent_phase_correlation   = {exact_k_gd:.4f}")
+    print(f"  lena_map_gd_phase_correlation_peak_100       = {lena_map[100.0]:.4f}")
+    print(f"  lena_map_gd_phase_correlation_peak_1000      = {lena_map[1000.0]:.4f}")
 
 
 if __name__ == "__main__":
