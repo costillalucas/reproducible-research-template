@@ -1133,10 +1133,21 @@ antes de construir la capa de orquestación, y siguiendo el ranking de
       flow no converge nunca en blue, ni con 400 épocas). Sirve como
       referencia para la pregunta abierta de 2a (¿por qué un canal se
       queda en mínimo local?): en este testbed es propiedad del solver,
-      no del problema. **Salvedades**: con ruido de Poisson la ventaja se
-      achica y no es limpia (una sola semilla; pico 100: blue GD 0.006 vs
-      WF 0.149; pico 10: blue GD 0.38 vs WF -0.03) — falta análisis
-      multi-semilla; un solo objeto/geometría; más costo por iteración.
+      no del problema. **Salvedades**: un solo objeto/geometría; más costo por
+      iteración. **Con ruido la ventaja NO se sostiene** (barrido pareado,
+      8 semillas × 3 canales × pico de fotones 100/20/5, WF 200 épocas vs
+      GD 100 iteraciones, `scripts/sweep_gd_vs_wf_noise.py`; diferencia
+      media GD−WF de `phase_correlation` ± error estándar): GD gana solo
+      en red con pico 100 (+0.090 ± 0.018, 8/8). En red con pico 20 pierde
+      (−0.114 ± 0.039, 1/8); green empata a pico 100 (−0.016 ± 0.021) y
+      tiende a perder a pico 20 (−0.062 ± 0.032); blue falla en los dos
+      métodos con ruido (WF ≈ 0, GD muy inestable, sd 0.23-0.41 entre
+      semillas). La ventaja sin ruido en blue (0.878 vs −0.056) es real
+      pero no transfiere a datos ruidosos, que es lo que habrá en el
+      laboratorio. No se probó si regularizar o cortar antes el GD (la
+      pérdida L2 sobre intensidad no es la adecuada para ruido de Poisson)
+      recupera la ventaja — pendiente. **Conclusión: no cambiar el solver
+      de los pipelines por esto.**
       **No arregla** el punto silla de fase pura (sección 1.6): GD
       -0.215 vs WF -0.044, eso requiere información nueva (TIE), no otro
       optimizador.

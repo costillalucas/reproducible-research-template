@@ -14,10 +14,14 @@ solvers see identical information):
 Blue is the striking one: the Wirtinger flow never converges (even at 400
 epochs) while gradient descent gets there in 100 iterations.
 
-NOT established, on purpose left out of the assertions:
-- Under Poisson noise the advantage shrinks and is not clean (single seed,
-  peak 100: blue GD 0.006 vs WF 0.149; peak 10: blue GD 0.38 vs WF -0.03;
-  green/red roughly tied or slightly favoring GD). Needs multi-seed work.
+NOT a general advantage -- multi-seed noise sweep (8 seeds, peak photon
+count 100/20/5, scripts/sweep_gd_vs_wf_noise.py) shows it does not survive
+Poisson noise: GD only wins red at peak 100 (+0.090 +/- 0.018, 8/8),
+loses red at peak 20 (-0.114 +/- 0.039), ties/loses green, and blue fails
+for both. These tests assert the NOISELESS result only; do not read them
+as a reason to replace `reconstruction.reconstruct`.
+
+NOT established:
 - Only one object, one geometry. Cost per iteration is higher for GD.
 - The weak pure-phase saddle-point failure
   (tests/test_weak_phase_object_limitation.py) is NOT fixed by GD -- see
