@@ -29,6 +29,9 @@ import numpy as np
 from .optics import circular_pupil
 
 
+_LOSSES = ("intensity", "amplitude", "poisson")
+
+
 def _coords(hr_shape: tuple[int, int], hr_pixel_um: float) -> tuple[np.ndarray, np.ndarray]:
     h, w = hr_shape
     y = (np.arange(h) - h // 2) * hr_pixel_um
@@ -82,10 +85,16 @@ def simulate_lr_stack_continuous(hr_object: np.ndarray, hr_pixel_um: float,
 
 def loss_and_gradients(hr_object: np.ndarray, hr_pixel_um: float, led_grid: list[dict],
                         lr_images: dict, lr_shape: tuple[int, int], lr_pixel_um: float,
-                        na: float, wavelength_um: float) -> dict:
-    """Loss L = sum_i sum_px (I_pred - I_meas)^2 / sum_i sum_px I_meas^2
-    (paper Eq. 4, normalized so step sizes don't depend on image
-    brightness) and its exact gradients:
+                        na: float, wavelength_um: float, loss: str = "intensity") -> dict:
+    """Loss, summed over LEDs and pixels and normalized so step sizes don't
+    depend on image brightness, plus its exact gradients. `loss`:
+      - "intensity": sum (I - M)^2 / sum M^2 (paper Eq. 4);
+      - "amplitude": sum (|f| - sqrt(M))^2 / sum M -- Gaussian noise on the
+        amplitude, the choice Yeh et al. 2015 found most robust to noise;
+      - "poisson": sum (I - M*ln(I + eps)) / sum M -- the Poisson negative
+        log-likelihood (up to a constant), the actual noise model of a
+        photon-counting camera.
+    Gradients:
       - `grad_object`: dL/d(conj(o)), complex (real/imag partials are
         2*Re/2*Im of it);
       - `grad_k`: (n_leds, 2) array of dL/d(fx, fy).
@@ -96,9 +105,12 @@ def loss_and_gradients(hr_object: np.ndarray, hr_pixel_um: float, led_grid: list
     n_lr = lr_shape[0] * lr_shape[1]
     scale = _field_scale(hr_object.shape, lr_shape)
     n_hr = hr_object.shape[0] * hr_object.shape[1]
-    norm = sum(float(np.sum(lr_images[(e["row"], e["col"])] ** 2)) for e in led_grid)
+    if loss not in _LOSSES:
+        raise ValueError(f"loss must be one of {_LOSSES}, got {loss!r}")
+    power = 2 if loss == "intensity" else 1
+    norm = sum(float(np.sum(lr_images[(e["row"], e["col"])] ** power)) for e in led_grid)
 
-    loss = 0.0
+    total = 0.0
     grad_obj = np.zeros_like(hr_object, dtype=complex)
     grad_k = np.zeros((len(led_grid), 2))
     for i, e in enumerate(led_grid):
@@ -107,11 +119,22 @@ def loss_and_gradients(hr_object: np.ndarray, hr_pixel_um: float, led_grid: list
         u = hr_object * tilt
         U = np.fft.fftshift(np.fft.fft2(u))
         field = scale * np.fft.ifft2(np.fft.ifftshift(U[ys, xs] * pupil))
-        resid = np.abs(field) ** 2 - meas
-        loss += float(np.sum(resid ** 2))
+        inten = np.abs(field) ** 2
+        if loss == "intensity":
+            resid = inten - meas
+            total += float(np.sum(resid ** 2))
+            g_field = 2.0 * resid * field  # dL/d conj(field)
+        elif loss == "amplitude":
+            amp = np.sqrt(inten)
+            resid = amp - np.sqrt(np.clip(meas, 0, None))
+            total += float(np.sum(resid ** 2))
+            g_field = resid * field / np.maximum(amp, 1e-12)
+        else:
+            eps = 1e-6 * max(float(meas.max()), 1e-12)
+            total += float(np.sum(inten - meas * np.log(inten + eps)))
+            g_field = (1.0 - meas / (inten + eps)) * field
 
         # backprop: dL/d conj(field) -> through ifft2 -> pupil -> zero-pad -> fft2
-        g_field = 2.0 * resid * field
         g_crop = scale * np.fft.fftshift(np.fft.fft2(g_field)) / n_lr * np.conj(pupil)
         g_full = np.zeros(hr_object.shape, dtype=complex)
         g_full[ys, xs] = g_crop
@@ -121,7 +144,7 @@ def loss_and_gradients(hr_object: np.ndarray, hr_pixel_um: float, led_grid: list
         d_conj_u = 2j * np.pi * np.conj(u)
         grad_k[i, 0] = 2.0 * np.real(np.sum(g_u * X * d_conj_u))
         grad_k[i, 1] = 2.0 * np.real(np.sum(g_u * Y * d_conj_u))
-    return {"loss": loss / norm, "grad_object": grad_obj / norm, "grad_k": grad_k / norm}
+    return {"loss": total / norm, "grad_object": grad_obj / norm, "grad_k": grad_k / norm}
 
 
 class _Adam:
@@ -146,7 +169,7 @@ def reconstruct_and_calibrate(lr_images: dict, led_grid_nominal: list[dict],
                                initial_object: np.ndarray, n_iterations: int = 200,
                                calibrate_leds: bool = True, led_model: str = "rigid",
                                warmup_iterations: int = 0, object_lr: float = 0.02,
-                               k_lr_bins: float = 0.02) -> dict:
+                               k_lr_bins: float = 0.02, loss: str = "intensity") -> dict:
     """Joint object + LED-position recovery (AD-SC). With
     `calibrate_leds=False` this is plain gradient-descent FPM with the
     given LED positions held fixed (the paper's "direct AD" baseline).
@@ -158,6 +181,8 @@ def reconstruct_and_calibrate(lr_images: dict, led_grid_nominal: list[dict],
     regularization `led_calibration.fit_similarity_transform` uses, here
     optimized jointly with the object. Far fewer parameters than data, so
     it can't overfit per-LED the way "per_led" can on small crops.
+
+    `loss`: see `loss_and_gradients` ("intensity", "amplitude", "poisson").
 
     `warmup_iterations`: the first N iterations update only the object
     (positions held at nominal), so the position gradient isn't computed
@@ -186,7 +211,7 @@ def reconstruct_and_calibrate(lr_images: dict, led_grid_nominal: list[dict],
     history = []
     for it in range(n_iterations):
         out = loss_and_gradients(obj, hr_pixel_um, grid, lr_images, lr_shape,
-                                  lr_pixel_um, na, wavelength_um)
+                                  lr_pixel_um, na, wavelength_um, loss)
         history.append({"iteration": it, "loss": out["loss"]})
         g = out["grad_object"]
         obj = obj - opt_re.step(2 * g.real) - 1j * opt_im.step(2 * g.imag)

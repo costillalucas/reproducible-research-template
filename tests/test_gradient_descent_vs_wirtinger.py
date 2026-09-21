@@ -104,3 +104,30 @@ def test_gradient_descent_does_not_fix_the_weak_phase_saddle_point():
                                        setup.objective.na, setup.wavelength_um, init,
                                        n_iterations=200, calibrate_leds=False)["object"]
     assert _phase_corr(gd, obj) < 0.3
+
+
+@pytest.mark.parametrize("channel", ["green", "red"])
+def test_amplitude_loss_gradient_descent_beats_wirtinger_flow_under_poisson_noise(channel):
+    """The noiseless advantage survives noise ONLY with the amplitude loss
+    (`loss="amplitude"`, Gaussian noise on |field|), not the paper's
+    intensity-L2 loss. 8-seed sweep (scripts/sweep_gd_vs_wf_noise.py,
+    peak photon count 20): green +0.462 +/- 0.026 and red +0.472 +/- 0.013
+    phase_correlation over the Wirtinger flow, 8/8 seeds each. Blue is NOT
+    covered: it wins at peak 100 (+0.695) but fails for every method at
+    peak <= 20. Here: 4 seeds at peak 20, WF 200 epochs vs GD 100 its.
+    """
+    setup, factor, hp, hs, truth, grid, _ = _bin_aligned_case(channel)
+    lp, na, wl = setup.lr_pixel_size_um, setup.objective.na, setup.wavelength_um
+    scale = (hs[0] * hs[1]) / (CROP * CROP)
+    diffs = []
+    for seed in range(4):
+        raw = forward_model.simulate_lr_stack(truth, hp, grid, (CROP, CROP), lp, na, wl,
+                                               peak_photon_count=20, rng=np.random.default_rng(seed))
+        wf = reconstruction.reconstruct(raw, grid, hp, lp, na, wl, factor, iterations=200)["object"]
+        meas = {k: v / scale ** 2 for k, v in raw.items()}
+        init = jc.initial_object_from_center_led(meas[(grid[0]["row"], grid[0]["col"])], hs)
+        gd = jc.reconstruct_and_calibrate(meas, grid, hs, hp, (CROP, CROP), lp, na, wl, init,
+                                           n_iterations=100, calibrate_leds=False, loss="amplitude")["object"]
+        diffs.append(_phase_corr(gd, truth) - _phase_corr(wf, truth))
+    assert all(d > 0 for d in diffs)
+    assert np.mean(diffs) > 0.2

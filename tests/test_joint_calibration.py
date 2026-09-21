@@ -52,7 +52,8 @@ def _measure(b, true_grid):
     return jc.simulate_lr_stack_continuous(b["truth"], b["hp"], true_grid, b["lr"], b["lp"], b["na"], b["wl"])
 
 
-def test_hand_derived_gradient_matches_finite_differences(bench):
+@pytest.mark.parametrize("loss_name", ["intensity", "amplitude", "poisson"])
+def test_hand_derived_gradient_matches_finite_differences(bench, loss_name):
     b = bench
     rng = np.random.default_rng(0)
     meas = _measure(b, b["nom"])
@@ -60,9 +61,9 @@ def test_hand_derived_gradient_matches_finite_differences(bench):
     grid = b["nom"][:12]
 
     def loss(obj, g):
-        return jc.loss_and_gradients(obj, b["hp"], g, meas, b["lr"], b["lp"], b["na"], b["wl"])["loss"]
+        return jc.loss_and_gradients(obj, b["hp"], g, meas, b["lr"], b["lp"], b["na"], b["wl"], loss_name)["loss"]
 
-    out = jc.loss_and_gradients(guess, b["hp"], grid, meas, b["lr"], b["lp"], b["na"], b["wl"])
+    out = jc.loss_and_gradients(guess, b["hp"], grid, meas, b["lr"], b["lp"], b["na"], b["wl"], loss_name)
     h = 1e-6
     for i, axis, col in [(3, "fx", 0), (7, "fy", 1)]:
         plus, minus = [dict(e) for e in grid], [dict(e) for e in grid]

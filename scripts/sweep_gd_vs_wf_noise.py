@@ -11,6 +11,8 @@ sys.path.insert(0,"src"); sys.path.insert(0,"tests")
 from ptyco_full_simulator import config, forward_model, led_array, metrics, optics, reconstruction, joint_calibration as jc
 from test_joint_calibration import _synthetic_object
 CROP=16
+# (result key, loss, iterations); the first is the original sweep's GD
+VARIANTS=[("gd","intensity",100),("gd_amp","amplitude",100),("gd_poisson","poisson",100),("gd_poisson30","poisson",30)]
 def job(a):
     ch,peak,seed=a
     setup=config.default_setup(channel=ch,grid_size=9,objective="current",resolution_px=(CROP,CROP))
@@ -22,9 +24,12 @@ def job(a):
     wf=reconstruction.reconstruct(raw,grid,hp,lp,na,wl,factor,iterations=200)["object"]
     scale=(hs[0]*hs[1])/(CROP*CROP); meas={k:v/scale**2 for k,v in raw.items()}
     init=jc.initial_object_from_center_led(meas[(grid[0]["row"],grid[0]["col"])],hs)
-    gd=jc.reconstruct_and_calibrate(meas,grid,hs,hp,(CROP,CROP),lp,na,wl,init,n_iterations=100,calibrate_leds=False)["object"]
     f=lambda o:metrics.compare_to_ground_truth(o,truth)["phase_correlation"]
-    return {"ch":ch,"peak":peak,"seed":seed,"wf":f(wf),"gd":f(gd)}
+    out={"ch":ch,"peak":peak,"seed":seed,"wf":f(wf)}
+    for name,loss,iters in VARIANTS:
+        gd=jc.reconstruct_and_calibrate(meas,grid,hs,hp,(CROP,CROP),lp,na,wl,init,n_iterations=iters,calibrate_leds=False,loss=loss)["object"]
+        out[name]=f(gd)
+    return out
 if __name__=="__main__":
     jobs=[(c,p,s) for c in ("green","red","blue") for p in (100,20,5) for s in range(8)]
     with Pool(os.cpu_count()) as pool: res=pool.map(job,jobs,chunksize=1)

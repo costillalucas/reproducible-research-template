@@ -1146,14 +1146,66 @@ antes de construir la capa de orquestación, y siguiendo el ranking de
       pero no transfiere a datos ruidosos, que es lo que habrá en el
       laboratorio. No se probó si regularizar o cortar antes el GD (la
       pérdida L2 sobre intensidad no es la adecuada para ruido de Poisson)
-      recupera la ventaja — pendiente. **Conclusión: no cambiar el solver
-      de los pipelines por esto.**
+      recupera la ventaja — **[probado después, ver abajo]**.
+      **[ACTUALIZADO — misma sesión] Con la pérdida de AMPLITUD la ventaja
+      sí sobrevive al ruido.** `joint_calibration.loss_and_gradients` /
+      `reconstruct_and_calibrate` ganan `loss="amplitude"`
+      (Σ(|f|−√M)², ruido gaussiano en amplitud, la que Yeh 2015 reporta
+      más robusta) y `loss="poisson"` (log-verosimilitud de Poisson), con
+      gradiente analítico verificado contra diferencias finitas. Mismo
+      barrido pareado (8 semillas, GD 100 iteraciones vs WF 200 épocas,
+      diferencia media de `phase_correlation` ± error estándar, victorias
+      de GD): **amplitud** gana en 8/8 semillas en green (+0.128 ± 0.007
+      a pico 100, +0.462 ± 0.026 a pico 20, +0.108 ± 0.015 a pico 5) y en
+      red (+0.230 ± 0.008, +0.472 ± 0.013, +0.052 ± 0.019, 7/8 a pico 5), y
+      **rescata blue a pico 100** (+0.695 ± 0.051, 8/8: 0.708 vs 0.013).
+      **Poisson** es mixta: gana en green/red a pico 100 y 20 pero con
+      más varianza (e.g. red pico 100 +0.115 ± 0.114) y no rescata blue.
+      **Cortar antes** (Poisson, 30 iteraciones) no ayuda: pierde a pico
+      100 (−0.348 green, −0.231 red). **Sigue sin resolverse:** blue a
+      pico ≤ 20 falla con todos los métodos y pérdidas probados (mejor
+      caso ≈ 0, peores ≈ −0.37). Todavía **no** se cambió el solver de los
+      pipelines: falta probar con más objetos/geometrías y con datos
+      reales antes de reemplazar `reconstruction.reconstruct`, pero ya es
+      un candidato serio (`loss="amplitude"`), no solo una curiosidad de
+      testbed sin ruido. Test:
+      `tests/test_gradient_descent_vs_wirtinger.py` (amplitud, green y
+      red, pico 20, 4 semillas).
       **No arregla** el punto silla de fase pura (sección 1.6): GD
       -0.215 vs WF -0.044, eso requiere información nueva (TIE), no otro
       optimizador.
     - No formalizado en el registro de procedencia
       (`compute_numbers.py`/`claims.yaml`) ni cableado a los pipelines
       CLI todavía.
+
+12. **[NEGATIVO — 2026-09-21] Diagnóstico de "cuántas iteraciones de FPM
+    correr tras el arranque con TIE": el residuo del par desenfocado tampoco
+    discrimina.** Idea (la que sugería el punto 6 de la sección 1: traer
+    información genuinamente nueva, no otro derivado de las intensidades
+    brillantes): el par de capturas desenfocadas es sensible a la fase,
+    así que comparar el par que *predice* la reconstrucción actual
+    (LED central, banda limitada por la pupila, propagada ±30µm) contra el
+    par *medido* no repite la ceguera de `recovery_error`/validación
+    cruzada. Probado en 6 objetos de fase mixta con FPM continuando 0/5/10/
+    20/40 iteraciones desde el arranque de TIE
+    (`scripts/explore_tie_continuation_diagnostic.py`; residuo invariante a
+    ganancia global — una primera versión sin eso dio números sin sentido,
+    ~79, por unidades de amplitud del solver):
+    - **Residuo con campo completo:** *sube* con las iteraciones en los 6
+      objetos, incluso donde la fase real *mejora* (obj0 0.979→0.989,
+      obj4 0.580→0.671). Mide distancia al arranque de TIE, no calidad.
+    - **Variante solo-fase** (amplitud medida del LED central + fase de la
+      estimación, para aislar lo que se quiere juzgar): *baja* siempre,
+      incluso donde la fase real *empeora* (obj1 0.998→0.987, obj2, obj5).
+    - En ambas, la dirección del residuo es la misma en todos los objetos,
+      así que no separa los casos que mejoran de los que empeoran; la
+      política "quedarse con el k de menor residuo" da 0.909 (=TIE solo)
+      con campo completo y 0.919 (=40 iteraciones fijas) con solo-fase,
+      contra 0.926 del oráculo.
+    - Interpretación: lo que separa "mejora" de "empeora" son componentes
+      de alta frecuencia que un defocus de 30µm limitado por la pupila casi
+      no ve. Cuarto y quinto diagnóstico descartados de este tipo.
+      Sigue abierto para el agente de orquestación.
 
 (Gap #4 FPM-INR/`zhou2023` queda fuera de este roadmap por ahora —
 mejora calidad/velocidad del solver monocromático en general por una vía
