@@ -18,8 +18,15 @@ DEFAULT_DATA_DIR = "/home/chanoscopio/Documents/LucasC/code/data_source"
 
 
 def _load_resized(path: str, shape: tuple[int, int]) -> np.ndarray:
-    img = Image.open(path).convert("L").resize((shape[1], shape[0]), Image.LANCZOS)
-    return np.asarray(img, dtype=float) / 255.0
+    img = Image.open(path)
+    if img.mode.startswith("I"):
+        # 16-bit (I;16*) / 32-bit-int grayscale, e.g. lab TIFFs: convert("L") would
+        # clip at 255 and collapse a 0..65535 ramp to a step. Go through float.
+        img, full_scale = img.convert("F"), 65535.0
+    else:
+        img, full_scale = img.convert("L"), 255.0
+    img = img.resize((shape[1], shape[0]), Image.LANCZOS)
+    return np.asarray(img, dtype=float) / full_scale
 
 
 def lena_map_object(hr_shape: tuple[int, int], phase_max_rad: float = 0.3 * np.pi,

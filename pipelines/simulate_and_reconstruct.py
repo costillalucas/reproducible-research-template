@@ -141,11 +141,21 @@ def main(argv=None) -> int:
     )
 
     led_grid = led_array.build_led_grid(setup.led_array, setup.wavelength_um)
-    lr_images = forward_model.simulate_lr_stack(
-        hr_object, hr_pixel_um, led_grid, (args.lr_size, args.lr_size),
-        setup.lr_pixel_size_um, setup.objective.na, setup.wavelength_um,
-        peak_photon_count=args.peak_photon_count, rng=rng,
-    )
+    if args.solver == "gd-amplitude":
+        # The GD solver models each LED at its exact k; simulating with the bin-rounded
+        # forward_model.simulate_lr_stack would hand it data from a different model
+        # (phase corr ~0.12 vs ~0.99 on matched data), so use the continuous-k simulator.
+        lr_images = joint_calibration.simulate_lr_stack_continuous(
+            hr_object, hr_pixel_um, led_grid, (args.lr_size, args.lr_size),
+            setup.lr_pixel_size_um, setup.objective.na, setup.wavelength_um,
+            peak_photon_count=args.peak_photon_count, rng=rng,
+        )
+    else:
+        lr_images = forward_model.simulate_lr_stack(
+            hr_object, hr_pixel_um, led_grid, (args.lr_size, args.lr_size),
+            setup.lr_pixel_size_um, setup.objective.na, setup.wavelength_um,
+            peak_photon_count=args.peak_photon_count, rng=rng,
+        )
     print(f"simulated {len(lr_images)} LR images")
 
     initial_object = None

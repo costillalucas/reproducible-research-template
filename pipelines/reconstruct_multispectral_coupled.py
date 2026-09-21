@@ -139,6 +139,15 @@ def parse_args(argv=None):
 
 def main(argv=None) -> int:
     args = parse_args(argv)
+    if args.solver == "gd-amplitude":
+        if args.recover_pupil or args.adaptive_step or args.use_reconstruction_agent:
+            raise SystemExit("--solver gd-amplitude cannot be combined with --recover-pupil, "
+                              "--adaptive-step or --use-reconstruction-agent -- those tune "
+                              "Wirtinger-flow internals (pupil update, step schedule, step_max retries)")
+        if args.qc:
+            raise SystemExit("--solver gd-amplitude cannot be combined with --qc: its recovery_error "
+                              "is sqrt(normalized amplitude loss), not the Wirtinger RMS amplitude "
+                              "residual, so the QC agent would judge convergence on a different scale")
     os.makedirs(args.output_dir, exist_ok=True)
 
     run = reconstruct_all_channels(

@@ -46,6 +46,9 @@ def convergence_summary(history: list[dict]) -> dict:
     """
     errors = [h["recovery_error"] for h in history]
     n = len(errors)
+    if n == 0:  # e.g. --iterations 0: nothing ran, so there is nothing to summarize
+        return {"first_error": None, "last_error": None, "relative_improvement": 0.0,
+                "fraction_of_epochs_that_improved": 1.0}
     improved = sum(1 for i in range(1, n) if errors[i] <= errors[i - 1])
     return {
         "first_error": errors[0],

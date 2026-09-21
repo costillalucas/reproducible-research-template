@@ -67,9 +67,14 @@ def initial_object_from_center_led(center_image: np.ndarray, hr_shape: tuple[int
 def simulate_lr_stack_continuous(hr_object: np.ndarray, hr_pixel_um: float,
                                   led_grid: list[dict], lr_shape: tuple[int, int],
                                   lr_pixel_um: float, na: float, wavelength_um: float,
+                                  peak_photon_count: float | None = None,
+                                  rng: np.random.Generator | None = None,
                                   ) -> dict[tuple[int, int], np.ndarray]:
-    """Noiseless {(row, col): intensity} using the continuous-k forward
-    model of this module (no rounding of k to a spectrum bin).
+    """{(row, col): intensity} using the continuous-k forward model of this
+    module (no rounding of k to a spectrum bin). Noiseless unless
+    `peak_photon_count` is set, which adds Poisson shot noise scaled the
+    same way `forward_model.simulate_lr_stack` does (the brightest pixel of
+    the whole stack has that many expected counts).
     """
     pupil = circular_pupil(lr_shape, lr_pixel_um, na, wavelength_um)
     X, Y = _coords(hr_object.shape, hr_pixel_um)
@@ -80,7 +85,13 @@ def simulate_lr_stack_continuous(hr_object: np.ndarray, hr_pixel_um: float,
         U = np.fft.fftshift(np.fft.fft2(hr_object * tilt))
         field = _field_scale(hr_object.shape, lr_shape) * np.fft.ifft2(np.fft.ifftshift(U[ys, xs] * pupil))
         out[(e["row"], e["col"])] = np.abs(field) ** 2
-    return out
+    peak = max((float(v.max()) for v in out.values()), default=0.0)
+    if peak_photon_count is None or peak <= 0:
+        return out
+    if rng is None:
+        rng = np.random.default_rng()
+    scale = peak_photon_count / peak
+    return {key: rng.poisson(v * scale).astype(float) / scale for key, v in out.items()}
 
 
 def loss_and_gradients(hr_object: np.ndarray, hr_pixel_um: float, led_grid: list[dict],
@@ -204,7 +215,10 @@ def reconstruct_and_calibrate(lr_images: dict, led_grid_nominal: list[dict],
     delta_k = 1.0 / (hr_shape[1] * hr_pixel_um)
     opt_re, opt_im = _Adam(obj.shape, object_lr), _Adam(obj.shape, object_lr)
     opt_pos = _Adam((len(grid), 2), k_lr_bins * delta_k)
-    opt_a = _Adam((2,), k_lr_bins * delta_k / float(np.sqrt(np.mean(np.abs(nominal_z) ** 2))))
+    # RMS radius of the array; 0 when every nominal k is 0 (a lone on-axis LED),
+    # where the rigid a-step has nothing to scale -- fall back to 1 instead of x/0.
+    rms_radius = float(np.sqrt(np.mean(np.abs(nominal_z) ** 2))) or 1.0
+    opt_a = _Adam((2,), k_lr_bins * delta_k / rms_radius)
     opt_b = _Adam((2,), k_lr_bins * delta_k)
     a, b = 1.0 + 0j, 0.0 + 0j
 
@@ -285,7 +299,12 @@ def reconstruct_gradient_descent(lr_images: dict, led_grid: list[dict], hr_pixel
     if not used:
         raise ValueError("none of led_grid's (row, col) keys are present in lr_images")
     lr_shape = next(iter(lr_images.values())).shape
-    center = used[0]  # led_grid is center-first (led_array.build_led_grid)
+    center = led_grid[0]  # led_grid is center-first (led_array.build_led_grid)
+    if (center["row"], center["col"]) not in lr_images:
+        raise ValueError(
+            f"center LED (row={center['row']}, col={center['col']}) is missing from lr_images: "
+            "the intensity normalization and the initial object are built from its image, so an "
+            "off-axis dark-field frame would silently give a wrong start")
     norm = float(np.mean(lr_images[(center["row"], center["col"])]))
     if norm <= 0:
         raise ValueError("center-LED image has non-positive mean intensity; cannot normalize")
