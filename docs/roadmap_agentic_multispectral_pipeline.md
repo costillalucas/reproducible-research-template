@@ -1242,6 +1242,38 @@ antes de construir la capa de orquestación, y siguiendo el ranking de
     - Costo: ~40s (9×9), ~260s (15×15), ~480s (21×21) por corrida
       (WF + GD, un núcleo).
 
+    **[SEGUIMIENTO — misma sesión] La conclusión de arriba ("más LEDs no
+    ayudan") estaba confundida y se corrige: sí ayuda subir la
+    redundancia si el lienzo HR se mantiene fijo, y la fase pasa a ser
+    recuperable con más fotones.** Barrido en
+    `scripts/sweep_lena_map_noise_and_redundancy.py` (mismo objeto/canal/
+    solvers; `corr. fase`, GD-amp vs WF; n semillas entre paréntesis):
+
+    | Experimento | LEDs (redundancia) | Pico | WF | GD-amp | GD−WF |
+    |---|---|---|---|---|---|
+    | A: ruido, 9×9 | 81 (9.0) | 100 (4) | 0.051 | 0.186 | +0.135 ± 0.021, 4/4 |
+    | | | 1000 (4) | 0.122 | 0.524 | +0.402 ± 0.010, 4/4 |
+    | | | 10000 (4) | 0.112 | 0.593 | +0.481 ± 0.021, 4/4 |
+    | B: lienzo fijo 96², misma extensión física (48 mm) | 225 (25.0) | 20 (2) | 0.108 | 0.279 | +0.171 ± 0.023, 2/2 |
+    | | | 1000 (2) | 0.262 | 0.725 | +0.463 ± 0.029, 2/2 |
+    | | 441 (49.0) | 20 (2) | 0.138 | 0.338 | +0.200 ± 0.014, 2/2 |
+    | | | 1000 (2) | 0.288 | 0.758 | +0.470 ± 0.004, 2/2 |
+
+    - **Fotones:** con 81 LEDs la fase de GD-amp sube 0.19 → 0.52 → 0.59 de
+      pico 100 → 1000 → 10000, contra 0.05-0.12 del WF; llega a 0.675 sin
+      ruido. El WF apenas se mueve. Para un objeto con este detalle, la fase
+      empieza a recuperarse de forma útil desde pico ≈ 1000.
+    - **Redundancia a lienzo fijo:** a pico 20, la fase de GD-amp pasa de
+      0.033 (9×9, del barrido anterior, 4 sem.) a 0.279 (225 LEDs) y 0.338
+      (441 LEDs); a pico 1000 de 0.524 a 0.725 y 0.758. El WF también sube
+      (0.12 → 0.26 → 0.29 a pico 1000) pero ~0.4-0.5 por debajo.
+    - **Salvedades:** 2 semillas en B; el pitch más chico también aumenta
+      el solapamiento entre LEDs vecinos (que ya se vio que importa,
+      `adjacent_led_overlap_ratio`) — redundancia y solapamiento están
+      confundidos y no se separaron; un solo objeto, canal green, LEDs
+      alineados a bin. Costo GD+WF por corrida: ~45 s (81 LEDs), ~120 s
+      (225), ~340 s (441).
+
 (Gap #4 FPM-INR/`zhou2023` queda fuera de este roadmap por ahora —
 mejora calidad/velocidad del solver monocromático en general por una vía
 de aprendizaje profundo mucho más grande, no es específico de
