@@ -1207,6 +1207,41 @@ antes de construir la capa de orquestación, y siguiendo el ranking de
       no ve. Cuarto y quinto diagnóstico descartados de este tipo.
       Sigue abierto para el agente de orquestación.
 
+13. **[HECHO — 2026-09-21] Objeto real (Lena amplitud + Map fase): más LEDs
+    NO rescatan la fase con ruido; la pérdida de amplitud sí gana sin
+    ruido y en recuperación de amplitud.** Nuevo
+    `src/ptyco_full_simulator/test_objects.py` (`lena_map_object`, imágenes
+    512×512 fuera del repo en `/home/chanoscopio/Documents/LucasC/code/
+    data_source`, o `PTYCO_DATA_SOURCE`). Green, objetivo "current", recorte
+    32px, fase máx 0.3π, WF 200 épocas vs GD 100 iteraciones con
+    `loss="amplitude"` (`scripts/sweep_lena_map_grid_size.py`):
+
+    | Grilla (LEDs) | Lienzo HR | Ruido | corr. fase WF | corr. fase GD-amp | corr. amp WF / GD-amp |
+    |---|---|---|---|---|---|
+    | 9×9 (81) | 96² | ninguno | 0.160 | 0.675 | 0.726 / 0.970 |
+    | 15×15 (225) | 160² | ninguno | 0.074 | 0.637 | 0.470 / 0.966 |
+    | 21×21 (441) | 160² | ninguno | 0.082 | 0.608 | 0.473 / 0.955 |
+    | 9×9 | 96² | pico 20 (4 sem.) | 0.023 | 0.033 | 0.267 / 0.733 |
+    | 15×15 | 160² | pico 20 (4 sem.) | 0.023 | −0.040 | 0.058 / 0.742 |
+    | 21×21 | 160² | pico 20 (2 sem.) | 0.020 | 0.005 | 0.126 / 0.748 |
+
+    - **Sin ruido**, GD-amp gana por ~0.5 de fase en todas las grillas
+      (una sola corrida por celda, sin barrido multi-semilla), y la
+      amplitud queda en ~0.96-0.97 contra 0.47-0.73 del Wirtinger flow.
+    - **Con ruido a pico 20, la fase no se recupera con ningún método a
+      ningún tamaño de grilla** (|corr| ≤ 0.04). Lo que sí se conserva es
+      la amplitud: GD-amp ~0.73-0.75 contra 0.06-0.27 del WF.
+    - **Más LEDs no ayudó a la fase con ruido.** Contra la hipótesis de
+      "faltan datos": el lienzo HR también crece con la grilla (96²→160²),
+      así que la redundancia (LEDs×píxeles LR / píxeles HR) es 9.0 en 9×9,
+      9.0 en 15×15 y 17.6 en 21×21 — subir de 9×9 a 15×15 no agrega
+      redundancia por píxel, solo 21×21 la duplica, y ahí tampoco mejoró
+      (n=2 semillas, no concluyente). Falta probar subir la redundancia a
+      lienzo fijo, o subir el pico de fotones (100, 1000) para ver dónde
+      la fase empieza a ser recuperable.
+    - Costo: ~40s (9×9), ~260s (15×15), ~480s (21×21) por corrida
+      (WF + GD, un núcleo).
+
 (Gap #4 FPM-INR/`zhou2023` queda fuera de este roadmap por ahora —
 mejora calidad/velocidad del solver monocromático en general por una vía
 de aprendizaje profundo mucho más grande, no es específico de
