@@ -23,7 +23,7 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
 
-from ptyco_full_simulator import config, io_utils, led_array, metrics, optics, reconstruction  # noqa: E402
+from ptyco_full_simulator import config, io_utils, joint_calibration, led_array, metrics, optics, reconstruction  # noqa: E402
 
 
 def parse_args(argv=None):
@@ -36,6 +36,13 @@ def parse_args(argv=None):
     p.add_argument("--crop", type=int, default=400,
                     help="the crop size named in the lab's own folder naming (...recortada_<crop>)")
     p.add_argument("--iterations", type=int, default=20)
+    p.add_argument("--solver", choices=["wirtinger", "gd-amplitude"], default="wirtinger",
+                    help="reconstruction solver. 'gd-amplitude' = Adam gradient descent on the amplitude "
+                         "loss (joint_calibration.reconstruct_gradient_descent): beat the Wirtinger flow "
+                         "under Poisson noise on synthetic and real-image test objects (roadmap "
+                         "milestones 11/13) but is NOT validated on real lab data, and blue with "
+                         "moderate/heavy noise fails for every solver. Use ~100 --iterations "
+                         "(full-batch steps). ")
     p.add_argument("--output-dir", default="results/reconstruct_real_images")
     return p.parse_args(argv)
 
@@ -66,10 +73,16 @@ def main(argv=None) -> int:
           f"upsampling_factor={factor}  hr_pixel={hr_pixel_um:.4f}um")
 
     led_grid = led_array.build_led_grid(setup.led_array, setup.wavelength_um)
-    result = reconstruction.reconstruct(
-        lr_images, led_grid, hr_pixel_um, setup.lr_pixel_size_um,
-        setup.objective.na, setup.wavelength_um, factor, iterations=args.iterations,
-    )
+    if args.solver == "gd-amplitude":
+        result = joint_calibration.reconstruct_gradient_descent(
+            lr_images, led_grid, hr_pixel_um, setup.lr_pixel_size_um,
+            setup.objective.na, setup.wavelength_um, factor, iterations=args.iterations,
+        )
+    else:
+        result = reconstruction.reconstruct(
+            lr_images, led_grid, hr_pixel_um, setup.lr_pixel_size_um,
+            setup.objective.na, setup.wavelength_um, factor, iterations=args.iterations,
+        )
 
     conv = metrics.convergence_summary(result["history"])
     print("convergence (no ground truth available -- this is internal "
@@ -86,7 +99,7 @@ def main(argv=None) -> int:
                 "na": setup.objective.na, "magnification": setup.objective.magnification,
                 "crop": args.crop, "upsampling_factor": factor,
                 "hr_pixel_um": hr_pixel_um, "lr_pixel_um": setup.lr_pixel_size_um,
-                "iterations": args.iterations, "data_root": args.data_root,
+                "iterations": args.iterations, "data_root": args.data_root, "solver": args.solver,
             },
         }, fh, indent=2)
     print(f"wrote results to {args.output_dir}")

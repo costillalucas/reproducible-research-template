@@ -110,6 +110,14 @@ def parse_args(argv=None):
                          "many iterations (>=400). CAN be combined with --use-reconstruction-agent "
                          "(2026-09-18: resolved, see orchestrate_reconstruction's docstring). "
                          "Mutually exclusive with --recover-pupil.")
+    p.add_argument("--solver", choices=["wirtinger", "gd-amplitude"], default="wirtinger",
+                    help="reconstruction solver. 'gd-amplitude' = Adam gradient descent on the amplitude "
+                         "loss (joint_calibration.reconstruct_gradient_descent): beat the Wirtinger flow "
+                         "under Poisson noise on synthetic and real-image test objects (roadmap "
+                         "milestones 11/13) but is NOT validated on real lab data, and blue with "
+                         "moderate/heavy noise fails for every solver. Use ~100 --iterations "
+                         "(full-batch steps). Mutually exclusive with --recover-pupil, --adaptive-step "
+                         "and --use-reconstruction-agent.")
     p.add_argument("--chromatic-report", action="store_true",
                     help="run src/ptyco_full_simulator/chromatic_diagnostics.py's "
                          "chromatic_registration_report on the 3 reconstructed channels (roadmap "
@@ -139,6 +147,7 @@ def main(argv=None) -> int:
         use_reconstruction_agent=args.use_reconstruction_agent,
         agent_live=args.agent_live, max_attempts=args.max_attempts,
         recover_pupil=args.recover_pupil, adaptive_step=args.adaptive_step,
+        solver=args.solver,
     )
     for channel in CHANNEL_ORDER:
         attempts = run["channels"][channel]["agent_attempts"]

@@ -30,7 +30,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."
 
 from ptyco_full_simulator import chromatic_diagnostics as cd  # noqa: E402
 from ptyco_full_simulator import config, io_utils, led_array, metrics, optics  # noqa: E402
-from ptyco_full_simulator import propagation as prop, reconstruction  # noqa: E402
+from ptyco_full_simulator import joint_calibration, propagation as prop, reconstruction  # noqa: E402
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "agents"))
 import reconstruction_orchestrator  # noqa: E402
@@ -43,7 +43,8 @@ def reconstruct_all_channels(data_root, grid_size: int, objective: str = "curren
                               index_base: int = 1, tie_defocus_um: float | None = None,
                               use_reconstruction_agent: bool = False,
                               agent_live: bool = False, max_attempts: int = 3,
-                              recover_pupil: bool = False, adaptive_step: bool = False) -> dict:
+                              recover_pupil: bool = False, adaptive_step: bool = False,
+                              solver: str = "wirtinger") -> dict:
     """Reconstruct red/green/blue independently on one shared HR grid.
 
     `tie_defocus_um`, if given, initializes each channel's solver with a
@@ -77,6 +78,17 @@ def reconstruct_all_channels(data_root, grid_size: int, objective: str = "curren
     `agents/reconstruction_orchestrator.py`'s docstring). Same
     restriction as `pipelines/simulate_and_reconstruct.py`'s CLI.
 
+    `solver`: "wirtinger" (default, `reconstruction.reconstruct`) or
+    "gd-amplitude" (`joint_calibration.reconstruct_gradient_descent`, Adam
+    on the amplitude loss -- measured to beat the Wirtinger flow under
+    Poisson noise on synthetic and real-image objects, see roadmap
+    milestones 11 & 13; never validated on real lab captures, and blue
+    with moderate/heavy noise fails for every solver). Mutually exclusive
+    with `recover_pupil`, `adaptive_step` and `use_reconstruction_agent`
+    (they all tune Wirtinger-flow internals: its step schedule / pupil
+    update / `step_max` retry lever). `iterations` are full-batch steps
+    under "gd-amplitude" -- ~100 was used in every comparison.
+
     Returns {"factor": int, "hr_pixel_um": float, "hr_shape": (h, w),
              "channels": {channel: {"object": complex ndarray,
                                      "history": [...], "n_leds_used": int,
@@ -84,6 +96,12 @@ def reconstruct_all_channels(data_root, grid_size: int, objective: str = "curren
                                      "agent_attempts": [...] or None,
                                      "pupil": complex ndarray or None}}}.
     """
+    if solver not in ("wirtinger", "gd-amplitude"):
+        raise ValueError(f"solver must be 'wirtinger' or 'gd-amplitude', got {solver!r}")
+    if solver == "gd-amplitude" and (recover_pupil or adaptive_step or use_reconstruction_agent):
+        raise ValueError("solver='gd-amplitude' cannot be combined with recover_pupil, "
+                          "adaptive_step or use_reconstruction_agent -- those tune "
+                          "Wirtinger-flow internals (pupil update, step schedule, step_max retries)")
     if recover_pupil and use_reconstruction_agent:
         raise ValueError("recover_pupil is not wired together with use_reconstruction_agent -- "
                           "reconstruct() ignores step_max under recover_pupil (nothing for the "
@@ -122,7 +140,13 @@ def reconstruct_all_channels(data_root, grid_size: int, objective: str = "curren
             initial_object = (amp0_hr * np.exp(1j * tie_phase)).astype(complex)
 
         agent_attempts = None
-        if use_reconstruction_agent:
+        if solver == "gd-amplitude":
+            result = joint_calibration.reconstruct_gradient_descent(
+                lr_images, led_grid, hr_pixel_um, setup.lr_pixel_size_um,
+                setup.objective.na, setup.wavelength_um, factor, iterations=iterations,
+                initial_object=initial_object,
+            )
+        elif use_reconstruction_agent:
             orchestrated = reconstruction_orchestrator.orchestrate_reconstruction(
                 lr_images, led_grid, hr_pixel_um, setup.lr_pixel_size_um,
                 setup.objective.na, setup.wavelength_um, factor,
@@ -217,6 +241,14 @@ def parse_args(argv=None):
                          "many iterations (>=400). CAN be combined with --use-reconstruction-agent "
                          "(2026-09-18: resolved, see orchestrate_reconstruction's docstring). "
                          "Mutually exclusive with --recover-pupil.")
+    p.add_argument("--solver", choices=["wirtinger", "gd-amplitude"], default="wirtinger",
+                    help="reconstruction solver per channel. 'gd-amplitude' = Adam gradient descent on "
+                         "the amplitude loss (joint_calibration.reconstruct_gradient_descent): beat the "
+                         "Wirtinger flow under Poisson noise on synthetic and real-image test objects "
+                         "(roadmap milestones 11/13) but is NOT validated on real lab data, and blue "
+                         "with moderate/heavy noise fails for every solver. Use ~100 --iterations "
+                         "(full-batch steps). Mutually exclusive with --recover-pupil, --adaptive-step "
+                         "and --use-reconstruction-agent.")
     p.add_argument("--chromatic-report", action="store_true",
                     help="run src/ptyco_full_simulator/chromatic_diagnostics.py's "
                          "chromatic_registration_report on the 3 reconstructed channels (roadmap "
@@ -238,6 +270,7 @@ def main(argv=None) -> int:
         use_reconstruction_agent=args.use_reconstruction_agent,
         agent_live=args.agent_live, max_attempts=args.max_attempts,
         recover_pupil=args.recover_pupil, adaptive_step=args.adaptive_step,
+        solver=args.solver,
     )
     print(f"grid={args.grid_size}x{args.grid_size}  objective={args.objective}  "
           f"shared_upsampling_factor={run['factor']}  hr_shape={run['hr_shape']}  "
@@ -247,7 +280,8 @@ def main(argv=None) -> int:
         "factor": run["factor"], "hr_pixel_um": run["hr_pixel_um"], "hr_shape": list(run["hr_shape"]),
         "tie_defocus_um": args.tie_defocus_um,
         "use_reconstruction_agent": args.use_reconstruction_agent,
-        "recover_pupil": args.recover_pupil, "adaptive_step": args.adaptive_step, "channels": {},
+        "recover_pupil": args.recover_pupil, "adaptive_step": args.adaptive_step,
+        "solver": args.solver, "channels": {},
     }
     complex_objects = {}
     pupils = {}

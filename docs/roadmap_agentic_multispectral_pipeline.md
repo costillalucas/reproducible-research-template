@@ -1274,6 +1274,44 @@ antes de construir la capa de orquestación, y siguiendo el ranking de
       alineados a bin. Costo GD+WF por corrida: ~45 s (81 LEDs), ~120 s
       (225), ~340 s (441).
 
+14. **[HECHO — 2026-09-21] Solver de descenso de gradiente con pérdida de
+    amplitud, cableado como opción `--solver gd-amplitude` (default sigue
+    siendo `wirtinger`).** `joint_calibration.reconstruct_gradient_descent`
+    devuelve lo mismo que `reconstruction.reconstruct` (`object`, `history`
+    con `recovery_error`), así que `metrics.convergence_summary` y el resto
+    de los pipelines funcionan sin cambios. Disponible en
+    `simulate_and_reconstruct.py`, `reconstruct_real_images.py` y los dos
+    pipelines multiespectrales (vía `reconstruct_all_channels(solver=...)`).
+    Normaliza la escala de intensidad (las capturas reales tienen escala
+    arbitraria) dividiendo por la media de la imagen del LED central, y
+    reescala un `initial_object` (p. ej. de TIE) en consecuencia.
+    Mutuamente excluyente con `--recover-pupil`, `--adaptive-step` y
+    `--use-reconstruction-agent` (ajustan partes internas del Wirtinger
+    flow). Sin validar con capturas reales; blue con ruido moderado/fuerte
+    falla con todos los solvers; usar ~100 iteraciones (pasos de lote
+    completo, no épocas por LED). 9 tests en
+    `tests/test_gd_solver_pipelines.py`.
+
+    **Hallazgo importante al cablearlo — el modelo de k es lo que importa,
+    y las pruebas viejas lo escondían.** Las capturas falsas de todo el
+    resto de la suite se generan con `forward_model.simulate_lr_stack`, que
+    redondea k a un bin del espectro: exactamente el modelo que el Wirtinger
+    flow invierte (un "crimen inverso"). Con capturas de k *exacto* (lo que
+    produce el hardware real), a igual dato, recorte de 16 px:
+    Wirtinger flow (modelo de bin redondeado, ~0.4 bin de error medio)
+    **0.076** de correlación de fase vs. descenso de gradiente (modelo
+    continuo) **0.995**. Recíprocamente, darle al gradiente una grilla
+    redondeada a bin sobre datos de k exacto da **0.092**: el modelo
+    continuo exige posiciones LED bien conocidas (bien por debajo de un bin;
+    ver milestone 11, la corrección `rigid` de `reconstruct_and_calibrate`
+    ayuda solo si el error inicial es menor a ~0.5 bin). Con datos reales
+    ni el redondeo ni las posiciones nominales son exactas, así que la
+    posición real de los LED del laboratorio es probablemente el factor
+    que más pese en cualquier solver — a medir con datos reales.
+    Implicación para comparaciones anteriores (milestones 11 y 13): se
+    hicieron con k alineado a bin a propósito (igualdad de condiciones para
+    ambos solvers), lo que es justo pero no realista.
+
 (Gap #4 FPM-INR/`zhou2023` queda fuera de este roadmap por ahora —
 mejora calidad/velocidad del solver monocromático en general por una vía
 de aprendizaje profundo mucho más grande, no es específico de

@@ -238,3 +238,67 @@ def reconstruct_and_calibrate(lr_images: dict, led_grid_nominal: list[dict],
     return {"object": obj, "led_grid": grid, "history": history,
             "similarity": {"scale": float(abs(a)), "rotation_rad": float(np.angle(a)),
                            "shift": (float(b.real), float(b.imag))}}
+
+
+def reconstruct_gradient_descent(lr_images: dict, led_grid: list[dict], hr_pixel_um: float,
+                                  lr_pixel_um: float, na: float, wavelength_um: float,
+                                  factor: int, iterations: int = 100,
+                                  initial_object: np.ndarray | None = None,
+                                  loss: str = "amplitude", object_lr: float = 0.02) -> dict:
+    """Drop-in alternative to `reconstruction.reconstruct` (same arguments
+    where they overlap, same `{"object", "history"}` return, `history`
+    entries `{"iteration", "recovery_error"}` so `metrics.
+    convergence_summary` works unchanged): Adam gradient descent on the
+    chosen loss with LED positions held at the given grid (no calibration
+    -- use `reconstruct_and_calibrate` for that).
+
+    Why it exists: with `loss="amplitude"` it beat the Wirtinger flow
+    under Poisson noise on a synthetic phantom (8 seeds, green/red at
+    every noise level tested, blue at low noise) and on a real-image
+    object (Lena/Map, tests/test_gradient_descent_vs_wirtinger.py,
+    docs/roadmap_agentic_multispectral_pipeline.md milestones 11 & 13).
+    NOT established on real lab data (none available yet); blue with
+    moderate/heavy noise fails for every solver tried.
+
+    LED positions: the model uses each LED's EXACT (fx, fy), not rounded
+    to a spectrum bin like `reconstruction.reconstruct`'s crop model. On
+    data with exact k (what real hardware produces) that is the matched
+    model -- measured on a 16px-crop phantom: this solver 0.995 phase
+    correlation vs the Wirtinger flow's 0.076 (its bin-rounded k is off
+    by ~0.4 bin on average) -- but it also means LED position error
+    hurts: giving this solver a grid rounded to bins on exact-k data
+    gives 0.09. The repo's older tests generate data with the same
+    bin-rounded model the Wirtinger flow inverts, which hides this.
+
+    Units: real captures have an arbitrary intensity scale, so measured
+    images are divided by the mean of the center-LED image (the returned
+    object is in units where that image's mean intensity is 1 -- an overall
+    amplitude scale, irrelevant to phase). A given `initial_object` is
+    assumed to be in the same units `reconstruction.initial_hr_guess`
+    uses (amplitude = sqrt of the raw center image) and is rescaled the
+    same way, so a TIE-informed start can be passed straight through.
+    `loss`: "amplitude" (default, the measured winner), "intensity" or
+    "poisson"; `iterations` are full-batch gradient steps (each touches
+    every LED), not per-LED epochs like `reconstruct`'s.
+    """
+    used = [e for e in led_grid if (e["row"], e["col"]) in lr_images]
+    if not used:
+        raise ValueError("none of led_grid's (row, col) keys are present in lr_images")
+    lr_shape = next(iter(lr_images.values())).shape
+    center = used[0]  # led_grid is center-first (led_array.build_led_grid)
+    norm = float(np.mean(lr_images[(center["row"], center["col"])]))
+    if norm <= 0:
+        raise ValueError("center-LED image has non-positive mean intensity; cannot normalize")
+    meas = {k: v / norm for k, v in lr_images.items()}
+    hr_shape = (lr_shape[0] * factor, lr_shape[1] * factor)
+    if initial_object is None:
+        obj0 = initial_object_from_center_led(meas[(center["row"], center["col"])], hr_shape)
+    else:
+        obj0 = np.asarray(initial_object, dtype=complex) / np.sqrt(norm)
+
+    result = reconstruct_and_calibrate(meas, used, hr_shape, hr_pixel_um, lr_shape, lr_pixel_um,
+                                        na, wavelength_um, obj0, n_iterations=iterations,
+                                        calibrate_leds=False, loss=loss, object_lr=object_lr)
+    history = [{"iteration": h["iteration"], "recovery_error": float(np.sqrt(max(h["loss"], 0.0)))}
+               for h in result["history"]]
+    return {"object": result["object"], "history": history}

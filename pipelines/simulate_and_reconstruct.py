@@ -25,7 +25,7 @@ import numpy as np
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
 
-from ptyco_full_simulator import config, forward_model, io_utils, led_array, metrics, optics  # noqa: E402
+from ptyco_full_simulator import config, forward_model, io_utils, joint_calibration, led_array, metrics, optics  # noqa: E402
 from ptyco_full_simulator import propagation as prop, reconstruction  # noqa: E402
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "agents"))
@@ -92,6 +92,14 @@ def parse_args(argv=None):
                          "meaningful starting point for the agent to retry with even when the "
                          "schedule self-adjusts, see orchestrate_reconstruction's docstring). "
                          "Mutually exclusive with --recover-pupil.")
+    p.add_argument("--solver", choices=["wirtinger", "gd-amplitude"], default="wirtinger",
+                    help="reconstruction solver. 'gd-amplitude' = Adam gradient descent on the amplitude "
+                         "loss (joint_calibration.reconstruct_gradient_descent): beat the Wirtinger flow "
+                         "under Poisson noise on synthetic and real-image test objects (roadmap "
+                         "milestones 11/13) but is NOT validated on real lab data, and blue with "
+                         "moderate/heavy noise fails for every solver. Use ~100 --iterations "
+                         "(full-batch steps). Mutually exclusive with --recover-pupil, --adaptive-step "
+                         "and --use-reconstruction-agent.")
     p.add_argument("--output-dir", default="results/simulate_and_reconstruct")
     return p.parse_args(argv)
 
@@ -108,6 +116,10 @@ def main(argv=None) -> int:
         raise SystemExit("--recover-pupil and --adaptive-step are mutually exclusive "
                           "(reconstruction.reconstruct ignores step_max/adaptive_step when "
                           "recover_pupil=True -- see that function's docstring)")
+    if args.solver == "gd-amplitude" and (args.recover_pupil or args.adaptive_step or args.use_reconstruction_agent):
+        raise SystemExit("--solver gd-amplitude cannot be combined with --recover-pupil, --adaptive-step "
+                          "or --use-reconstruction-agent -- those tune Wirtinger-flow internals "
+                          "(pupil update, step schedule, step_max retries)")
     rng = np.random.default_rng(args.seed)
 
     setup = config.default_setup(
@@ -153,7 +165,13 @@ def main(argv=None) -> int:
         print(f"TIE-informed init: defocus=+/-{dz}um, on-axis pair simulated from the same known object")
 
     agent_attempts = None
-    if args.use_reconstruction_agent:
+    if args.solver == "gd-amplitude":
+        result = joint_calibration.reconstruct_gradient_descent(
+            lr_images, led_grid, hr_pixel_um, setup.lr_pixel_size_um,
+            setup.objective.na, setup.wavelength_um, factor, iterations=args.iterations,
+            initial_object=initial_object,
+        )
+    elif args.use_reconstruction_agent:
         orchestrated = reconstruction_orchestrator.orchestrate_reconstruction(
             lr_images, led_grid, hr_pixel_um, setup.lr_pixel_size_um,
             setup.objective.na, setup.wavelength_um, factor,
@@ -198,6 +216,7 @@ def main(argv=None) -> int:
                 "seed": args.seed, "tie_defocus_um": args.tie_defocus_um,
                 "use_reconstruction_agent": args.use_reconstruction_agent,
                 "recover_pupil": args.recover_pupil, "adaptive_step": args.adaptive_step,
+                "solver": args.solver,
             },
         }, fh, indent=2)
     print(f"wrote results to {args.output_dir}")
