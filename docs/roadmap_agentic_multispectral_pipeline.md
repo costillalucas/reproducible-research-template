@@ -1312,6 +1312,285 @@ antes de construir la capa de orquestación, y siguiendo el ranking de
     hicieron con k alineado a bin a propósito (igualdad de condiciones para
     ambos solvers), lo que es justo pero no realista.
 
+15. **[HECHO — 2026-09-21] Redundancia vs solapamiento entre LEDs a
+    lienzo HR fijo (96²): con solapamiento fijo, más LEDs no mejoran la
+    fase frente a lo que la apertura sintética permite; el solapamiento
+    ayuda a igual cantidad de LEDs.** Lena+Map, green, recorte 32px, fase
+    máx 0.3π, pico 1000 fotones, GD-amp 100 iteraciones (sin WF),
+    3 semillas, `scripts/sweep_lena_map_redundancy_vs_overlap.py`. Todos
+    los brazos son grillas uniformes sobre 48 mm (U) o subconjuntos de la
+    de 21×21 (paso 2.4 mm): R = subconjunto aleatorio (centro incluido),
+    C = 9×9/15×15 central (mismo solapamiento que U21, apertura menor).
+    "corr. fase (pasabajos)" compara contra la verdad filtrada al corte de
+    cada brazo (NA objetivo + NA del LED más externo), para no penalizar a
+    C por resolución que su apertura no puede tener:
+
+    | Brazo | LEDs | Solap. vecino mediano | corr. fase | corr. fase (pasabajos) | corr. amp |
+    |---|---|---|---|---|---|
+    | U9 (uniforme) | 81 | 0.33 | 0.526 ± 0.003 | 0.547 | 0.954 |
+    | R81 (aleatorio) | 81 | 0.65 | 0.462 ± 0.070 | 0.478 | 0.928 |
+    | C9 (central) | 81 | 0.77 | 0.573 ± 0.008 | 0.750 | 0.915 |
+    | U15 (uniforme) | 225 | 0.65 | 0.719 ± 0.025 | 0.745 | 0.964 |
+    | R225 (aleatorio) | 225 | 0.77* | 0.700 ± 0.010 | 0.724 | 0.963 |
+    | C15 (central) | 225 | 0.77 | 0.659 ± 0.015 | 0.724 | 0.948 |
+    | U21 (uniforme) | 441 | 0.77 | 0.758 ± 0.006 | 0.785 | 0.966 |
+
+    - **Misma cantidad de LEDs, distinto solapamiento (81):** el 9×9
+      compacto (0.77) supera al uniforme espaciado (0.33) en fase contra
+      la verdad filtrada (0.750 vs 0.547) pero solo un poco contra la
+      verdad completa (0.573 vs 0.526), porque su apertura es la mitad de
+      grande. El aleatorio (R81) es el peor (0.462, la mayor varianza):
+      huecos y grupos no ayudan.
+    - **Mismo solapamiento, distinta cantidad (C9→C15→U21, 0.77):** la
+      fase contra la verdad completa sube 0.573 → 0.659 → 0.758, pero contra
+      la verdad filtrada queda ~plana (0.750 → 0.724 → 0.785). Es decir,
+      la mejora al agregar LEDs a solapamiento fijo viene de ampliar la
+      apertura (más frecuencias), no de la redundancia en sí; a apertura
+      fija (dentro de cada corte) más LEDs no aportó de forma clara.
+    - **Misma cantidad (225), solapamiento distinto:** U15 0.719, R225
+      0.700, C15 0.659 (0.724 filtrada): diferencias chicas, del orden de
+      1-2 desviaciones estándar salvo C15 en la métrica completa.
+    - **Conclusión matizada:** la ganancia por "más redundancia a lienzo
+      fijo" del milestone 13 (0.524 → 0.725 → 0.758) queda explicada
+      sobre todo por solapamiento y apertura, no por redundancia pura.
+      Redundancia pura (cuadros repetidos, mismo k) no se probó.
+    - **Salvedades:** 3 semillas, un solo pico (1000), un objeto, sin WF;
+      (*) la métrica "solapamiento vecino mediano" usa el vecino más
+      cercano y no distingue el R225 (muchos pares adyacentes a paso
+      mínimo, pero con huecos) del uniforme; la comparación filtrada
+      depende de definir el corte como NA_obj + NA del LED más externo; el
+      C9 no separa del todo "solapamiento" de "tamaño de apertura".
+      Costo por corrida (un núcleo): ~35-45 s (81), ~95-110 s (225), ~205 s
+      (441).
+
+- **Milestone 16 — error de posición de los LEDs con k exacto (2026-09-21):**
+  `scripts/plan_p4_led_position_error.py` (experimentos P1 y P3 del plan
+  `docs/plan_experimentos_punto3_y_hardware_real.md`); JSON crudo en
+  `data/plan_p1_led_position_error.json` (22 jobs) y
+  `data/plan_p3_led_position_error.json` (10 jobs). Lena+Map, green, 9×9 LEDs
+  sobre 48 mm, recorte de 32 px, HR 96², fase máx 0.3π, Poisson pico 1000,
+  **2 semillas por celda**. Los datos se generan con las posiciones
+  *verdaderas* (perturbadas físicamente: mm/grados/fracción de pitch) y todos
+  los solvers reciben la grilla *nominal*; `gd_true` es el oráculo con las
+  posiciones verdaderas. Correlación de fase, media de 2 semillas (`k_err` =
+  RMS del error de k en bins del espectro HR):
+
+  | error (k_err bins) | WF | GD nominal | GD rígido | GD per-LED | GD oráculo |
+  |---|---|---|---|---|---|
+  | ninguno (0.00) | 0.03 | 0.435 | 0.414 | 0.370 | 0.435 |
+  | jitter 0.05 mm (0.07) | 0.03 | 0.355 | 0.358 | 0.439 | 0.504 |
+  | pitch +1 % (0.20) | 0.05 | 0.431 | 0.441 | 0.405 | 0.455 |
+  | jitter 0.2 mm (0.27) | 0.04 | 0.182 | 0.179 | 0.357 | 0.501 |
+  | rot 1° (0.40) | 0.03 | 0.359 | 0.424 | 0.396 | 0.449 |
+  | z +2 mm (0.56) | 0.03 | 0.152 | 0.185 | 0.208 | 0.535 |
+  | offset 0.5 mm (0.59) | 0.05 | −0.003 | 0.101 | 0.049 | 0.499 |
+  | rot 3° (1.19) | 0.03 | 0.096 | 0.388 | 0.281 | 0.464 |
+  | combinado (1.49) | 0.02 | 0.034 | 0.023 | 0.023 | 0.527 |
+  | z +7 mm (1.86) | 0.04 | 0.255 | 0.115 | 0.076 | 0.538 |
+  | offset 2 mm (2.36) | −0.02 | −0.007 | −0.022 | −0.041 | 0.563 |
+
+  P3 (error "combinado" × multiplicador; k_err 0.15 / 0.38 / 0.76 / 1.49 /
+  2.89 bins): GD nominal 0.348 / 0.144 / 0.059 / 0.034 / 0.015; GD rígido
+  0.433 / 0.259 / 0.122 / 0.023 / −0.004; oráculo 0.52-0.56 en todos.
+
+    - **El error de posición es el cuello de botella, no el solver.** Con
+      las posiciones verdaderas la fase se recupera a 0.43-0.56 en todas las
+      filas; con la grilla nominal cae a ~0.0-0.2 apenas el error supera
+      ~0.3-0.6 bin (offset 0.5 mm, z +2 mm, jitter 0.2 mm ya pierden 0.2-0.5
+      de correlación). Un error "combinado" plausible (jitter 0.1 mm, offset
+      ~1 mm, rot 1.5°, z +3 mm, pitch +0.5 %) mide 1.5 bins a 32 px y deja
+      el resultado en ~0.03 para todos los solvers. Con hardware real esto
+      es lo que hay que medir primero (calibración de posiciones de LEDs
+      con campo brillante, `led_calibration.py`).
+    - **La calibración rígida (AD-SC) rescata solo errores con estructura
+      global y pequeños.** Rescata claramente rot 3° (0.096 → 0.388;
+      `k_err` 1.19 → 0.03) y ayuda en offset 0.5 mm (+0.10) y en el
+      "combinado" ×0.1-×0.5 (+0.04 a +0.13, mismo signo en ambas semillas; el
+      de ×0.5 es el más flojo); no ayuda con
+      jitter, pitch ni z +2 mm (dentro del ruido o +0.03), y empeora z +7 mm
+      (0.255 → 0.115). No rescata nada del "combinado" ×1 (1.49 bins) ni
+      del offset de 2 mm: `k_err` tras la calibración queda igual que
+      antes (1.59 y 2.33). Ni siquiera donde el `k_err` baja (×0.5: 0.76 →
+      0.22) la fase llega al oráculo (0.12 vs 0.50): la posición recuperada
+      sigue sin alcanzar. **Acantilado:** entre ~0.8 y ~1.5 bins para el
+      error combinado; pero depende del tipo (una rotación de 3° con 1.19
+      bins sí se recupera, un offset de 2 mm con 2.4 no), así que "0.5 bin"
+      del milestone 11 es una guía, no un umbral.
+    - **Per-LED:** es lo único que ayuda con jitter (0.2 mm: 0.182 → 0.357;
+      0.05 mm: 0.355 → 0.439) aunque `k_err_after_perled` no baja (0.27 →
+      0.35): compensa el efecto sin recuperar la posición. Sobreajusta o
+      empata en los demás casos.
+    - **Contra el criterio de refutación del plan:** (a) `gd_nominal` no
+      supera de forma consistente a WF con `k_err` ≥ 0.5 (sí en z +2, rot 3°
+      y z +7; no en offset 0.5, combinado y offset 2); (b) `gd_rigid` no
+      supera a `gd_nominal` con `k_err` < 0.5 (rot 1° +0.06, pitch +0.01,
+      jitter ±0.00): ahí no hay nada que rescatar porque el nominal ya está
+      cerca del oráculo. La hipótesis de P3 "rígido ≈ oráculo debajo del
+      acantilado" **no se cumple** (0.433 vs 0.519 a 0.15 bin; 0.259 vs 0.531
+      a 0.38).
+    - **Salvedades (importantes):** (1) **2 semillas**: las diferencias
+      menores de ~0.05 están dentro del ruido (en la fila "ninguno" GD rígido
+      − nominal da −0.01 y −0.03); solo tomo como robustas las de >0.1 en
+      ambas semillas. (2) **El WF da ~0.03 hasta sin error de posición**, es
+      decir, está en su piso incluso en la fila de control; con 200 épocas
+      sin afinar, la comparación con WF no es informativa (ver auditoría A2)
+      y no se debe leer como "GD le gana a WF". (3) **El operador que genera
+      los datos es el mismo que usa GD** (`jc.simulate_lr_stack_continuous`):
+      lo independiente es la posición (verdadera vs nominal), no el modelo
+      directo, así que el 0.435 de la fila de control es un techo optimista
+      (hallazgo A1 solo parcialmente atendido). (4) Fase máx 0.3π, pico 1000
+      y Lena/Map: el techo del oráculo es ~0.5, no 1. (5) Los errores son
+      una parametrización inventada, no medidos. (6) A 32 px los bins escalan
+      con el recorte: el mismo error físico mide menos bins a 16 px.
+      No se ejecutaron P2 (ruido × canal) ni P4 (recorte). Costo real: P1
+      ~33 min (22 jobs, 2 procesos, PC cargada), P3 ~14 min (10 jobs);
+      ~160-190 s por job.
+
+- **Milestone 17 — E1 (objeto × fase × fotones) y E3b (span fijo, cantidad
+  de LEDs), 2 seeds (2026-09-21):** `scripts/plan_p3_object_phase_geometry.py`
+  (agregué `--where`, guardado incremental y `*_phase_rmse`/`flat_phase_rmse`
+  a la salida); datos en `data/plan_e1_object_phase.json` (36 jobs) y
+  `data/plan_e3b_fixed_span_leds.json` (32 jobs). Datos alineados a bin (la
+  vara justa de los hitos 11-15, no la realista del hito 16), green, recorte
+  32 px, GD-amplitud 100 iter contra WF 200 épocas sin afinar (ver A2), 1
+  proceso. **Diseño recortado** respecto del plan: E1 sin `map_lena` ni
+  `siemens_star` y sin fase 0.2π (3 objetos × {0.05, 0.1, 0.3}π × pico
+  {100, 1000}); E3b sin la grilla 21×21. Solo n=2: en las tablas cuento
+  como diferencia real solo lo que se repite en ambas seeds y pasa de ~0.1.
+  - **E1, GD > WF:** en `lena_map` y `blob` GD gana a WF en las 12
+    condiciones y WF queda cerca de 0 casi siempre. A 0.3π y pico 1000, GD
+    da 0.528 (`lena_map`) y 0.772 (`blob`), contra WF 0.111 y −0.115.
+    Ojo con A2: WF sin afinar, así que esto no mide "algoritmo contra
+    algoritmo".
+  - **E1, fase débil no es recuperable:** para fase ≤ 0.1π GD queda por
+    debajo de 0.5 en todo objeto y pico (máximo 0.253 en `lena_map`
+    0.1π/1000; `blob` 0.235). Es el resultado negativo esperado. En RMSE,
+    GD queda peor que "no poner fase" para fase débil en `lena_map` (0.097
+    contra 0.022 a 0.05π, pico 1000) y solo iguala la referencia a 0.3π
+    (0.124 contra 0.131), aunque la correlación suba a 0.53: **la
+    correlación sobrestima lo recuperado en radianes** (M1 del auditor).
+    Solo `blob` a 0.3π/1000 mejora de verdad el RMSE (0.161 contra 0.219).
+  - **E1, `phase_only` no confirma la hipótesis:** a 0.3π y pico 1000 GD
+    da −0.239 en ambas seeds (con pico 100: 0.335, no monótono en los
+    fotones), y a 0.1π/1000 las dos seeds dan −0.34 y +0.35. La amplitud
+    es plana, así que la inicialización desde el LED central no aporta
+    nada (la advertencia de E2): puede ser un problema de inicialización y
+    no del solver, y con n=2 no lo puedo separar. Esta es la celda donde
+    la ventaja de GD **se refuta** (GD < WF a 0.3π/1000, ambas seeds).
+  - **E3b, más LEDs ayudan a canvas fijo:** `current`, pico 1000, GD:
+    0.177 → 0.528 → 0.693 → 0.725 con 49/81/121/225 LEDs; `future`:
+    0.454 → 0.594 → 0.636 → 0.682. A pico 100: 0.058 → 0.214 → 0.473 →
+    0.554 (`current`) y 0.202 → 0.333 → 0.424 → 0.477 (`future`). Las seeds
+    coinciden (±0.05) salvo 7×7. El HR es constante dentro de cada objetivo
+    (96² para `current`, 160² para `future`), como debía. **No refuta**
+    nada: la mejora es mayor a ±0.05 entre 7 y 15 en ambos objetivos. La
+    ganancia se achata con las grillas grandes (11 → 15: +0.03 a +0.05 a
+    pico 1000).
+  - **E3b no separa redundancia de solapamiento:** a span fijo suben
+    juntos (overlap 0.096 → 0.564 y redundancia 5.4 → 25 en `current`).
+    Es exactamente lo que ya separó el hito 15, que atribuyó la mejora
+    sobre todo al solapamiento y a la apertura. Leer los dos juntos.
+  - **E3b, `future` contra `current` no es una comparación limpia:** el
+    canvas HR es distinto (160² contra 96²), así que "future mejor por más
+    overlap" queda confundido con el tamaño del canvas y con la
+    resolución. A pico 100 `future` gana con pocos LEDs (0.202 contra
+    0.058 con 7×7); a pico 1000 y grillas de 9 o más `current` es igual o
+    mejor. Sin veredicto.
+  - **E3b, WF:** 0.04-0.30 en todo el barrido y RMSE de fase de hasta
+    1.4 rad en `future` (más que la referencia sin fase, 0.139): WF queda
+    en su piso, así que nada de lo medido dice algo de WF.
+  - **Salvedades:** n=2 y una sola vara de fase (0.3π) en E3b; solo canal
+    green; ruido Poisson puro; los datos son de k redondeado a bin (la
+    ventaja de GD acá no se traslada a datos con posiciones exactas y
+    grilla nominal: ver hito 16, donde todos los solvers caen a ~0.0-0.2
+    con error de posición > ~0.5 bin); no se corrieron E2, E3a ni E4.
+    Costo real: E1 ~30 min (36 jobs, ~25 s cada uno) y E3b ~30 min (32
+    jobs), con la PC compartida con otros jobs.
+
+- **Auditoría A2/A3 — Wirtinger flow afinado y ablación pérdida × esquema
+  (2026-09-21, `scripts/audit_wf_tuning_and_gd_ablation.py`; sin número de
+  hito para no chocar con los que agregan otros agentes):** responde a los
+  hallazgos A2 ("el baseline WF nunca se afinó") y A3 ("la pérdida de
+  amplitud mezcla pérdida, optimizador y lote") de la auditoría adversarial
+  a los hitos 11-14.
+  - **Diseño:** green, 9×9 LEDs, crop 16 (HR 48×48), datos con k redondeado
+    a bin (justo para ambos, NO el régimen de k exacto de hardware real),
+    ruido Poisson pico 20/100/1000, objetos: fantasma sintético y Lena/Map
+    (fase máx. 0.3π). **6 semillas de evaluación (0-5) por condición**, 36
+    problemas, pareadas por semilla. Presupuesto: 100 evaluaciones de
+    gradiente por LED para todas las celdas de Adam y para WF
+    (`wf_*` = 100 épocas); `wf_s20_200` es WF con el ajuste de los hitos
+    11-14 (200 épocas, `step_max=20`). WF: `step_max` 1, 2, 5, 10, 20, y
+    `adaptive_step` (zuo2016) con `step_max` 20 y 5. 2×2 de GD: pérdida
+    (intensidad | amplitud) × esquema (Adam de lote completo | Adam
+    incremental por LED, gradiente reponderado por su norma para
+    conservar los pesos por LED de la pérdida global). Los `lr` de Adam se
+    eligieron con **una** semilla de ajuste (100, disjunta) por objeto a
+    pico 100, sobre una grilla de 3 valores por celda: `full_int` 0.01,
+    `full_amp` 0.01, `incr_int` 0.001, `incr_amp` 0.005.
+  - **Línea base de inicialización** (amplitud del LED central, fase 0): la
+    correlación de fase es indefinida (fase constante), así que la
+    referencia es su `phase_rmse_rad` (**0.236** fantasma, **0.137**
+    Lena/Map) y su correlación de amplitud (fantasma 0.57/0.75/0.83,
+    Lena/Map 0.40/0.49/0.51 a pico 20/100/1000).
+  - **A2 — WF afinado (correlación de fase, media de 6 semillas):**
+    `step_max=20` (el default) NO es el mejor a pico bajo ni en Lena/Map.
+    Mejor `step_max` fijo por condición: fantasma 20→0.377 (`s1`),
+    100→0.745 (`s20`; 0.840 con 200 épocas), 1000→0.951 (0.974 con 200);
+    Lena/Map 20→0.114 (`s1`), 100→0.265 (`s5`/`adapt5`), 1000→0.286
+    (`s5`). Afinar sube a WF (fantasma pico 20: 0.224→0.377; Lena/Map
+    pico 100: 0.179→0.265) pero no cierra la brecha. `adaptive_step` no
+    mejora lo que ya da el mejor `step_max` fijo. **Con `step_max` ≥ 10 y
+    pico ≤ 100 WF queda PEOR que su propia inicialización:** `phase_rmse`
+    0.60-0.70 rad contra 0.236 (fantasma pico 20) y 0.57-0.70 contra 0.137
+    (Lena/Map pico 20), y su correlación de amplitud (0.25-0.5) cae por
+    debajo de la de la inicialización (0.57-0.75) en todos los niveles de
+    ruido del fantasma; la correlación de fase no delata esto.
+  - **¿GD sigue ganando con WF afinado?** Sí en casi todo, pero menos que
+    en los hitos 11-14 (mejor WF por condición, elegido con las mismas
+    semillas de evaluación, o sea a favor de WF; GD = `full_amp`; entre
+    paréntesis semillas ganadas de 6 y diferencia media de correlación de
+    fase): fantasma pico 20 +0.40 (6/6), 100 +0.13 (6/6, contra WF de 200
+    épocas), 1000 +0.02 (6/6); Lena/Map pico 20 +0.07 (5/6), 100 +0.08
+    (6/6), **1000 +0.001 (3/6, empate)**. En Lena/Map pico 1000 el GD de
+    lote completo con `lr` 0.01 queda en 0.289 con `phase_rmse` 0.211,
+    peor que WF (0.131); la ventaja ahí solo aparece con el esquema
+    incremental (ver A3).
+  - **A3 — pérdida contra esquema:** la **pérdida es el factor grande y
+    consistente**: amplitud > intensidad en las 6 condiciones y en ambos
+    esquemas (fantasma pico 20: 0.775 contra 0.292 con lote completo;
+    Lena/Map pico 100: 0.350 contra 0.128); GD con pérdida de intensidad
+    NO le gana al mejor WF afinado (0-3 de 6 semillas por condición,
+    diferencia media ≤ 0). El **esquema no importa en el fantasma** (|Δ|
+    ≤ 0.02 salvo pico 20, donde el incremental tiene sd 0.18 con
+    intensidad), **pero sí en Lena/Map**: incremental+amplitud 0.394 contra
+    0.350 a pico 100 y **0.649 contra 0.289 a pico 1000** (con el `lr`
+    afinado, que cayó en el borde de la grilla, 0.005). Es decir que el
+    veredicto del hito 14 "GD con pérdida de amplitud gana" se sostiene
+    por la pérdida, y la elección lote-completo vs incremental cambia el
+    resultado en el objeto real.
+  - **Lo que debilita la conclusión del hito 14:** (1) el baseline WF
+    del hito 14 estaba mal afinado (ver A2), y la ventaja se reduce de
+    ~+0.4 a ~+0.1 en varias condiciones; (2) a pico alto en Lena/Map el
+    GD "estándar" (lote completo, `lr` 0.01) empata con WF y solo el
+    incremental gana claro, así que la ventaja depende de un
+    hiperparámetro de esquema que el hito 14 no exploró; (3) la etiqueta
+    "amplitud" no es específica de GD: WF ya usa esa pérdida, y
+    intensidad+Adam pierde contra WF afinado, así que lo que gana es la
+    combinación pérdida de amplitud + Adam (hipótesis: el paso
+    normalizado de Adam frente al paso fijo de WF; no se probó WF con
+    Adam de forma aislada más allá de esta celda).
+  - **Salvedades de este barrido:** solo 1 semilla y 3 valores de `lr` por
+    celda para ajustar Adam (y el mejor `lr` de `incr_amp` en Lena/Map en
+    el borde de la grilla: el techo del incremental puede ser mayor); el
+    mejor WF se elige por condición con las semillas de evaluación (sesgo
+    a favor de WF, conservador para GD); comparaciones a 100 épocas de
+    gradiente por LED, y GD no se corrió con 200; datos de k redondeado a
+    bin, crop 16, un solo canal y una sola geometría; ruido Poisson puro;
+    el fantasma viene de `tests/test_joint_calibration.py::_synthetic_object`
+    y Lena/Map de imágenes fuera del repo. Costo: ~58 min de un core
+    (36 problemas, ~100 s cada uno, más ~7 min de ajuste de `lr`).
+
 (Gap #4 FPM-INR/`zhou2023` queda fuera de este roadmap por ahora —
 mejora calidad/velocidad del solver monocromático en general por una vía
 de aprendizaje profundo mucho más grande, no es específico de
@@ -1414,3 +1693,73 @@ fase si conviene.)
    wavelengths", Nat. Rev. Methods Primers 2025) no leída en profundidad,
    útil como contexto de estado del arte si hace falta antes de escribir
    un eventual paper/reporte de 2b.
+
+### A1 modelo directo independiente (auditoría 2026-09-21)
+
+Ataca el hallazgo A1: el "GD 0.995 contra WF 0.076" con k exacto genera los
+datos con `jc.simulate_lr_stack_continuous`, el mismo operador que invierte
+GD. `scripts/audit_independent_forward_model.py` (datos crudos en
+`data/audit_independent_forward_model.jsonl`) genera los datos con un modelo
+que no comparte discretización con ningún solver: objeto sobremuestreado x3
+(interpolación bicúbica), tilt del LED en el espacio real a k continuo,
+pupila con borde de coseno alzado (1 bin) y píxel de cámara que integra
+intensidad (5x5 sub-muestras). `selfcheck` lo valida: con esas tres
+diferencias apagadas coincide con el operador de GD (diferencia 0.0000); el
+modelo completo difiere de él en 6.8% (phantom) y 7.3% (Lena/Map) de RMS
+relativo en intensidad.
+
+Condiciones: green, 9x9 LEDs, recorte de 16 px, canvas 48x48, 100 iteraciones
+por solver, posiciones VERDADERAS para todos (sin calibración), 1 core. Sin
+ruido: 1 corrida por objeto. Poisson a pico 1000: **3 semillas** (0, 1, 2) por
+objeto. Nada se sintonizó acá: GD con `lr` 0.02 (el que se entrega) y 0.01;
+WF con `step_max` 2, 5 y 20 (20 = hitos 11-14; 2 y 5 = candidatos de
+`audit_wf_tuning_and_gd_ablation.py`).
+
+Correlación de fase, media de 3 semillas a pico 1000 (entre corchetes, sin
+ruido, n=1):
+
+| Objeto | Datos | GD lr 0.02 | GD lr 0.01 | WF s2 | WF s5 | WF s20 |
+|---|---|---|---|---|---|---|
+| phantom | A mismo operador, k exacto | 0.951 [0.995] | 0.958 [0.982] | 0.09 | 0.04 | 0.05 |
+| phantom | B independiente, k exacto | **0.748** [0.776] | 0.717 [0.737] | -0.12 | -0.12 | -0.03 |
+| phantom | C independiente, k a bin | 0.084 | 0.051 | 0.10 | 0.13 | 0.25 |
+| phantom | D modelo de WF, k a bin | 0.994 | 0.995 | 0.60 | 0.68 | 0.96 |
+| Lena/Map | A mismo operador, k exacto | 0.447 [0.539] | 0.381 [0.423] | 0.08 | 0.09 | 0.03 |
+| Lena/Map | B independiente, k exacto | **0.384** [0.396] | 0.321 [0.371] | 0.10 | 0.09 | 0.02 |
+| Lena/Map | C independiente, k a bin | 0.195 | 0.173 | 0.11 | 0.15 | 0.18 |
+| Lena/Map | D modelo de WF, k a bin | 0.286 | 0.234 | 0.21 | 0.26 | 0.23 |
+
+Lectura:
+- **El 0.995 era un techo del inverse crime.** En el phantom, GD baja de 0.995
+  (sin ruido, mismo operador) a 0.776 con el modelo independiente, y a 0.748 a
+  pico 1000 (0.951 con el mismo operador): la caída atribuible al desajuste de
+  modelo es ~0.2. En Lena/Map casi no cae (0.447 a 0.384 a pico 1000), porque
+  ahí el techo con el mismo operador ya es bajo (0.45-0.54) y lo limita el
+  objeto, no el modelo.
+- **GD sigue ganándole a WF con k exacto y modelo independiente**: 0.75 contra
+  -0.12 a 0.0 (phantom) y 0.38 contra 0.02-0.10 (Lena/Map). La ventaja no se
+  reduce a la coincidencia de operador. Pero WF es el solver cuyo modelo (k
+  redondeado a bin) no coincide con datos de k exacto, así que ese contraste
+  sigue midiendo en parte "modelo de posición correcto contra incorrecto".
+- **La posición manda más que el operador**: con el mismo modelo independiente
+  pero k redondeado a bin (C) GD cae a 0.08 (phantom) y 0.20 (Lena/Map). Esto
+  refuerza el hito 16: la exactitud de la posición de los LEDs es la incógnita
+  dominante con hardware real.
+- **WF solo es competitivo en su propio modelo (D)**: 0.96 con `step_max` 20 en
+  el phantom, donde iguala a GD (0.994). Ahí GD no pierde, pero WF con
+  `step_max` 2-5 sí (0.60-0.68), por lo que el `step_max` sí importa (A2).
+
+Salvedades:
+- 3 semillas a pico 1000 y 1 sin ruido; solo phantom y Lena/Map, un canal
+  (green), un recorte (16 px), un solo pico. Las desviaciones entre semillas
+  son chicas (<0.05), pero con n=3 no son intervalos de confianza.
+- Independiente no es realista: comparte con GD la misma definición de k y de
+  pupila hasta el borde, y sigue siendo una simulación numérica, no un
+  microscopio. Es un modelo más distinto, no el más distinto posible. No
+  incluye aberraciones, ruido de lectura ni error de posición.
+- Los WF están con 100 épocas y sin `adaptive_step`; el WF nunca alcanza su
+  techo en B (correlaciones ≈0 con k exacto), lo que dice poco de cuánto rinde
+  bien afinado en datos reales.
+- Las diferencias entre `lr` 0.02 y 0.01 (~0.03-0.06) son del orden del ruido
+  entre semillas; no se elige uno.
+- `phase_correlation` de la inicialización es NaN (fase cero); se omite.
