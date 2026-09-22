@@ -11,6 +11,7 @@ realistic -- see plan_p4_led_position_error.py for exact-k data).
   python3 scripts/plan_p3_object_phase_geometry.py --exp E1 --out e1.json [--procs 2]
 """
 import argparse, json, time, os
+from functools import partial
 from plan_common import *  # noqa (sets single-thread env, sys.path)
 from multiprocessing import Pool
 
@@ -79,10 +80,6 @@ def job(a, wf_epochs=200, gd_iters=100, crop=32):
             "gd_phase": g["phase_corr"], "gd_amp": g["amp_corr"], "secs": time.time() - t}
 
 
-def _job_star(a):
-    return job(a, **_opts)
-
-
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--exp", default="E1", choices=["E1", "E2", "E3a", "E3b", "E4"])
@@ -108,7 +105,7 @@ if __name__ == "__main__":
             print(e, {k: (round(v, 3) if isinstance(v, float) else v) for k, v in r.items()
                       if k in ("kind", "objective", "grid", "hr", "overlap", "wf_phase", "gd_phase", "secs")})
         raise SystemExit
-    _opts = dict(wf_epochs=args.wf_epochs, gd_iters=args.gd_iters, crop=args.crop)
+    opts = dict(wf_epochs=args.wf_epochs, gd_iters=args.gd_iters, crop=args.crop)
     J = jobs_for(args.exp, args.seeds)
     for w in args.where:
         key, vals = w.split("=", 1)
@@ -122,7 +119,7 @@ if __name__ == "__main__":
     J.sort(key=lambda a: a["seed"])  # complete seed 0 first, so a cut-short run is still a full design at n=1
     res = []
     with Pool(args.procs) as p:
-        for r in p.imap(_job_star, J, chunksize=1):
+        for r in p.imap(partial(job, **opts), J, chunksize=1):
             res.append(r)
             if args.out:  # incremental: a killed run keeps what it finished
                 json.dump(res, open(args.out, "w"))
