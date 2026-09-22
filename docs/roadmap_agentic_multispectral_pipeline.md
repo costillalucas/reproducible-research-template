@@ -2312,8 +2312,31 @@ locales de esa ventana, **ninguno pusheado** (`origin/main` sigue en
 7. `2e9e176` — hito 21: el colapso a contraste 0% es un problema de cuenca
    de atracción (init), no del paisaje de optimización — arrancar en la
    verdad converge perfecto, una perturbación de fase chica no rescata nada.
+8. `a4f1b86` — primer borrador de esta nota de traspaso.
+9. `d2b9a2e` — **corrige el hito 20**: ni el refinamiento TV (probado
+   `refine=True` contra `False`, resultado idéntico bit a bit — el
+   refinamiento resulta estar completamente sin usar en
+   `couple_rgb_channels`, ver docstring) ni el pistón (chequeado,
+   coincide con la media circular) explican la pérdida al acoplar. El
+   mecanismo real: un puñado de píxeles con número de envolvimiento
+   espurio (0.3-2.5% a escala baja) inyectan errores enormes de OPL que
+   dominan la correlación de Pearson sobre toda la imagen — excluirlos
+   muestra que acoplar en realidad **gana** contra lo ingenuo para WF.
+   Para GD el hallazgo original se sostiene (90% de píxeles con `k≠0`
+   incluso sin necesitarlo — ruido extendido, no outliers raros).
+10. `3a69987` — agrega `corr_coupled_masked` como métrica permanente del
+    script (formaliza el diagnóstico del punto 9).
+11. `47239be` — confirma el punto 9 con el barrido completo de 4 semillas:
+    enmascarar gana limpio para WF en escala 1/2/4 (0.80/0.88/0.93,
+    fracción enmascarada ≤20%); en escala 8+ la fracción salta a 68-93%
+    y enmascarar pasa a ser la peor métrica (ya está tirando señal real,
+    no solo ruido). Para GD, enmascarar ayuda pero nunca llega a bueno
+    (fracción enmascarada 88-97% siempre, sin transición limpia).
+12. `117ddea` — corrige una afirmación imprecisa sobre `crop=32` que se
+    había colado en el commit anterior (el chequeo real era mixto:
+    ayudaba a lo acoplado, empeoraba lo ingenuo).
 
-**Para retomar en otra máquina**: `data/data_source/` (con `Lena_512.png` y
+**Para retomar en otra máquina**: `data_source/` (con `Lena_512.png` y
 `Map_512.tiff`) vive **fuera del repo**, en una carpeta hermana
 (`Documents/data_source/` en esta máquina) — no está en git. Sin ella,
 cualquier script que use `lena_map` falla con `FileNotFoundError`. Hay que
@@ -2321,23 +2344,24 @@ copiarla a mano o apuntar `PTYCO_DATA_SOURCE` a donde esté. También hace
 falta configurar la identidad de git local (`git config user.name/email`)
 en cada máquina nueva — no hay `.gitconfig` global en esta.
 
-**Hilo en curso al momento de escribir esta nota** (puede haber terminado o
-seguir corriendo — revisar el estado real antes de asumir): diagnóstico de
-por qué el hito 20 encontró que acoplar (2b.i+2b.ii) empeora el resultado de
-WF incluso cuando `frac_k`≈0 (no debería hacer falta desenvolver nada). Dos
-preguntas en un solo barrido, sin costo extra (las tres reconstrucciones por
-canal son lo caro; la etapa de acople es barata, así que se corren varias
-variantes de acople sobre las mismas reconstrucciones): (a) ¿el refinamiento
-TV (`refine_opl_tv`, activado por defecto) es el culpable, comparando
-`refine=True` contra `refine=False`? (b) ¿el pistón de referencia
-(`reference_phase_to_background`, que promedia fases ya envueltas de forma
-aritmética, no circular) se calcula mal cuando el fondo tiene fases cerca de
-±π, generando `k≠0` espurios sin que haga falta ningún ruido "estructurado"?
-Si el pistón resulta ser la causa, **hay que corregir el mecanismo del hito
-20 antes de que alguien lo lea** — no solo agregar un resultado nuevo.
+**El hilo que estaba "en curso" al escribir el primer borrador de esta nota
+ya se resolvió** (era exactamente los puntos 9-12 de arriba) — ver hito 20
+en la sección 3 para el resultado completo, no repetido acá.
 
 **Hilos abiertos, no atacados esta noche** (quedan en el roadmap, priorizar
-si se retoma):
+si se retoma, ningún orden implícito salvo el primero):
+- **La reconstrucción ingenua (sin acoplar) de GD-amplitude en el objeto del
+  hito 20 (crop 16, bump oscilante, grid 9×9) es mucho peor que la de WF
+  ahí** (0.04-0.20 contra 0.66-0.89 a escala baja) — lo opuesto de los
+  hitos 11-19, donde GD solía ganar. Un chequeo de una sola celda con
+  crop 32 dio mixto (ayudó a lo acoplado, empeoró lo ingenuo), así que no
+  está resuelto si es el crop, el objeto, o algo específico de esta
+  geometría. Es la salvedad más grande que quedó sin cerrar.
+- Usar `pair_disagreement` (que `couple_rgb_channels` ya calcula y
+  devuelve, documentado como "diagnóstico de confianza por píxel") para
+  enmascarar o ponderar de forma automática en vez del filtro binario
+  ad hoc de esta noche (`K1≠0 or K2≠0`) — la mejora concreta más barata
+  identificada, no implementada.
 - P2/P4 rediseñados correctamente (ver salvedades del hito 18).
 - Confirmar la degeneración A/B/t con datos que pasen por el solver real
   (hoy solo probada con OPL inyectado).
@@ -2345,3 +2369,13 @@ si se retoma):
   a un atractor malo en vez de solo agregar varianza (hito 21).
 - Si el problema de cuenca del hito 21 aparece también a contraste bajo
   pero no cero (2-5%), o es específico de contraste exactamente cero.
+
+**Patrón que se repitió tres veces esta noche, vale tenerlo presente**: un
+resultado inicial sorprendente (P1/P3→P2/P4, el techo de fase, el colapso
+de inicialización, "acoplar empeora") resultó tener un problema de
+metodología (convención de forward model mezclada, métrica que envuelve mal
+por encima de π, o una métrica sin robustez a outliers) que cambiaba la
+conclusión real. Ninguno de los hallazgos que sobrevivió esta noche se tomó
+al pie de la letra en su primera corrida — todos se verificaron con al
+menos una corrida de control antes de escribirse. Vale seguir con esa
+disciplina si se retoma cualquiera de los hilos de arriba.
