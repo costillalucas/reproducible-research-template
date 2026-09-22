@@ -2520,11 +2520,14 @@ mejor convergidas antes de confirmarse.
 
 ### 6.5 gd-amplitude: ~10-20x más lento que WF, causa raíz identificada
 
-`--solver gd-amplitude` (100 iteraciones, mismos datos) llevaba más de 50
-minutos sin terminar ni el primer canal de 3, contra 13.5 minutos que
-tardó `wirtinger` en los 3 canales a 200 iteraciones — una desaceleración
-por iteración de ~10-20x que el texto de ayuda del CLI ("Use ~100
---iterations") no anticipa.
+`--solver gd-amplitude` (100 iteraciones, mismos datos) se mató a los 77
+minutos sin haber terminado ni el primer canal de 3 (`reconstruct_all_channels`
+no guarda nada a disco hasta que terminan los 3 canales, así que esta
+corrida no dejó ningún resultado de calidad de reconstrucción utilizable
+-- solo el dato de tiempo de pared, usado abajo). Contra 13.5 minutos que
+tardó `wirtinger` en los 3 canales completos a 200 iteraciones, es una
+desaceleración por iteración de ~10-20x que el texto de ayuda del CLI
+("Use ~100 --iterations") no anticipa.
 
 **Causa raíz encontrada (investigación de solo lectura, sin tocar el
 proceso en vivo ni el código)**: `joint_calibration.py` hace su forward/
@@ -2543,10 +2546,10 @@ que una LR (73.6ms vs 5.65ms), y el `exp()` del tilt HR solo ya cuesta
 brecha de pared observada. **Es una ineficiencia de implementación real,
 no un costo inherente al gradiente**: gd-amplitude podría adoptar el mismo
 truco de espectro-persistente-más-recorte que usa WF y debería caer en la
-misma clase de costo. No corregido en esta sesión (el proceso real seguía
-corriendo con la implementación actual) — queda como ítem de optimización
-concreto para una sesión futura, con puntero exacto a las líneas
-responsables.
+misma clase de costo. No corregido en esta sesión -- queda como ítem de
+optimización concreto para una sesión futura, con puntero exacto a las
+líneas responsables, y como prerrequisito antes de intentar de nuevo
+`--solver gd-amplitude` sobre datos reales a esta escala.
 
 ### 6.6 Primera corrida acoplada real (milestone 2b, `--qc`)
 
