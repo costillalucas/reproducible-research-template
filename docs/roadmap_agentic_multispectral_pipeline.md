@@ -1985,11 +1985,56 @@ antes de construir la capa de orquestación, y siguiendo el ranking de
       es la ausencia de un paso de filtrado/robustez que use la señal de
       confianza que el código ya calcula. Para GD, el problema es más
       profundo (ruido de fase por píxel demasiado alto) y no se resuelve
-      con un filtro de outliers. Diagnóstico de una sola semilla
-      (`seed=0`) en 4 celdas puntuales (escala 1 y 2 con WF, escala 1 con
-      GD, escala 8 con WF) — no se rehizo el barrido completo de 4
-      semillas con esta lectura; sería el siguiente paso natural si se
-      retoma.
+      con un filtro de outliers.
+
+    - **Confirmado con el barrido completo de 4 semillas** (mismo diseño
+      de 48 jobs de arriba, `corr_coupled_masked` agregado a
+      `scripts/coupled_opl_ceiling_sweep.py`, `data/coupled_opl_ceiling_sweep_masked.json`):
+      el diagnóstico de una semilla se sostiene entero y se ve más nítido
+      con más datos.
+
+      | escala | frac. enmascarada | acoplada WF | **enmascarada WF** | ingenua WF | acoplada GD | **enmascarada GD** | ingenua GD |
+      |---|---|---|---|---|---|---|---|
+      | 1 | 0.4% (WF) / 91% (GD) | 0.11±0.04 | **0.80±0.01** | 0.66±0.03 | −0.05±0.03 | 0.20±0.10 | 0.07±0.01 |
+      | 2 | 1.9% / 91% | 0.30±0.02 | **0.88±0.01** | 0.82±0.01 | −0.03±0.04 | 0.33±0.18 | 0.08±0.01 |
+      | 4 | 20% / 88% | 0.35±0.21 | **0.93±0.01** | 0.89±0.01 | −0.20±0.01 | 0.34±0.07 | 0.04±0.01 |
+      | 8 | 68% / 89% | −0.04±0.07 | −0.46±0.10 | −0.69±0.01 | −0.35±0.07 | 0.42±0.08 | 0.20±0.01 |
+      | 16 | 82% / 93% | 0.04±0.01 | −0.48±0.09 | −0.45±0.01 | −0.28±0.03 | −0.08±0.39 | −0.35±0.04 |
+      | 24 | 93% / 97% | 0.01±0.02 | −0.24±0.09 | −0.21±0.02 | −0.15±0.03 | 0.21±0.36 | −0.26±0.03 |
+
+      - **Para WF, enmascarar da el mejor resultado de las tres métricas
+        en escala 1, 2 y 4** (0.80, 0.88, 0.93 — todas mejores que
+        ingenuo, que a su vez ya era razonable ahí). La fracción
+        enmascarada se mantiene chica hasta escala 4 (≤20%), consistente
+        con "son outliers, no señal real perdida". **En escala 8 en
+        adelante la fracción enmascarada salta a 68-93%** — ahí enmascarar
+        ya está descartando la mayoría de la imagen (donde el
+        desenvolvimiento real sí hace falta, no es espurio) y por eso
+        la métrica enmascarada se vuelve la peor de las tres, no la
+        mejor. El punto de quiebre (entre escala 4 y 8) coincide con
+        donde la fase azul cruza ~0.5-1.0π (ver hito 19/20) — justo donde
+        empieza a hacer falta desenvolver de verdad.
+      - **Para GD, enmascarar ayuda pero nunca llega a bueno** (0.20-0.42
+        en el mejor caso, contra 0.80-0.93 de WF a las mismas escalas
+        bajas) y la fracción enmascarada es enorme en todas las escalas
+        (88-97%, sin la caída abrupta que muestra WF entre escala 4 y 8).
+        Esto descarta que el problema de GD sea "unos pocos outliers
+        además de los reales" — es ruido de fase por píxel extendido a
+        casi toda la imagen incluso donde no debería hacer falta ningún
+        wrap. **Salvedad nueva**: la reconstrucción ingenua de GD en este
+        objeto/geometría (crop 16, bump oscilante, grid 9×9) ya es mucho
+        peor que la de WF en las mismas condiciones (ingenua GD 0.04-0.20
+        contra ingenua WF 0.66-0.89 a escala 1-4) — algo no visto en los
+        hitos 11-19, donde GD solía ganarle a WF en objetos con
+        estructura. No se investigó si esto es específico de este
+        objeto/crop (16, más chico que el crop 32 de los hitos anteriores
+        — un chequeo rápido mostró que crop 32 mejora algo la
+        reconstrucción aislada de GD acá, ver más arriba) o una
+        interacción distinta; sería el primer lugar a mirar si se
+        retoma esto.
+      - Esto reemplaza el diagnóstico de una sola semilla de arriba, que
+        queda como registro de cómo se llegó al hallazgo, no como el
+        resultado final.
 
 - **Milestone 21 — diagnóstico de inicialización para el colapso a
   contraste 0% (2026-09-22, sesión nocturna autónoma):** el hito 19
