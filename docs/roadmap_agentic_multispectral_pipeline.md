@@ -1446,6 +1446,36 @@ antes de construir la capa de orquestación, y siguiendo el ranking de
       ~33 min (22 jobs, 2 procesos, PC cargada), P3 ~14 min (10 jobs);
       ~160-190 s por job.
 
+    - **Ampliación a 4 semillas (2026-09-21) de las celdas más ambiguas con
+      2:** `jitter 0.2 mm`, `offset 0.5 mm` y `z +2 mm` de P1, y `combinado
+      ×0.25` y `×0.5` de P3 — 10 jobs nuevos (seeds 2-3), datos crudos en
+      `data/plan_p1_p3_extra_seeds.json`, combinados con las semillas 0-1 de
+      arriba. Mismo objeto/configuración; media ± desviación estándar de las
+      4 semillas:
+
+      | condición | k_err (bins) | GD nominal | GD rígido | GD per-LED | GD oráculo |
+      |---|---|---|---|---|---|
+      | jitter 0.2 mm | 0.27 | 0.19±0.09 | 0.16±0.06 | **0.32±0.05** | 0.51±0.02 |
+      | offset 0.5 mm | 0.59 | −0.00±0.01 | 0.10±0.01 | 0.05±0.01 | 0.52±0.03 |
+      | z +2 mm | 0.56 | 0.16±0.03 | 0.20±0.04 | 0.21±0.02 | 0.54±0.01 |
+      | combinado ×0.25 | 0.38 | 0.13±0.01 | **0.26±0.01** | 0.25±0.01 | 0.53±0.01 |
+      | combinado ×0.5 | 0.76 | 0.06±0.02 | 0.12±0.02 | 0.10±0.01 | 0.52±0.02 |
+
+      Confirma con menos incertidumbre lo que ya sugerían las 2 semillas: (1)
+      **per-LED sigue siendo lo único que rescata jitter** (0.32 contra
+      0.16-0.19 de nominal/rígido, sd baja); (2) **offset 0.5 mm es un caso
+      raro y estable**: la calibración rígida baja `k_err` pero la fase
+      recuperada (0.10±0.01) queda muy por debajo del oráculo (0.52±0.03) —
+      no es ruido de 2 semillas, hay un mínimo local o una ambigüedad
+      estructural en la calibración conjunta ante offset puro que no se
+      investigó más; (3) **z +2 mm sigue sin que ninguna variante de GD
+      ayude claramente** (0.16-0.21, todas dentro de la sd de las otras);
+      (4) el **acantilado de P3 se confirma entre 0.38 y 0.76 bins**: a
+      ×0.25 el rígido casi duplica al nominal (0.26 contra 0.13), a ×0.5 el
+      margen se estrecha (0.12 contra 0.06) y ambos ya están lejos del
+      oráculo. Sigue siendo n=4, no un intervalo de confianza; P2 y P4 del
+      plan continúan sin correr.
+
 - **Milestone 17 — E1 (objeto × fase × fotones) y E3b (span fijo, cantidad
   de LEDs), 2 seeds (2026-09-21):** `scripts/plan_p3_object_phase_geometry.py`
   (agregué `--where`, guardado incremental y `*_phase_rmse`/`flat_phase_rmse`
