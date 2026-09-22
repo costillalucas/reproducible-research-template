@@ -1621,6 +1621,97 @@ antes de construir la capa de orquestación, y siguiendo el ranking de
     y Lena/Map de imágenes fuera del repo. Costo: ~58 min de un core
     (36 problemas, ~100 s cada uno, más ~7 min de ajuste de `lr`).
 
+- **Milestone 18 — P2 (canal × ruido) y P4 (tamaño de recorte), 2 semillas
+  (2026-09-21):** completa el plan de error de posición de LEDs iniciado en
+  el hito 16. `scripts/plan_p4_led_position_error.py --exp P2` (18 jobs,
+  `data/plan_p2_channel_noise.json`) y `--exp P4` (6 jobs,
+  `data/plan_p4_crop_size.json`). Mismo objeto Lena/Map, error "combinado"
+  de P1/P3, sin escalar (×1). **Bug de portabilidad arreglado antes de
+  correr**: `_job_star` leía una variable global `_opts` que solo existía
+  dentro del bloque `if __name__ == "__main__":`; en Windows
+  `multiprocessing.Pool` usa `spawn` (no `fork`), así que los procesos hijos
+  reimportan el módulo sin ejecutar ese bloque y `_opts` no existe ahí →
+  `NameError` en todo trabajo con `--procs > 1`. Corregido con
+  `functools.partial(job, **opts)`, sin variable global; probado con un job
+  chico real (no solo `--dry-run`, que no pasa por `Pool`) antes de la
+  corrida completa.
+
+  P2 (`k_err_bins` ya fijo por canal, ya que k escala con 1/λ para el mismo
+  error físico):
+
+  | canal | pico | k_err | WF | GD nominal | GD rígido | GD per-LED | GD oráculo |
+  |---|---|---|---|---|---|---|---|
+  | azul | 100 | 1.68 | −0.02 | 0.01 | 0.01 | 0.01 | 0.25 |
+  | azul | 1000 | 1.68 | −0.01 | 0.02 | 0.02 | 0.00 | 0.54 |
+  | azul | 10000 | 1.68 | −0.02 | 0.02 | 0.02 | 0.00 | 0.77 |
+  | verde | 100 | 1.49 | 0.02 | 0.02 | 0.02 | −0.00 | 0.20 |
+  | verde | 1000 | 1.49 | 0.02 | 0.03 | 0.02 | 0.02 | 0.53 |
+  | verde | 10000 | 1.49 | 0.01 | 0.03 | 0.02 | 0.03 | 0.72 |
+  | rojo | 100 | 1.26 | 0.03 | 0.12 | 0.05 | 0.07 | 0.26 |
+  | rojo | 1000 | 1.26 | 0.03 | 0.12 | 0.06 | 0.08 | 0.46 |
+  | rojo | 10000 | 1.26 | 0.02 | 0.11 | 0.09 | 0.07 | 0.54 |
+
+  P4 (crop 16/32/48; `k_err` es el mismo error "combinado" físico, pero
+  escala con el recorte):
+
+  | crop | k_err | k_err tras rígido | WF | GD nominal | GD rígido | GD per-LED | GD oráculo |
+  |---|---|---|---|---|---|---|---|
+  | 16 | 0.75 | 0.68 | 0.03 | −0.14 | −0.02 | −0.02 | 0.40 |
+  | 32 | 1.49 | 1.59 | 0.02 | 0.03 | 0.02 | 0.02 | 0.53 |
+  | 48 | 2.24 | 2.22 | −0.01 | −0.00 | −0.00 | −0.01 | 0.56 |
+
+    - **P2 no puede probar su hipótesis: el error "combinado" a ×1 ya está
+      muy por encima del acantilado (1.26-1.68 bins, contra el ~0.4-0.8
+      bin del hito 16) en los tres canales.** Por eso ningún solver (WF,
+      nominal, rígido, per-LED) recupera nada en ningún pico —quedan todos
+      pinneados entre −0.02 y 0.12 sin importar si hay 100 o 10000 fotones—
+      mientras el oráculo (posiciones verdaderas) sí mejora con los fotones
+      (0.20→0.72 en verde, 0.25→0.77 en azul). El criterio de refutación
+      ("`gd_rigid` ≈ `gd_true` a pico 100 en verde → el ruido no limita la
+      calibración") ni siquiera llega a evaluarse: rígido nunca se acerca
+      al oráculo en ningún pico, así que el cuello de botella es
+      enteramente la posición, no el ruido fotónico — el diseño del
+      experimento reutilizó el error a magnitud completa en vez de una
+      escala parcial (como el ×0.25/×0.5 de P3), y ahí no queda nada que
+      el ruido pueda seguir rompiendo.
+    - **Sí aparece una señal de canal, chica pero consistente en ambas
+      semillas: rojo (menos bins de error, 1.26) queda menos roto que
+      verde y azul** (nominal 0.11-0.12 contra 0.02-0.03 y 0.01-0.02).
+      Coincide con el patrón ya visto en P1/P3 ("menos bins, menos
+      catástrofe"), no con la hipótesis original de "el azul falla primero
+      por peor SNR" — acá lo que manda es que el mismo error físico mide
+      menos bins en rojo (λ mayor), no el ruido.
+    - **P4 confirma la propia advertencia del plan: crop y `k_err_bins` están
+      confundidos** (el error físico "combinado" mide 0.75 bins a crop 16 y
+      2.24 a crop 48), así que 32 y 48 ya están muy pasados el acantilado y
+      no hay nada que comparar ahí. El único punto con señal es crop 16
+      (0.75 bins, cerca del umbral), y ahí el resultado va en contra de la
+      hipótesis del plan ("crops chicos dan poca señal y `per_led` sobreajusta
+      peor que `rigid`"): las tres variantes de GD quedan mal, pero
+      **`gd_nominal` es la peor y va a negativo (−0.14)**, peor que
+      `gd_rigid` y `gd_perled` (−0.02 ambos) — a recorte chico, no calibrar
+      es peor que calibrar de cualquier forma, no al revés. El criterio de
+      refutación ("`gd_rigid` no cambia con el crop, ±0.05") tampoco se
+      puede evaluar limpiamente por la misma confusión: los tres valores
+      (−0.02 / 0.02 / −0.00) están dentro del ruido entre sí, pero
+      corresponden a tres severidades de error distintas, no a la misma.
+    - **No se amplió a 4 semillas**: a diferencia del hito 16, acá ninguna
+      celda queda en una zona ambigua (~0.05-0.1) que dependa de la
+      elección — todo está claramente cerca de cero o claramente cerca del
+      oráculo, salvo la señal roja-contra-verde/azul de P2, que ya es
+      consistente en las 2 semillas.
+    - **Salvedades:** (1) 2 semillas, igual que el resto del plan hasta
+      ahora. (2) Ninguno de los dos experimentos prueba realmente lo que se
+      propuso: P2 necesitaría un error a escala parcial (no ×1) para
+      separar el efecto del ruido/canal del acantilado ya cruzado; P4
+      necesitaría mantener el error en bins constante entre recortes (no el
+      error físico) para aislar el efecto del tamaño de recorte del
+      acantilado. Quedan como diseños a corregir si se retoma este punto,
+      no como resultados negativos definitivos. (3) Mismo objeto Lena/Map,
+      geometría "current", fase 0.3π, calibración conjunta de 150
+      iteraciones. Costo real: P2 ~40 min (18 jobs, 2 procesos, PC
+      cargada), P4 ~16 min (6 jobs, el crop 48 domina el costo).
+
 (Gap #4 FPM-INR/`zhou2023` queda fuera de este roadmap por ahora —
 mejora calidad/velocidad del solver monocromático en general por una vía
 de aprendizaje profundo mucho más grande, no es específico de
