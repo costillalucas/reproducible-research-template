@@ -2164,3 +2164,56 @@ Salvedades:
 - Las diferencias entre `lr` 0.02 y 0.01 (~0.03-0.06) son del orden del ruido
   entre semillas; no se elige uno.
 - `phase_correlation` de la inicialización es NaN (fase cero); se omite.
+
+## 5. Traspaso de la sesión nocturna autónoma (2026-09-22, 00:34–~04:30)
+
+El usuario pidió seguir explorando sin supervisión durante ~5 horas. Commits
+locales de esa ventana, **ninguno pusheado** (`origin/main` sigue en
+`63eae1f`; hay que revisar y correr `git push` a mano):
+
+1. `63eae1f` — P1/P3 (error de posición de LEDs) ampliados a 4 semillas.
+2. `9866908` — fix de `NameError` con `multiprocessing.Pool` en Windows
+   (`spawn` vs `fork`) en `plan_p4_led_position_error.py`.
+3. `c8f906d` — P2/P4 corridos (resultado inconcluso por diseño, documentado).
+4. `64d297c` — mismo fix de `multiprocessing` en `plan_p3_object_phase_geometry.py`.
+5. `12dc5ce` — hito 19: techo de fase (GD-amplitude) y piso de contraste de
+   amplitud.
+6. `ad1ba17` — hito 20: techo de la cadena acoplada completa
+   (`couple_rgb_channels`) con el solver real; corrige también la lectura
+   del hito 19 por encima de π (artefacto de envolvimiento en `metrics.py`).
+7. `2e9e176` — hito 21: el colapso a contraste 0% es un problema de cuenca
+   de atracción (init), no del paisaje de optimización — arrancar en la
+   verdad converge perfecto, una perturbación de fase chica no rescata nada.
+
+**Para retomar en otra máquina**: `data/data_source/` (con `Lena_512.png` y
+`Map_512.tiff`) vive **fuera del repo**, en una carpeta hermana
+(`Documents/data_source/` en esta máquina) — no está en git. Sin ella,
+cualquier script que use `lena_map` falla con `FileNotFoundError`. Hay que
+copiarla a mano o apuntar `PTYCO_DATA_SOURCE` a donde esté. También hace
+falta configurar la identidad de git local (`git config user.name/email`)
+en cada máquina nueva — no hay `.gitconfig` global en esta.
+
+**Hilo en curso al momento de escribir esta nota** (puede haber terminado o
+seguir corriendo — revisar el estado real antes de asumir): diagnóstico de
+por qué el hito 20 encontró que acoplar (2b.i+2b.ii) empeora el resultado de
+WF incluso cuando `frac_k`≈0 (no debería hacer falta desenvolver nada). Dos
+preguntas en un solo barrido, sin costo extra (las tres reconstrucciones por
+canal son lo caro; la etapa de acople es barata, así que se corren varias
+variantes de acople sobre las mismas reconstrucciones): (a) ¿el refinamiento
+TV (`refine_opl_tv`, activado por defecto) es el culpable, comparando
+`refine=True` contra `refine=False`? (b) ¿el pistón de referencia
+(`reference_phase_to_background`, que promedia fases ya envueltas de forma
+aritmética, no circular) se calcula mal cuando el fondo tiene fases cerca de
+±π, generando `k≠0` espurios sin que haga falta ningún ruido "estructurado"?
+Si el pistón resulta ser la causa, **hay que corregir el mecanismo del hito
+20 antes de que alguien lo lea** — no solo agregar un resultado nuevo.
+
+**Hilos abiertos, no atacados esta noche** (quedan en el roadmap, priorizar
+si se retoma):
+- P2/P4 rediseñados correctamente (ver salvedades del hito 18).
+- Confirmar la degeneración A/B/t con datos que pasen por el solver real
+  (hoy solo probada con OPL inyectado).
+- Por qué el ruido de conteo del init "default" empuja de forma consistente
+  a un atractor malo en vez de solo agregar varianza (hito 21).
+- Si el problema de cuenca del hito 21 aparece también a contraste bajo
+  pero no cero (2-5%), o es específico de contraste exactamente cero.
