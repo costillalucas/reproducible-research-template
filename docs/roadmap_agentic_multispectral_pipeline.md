@@ -1911,6 +1911,87 @@ antes de construir la capa de orquestación, y siguiendo el ranking de
       ~20 min (primera corrida, con el bug) + ~20 min (corrida
       corregida), 2 procesos.
 
+- **Milestone 21 — diagnóstico de inicialización para el colapso a
+  contraste 0% (2026-09-22, sesión nocturna autónoma):** el hito 19
+  encontró que GD-amplitude, a contraste de amplitud exactamente cero
+  (fase pura) y pico 1000, da correlación de fase **negativa** (−0.24,
+  peor que WF). ¿Es un problema de inicialización (`initial_hr_guess`/
+  `initial_object_from_center_led` arrancan de una imagen sin estructura)
+  o del paisaje de optimización en sí (el "saddle de fase débil" ya
+  documentado en `c566d85`)? `reconstruct_and_calibrate` ya acepta
+  `initial_object` como parámetro arbitrario, así que esto no tocó
+  `src/`.
+
+  **Falso comienzo, corregido antes de confiar en el resultado:** la
+  primera versión del diagnóstico usó el modelo directo de k continuo de
+  `plan_common.simulate_exact_k` (la convención de los hitos 16+), NO la
+  grilla alineada a bin + `forward_model.simulate_lr_stack` que el hito 19
+  realmente usó — con esa mezcla, el init "default" daba correlación
+  **positiva** (0.75±0.01 a pico 1000), sin relación con la anomalía
+  original. Corregido para replicar exactamente el `job()` de
+  `plan_p3_object_phase_geometry.py` (grilla alineada a bin, conversión
+  `/sc**2` para GD); con eso, "default" reprodujo la anomalía casi exacto
+  en la prueba de una semilla (−0.27 contra el −0.24 original) antes de
+  correr las 4 semillas completas.
+
+  `data/init_diagnosis_pure_phase.json` (32 jobs, 4 inits × 2 picos × 4
+  semillas), `lena_map`, verde, `min_amp=1.0` (fase pura), fase 0.3π,
+  crop 32, 9×9, GD-amplitude 100 iteraciones, posiciones exactas:
+
+  | init | pico 100 | pico 1000 |
+  |---|---|---|
+  | default (centro-LED, el que falla) | 0.242±0.117 | **−0.338±0.165** |
+  | oráculo amplitud (=1 exacto, fase 0) | 0.096±0.064 | 0.191±0.325 |
+  | fase aleatoria chica (σ=0.3 rad) | 0.029±0.019 | 0.032±0.063 |
+  | **oráculo completo (objeto verdadero)** | 0.601±0.020 | **0.913±0.000** |
+
+    - **Es un problema de cuenca de atracción, no del paisaje de
+      optimización.** Arrancar exactamente en la respuesta verdadera
+      (`oracle_full`) converge casi perfecto y con desviación
+      prácticamente nula entre semillas (0.913±0.000 a pico 1000) — el
+      optimizador no se aleja de un buen óptimo una vez que llega ahí. El
+      problema es puramente de **alcanzabilidad** desde un arranque plano
+      típico, no de que no exista un buen óptimo o de que el gradiente
+      empuje activamente lejos de él.
+    - **Un arreglo barato y genérico (romper la simetría con fase
+      aleatoria chica) no rescata nada** — 0.03 a ambos picos,
+      indistinguible de ruido. No es un saddle simétrico que cualquier
+      perturbación resuelve; el arranque plano cae en (o cerca de) un
+      atractor malo específico, no en un punto de equilibrio inestable
+      genérico.
+    - **El init "default" es *peor* que el init con amplitud oráculo
+      (ambos son "planos"), y con menos variabilidad entre semillas**
+      (sd 0.165 contra 0.325) — el ruido de conteo de fotones en la
+      imagen del LED central (que en teoría no debería aportar ninguna
+      estructura útil a contraste 0%) parece empujar de forma consistente
+      hacia un atractor malo específico, mientras el init perfectamente
+      uniforme (sin ese ruido) es más errático semilla a semilla —a veces
+      cae mejor, a veces peor, con muchísima más varianza. No se investigó
+      por qué el ruido de conteo tiene un efecto direccional consistente
+      en vez de puramente aleatorio; sería el siguiente paso si se retoma
+      esto.
+    - **Implicación práctica:** ni con este solver ni con una
+      inicialización barata hay hoy una forma de manejar el caso 0% de
+      contraste con muchos fotones. Un arreglo real necesitaría o (a) una
+      inicialización más informada (p. ej. desde un espectrograma de fase
+      débil o desde un modelo TIE aproximado, no probado acá), o (b) un
+      cambio de esquema de optimización (scheduling del learning rate,
+      annealing, o el "saddle de fase débil" de `c566d85` sugiere que
+      podría hacer falta una estrategia de escape de saddle específica),
+      ninguno de los cuales se probó en esta sesión.
+    - **Salvedades:** 4 semillas; una sola celda (contraste exacto 0%,
+      `lena_map`, verde, fase 0.3π); no se probó a otros niveles de
+      contraste bajo (2%/5%) si el mismo problema de cuenca aparece ahí
+      también o si es específico del contraste exactamente cero; solo GD-
+      amplitude (no se repitió el diagnóstico con WF, que a esta celda ya
+      se sabe que se queda cerca de cero sin volverse negativo). Script
+      en el scratchpad de la sesión (extensión directa de
+      `plan_p3_object_phase_geometry.job()`, variando solo `initial_object`
+      — no copiado a `scripts/` por brevedad, dado que es un diagnóstico
+      puntual, no un experimento a repetir). Costo real: ~2 min (prueba de
+      una semilla, ya con el bug corregido) + ~13 min (barrido completo),
+      2 procesos.
+
 (Gap #4 FPM-INR/`zhou2023` queda fuera de este roadmap por ahora —
 mejora calidad/velocidad del solver monocromático en general por una vía
 de aprendizaje profundo mucho más grande, no es específico de
