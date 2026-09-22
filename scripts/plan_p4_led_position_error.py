@@ -14,6 +14,7 @@ Reported vs `k_err_bins` = RMS(true - nominal) in HR spectrum bins.
   python3 scripts/plan_p4_led_position_error.py --exp P1 --out p1.json [--procs 2]
 """
 import argparse, json, time
+from functools import partial
 from plan_common import *  # noqa
 from multiprocessing import Pool
 
@@ -97,10 +98,6 @@ def job(a, wf_epochs=200, gd_iters=100, cal_iters=150, crop_default=32):
     return out
 
 
-def _job_star(a):
-    return job(a, **_opts)
-
-
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--exp", default="P1", choices=["P1", "P2", "P3", "P4"])
@@ -126,10 +123,10 @@ if __name__ == "__main__":
                       if k in ("err", "k_err_bins", "k_err_after_rigid", "wf_phase", "gd_nominal_phase",
                                "gd_rigid_phase", "gd_perled_phase", "gd_true_phase", "secs")})
         raise SystemExit
-    _opts = dict(wf_epochs=args.wf_epochs, gd_iters=args.gd_iters, cal_iters=args.cal_iters)
+    opts = dict(wf_epochs=args.wf_epochs, gd_iters=args.gd_iters, cal_iters=args.cal_iters)
     J = jobs_for(args.exp, args.seeds)
     with Pool(args.procs) as p:
-        res = p.map(_job_star, J, chunksize=1)
+        res = p.map(partial(job, **opts), J, chunksize=1)
     if args.out:
         json.dump(res, open(args.out, "w"))
     print(len(res), "jobs done")
