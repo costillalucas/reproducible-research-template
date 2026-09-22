@@ -2026,11 +2026,14 @@ antes de construir la capa de orquestación, y siguiendo el ranking de
         peor que la de WF en las mismas condiciones (ingenua GD 0.04-0.20
         contra ingenua WF 0.66-0.89 a escala 1-4) — algo no visto en los
         hitos 11-19, donde GD solía ganarle a WF en objetos con
-        estructura. No se investigó si esto es específico de este
-        objeto/crop (16, más chico que el crop 32 de los hitos anteriores
-        — un chequeo rápido mostró que crop 32 mejora algo la
-        reconstrucción aislada de GD acá, ver más arriba) o una
-        interacción distinta; sería el primer lugar a mirar si se
+        estructura. No se investigó a fondo si esto es específico de este
+        objeto/crop (16, más chico que el crop 32 de los hitos anteriores).
+        **Corrección**: un chequeo de una sola celda (escala 8, semilla 0)
+        que se mencionó más arriba como "crop 32 mejora algo" en realidad
+        dio **mixto, no una mejora limpia**: crop 32 mejoró lo acoplado
+        (−0.227→0.054) pero **empeoró lo ingenuo** (0.198→0.094) respecto
+        de crop 16. No alcanza para concluir que crop 32 arregla nada acá;
+        sería el primer lugar a mirar con más semillas si se
         retoma esto.
       - Esto reemplaza el diagnóstico de una sola semilla de arriba, que
         queda como registro de cómo se llegó al hallazgo, no como el
