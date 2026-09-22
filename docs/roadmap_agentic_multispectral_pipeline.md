@@ -2518,7 +2518,7 @@ docstring del módulo advierte que la precisión de este diagnóstico depende
 de la calidad de la reconstrucción que mide, esto necesita reconstrucciones
 mejor convergidas antes de confirmarse.
 
-### 6.5 gd-amplitude: ~10-20x más lento que WF, causa raíz identificada
+### 6.5 gd-amplitude: ~10-20x más lento que WF -- es el costo real de su ventaja, no un bug
 
 `--solver gd-amplitude` (100 iteraciones, mismos datos) se mató a los 77
 minutos sin haber terminado ni el primer canal de 3 (`reconstruct_all_channels`
@@ -2529,27 +2529,45 @@ tardó `wirtinger` en los 3 canales completos a 200 iteraciones, es una
 desaceleración por iteración de ~10-20x que el texto de ayuda del CLI
 ("Use ~100 --iterations") no anticipa.
 
-**Causa raíz encontrada (investigación de solo lectura, sin tocar el
-proceso en vivo ni el código)**: `joint_calibration.py` hace su forward/
-backward pass **en espacio real a resolución HR completa por cada LED y
-cada iteración** (líneas ~128-131 y ~150-158: arma un `tilt` complejo
-sobre la grilla HR entera de 1200x1200, una `fft2` HR completa por LED, y
-en la pasada hacia atrás un zero-padding del gradiente LR a tamaño HR
-seguido de otra `ifft2` HR completa), mientras que `reconstruction.py`
-(Wirtinger flow) mantiene un único espectro HR persistente y por cada LED
-solo recorta y opera sobre la ventana LR (`reconstruction.py:175` hace la
-`fft2` HR **una sola vez**, fuera del loop; `:187-190` solo cortan la
-ventana `lr_shape` de ese espectro ya calculado). Medido de forma aislada
-con timings sintéticos a esta misma escala: una `fft2` HR cuesta ~13x más
-que una LR (73.6ms vs 5.65ms), y el `exp()` del tilt HR solo ya cuesta
-~101ms — costo combinado por LED estimado en ~22x, que coincide con la
-brecha de pared observada. **Es una ineficiencia de implementación real,
-no un costo inherente al gradiente**: gd-amplitude podría adoptar el mismo
-truco de espectro-persistente-más-recorte que usa WF y debería caer en la
-misma clase de costo. No corregido en esta sesión -- queda como ítem de
-optimización concreto para una sesión futura, con puntero exacto a las
-líneas responsables, y como prerrequisito antes de intentar de nuevo
-`--solver gd-amplitude` sobre datos reales a esta escala.
+**Primer diagnóstico (solo lectura) e intento de corrección -- corregido
+más abajo, no tomar la primera lectura como conclusión final**:
+`joint_calibration.py` hace su forward/backward pass **en espacio real a
+resolución HR completa por cada LED y cada iteración** (líneas ~128-131 y
+~150-158: arma un `tilt` complejo sobre la grilla HR entera de 1200x1200,
+una `fft2` HR completa por LED), mientras que `reconstruction.py` (WF)
+mantiene un único espectro HR persistente y por cada LED solo recorta la
+ventana LR (`reconstruction.py:175`, `:187-190`). Medido de forma aislada:
+~22x de sobrecosto por LED, que coincide con la brecha observada. La
+primera lectura concluyó que era "una ineficiencia de implementación, no
+un costo inherente" y propuso adoptar el truco de recorte de WF.
+
+**Se intentó ese cambio en un segundo pase y se DETUVO antes de tocar
+código, tras verificar por qué el diseño actual es así**: el propio
+docstring de `joint_calibration.py` (líneas ~13-19 y ~277-285) explica que
+existe específicamente para EVITAR el redondeo que sí hace el recorte de
+WF -- `spectral_ops.led_crop_window` (`spectral_ops.py:34-35`) redondea el
+k de cada LED al bin de FFT HR más cercano (`int(round(...))`);
+`joint_calibration.py` aplica el tilt en espacio real con k **continuo**
+(sin cuantizar) precisamente para poder evitar esa pérdida de precisión
+sub-bin. El propio docstring cita el número que sustenta el diseño: con k
+exacto/continuo este solver da 0.995 de correlación de fase contra 0.076
+de WF; forzado al mismo grid redondeado a bins que usa el truco de
+recorte, la correlación cae a **0.09** -- una regresión de ~10x, justo en
+el régimen (posiciones físicas de LED reales, no cuantizadas) que es la
+razón de ser de este solver sobre hardware real. Verificado leyendo
+`spectral_ops.py:24-47` directamente, no solo el docstring.
+
+**Conclusión corregida: la lentitud es el costo real y documentado de la
+ventaja de precisión de gd-amplitude, no un bug de implementación libre de
+arreglar.** No se tocó el código. Camino legítimo para acelerar sin perder
+precisión de k continuo, anotado para el futuro pero fuera de alcance de
+esta sesión: una NUFFT / chirp-Z transform (lectura de frecuencia
+fraccionaria exacta desde un único espectro HR persistente, en vez de
+recorte por índice entero) -- técnica genuinamente distinta con su propio
+error de interpolación a caracterizar, no un ajuste trivial. Este es
+exactamente el patrón de la sección 5: el primer diagnóstico sorprendente
+("es solo un bug") no sobrevivió una verificación más profunda antes de
+tocar la ruta de reconstrucción científica.
 
 ### 6.6 Primera corrida acoplada real (milestone 2b, `--qc`)
 
