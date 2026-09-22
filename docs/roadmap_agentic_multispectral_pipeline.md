@@ -2390,3 +2390,188 @@ conclusión real. Ninguno de los hallazgos que sobrevivió esta noche se tomó
 al pie de la letra en su primera corrida — todos se verificaron con al
 menos una corrida de control antes de escribirse. Vale seguir con esa
 disciplina si se retoma cualquiera de los hilos de arriba.
+
+## 6. Primera validación con datos reales de laboratorio (2026-09-22)
+
+Hasta esta sesión, absolutamente todo el trabajo del proyecto (milestones
+1-21, la auditoría adversarial, la sesión nocturna autónoma) corrió sobre
+datos **sintéticos** — ninguna captura TIFF real había pasado nunca por
+`pipelines/reconstruct_real_images.py`,
+`pipelines/reconstruct_multispectral_independent.py` ni
+`pipelines/reconstruct_multispectral_coupled.py` (ver sección 1 y el cierre
+de la sección 5). Esta sesión usó la primera captura real disponible:
+`/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2025-12-12/organizado`
+(grid 9x9, `crop=400`, los 3 canales red/green/blue con 81/81 LEDs cada
+uno).
+
+### 6.1 Bug encontrado y corregido antes de poder cargar los datos
+
+La convención asumida por `io_utils.py`
+(`fila<R>_columna<C>.tiff`, un único `index_base` compartido entre fila y
+columna) no coincidía con la captura real en dos puntos independientes:
+
+- Los archivos se llaman `fila<R>_col<C>.tiff`, no `fila<R>_columna<C>.tiff`.
+- Las filas numeran 13-21 y las columnas 11-19 para el mismo escaneo 9x9 —
+  bases distintas por eje, algo que `LEDArrayConfig` no podía representar
+  (asumía `index_base` único, usado tanto para el rango de filas como el de
+  columnas al calcular la posición física de cada LED).
+
+Antes de tocar código, se confirmó de forma independiente cuál es el LED
+sobre el eje óptico usando los propios metadatos del laboratorio
+(`green/leds_por_tiempo_17.100.json`, que agrupa LEDs por tiempo de
+exposición — los de exposición más corta son los más brillantes, es decir
+los más cercanos al eje): el bucket de exposición más corta es
+`[[16,15],[17,15],[18,15]]`, centrado exactamente en fila=17, columna=15 —
+el centro geométrico de la ventana 9x9 (13+4=17, 11+4=15). Esto confirmó
+que la ventana capturada SÍ está centrada en el eje óptico, solo que fila y
+columna se numeran desde esquinas distintas, antes de generalizar el
+código (evitando adivinar la calibración física a ciegas).
+
+Corregido en el commit `56d9ae6` ("Support asymmetric LED row/col index
+bases and add a real-HR-reference correlation tool"): `LEDArrayConfig`
+gana `row_index_base`/`col_index_base` (caen de vuelta al `index_base`
+compartido si no se pasan) y las propiedades `row_base`/`col_base`/
+`center_row`/`center_col`; `led_array.py` usa `center_row`/`center_col`
+por separado en vez de un único `center_index`; `io_utils.load_real_lr_stack`
+prueba ambas grafías de nombre de archivo; los 3 scripts de datos reales
+ganan `--row-index-base`/`--col-index-base`. 196 tests recolectados en el
+árbol de trabajo actual (`python3 -m pytest --collect-only -q tests/`),
+incluyendo 12 tests nuevos de geometría (`tests/test_real_capture_index_base.py`)
+y 6 de la herramienta de correlación de la sección 6.3
+(`tests/test_metrics.py`).
+
+### 6.2 Primeras reconstrucciones reales (Wirtinger flow, milestone 2a)
+
+`pipelines/reconstruct_multispectral_independent.py`, solver `wirtinger`,
+`--row-index-base 13 --col-index-base 11`:
+
+- **20 iteraciones** (`results/real_run1_2025-12-12/`): mejora relativa
+  minúscula en los 3 canales (~0.25-0.3%); la fase queda completamente
+  plana (`std=0.0` en los PNG de fase guardados) — el solver prácticamente
+  no movió la fase todavía.
+- **200 iteraciones** (`results/real_run2_iter200_2025-12-12/`): mejora
+  relativa ~3.7-4.1%, pero el error **sigue bajando en el 100% de las
+  épocas** (`fraction_of_epochs_that_improved: 1.0`), sin señal de
+  plateau — no convergió. La fase recién empieza a moverse pero queda muy
+  chica (`std` ~0.3-0.4 sobre un rango 0-255 que mapea a 2π, es decir unos
+  pocos centésimos de radián). 13m30s de tiempo de pared para los 3
+  canales en esta máquina.
+
+Esto coincide con la salvedad ya documentada en los milestones 2a/2b sobre
+convergencia lenta de fase débil, pero es la primera vez que se observa
+sobre datos reales ruidosos en vez de sintéticos — el efecto es
+notablemente más marcado de lo visto en sintéticos.
+
+### 6.3 Nuevo método de validación: referencia HR real, y un hallazgo contraintuitivo
+
+El usuario compartió una imagen de referencia real de alta resolución
+(`/home/chanoscopio/Documents/AleYLu/elefante_referencia_recortada_400/img_mov_alineada_recortada_1120.tif`,
+400x400, float32, una captura bien enfocada de amplitud de la muestra real)
+— la primera verdad de referencia real con la que contó el proyecto (hasta
+ahora todo `compare_to_ground_truth` corría contra fantasmas sintéticos).
+Nueva herramienta `metrics.correlate_against_hr_reference()` (commit
+`56d9ae6`): redimensiona (Lanczos) la referencia a la grilla de la
+reconstrucción, normaliza ambas (z-score) y correlaciona probando las 4
+combinaciones de volteo vertical/horizontal, devolviendo la mejor —
+pensado específicamente para poder chequear por primera vez si la
+convención de ejes fila/columna del forward model coincide con la cámara
+real, algo que antes no había forma de verificar.
+
+**Resultado**: ningún volteo fue necesario para la mejor correlación en
+ningún canal — confirma que la convención de ejes del forward model
+coincide con la cámara real. Correlaciones: 20 iteraciones
+red/green/blue = 0.691/0.725/0.743; 200 iteraciones
+red/green/blue = 0.666/0.697/0.713.
+
+**Hallazgo a marcar explícitamente como abierto, no como conclusión**: más
+iteraciones dieron una correlación de amplitud levemente **peor** contra
+la referencia real, a pesar de que el error interno de amplitud siguió
+bajando. Dos lecturas posibles, ninguna descartada todavía: (a) la
+amplitud empieza a sobreajustar al ruido real del sensor una vez que ya
+está cerca del objeto verdadero, o (b) la diferencia (~0.02-0.05) está
+dentro del propio piso de ruido de la métrica y no es una tendencia real.
+Siguiendo la disciplina de la sección 5 (todo hallazgo sorprendente de esta
+noche tuvo un problema de metodología detrás), esto NO debe tomarse como
+"más iteraciones empeoran la reconstrucción" sin un barrido de más puntos
+de iteración que lo confirme o lo descarte primero.
+
+### 6.4 Diagnóstico cromático sobre datos reales
+
+Primera corrida real de
+`chromatic_diagnostics.chromatic_registration_report` (`--chromatic-report`;
+la herramienta se construyó el 2026-09-18, ver sección 4 pregunta 2, y
+hasta ahora nunca había tenido datos reales para correr con sentido).
+Señal consistente entre las corridas de 20 y 200 iteraciones (dos
+reconstrucciones independientes):
+
+- **red vs green**: ~0 corrimiento lateral, pero desenfoque repetible de
+  -25 a -27.5 µm (`corr_at_offset` 0.76-0.81 vs. `corr_at_zero` 0.75-0.80
+  — señal real pero débil, consistente en signo y magnitud entre las dos
+  corridas).
+- **blue vs green**: ~0 corrimiento lateral Y ~0 desenfoque, correlación
+  alta (0.89-0.92).
+
+Lectura tentativa, no confirmada: posible aberración cromática axial real
+entre red y green específicamente (no entre blue y green). Dado que la
+reconstrucción todavía no convergió bien (sección 6.2), y el propio
+docstring del módulo advierte que la precisión de este diagnóstico depende
+de la calidad de la reconstrucción que mide, esto necesita reconstrucciones
+mejor convergidas antes de confirmarse.
+
+### 6.5 gd-amplitude: ~10-20x más lento que WF, causa raíz identificada
+
+`--solver gd-amplitude` (100 iteraciones, mismos datos) llevaba más de 50
+minutos sin terminar ni el primer canal de 3, contra 13.5 minutos que
+tardó `wirtinger` en los 3 canales a 200 iteraciones — una desaceleración
+por iteración de ~10-20x que el texto de ayuda del CLI ("Use ~100
+--iterations") no anticipa.
+
+**Causa raíz encontrada (investigación de solo lectura, sin tocar el
+proceso en vivo ni el código)**: `joint_calibration.py` hace su forward/
+backward pass **en espacio real a resolución HR completa por cada LED y
+cada iteración** (líneas ~128-131 y ~150-158: arma un `tilt` complejo
+sobre la grilla HR entera de 1200x1200, una `fft2` HR completa por LED, y
+en la pasada hacia atrás un zero-padding del gradiente LR a tamaño HR
+seguido de otra `ifft2` HR completa), mientras que `reconstruction.py`
+(Wirtinger flow) mantiene un único espectro HR persistente y por cada LED
+solo recorta y opera sobre la ventana LR (`reconstruction.py:175` hace la
+`fft2` HR **una sola vez**, fuera del loop; `:187-190` solo cortan la
+ventana `lr_shape` de ese espectro ya calculado). Medido de forma aislada
+con timings sintéticos a esta misma escala: una `fft2` HR cuesta ~13x más
+que una LR (73.6ms vs 5.65ms), y el `exp()` del tilt HR solo ya cuesta
+~101ms — costo combinado por LED estimado en ~22x, que coincide con la
+brecha de pared observada. **Es una ineficiencia de implementación real,
+no un costo inherente al gradiente**: gd-amplitude podría adoptar el mismo
+truco de espectro-persistente-más-recorte que usa WF y debería caer en la
+misma clase de costo. No corregido en esta sesión (el proceso real seguía
+corriendo con la implementación actual) — queda como ítem de optimización
+concreto para una sesión futura, con puntero exacto a las líneas
+responsables.
+
+### 6.6 Primera corrida acoplada real (milestone 2b, `--qc`)
+
+`reconstruct_multispectral_coupled.py`, mismos datos, `--qc` (dry-run, sin
+llamada real a la API), `--chromatic-report`. 10m22s de pared.
+
+- Diagnóstico cromático: red vs green desenfoque -25.00µm
+  (`corr_at_offset=0.792` vs `corr_at_zero=0.779`), blue vs green ~0 —
+  **tercera medición independiente** (20-iter, 200-iter, y esta corrida
+  acoplada) que da el mismo número para red-green, reforzando que es una
+  señal real y no ruido de una sola corrida.
+- `pair_disagreement` (red_green/green_blue, el diagnóstico de confianza
+  por píxel que `couple_rgb_channels` ya calculaba pero el roadmap tenía
+  como "no explotado" en la sección 5): mean 0.0003µm, max ~0.0045µm en
+  ambos pares — **sospechosamente bajo, no necesariamente bueno**. Dado
+  que la fase todavía casi no se movió (sección 6.2: excursión de unos
+  centésimos de radián), es esperable que los canales "no disientan" entre
+  sí trivialmente, no porque el acople esté funcionando bien. El QC agent
+  (dry-run, heurística canned) dio `confidence=high, recommendation=report`
+  — **este veredicto probablemente es engañoso** por la misma razón: una
+  heurística de bajo disagreement no distingue "acople genuinamente bueno"
+  de "no hay señal de fase todavía para disentir". No tomar el veredicto
+  del QC agent al pie de la letra sin reconstrucciones mejor convergidas
+  primero, siguiendo la misma disciplina de esta sección para cualquier
+  resultado que parezca demasiado bueno de entrada.
+- No se registró ningún ajuste de dispersión C/D (`baseline_index` no se
+  pasó) — solo quedaron el reporte cromático y las métricas de
+  disagreement en `results/real_run4_coupled_2025-12-12/`.
