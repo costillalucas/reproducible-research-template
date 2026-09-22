@@ -1911,6 +1911,86 @@ antes de construir la capa de orquestación, y siguiendo el ranking de
       ~20 min (primera corrida, con el bug) + ~20 min (corrida
       corregida), 2 procesos.
 
+  - **CORRECCIÓN IMPORTANTE (misma noche, después de seguir la sugerencia
+    del advisor de aislar el mecanismo):** la lectura de arriba ("acoplar
+    es una pérdida neta cuando no hace falta desenvolver") está **mal
+    diagnosticada para WF** — el mecanismo real es otro y bastante más
+    interesante. Se probaron los dos sospechosos obvios y ninguno explica
+    nada:
+    1. **`refine_opl_tv` no tiene ningún efecto en `couple_rgb_channels`,
+       nunca.** Comparar `refine=True` (default) contra `refine=False` en
+       el mismo job da **resultados idénticos, bit a bit** (0.115 en
+       ambos, escala 1, WF). Razón, ya documentada en el propio docstring
+       de `couple_rgb_channels` pero que se me había pasado: el
+       diccionario `opl` que alimenta `fit_cauchy_dispersion` se arma con
+       `rg["opl1"]`/`rg["opl2"]`/`gb["opl1"]`/`gb["opl2"]` —las
+       candidatas CRUDAS de `search_wrap_numbers`— nunca con `rg["opl"]`/
+       `gb["opl"]` (la salida refinada de `refine_opl_tv`). El
+       refinamiento TV se calcula (dentro de `unwrap_two_channel`) pero
+       su resultado **no se usa en ningún lado que afecte el espesor
+       final**. No es un bug — el docstring explica por qué (promediar
+       antes de ajustar borraría la señal de dispersión) — pero sí
+       significa que "afinar `refine_opl_tv`" no es una vía de mejora
+       disponible hoy para este pipeline específico, contra lo que
+       sugería la salvedad original.
+    2. **El pistón (`reference_phase_to_background`) tampoco es la
+       causa**: a escala 1, el pistón aritmético y el circular coinciden
+       hasta la 6ª cifra decimal en los tres canales, y el fondo nunca
+       cruza ±π (`straddles_pi=False`). Descartado.
+    - **El mecanismo real: unos pocos píxeles con número de envolvimiento
+      erróneo, y una métrica (correlación de Pearson) sin ninguna
+      robustez a outliers.** A escala 1 (WF), 7 de 2304 píxeles (0.3%)
+      reciben `k≠0` cuando la verdad es `k=0` en todos lados; cada uno de
+      esos píxeles mete un error de OPL de hasta 1.26 (la señal real
+      completa mide ~0.012). **Excluir esos 7 píxeles sube la correlación
+      de 0.115 a 0.79** —mejor que el ingenuo (0.65), no peor—. A escala 2
+      (WF), 58/2304 píxeles (2.5%) están mal; excluirlos da 0.88 contra
+      0.33 con ellos (ingenuo: 0.82). **La conclusión "acoplar empeora"
+      del texto original es en gran parte un artefacto de la métrica, no
+      una falla real del pipeline**: para el 97-99.7% de los píxeles
+      restantes, acoplar sí ayuda.
+    - **Para GD-amplitude el diagnóstico es distinto, y ahí la conclusión
+      original sí se sostiene.** A escala 1, GD tiene **2084/2304 píxeles
+      (90%)** con `k≠0` —no es un puñado de outliers, es la mayoría de la
+      imagen—. Excluir esos píxeles solo sube la correlación de −0.09 a
+      0.29, lejos de ser buena. Para GD el problema no es un artefacto de
+      métrica: la fase cruda que entrega tiene demasiado ruido por
+      píxel, en todas partes, como para que la búsqueda de número de
+      envolvimiento funcione en absoluto.
+    - **A escalas altas (8+), donde sí hace falta desenvolver de verdad,
+      este diagnóstico deja de ser limpio**: la fracción de píxeles con
+      `k≠0` ahí mezcla correcciones genuinamente necesarias con errores
+      residuales, así que "excluir los píxeles con k≠0" ya no separa
+      "ruido espurio" de "señal real" (a escala 8/WF, excluirlos da
+      **peor** correlación, −0.29, que no excluirlos, 0.02 — consistente
+      con estar tirando la mayoría de la información real). La lectura
+      original del hito 20 para esas escalas (ingenuo colapsa, acoplado
+      lo mitiga sin llegar a bueno) no se revisó de nuevo y puede seguir
+      siendo válida.
+    - **Salida constructiva que el propio código ya deja preparada y sin
+      usar:** `couple_rgb_channels` ya devuelve `pair_disagreement`
+      (`|opl1-opl2|` en el par ganador), documentado explícitamente en su
+      docstring como "diagnóstico de confianza por píxel" — exactamente
+      la señal que habría marcado los 7/58 píxeles problemáticos de
+      arriba. Hoy nada en el pipeline lo usa para filtrar o ponderar el
+      ajuste de dispersión ni el mapa de espesor final. Enmascarar o
+      down-weight-ear por `pair_disagreement` alto antes de calcular
+      correlación/ajustar dispersión es la mejora concreta más barata
+      que se identificó en toda la sesión — no probada todavía, es
+      trabajo a futuro, no un resultado.
+    - **Conclusión revisada del hito 20**: para WF, acoplar (2b.i, la
+      parte de desenvolvimiento) **funciona razonablemente bien** una vez
+      que se controla por el puñado de píxeles con número de
+      envolvimiento mal asignado — el problema no es 2b.i/2b.ii en sí,
+      es la ausencia de un paso de filtrado/robustez que use la señal de
+      confianza que el código ya calcula. Para GD, el problema es más
+      profundo (ruido de fase por píxel demasiado alto) y no se resuelve
+      con un filtro de outliers. Diagnóstico de una sola semilla
+      (`seed=0`) en 4 celdas puntuales (escala 1 y 2 con WF, escala 1 con
+      GD, escala 8 con WF) — no se rehizo el barrido completo de 4
+      semillas con esta lectura; sería el siguiente paso natural si se
+      retoma.
+
 - **Milestone 21 — diagnóstico de inicialización para el colapso a
   contraste 0% (2026-09-22, sesión nocturna autónoma):** el hito 19
   encontró que GD-amplitude, a contraste de amplitud exactamente cero

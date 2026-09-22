@@ -81,6 +81,13 @@ def job(a, crop=16, wf_iters=100, gd_iters=100):
     t_estimate = coupled["resolved"]["thickness_um"]
     corr = float(np.corrcoef(t_estimate.ravel(), t_true.ravel())[0, 1])
 
+    # same coupling, TV refinement OFF -- isolates refine_opl_tv (vs. the wrap search / dispersion
+    # fit / green-channel averaging, which are identical in both arms) as milestone 20's suspect #1
+    coupled_norf = ms.couple_rgb_channels(phases_wrapped, WAVELENGTHS_UM, background_mask,
+                                          baseline_index_A=A_TRUE, refine=False)
+    t_estimate_norf = coupled_norf["resolved"]["thickness_um"]
+    corr_norefine = float(np.corrcoef(t_estimate_norf.ravel(), t_true.ravel())[0, 1])
+
     # naive k=0 baseline for context (same as the existing test's second test)
     naive_opls = []
     for channel, wavelength_um in WAVELENGTHS_UM.items():
@@ -95,9 +102,22 @@ def job(a, crop=16, wf_iters=100, gd_iters=100):
     rg = ms.search_wrap_numbers(referenced["red"], referenced["green"], WAVELENGTHS_UM["red"], WAVELENGTHS_UM["green"])
     frac_nonzero_k = float(np.mean((rg["K1"] != 0) | (rg["K2"] != 0)))
 
+    # diagnostic #2 (suspect #2, per advisor): reference_phase_to_background subtracts an
+    # ARITHMETIC mean of already-wrapped background phase -- wrong if those values straddle
+    # +/-pi. Compare to the correct circular mean; a large gap here (not noise "structure")
+    # could be what's injecting spurious nonzero k at scale=1-2, where no real wrap exists.
+    piston_diag = {}
+    for ch in WAVELENGTHS_UM:
+        bg = phases_wrapped[ch][background_mask]
+        piston_arith = float(np.mean(bg))
+        piston_circular = float(np.angle(np.mean(np.exp(1j * bg))))
+        piston_diag[ch] = {"arith": piston_arith, "circular": piston_circular,
+                           "gap": float(ms.wrap_phase(piston_arith - piston_circular)),
+                           "straddles_pi": bool(bg.max() - bg.min() > np.pi)}
+
     return {**a, "hr": list(hr_shape), "max_phase_blue_pi": max_phase_true["blue"] / np.pi,
-            "corr_coupled": corr, "corr_naive": corr_naive, "frac_nonzero_k_rg": frac_nonzero_k,
-            "secs": time.time() - t0}
+            "corr_coupled": corr, "corr_coupled_norefine": corr_norefine, "corr_naive": corr_naive,
+            "frac_nonzero_k_rg": frac_nonzero_k, "piston_diag": piston_diag, "secs": time.time() - t0}
 
 
 if __name__ == "__main__":
