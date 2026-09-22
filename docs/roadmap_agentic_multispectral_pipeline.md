@@ -2483,17 +2483,34 @@ coincide con la cámara real. Correlaciones: 20 iteraciones
 red/green/blue = 0.691/0.725/0.743; 200 iteraciones
 red/green/blue = 0.666/0.697/0.713.
 
-**Hallazgo a marcar explícitamente como abierto, no como conclusión**: más
-iteraciones dieron una correlación de amplitud levemente **peor** contra
-la referencia real, a pesar de que el error interno de amplitud siguió
-bajando. Dos lecturas posibles, ninguna descartada todavía: (a) la
-amplitud empieza a sobreajustar al ruido real del sensor una vez que ya
-está cerca del objeto verdadero, o (b) la diferencia (~0.02-0.05) está
-dentro del propio piso de ruido de la métrica y no es una tendencia real.
-Siguiendo la disciplina de la sección 5 (todo hallazgo sorprendente de esta
-noche tuvo un problema de metodología detrás), esto NO debe tomarse como
-"más iteraciones empeoran la reconstrucción" sin un barrido de más puntos
-de iteración que lo confirme o lo descarte primero.
+**Actualizado (mismo día, sweep de seguimiento): el hallazgo dejó de ser
+abierto, se confirmó con 4 puntos y se generalizó.** Sweep en el canal
+green (único canal con múltiples puntos de iteración; el resto son de
+las corridas de 3 canales ya citadas), usando
+`scripts/sweep_real_reconstruction_quality.py` (nueva herramienta
+reusable) más dos variantes de solver corridas aparte:
+
+| corrida | mejora interna (`relative_improvement`) | correlación vs. referencia real |
+|---|---|---|
+| WF 20 iter | ~0.25-0.3% (los 3 canales) | red 0.691 / green 0.725 / blue 0.743 |
+| WF 50 iter (green) | 0.83% | green 0.721 |
+| WF 200 iter | ~3.7-4.1% (los 3 canales) | red 0.666 / green 0.697 / blue 0.713 |
+| WF 600 iter (green) | 11.8% | green 0.602 |
+| `--recover-pupil` 200 iter | 0.19% / 0.06% / **-0.33%** (blue empeoró cada época) | red 0.691 / green 0.726 / blue 0.744 |
+| `--adaptive-step` 400 iter | ~0.05% (los 3 canales) | red 0.692 / green 0.726 / blue 0.745 |
+
+Con 4 puntos de WF puro (20/50/200/600 iteraciones) la correlación baja
+**monótonamente** (0.725 → 0.721 → 0.697 → 0.602) mientras la mejora
+interna sigue subiendo (0.3% → 0.83% → 3.9% → 11.8%) — ya no es ruido de
+la métrica, es una tendencia clara en un rango de 30x en iteraciones.
+Además, `--recover-pupil` y `--adaptive-step` en estas configuraciones
+apenas movieron el residuo interno (igual de poco que WF a ~20
+iteraciones) y sus correlaciones caen justo donde caería WF a esas pocas
+iteraciones -- **no hay evidencia de que sean "mejores algoritmos" acá**;
+lo que se observa es consistente con que TODAS las corridas, sin importar
+el mecanismo, caen sobre la misma curva "cuanto menos se movió el residuo
+interno desde el arranque, mejor correlaciona con la verdad real" (ver
+6.7 para la lectura unificada).
 
 ### 6.4 Diagnóstico cromático sobre datos reales
 
@@ -2596,3 +2613,47 @@ llamada real a la API), `--chromatic-report`. 10m22s de pared.
 - No se registró ningún ajuste de dispersión C/D (`baseline_index` no se
   pasó) — solo quedaron el reporte cromático y las métricas de
   disagreement en `results/real_run4_coupled_2025-12-12/`.
+
+### 6.7 Lectura unificada: semi-convergencia, y por qué el residuo interno no sirve de proxy en datos reales
+
+La tabla de la sección 6.3 sugiere algo más general que "más iteraciones
+empeoran la amplitud": en las 6 corridas (WF a 20/50/200/600 iteraciones,
+`--recover-pupil` a 200, `--adaptive-step` a 400), **la correlación contra
+la referencia real cae de forma consistente con cuánto se movió el
+residuo interno**, sin importar qué mecanismo produjo ese movimiento. Esto
+coincide con **semi-convergencia**, un fenómeno bien documentado en
+problemas inversos mal condicionados resueltos con métodos iterativos
+(Landweber, ART, y similares -- ver p. ej. Hansen, *Discrete Inverse
+Problems*): las primeras iteraciones recuperan la señal verdadera, y las
+iteraciones siguientes empiezan a ajustar el ruido de los datos en vez de
+la señal, empeorando la precisión real aunque el residuo de ajuste a los
+datos siga bajando. Encaja con que esto nunca se haya visto en los
+milestones sintéticos anteriores (1-21): ahí el ruido es el que el propio
+proyecto inyecta de forma controlada (Poisson, conocido), y `WF`/`GD` se
+evalúan contra un fantasma con fase/amplitud exactas -- la única vez que
+`compare_to_ground_truth` corrió contra una verdad de referencia real,
+recién ahora, apareció este efecto.
+
+**Consecuencia práctica importante, no solo una curiosidad**: sobre datos
+reales, `metrics.convergence_summary` (el único diagnóstico disponible
+para `pipelines/reconstruct_real_images.py` sin esta referencia externa)
+**no es un proxy confiable de precisión real** -- en este dataset apunta
+en la dirección contraria. Cualquier decisión automática (agente de
+reconstrucción, agente de QC) que use exclusivamente `relative_improvement`
+o `recovery_error` para decidir "aceptar"/"reintentar con más
+iteraciones" sobre datos reales estaría optimizando en la dirección
+equivocada. Esto es exactamente la salvedad que hace sospechoso el
+veredicto del QC agent en 6.6.
+
+**No confirmado todavía, con qué cuidado leer esto**: n=6 corridas, 4 de
+ellas en un solo canal (green) y solo una variable de barrido genuina
+(iteraciones de WF puro); `--recover-pupil`/`--adaptive-step` solo tienen
+un punto cada uno, así que no se sabe si también muestran semi-convergencia
+en su propio eje de iteraciones o si se comportan distinto. Antes de
+tratar esto como establecido: (a) barrer `--recover-pupil`/`--adaptive-step`
+en varios conteos de iteración cada uno, (b) repetir el sweep de WF puro
+en red/blue para confirmar que no es específico de green, (c) considerar
+si un criterio de parada temprana (early stopping) basado en esta
+referencia -- o en `pair_disagreement` una vez que haya señal de fase real
+-- sería el ajuste correcto al pipeline, en vez de simplemente correr
+menos iteraciones por defecto.
