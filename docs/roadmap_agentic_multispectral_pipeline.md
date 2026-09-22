@@ -1741,15 +1741,36 @@ antes de construir la capa de orquestación, y siguiendo el ranking de
   | 2.0π | 1.49 | 1.20 | −0.02 a −0.05 |
   | 3.0π | 1.33 | 1.12 | 0.28 |
 
-  **GD-amplitude colapsa entre 1.0π y 1.5π** — justo en el umbral donde
-  empezaría a hacer falta desenvolvimiento real, no bien por encima. Hasta
-  1.0π le sigue ganando claro a la referencia "sin fase"; en 1.5π pasa a
-  ser peor que adivinar (RMSE mayor, correlación negativa) y nunca se
-  recupera ni a 2π ni a 3π. **Conclusión: el tercer test no se puede
-  construir hoy, con ningún solver del repo.** La separación en dos tests
-  de `test_multispectral_end_to_end.py` (uno con el solver real y fase
-  chica, otro con fase inyectada para aislar 2b.i/2b.ii) **no es una
-  rareza de Wirtinger flow** como sugería el hallazgo del hito 2b — es una
+  **Corrección (revisión del advisor, misma noche):** las filas de 1.5π en
+  adelante **no son una curva de degradación confiable**. `metrics.py`'s
+  `compare_to_ground_truth` calcula `truth_phase = _normalize_phase(np.angle(truth))`
+  — envuelve la fase *verdadera* a `(-π, π]` antes de comparar, y además
+  compara wrapped-contra-wrapped con una resta ingenua (sin
+  `wrap_phase(recon − truth)` circular). Con `phase_max` > π la propia
+  verdad de referencia queda con discontinuidades de envolvimiento
+  artificiales, y por eso `flat_phase_rmse` (la referencia "sin fase") es
+  **no monótono** con la fase (0.13→0.22→0.33→0.44→**2.30→1.20→1.12**): no
+  es que "sin fase" se vuelva una mejor referencia a fases más altas, es
+  que la métrica ya no mide lo mismo por encima de π. **Conclusión
+  corregida: GD-amplitude no es medible de forma confiable por encima de
+  π con la métrica actual** (no "colapsa entre 1.0π y 1.5π" con precisión
+  — esa lectura punto por punto no sobrevive). Lo que sí se sostiene: hasta
+  1.0π le gana claro a la referencia "sin fase" con una métrica que ahí sí
+  es válida (fase todavía < π, sin envolver), y **el tercer test tampoco
+  se puede construir hoy** — si la métrica de este repo no puede siquiera
+  puntuar una reconstrucción por encima de π, la conclusión de más abajo
+  (que no hay wrap ambiguity utilizable con ningún solver actual) se
+  sostiene igual o más fuerte, solo que por una razón distinta (límite de
+  medición, no necesariamente solo de solver). No se tocó `metrics.py`
+  para arreglar esto — cambiar una función compartida por tantos hitos
+  pasados invalidaría la comparabilidad histórica; queda documentado como
+  limitación conocida, a evaluar aparte si hace falta medir fase > π de
+  verdad en el futuro.
+
+  La separación en dos tests de `test_multispectral_end_to_end.py` (uno
+  con el solver real y fase chica, otro con fase inyectada para aislar
+  2b.i/2b.ii) **no es una rareza de Wirtinger flow** como sugería el
+  hallazgo del hito 2b — es una
   propiedad de esta familia de solvers (ninguno probado hasta ahora
   reconstruye de forma útil por encima de ~π rad de fase absoluta). No se
   intentó forzar el tercer test con fase inyectada disfrazada de
@@ -1803,6 +1824,92 @@ antes de construir la capa de orquestación, y siguiendo el ranking de
     medición directa de dónde falla el pipeline de 2b entero. Costo real:
     ~35 min (barrido de fase, 28 jobs) + ~25 min (contraste, 20 jobs), 2
     procesos.
+
+- **Milestone 20 — techo de la cadena acoplada completa con el solver real
+  (2026-09-22, sesión nocturna autónoma):** el hito 19 solo midió un canal
+  aislado; esto corre `couple_rgb_channels` de punta a punta (extensión de
+  `test_full_pipeline_through_real_reconstruction_recovers_thickness_shape`)
+  con WF y GD-amplitude, barriendo la magnitud de OPL. `data/coupled_opl_ceiling_sweep.json`
+  (48 jobs), crop 16, 9×9, pico 1000, 4 semillas, objeto/geometría de ese
+  test (bump de amplitud + espesor oscilante `sin·cos`, A=1.34/B=0.004),
+  script en el scratchpad de la sesión (no versionado — extensión ad hoc
+  del test existente, no un script de `scripts/`). **Bug encontrado y
+  arreglado antes de confiar en el resultado**: la primera corrida
+  alimentaba `jc.reconstruct_and_calibrate` con imágenes generadas por
+  `forward_model.simulate_lr_stack` (la convención de unidades de WF) sin
+  la conversión `/sc**2` que `plan_p3_object_phase_geometry.job()` sí
+  aplica entre esa convención y la que espera `jc` (documentado en el
+  propio docstring de `initial_object_from_center_led`); GD salía
+  uniformemente roto en todas las escalas. Corregido y re-corrido
+  completo; la corrección mejoró GD pero no cambió la conclusión (ver
+  abajo). Correlación con el espesor verdadero (no la fase — sin el
+  problema de envolvimiento del hito 19), media±sd de 4 semillas:
+
+  | escala | fase máx azul | corr. acoplada WF | corr. ingenua WF | corr. acoplada GD | corr. ingenua GD | frac. k≠0 |
+  |---|---|---|---|---|---|---|
+  | 1 | 0.14π | 0.11±0.04 | **0.66±0.03** | −0.05±0.03 | 0.07±0.01 | 0.00 (WF) / 0.45 (GD) |
+  | 2 | 0.28π | 0.30±0.02 | **0.82±0.01** | −0.03±0.04 | 0.08±0.01 | 0.00 / 0.43 |
+  | 4 | 0.55π | 0.35±0.21 | **0.89±0.01** | −0.20±0.01 | 0.04±0.01 | 0.03 / 0.35 |
+  | 8 | 1.11π | −0.04±0.07 | −0.69±0.01 | −0.35±0.07 | 0.20±0.01 | 0.40 / 0.56 |
+  | 16 | 2.22π | 0.04±0.01 | −0.45±0.01 | −0.28±0.03 | −0.35±0.04 | 0.50 / 0.56 |
+  | 24 | 3.33π | 0.01±0.02 | −0.21±0.02 | −0.15±0.03 | −0.26±0.03 | 0.65 / 0.76 |
+
+    - **Con WF, acoplar (2b.i+2b.ii) es una pérdida neta cuando NO hace
+      falta desenvolver, y solo un rescate parcial cuando sí hace falta.**
+      A escala 1-4 (`frac_k`≈0, el desenvolvimiento no debería tocar nada)
+      el ingenuo ya reconstruye bien el espesor (0.66-0.89) y **acoplar lo
+      empeora** (0.11-0.35) — el ajuste de dispersión + el refinamiento TV
+      de `refine_opl_tv` distorsionan la señal incluso con k=0 en todos
+      lados, no solo cuando corrigen wraps reales. A escala 8 (fase azul
+      1.11π, `frac_k`=0.40, ahí sí hace falta desenvolver) el ingenuo
+      colapsa (−0.69) y acoplar lo mitiga (−0.04) pero **sin llegar a un
+      resultado útil** — sigue cerca de cero, no una reconstrucción de
+      espesor confiable. A escala 16-24 el patrón se repite (ingenuo muy
+      negativo, acoplado cerca de cero).
+    - **Con GD-amplitude, acoplar es un problema en todas las escalas,
+      incluso ya con el fix de unidades.** El ingenuo de GD (0.04-0.20 en
+      casi todo, sin colapsar del todo) es sistemáticamente mejor que el
+      acoplado (−0.03 a −0.35, siempre negativo o cerca). La causa
+      aparece en `frac_k`: a escala 1 (fase azul 0.14π, donde NO debería
+      hacer falta ningún wrap real) el 45% de los píxeles ya reciben un
+      número de envolvimiento distinto de cero — la fase cruda de GD trae
+      suficiente ruido/estructura espuria como para que
+      `search_wrap_numbers` "corrija" con saltos de 2π donde no los hay,
+      metiendo ruido nuevo en vez de sacarlo. La robustez al ruido de
+      `search_wrap_numbers` está validada en
+      `tests/test_multispectral_unwrapping.py` con 0.05 rad de ruido
+      gaussiano sintético — el ruido real de una reconstrucción GD parece
+      tener una estructura (espacialmente correlacionada, no gaussiano
+      i.i.d.) que rompe ese supuesto de robustez.
+    - **Contraste con el hito 2b/la prueba de fase inyectada:** con fase
+      inyectada limpia, acoplar le gana al ingenuo por >20x de error
+      (`test_unwrapping_beats_naive_phase_on_a_large_dispersion_signal`).
+      Acá, con fase real (de cualquier solver), la ventaja de acoplar
+      **nunca aparece como una mejora neta útil** — en el mejor caso
+      (WF, fases grandes) pasa de catastrófico a mediocre, no a bueno. La
+      cadena 2b.i+2b.ii tal como está calibrada hoy (parámetros por
+      defecto de `refine_opl_tv`, `k_range`) está afinada para fase
+      limpia/inyectada, no para el nivel de ruido de una reconstrucción
+      real — esto es un hallazgo nuevo y más importante que el bug de
+      unidades: **incluso arreglado, 2b no produce un resultado
+      cuantitativo utilizable a través del solver real, con ningún
+      solver de este repo.**
+    - **Salvedades:** 4 semillas, un solo objeto/geometría (crop 16, 9×9,
+      el del test existente, no `lena_map`), un solo pico (1000), un solo
+      `k_range` y una sola configuración de `refine_opl_tv` (los
+      parámetros por defecto de `couple_rgb_channels`); no se probó
+      desactivar el refinamiento TV (`refine=False`) para ver si la
+      pérdida neta a escala baja viene de ahí específicamente en vez del
+      ajuste de dispersión en sí — sería el primer lugar a mirar si se
+      retoma esto. Posiciones de LEDs exactas (sin el error de los hitos
+      16-18, que ya se sabe que domina sobre esto en la práctica). Script
+      guardado en `scripts/coupled_opl_ceiling_sweep.py` (vivió en el
+      scratchpad de la sesión durante el desarrollo; copiado al repo
+      recién al final para que quede reproducible) — es una extensión
+      directa de `tests/test_multispectral_end_to_end.py`'s primer test,
+      barriendo `t_scale` y agregando la rama `gd-amplitude`. Costo real:
+      ~20 min (primera corrida, con el bug) + ~20 min (corrida
+      corregida), 2 procesos.
 
 (Gap #4 FPM-INR/`zhou2023` queda fuera de este roadmap por ahora —
 mejora calidad/velocidad del solver monocromático en general por una vía
