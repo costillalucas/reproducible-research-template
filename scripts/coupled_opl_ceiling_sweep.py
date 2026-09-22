@@ -100,7 +100,19 @@ def job(a, crop=16, wf_iters=100, gd_iters=100):
     # diagnostic: fraction of pixels where the winning wrap number is nonzero (real unwrapping engaged)
     referenced = {ch: ms.reference_phase_to_background(phases_wrapped[ch], background_mask) for ch in WAVELENGTHS_UM}
     rg = ms.search_wrap_numbers(referenced["red"], referenced["green"], WAVELENGTHS_UM["red"], WAVELENGTHS_UM["green"])
+    gb = ms.search_wrap_numbers(referenced["green"], referenced["blue"], WAVELENGTHS_UM["green"], WAVELENGTHS_UM["blue"])
+    any_nonzero_k = (rg["K1"] != 0) | (rg["K2"] != 0) | (gb["K1"] != 0) | (gb["K2"] != 0)
     frac_nonzero_k = float(np.mean((rg["K1"] != 0) | (rg["K2"] != 0)))
+
+    # corr_coupled_masked: exclude pixels either pair assigned a nonzero wrap number, before
+    # scoring (fit_cauchy_dispersion/resolve_thickness_and_dispersion are per-pixel -- see their
+    # docstrings -- so masking post-hoc for scoring doesn't touch other pixels' estimates). This
+    # is the diagnostic that found milestone 20's real mechanism: a handful of spurious nonzero-k
+    # pixels can dominate a whole-image Pearson correlation even when correct almost everywhere.
+    keep = ~any_nonzero_k
+    corr_masked = (float(np.corrcoef(t_estimate[keep].ravel(), t_true[keep].ravel())[0, 1])
+                  if keep.sum() >= 2 else float("nan"))
+    frac_masked_out = float(np.mean(any_nonzero_k))
 
     # diagnostic #2 (suspect #2, per advisor): reference_phase_to_background subtracts an
     # ARITHMETIC mean of already-wrapped background phase -- wrong if those values straddle
@@ -117,6 +129,7 @@ def job(a, crop=16, wf_iters=100, gd_iters=100):
 
     return {**a, "hr": list(hr_shape), "max_phase_blue_pi": max_phase_true["blue"] / np.pi,
             "corr_coupled": corr, "corr_coupled_norefine": corr_norefine, "corr_naive": corr_naive,
+            "corr_coupled_masked": corr_masked, "frac_masked_out": frac_masked_out,
             "frac_nonzero_k_rg": frac_nonzero_k, "piston_diag": piston_diag, "secs": time.time() - t0}
 
 
