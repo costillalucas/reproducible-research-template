@@ -15,8 +15,8 @@ from .config import LEDArrayConfig
 
 def led_position_mm(row: int, col: int, cfg: LEDArrayConfig) -> tuple[float, float]:
     """Lateral (x, y) offset of LED (row, col) from the on-axis LED, in mm."""
-    dx = (col - cfg.center_index) * cfg.pitch_mm
-    dy = (row - cfg.center_index) * cfg.pitch_mm
+    dx = (col - cfg.center_col) * cfg.pitch_mm
+    dy = (row - cfg.center_row) * cfg.pitch_mm
     return dx, dy
 
 
@@ -43,10 +43,10 @@ def build_led_grid(cfg: LEDArrayConfig, wavelength_um: float) -> list[dict]:
     that way.
     """
     entries = []
-    lo = cfg.index_base
-    hi = cfg.index_base + cfg.grid_size - 1
-    for row in range(lo, hi + 1):
-        for col in range(lo, hi + 1):
+    row_lo, row_hi = cfg.row_base, cfg.row_base + cfg.grid_size - 1
+    col_lo, col_hi = cfg.col_base, cfg.col_base + cfg.grid_size - 1
+    for row in range(row_lo, row_hi + 1):
+        for col in range(col_lo, col_hi + 1):
             fx, fy = illumination_spatial_freq(row, col, cfg, wavelength_um)
             dx, dy = led_position_mm(row, col, cfg)
             entries.append({
@@ -61,9 +61,9 @@ def max_illumination_na(cfg: LEDArrayConfig) -> float:
     """sin(theta) of the array's outermost LED -- the largest illumination
     angle actually available, used to size the synthetic-aperture NA.
     """
-    lo = cfg.index_base
-    hi = cfg.index_base + cfg.grid_size - 1
-    corner_dx, corner_dy = led_position_mm(hi, hi, cfg)
+    row_hi = cfg.row_base + cfg.grid_size - 1
+    col_hi = cfg.col_base + cfg.grid_size - 1
+    corner_dx, corner_dy = led_position_mm(row_hi, col_hi, cfg)
     distance = np.sqrt(corner_dx**2 + corner_dy**2 + cfg.z_distance_mm**2)
     return float(np.hypot(corner_dx, corner_dy) / distance)
 

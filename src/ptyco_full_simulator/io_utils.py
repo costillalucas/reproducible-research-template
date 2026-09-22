@@ -76,25 +76,45 @@ def real_image_path(root: str | Path, channel: str, grid_size: int, crop: int,
     return Path(root) / channel / subdir / f"fila{row}_columna{col}.tiff"
 
 
+def _real_image_path_candidates(root: str | Path, channel: str, grid_size: int, crop: int,
+                                 row: int, col: int) -> list[Path]:
+    """Both filename spellings seen in the wild: the convention this
+    module documents (`columna`) and the lab's actual 2025-12-12 capture
+    (`col`). Tried in that order; first existing one wins."""
+    subdir = f"{grid_size}x{grid_size}_recortada_{crop}"
+    base = Path(root) / channel / subdir
+    return [base / f"fila{row}_columna{col}.tiff", base / f"fila{row}_col{col}.tiff"]
+
+
 def load_real_lr_stack(root: str | Path, channel: str, grid_size: int, crop: int,
                         index_base: int = 1,
+                        row_index_base: int | None = None,
+                        col_index_base: int | None = None,
                         crop_to: tuple[int, int] | None = None
                         ) -> dict[tuple[int, int], np.ndarray]:
-    """Load every fila<row>_columna<col>.tiff under
-    root/channel/<grid_size>x<grid_size>_recortada_<crop>/ for row, col in
-    [index_base, index_base + grid_size - 1]. Missing files are skipped
-    (so a partial/interrupted scan still reconstructs with fewer LEDs, at
-    reduced resolution/SNR). The TIFFs are already cropped to `crop` per
-    the lab's own folder naming; `crop_to`, if given, center-crops further
-    (a no-op if the file is already exactly that size) -- use it only if
-    the on-disk images turn out bigger than their folder name says.
+    """Load every fila<row>_columna<col>.tiff (or fila<row>_col<col>.tiff)
+    under root/channel/<grid_size>x<grid_size>_recortada_<crop>/ for row in
+    [row_index_base, row_index_base + grid_size - 1] and col in
+    [col_index_base, col_index_base + grid_size - 1]. `row_index_base`/
+    `col_index_base` default to `index_base` when not given -- the lab's
+    own numbering doesn't always share one base between rows and columns
+    (e.g. rows 13-21, columns 11-19 for the same on-axis-centered 9x9
+    scan; see `config.LEDArrayConfig`'s docstring). Missing files are
+    skipped (so a partial/interrupted scan still reconstructs with fewer
+    LEDs, at reduced resolution/SNR). The TIFFs are already cropped to
+    `crop` per the lab's own folder naming; `crop_to`, if given,
+    center-crops further (a no-op if the file is already exactly that
+    size) -- use it only if the on-disk images turn out bigger than their
+    folder name says.
     """
+    row_base = index_base if row_index_base is None else row_index_base
+    col_base = index_base if col_index_base is None else col_index_base
     stack = {}
-    hi = index_base + grid_size - 1
-    for row in range(index_base, hi + 1):
-        for col in range(index_base, hi + 1):
-            path = real_image_path(root, channel, grid_size, crop, row, col)
-            if not path.exists():
+    for row in range(row_base, row_base + grid_size):
+        for col in range(col_base, col_base + grid_size):
+            candidates = _real_image_path_candidates(root, channel, grid_size, crop, row, col)
+            path = next((c for c in candidates if c.exists()), None)
+            if path is None:
                 continue
             img = _load_grayscale(path)
             if crop_to is not None:
@@ -102,8 +122,10 @@ def load_real_lr_stack(root: str | Path, channel: str, grid_size: int, crop: int
             stack[(row, col)] = img
     if not stack:
         raise FileNotFoundError(
-            f"no fila*_columna*.tiff files found under "
-            f"{Path(root) / channel / f'{grid_size}x{grid_size}_recortada_{crop}'}"
+            f"no fila*_columna*.tiff or fila*_col*.tiff files found under "
+            f"{Path(root) / channel / f'{grid_size}x{grid_size}_recortada_{crop}'} "
+            f"for rows [{row_base}, {row_base + grid_size - 1}], "
+            f"cols [{col_base}, {col_base + grid_size - 1}]"
         )
     return stack
 

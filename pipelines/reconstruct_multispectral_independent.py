@@ -40,7 +40,10 @@ CHANNEL_ORDER = ("red", "green", "blue")
 
 def reconstruct_all_channels(data_root, grid_size: int, objective: str = "current",
                               crop: int = 400, iterations: int = 20,
-                              index_base: int = 1, tie_defocus_um: float | None = None,
+                              index_base: int = 1,
+                              row_index_base: int | None = None,
+                              col_index_base: int | None = None,
+                              tie_defocus_um: float | None = None,
                               use_reconstruction_agent: bool = False,
                               agent_live: bool = False, max_attempts: int = 3,
                               recover_pupil: bool = False, adaptive_step: bool = False,
@@ -112,6 +115,7 @@ def reconstruct_all_channels(data_root, grid_size: int, objective: str = "curren
         channel: config.default_setup(
             channel=channel, grid_size=grid_size, objective=objective,
             resolution_px=(crop, crop),
+            row_index_base=row_index_base, col_index_base=col_index_base,
         )
         for channel in CHANNEL_ORDER
     }
@@ -125,6 +129,7 @@ def reconstruct_all_channels(data_root, grid_size: int, objective: str = "curren
         setup = setups[channel]
         lr_images = io_utils.load_real_lr_stack(
             data_root, channel, grid_size, crop, index_base=index_base,
+            row_index_base=setup.led_array.row_base, col_index_base=setup.led_array.col_base,
         )
         led_grid = led_array.build_led_grid(setup.led_array, setup.wavelength_um)
 
@@ -204,6 +209,13 @@ def parse_args(argv=None):
     p.add_argument("--objective", choices=sorted(config.OBJECTIVES), default="current")
     p.add_argument("--crop", type=int, default=400,
                     help="the crop size named in the lab's own folder naming (...recortada_<crop>)")
+    p.add_argument("--row-index-base", type=int, default=None,
+                    help="first row number in the lab's fila<R>_col<C> filenames, if different from "
+                         "column numbering (e.g. rows 13-21 vs cols 11-19 for the same on-axis-centered "
+                         "scan) -- defaults to the same value as columns (1) when omitted")
+    p.add_argument("--col-index-base", type=int, default=None,
+                    help="first column number in the lab's fila<R>_col<C> filenames, if different from "
+                         "row numbering -- defaults to the same value as rows (1) when omitted")
     p.add_argument("--iterations", type=int, default=20)
     p.add_argument("--tie-defocus-um", type=float, default=None,
                     help="if set, initialize each channel's solver with a Transport of Intensity "
@@ -267,6 +279,7 @@ def main(argv=None) -> int:
     run = reconstruct_all_channels(
         args.data_root, args.grid_size, objective=args.objective,
         crop=args.crop, iterations=args.iterations, tie_defocus_um=args.tie_defocus_um,
+        row_index_base=args.row_index_base, col_index_base=args.col_index_base,
         use_reconstruction_agent=args.use_reconstruction_agent,
         agent_live=args.agent_live, max_attempts=args.max_attempts,
         recover_pupil=args.recover_pupil, adaptive_step=args.adaptive_step,

@@ -5,6 +5,7 @@ data, where there is no ground truth to compare against).
 from __future__ import annotations
 
 import numpy as np
+from PIL import Image
 
 
 def _normalize_phase(phase: np.ndarray) -> np.ndarray:
@@ -38,6 +39,63 @@ def compare_to_ground_truth(recon: np.ndarray, truth: np.ndarray) -> dict:
         "phase_rmse_rad": phase_rmse,
         "phase_correlation": phase_corr,
     }
+
+
+def correlate_against_hr_reference(recon_amplitude: np.ndarray, reference: np.ndarray) -> dict:
+    """Pearson correlation between a reconstruction's amplitude and a real
+    HR intensity reference image (e.g. a separately captured, well-focused
+    image of the actual sample) -- for validating a REAL-data reconstruction
+    against an actual ground truth, as opposed to `compare_to_ground_truth`
+    (synthetic phantom, exact same array shape and a complex-valued truth
+    with a known phase).
+
+    `reference` may be a different resolution than `recon_amplitude`; it is
+    resized (Lanczos) to match. Both are z-scored (mean 0, unit std) before
+    correlating, since a real reference's absolute intensity scale/offset
+    has no reason to match a reconstruction's arbitrary amplitude scale.
+
+    Tries all 4 combinations of vertical/horizontal flip on
+    `recon_amplitude` and returns the best by |correlation| -- real-camera
+    vs. this project's forward-model axis convention (row/col vs x/y,
+    sign of the illumination-angle-to-shift mapping) is a real risk this
+    project had no way to check until an actual real HR reference existed
+    (2026-09-22); this is not a hedge against a bug we expect, it's the
+    first time this convention could be checked against real data at all.
+
+    Returns {"correlation": float, "flipud": bool, "fliplr": bool,
+    "all_orientations": {(flipud, fliplr): float, ...}} -- the last field
+    is there so a caller/test can confirm the winning orientation wasn't
+    a coin flip against its nearest competitor.
+    """
+    if reference.ndim != 2 or recon_amplitude.ndim != 2:
+        raise ValueError("both images must be 2D (amplitude/intensity, no complex/color axis)")
+
+    # PIL's "F" mode is specifically 32-bit float -- float64 input to
+    # fromarray(..., mode="F") silently reinterprets bytes wrong (NaNs),
+    # it does not convert
+    ref_img = Image.fromarray(np.ascontiguousarray(reference, dtype=np.float32), mode="F")
+    ref_resized = np.asarray(
+        ref_img.resize((recon_amplitude.shape[1], recon_amplitude.shape[0]), Image.LANCZOS),
+        dtype=np.float64,
+    )
+    ref_z = (ref_resized - ref_resized.mean()) / ref_resized.std()
+
+    all_orientations = {}
+    best = None
+    for flipud in (False, True):
+        for fliplr in (False, True):
+            a = np.asarray(recon_amplitude, dtype=np.float64)
+            if flipud:
+                a = a[::-1]
+            if fliplr:
+                a = a[:, ::-1]
+            a_z = (a - a.mean()) / a.std()
+            corr = float(np.mean(a_z * ref_z))
+            all_orientations[(flipud, fliplr)] = corr
+            if best is None or abs(corr) > abs(best["correlation"]):
+                best = {"correlation": corr, "flipud": flipud, "fliplr": fliplr}
+    best["all_orientations"] = all_orientations
+    return best
 
 
 def convergence_summary(history: list[dict]) -> dict:

@@ -35,6 +35,13 @@ def parse_args(argv=None):
     p.add_argument("--objective", choices=sorted(config.OBJECTIVES), default="current")
     p.add_argument("--crop", type=int, default=400,
                     help="the crop size named in the lab's own folder naming (...recortada_<crop>)")
+    p.add_argument("--row-index-base", type=int, default=None,
+                    help="first row number in the lab's fila<R>_col<C> filenames, if different from "
+                         "column numbering (e.g. rows 13-21 vs cols 11-19 for the same on-axis-centered "
+                         "scan) -- defaults to the same value as columns (1) when omitted")
+    p.add_argument("--col-index-base", type=int, default=None,
+                    help="first column number in the lab's fila<R>_col<C> filenames, if different from "
+                         "row numbering -- defaults to the same value as rows (1) when omitted")
     p.add_argument("--iterations", type=int, default=20)
     p.add_argument("--solver", choices=["wirtinger", "gd-amplitude"], default="wirtinger",
                     help="reconstruction solver. 'gd-amplitude' = Adam gradient descent on the amplitude "
@@ -53,10 +60,11 @@ def main(argv=None) -> int:
     setup = config.default_setup(
         channel=args.channel, grid_size=args.grid_size, objective=args.objective,
         resolution_px=(args.crop, args.crop),
+        row_index_base=args.row_index_base, col_index_base=args.col_index_base,
     )
     lr_images = io_utils.load_real_lr_stack(
         args.data_root, args.channel, args.grid_size, args.crop,
-        index_base=setup.led_array.index_base,
+        row_index_base=setup.led_array.row_base, col_index_base=setup.led_array.col_base,
     )
     n_expected = args.grid_size * args.grid_size
     subdir = f"{args.grid_size}x{args.grid_size}_recortada_{args.crop}"
@@ -100,6 +108,7 @@ def main(argv=None) -> int:
                 "crop": args.crop, "upsampling_factor": factor,
                 "hr_pixel_um": hr_pixel_um, "lr_pixel_um": setup.lr_pixel_size_um,
                 "iterations": args.iterations, "data_root": args.data_root, "solver": args.solver,
+                "row_index_base": setup.led_array.row_base, "col_index_base": setup.led_array.col_base,
             },
         }, fh, indent=2)
     print(f"wrote results to {args.output_dir}")

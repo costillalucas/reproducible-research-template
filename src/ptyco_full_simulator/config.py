@@ -27,13 +27,23 @@ class LEDArrayConfig:
     Rows/columns are 1-indexed, matching the lab's own filaR_columnaC
     convention. The array is square (grid_size x grid_size) and centered
     on the optical axis: for odd grid_size, the center LED is exactly
-    at row = col = (grid_size + 1) / 2.
+    at row = col = (grid_size + 1) / 2 -- in this config's own index_base.
+
+    Rows and columns don't have to share the same starting number: the
+    lab's own numbering can put e.g. rows 13-21 and columns 11-19 for the
+    same 9x9 on-axis-centered scan (confirmed on the 2025-12-12 capture by
+    cross-referencing the shortest-exposure LEDs, which are the brightest
+    because they're closest to the optical axis). Pass `row_index_base`/
+    `col_index_base` for that case; either left as None falls back to the
+    shared `index_base` (the common, symmetric case).
     """
 
     grid_size: int  # e.g. 9 or 31; must be odd so there's a true center LED
     pitch_mm: float = 6.0
     z_distance_mm: float = 70.0  # array-to-sample distance; easy to retune
     index_base: int = 1
+    row_index_base: int | None = None
+    col_index_base: int | None = None
 
     def __post_init__(self):
         if self.grid_size % 2 == 0:
@@ -42,9 +52,27 @@ class LEDArrayConfig:
             )
 
     @property
+    def row_base(self) -> int:
+        return self.index_base if self.row_index_base is None else self.row_index_base
+
+    @property
+    def col_base(self) -> int:
+        return self.index_base if self.col_index_base is None else self.col_index_base
+
+    @property
     def center_index(self) -> float:
-        """Row/column of the on-axis LED, in this config's own index_base."""
+        """Row/column of the on-axis LED, in this config's own index_base.
+        Only meaningful when row and col share one index_base -- use
+        `center_row`/`center_col` otherwise."""
         return self.index_base + (self.grid_size - 1) / 2.0
+
+    @property
+    def center_row(self) -> float:
+        return self.row_base + (self.grid_size - 1) / 2.0
+
+    @property
+    def center_col(self) -> float:
+        return self.col_base + (self.grid_size - 1) / 2.0
 
 
 @dataclass(frozen=True)
@@ -95,10 +123,13 @@ class SetupConfig:
 
 
 def default_setup(channel: str, grid_size: int, objective: str = "current",
-                   resolution_px: tuple[int, int] = (200, 200)) -> SetupConfig:
+                   resolution_px: tuple[int, int] = (200, 200),
+                   row_index_base: int | None = None,
+                   col_index_base: int | None = None) -> SetupConfig:
     """Convenience builder for the lab's actual hardware, current values."""
     return SetupConfig(
-        led_array=LEDArrayConfig(grid_size=grid_size),
+        led_array=LEDArrayConfig(grid_size=grid_size, row_index_base=row_index_base,
+                                  col_index_base=col_index_base),
         objective=OBJECTIVES[objective],
         sensor=SensorConfig(resolution_px=resolution_px),
         channel=channel,

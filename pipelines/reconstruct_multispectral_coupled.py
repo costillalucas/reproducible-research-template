@@ -72,6 +72,13 @@ def parse_args(argv=None):
     p.add_argument("--objective", choices=sorted(config.OBJECTIVES), default="current")
     p.add_argument("--crop", type=int, default=400,
                     help="the crop size named in the lab's own folder naming (...recortada_<crop>)")
+    p.add_argument("--row-index-base", type=int, default=None,
+                    help="first row number in the lab's fila<R>_col<C> filenames, if different from "
+                         "column numbering (e.g. rows 13-21 vs cols 11-19 for the same on-axis-centered "
+                         "scan) -- defaults to the same value as columns (1) when omitted")
+    p.add_argument("--col-index-base", type=int, default=None,
+                    help="first column number in the lab's fila<R>_col<C> filenames, if different from "
+                         "row numbering -- defaults to the same value as rows (1) when omitted")
     p.add_argument("--iterations", type=int, default=20)
     p.add_argument("--background-rows", type=int, default=None,
                     help="use the top N rows of the reconstructed HR image as the bare-medium "
@@ -153,6 +160,7 @@ def main(argv=None) -> int:
     run = reconstruct_all_channels(
         args.data_root, args.grid_size, objective=args.objective,
         crop=args.crop, iterations=args.iterations,
+        row_index_base=args.row_index_base, col_index_base=args.col_index_base,
         use_reconstruction_agent=args.use_reconstruction_agent,
         agent_live=args.agent_live, max_attempts=args.max_attempts,
         recover_pupil=args.recover_pupil, adaptive_step=args.adaptive_step,
