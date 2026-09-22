@@ -1712,6 +1712,98 @@ antes de construir la capa de orquestación, y siguiendo el ranking de
       iteraciones. Costo real: P2 ~40 min (18 jobs, 2 procesos, PC
       cargada), P4 ~16 min (6 jobs, el crop 48 domina el costo).
 
+- **Milestone 19 — techo de fase y contraste de amplitud para retomar 2b
+  (2026-09-22):** antes de intentar construir el tercer test de punta a
+  punta que faltaba en `tests/test_multispectral_end_to_end.py` (solver
+  real + señal de dispersión grande + sin fase inyectada), dos chequeos
+  baratos para saber si es siquiera posible. **Bug de portabilidad
+  arreglado en el camino** (mismo patrón que el hito 18, otro archivo):
+  `scripts/plan_p3_object_phase_geometry.py` tenía el mismo `_job_star`/
+  `_opts` global roto bajo `spawn` en Windows — mismo fix con
+  `functools.partial`.
+
+  **Techo de fase (`data/phase_ceiling_sweep_blue.json`, 28 jobs):**
+  `search_wrap_numbers` solo hace algo real cuando la fase absoluta supera
+  **π rad** (envuelve a `(-π, π]`, ver `wrap_phase` en `multispectral.py`)
+  — GD-amplitude nunca se había probado más allá de 0.3π (~0.94 rad,
+  hitos 11-18). Barrido en **azul** (el canal con más fase a OPL
+  compartido, hito 2b), `lena_map`, crop 32, 9×9, pico 1000 y sin ruido, 2
+  semillas, RMSE de fase en radianes (no correlación — M1 del auditor: la
+  correlación sobrestima lo recuperado):
+
+  | fase máx | RMSE GD (rad) | RMSE "sin fase" | correlación GD |
+  |---|---|---|---|
+  | 0.3π | 0.11 | 0.13 | 0.62-0.71 |
+  | 0.5π | 0.15-0.16 | 0.22 | 0.74-0.76 |
+  | 0.75π | 0.22-0.24 | 0.33 | 0.73-0.76 |
+  | 1.0π | 0.30-0.36 | 0.44 | 0.67-0.74 |
+  | **1.5π** | **2.63** | 2.30 | **−0.40 a −0.45** |
+  | 2.0π | 1.49 | 1.20 | −0.02 a −0.05 |
+  | 3.0π | 1.33 | 1.12 | 0.28 |
+
+  **GD-amplitude colapsa entre 1.0π y 1.5π** — justo en el umbral donde
+  empezaría a hacer falta desenvolvimiento real, no bien por encima. Hasta
+  1.0π le sigue ganando claro a la referencia "sin fase"; en 1.5π pasa a
+  ser peor que adivinar (RMSE mayor, correlación negativa) y nunca se
+  recupera ni a 2π ni a 3π. **Conclusión: el tercer test no se puede
+  construir hoy, con ningún solver del repo.** La separación en dos tests
+  de `test_multispectral_end_to_end.py` (uno con el solver real y fase
+  chica, otro con fase inyectada para aislar 2b.i/2b.ii) **no es una
+  rareza de Wirtinger flow** como sugería el hallazgo del hito 2b — es una
+  propiedad de esta familia de solvers (ninguno probado hasta ahora
+  reconstruye de forma útil por encima de ~π rad de fase absoluta). No se
+  intentó forzar el tercer test con fase inyectada disfrazada de
+  "punta a punta"; se registra el nulo como resultado.
+
+  **Contraste de amplitud (`data/amplitude_contrast_sweep.json`, 20
+  jobs):** el hallazgo del hito 2b decía que el solver (WF) falla en
+  objetos de amplitud uniforme (fase pura) — justo el régimen de muestras
+  biológicas casi transparentes que motiva el proyecto. `lena_map`,
+  verde, fase fija 0.3π (zona segura del barrido de arriba), crop 32,
+  9×9, 2 semillas, contraste = `1 - min_amplitude`:
+
+  | contraste | pico | corr WF | corr GD | RMSE WF | RMSE GD |
+  |---|---|---|---|---|---|
+  | 20% | 100 | 0.06 | 0.28 | 0.131 | 0.126 |
+  | 20% | 1000 | 0.32 | **0.75** | 0.124 | 0.086 |
+  | 10% | 100 | 0.09 | 0.25 | 0.130 | 0.127 |
+  | 10% | 1000 | 0.09 | **0.58** | 0.131 | 0.106 |
+  | 5% | 100 | 0.03 | 0.01 | 0.132 | 0.138 |
+  | 5% | 1000 | 0.09 | **0.42** | 0.131 | 0.122 |
+  | 2% | 100 | 0.01 | 0.12 | 0.132 | 0.133 |
+  | 2% | 1000 | 0.02 | 0.15 | 0.132 | 0.138 |
+  | 0% (fase pura) | 100 | 0.10 | 0.34 | 0.130 | 0.123 |
+  | 0% (fase pura) | 1000 | 0.00 | **−0.24** | 0.133 | **0.166** |
+
+    - **GD-amplitude sí ayuda con poco contraste, pero no en cero exacto.**
+      Desde 2% de contraste hacia arriba, a pico 1000, gana claro a WF (de
+      0.15 a 0.75 de correlación, contra 0.02-0.32 de WF) y con RMSE por
+      debajo de WF en casi todos los casos. **En contraste cero exacto
+      (fase pura) a pico 1000, GD-amplitude se vuelve inestable y queda
+      peor que WF** (correlación −0.24, RMSE 0.166 — peor que "sin fase",
+      0.131): no resuelve el caso límite que motivó el hallazgo del hito
+      2b, solo lo mueve. WF en cambio se queda plano cerca de cero en todo
+      el barrido, sin colapsar nunca a negativo.
+    - **A pico 100 (menos fotones) la ventaja de GD se erosiona y en 5% se
+      invierte** (corr 0.01 contra 0.03 de WF) — con ruido moderado y poco
+      contraste, ninguno de los dos solvers sirve de mucho (todas las
+      correlaciones ≤0.34).
+    - **No confirma "dramáticamente" la recuperación con 5-10% de contraste
+      del hito 2b para WF específicamente** — acá WF se queda en 0.09-0.32
+      en ese rango, no cerca de los 0.6-0.9 que mencionaba esa entrada
+      (que viene de otra geometría/objeto, la del test de punta a punta
+      inyectado, no de este barrido); no se reconcilian ambos números en
+      esta sesión.
+  - **Salvedades:** 2 semillas; un solo canal (verde) para el contraste,
+    uno solo (azul) para el techo de fase; un solo objeto (`lena_map`),
+    geometría y crop fijos; posiciones de LEDs exactas (sin el error de
+    los hitos 16-18); Poisson puro. El techo de fase es una medición de
+    reconstrucción monocanal aislada, no de la cadena acoplada completa
+    (`couple_rgb_channels`) — sirve como cota superior barata, no como
+    medición directa de dónde falla el pipeline de 2b entero. Costo real:
+    ~35 min (barrido de fase, 28 jobs) + ~25 min (contraste, 20 jobs), 2
+    procesos.
+
 (Gap #4 FPM-INR/`zhou2023` queda fuera de este roadmap por ahora —
 mejora calidad/velocidad del solver monocromático en general por una vía
 de aprendizaje profundo mucho más grande, no es específico de
