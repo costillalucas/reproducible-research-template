@@ -2293,10 +2293,21 @@ Salvedades:
   entre semillas; no se elige uno.
 - `phase_correlation` de la inicialización es NaN (fase cero); se omite.
 
-## 5. Traspaso de la sesión nocturna autónoma (2026-09-22, 00:34–~04:30)
+## 5. Traspaso de la sesión nocturna autónoma (2026-09-22, 00:34–~02:50)
 
-El usuario pidió seguir explorando sin supervisión durante ~5 horas. Commits
-locales de esa ventana, **ninguno pusheado** (`origin/main` sigue en
+El usuario pidió seguir explorando sin supervisión durante ~5 horas; se
+cerró antes (~2h20m) por indicación del advisor, con margen de sobra.
+**Chequeo final antes de cerrar**: `pytest` no estaba instalado en este
+entorno (solo numpy/pillow/pyyaml/scipy) — instalado (`pip install pytest`)
+y corrida la suite completa después de los edits de la noche
+(`scripts/plan_p4_led_position_error.py`, `scripts/plan_p3_object_phase_geometry.py`,
+`scripts/coupled_opl_ceiling_sweep.py` nuevo; ningún cambio en `src/`):
+**178 tests, todos pasan, sin regresiones** (21m23s,
+`PTYCO_DATA_SOURCE` configurado). No se corrió `scripts/reproduce.sh` (la
+puerta de procedencia completa) por tiempo — nada de lo tocado esta noche
+afecta esa cadena, pero queda sin verificar formalmente.
+
+Commits locales de esa ventana, **ninguno pusheado** (`origin/main` sigue en
 `63eae1f`; hay que revisar y correr `git push` a mano):
 
 1. `63eae1f` — P1/P3 (error de posición de LEDs) ampliados a 4 semillas.
