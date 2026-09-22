@@ -2614,46 +2614,67 @@ llamada real a la API), `--chromatic-report`. 10m22s de pared.
   pasó) — solo quedaron el reporte cromático y las métricas de
   disagreement en `results/real_run4_coupled_2025-12-12/`.
 
-### 6.7 Lectura unificada: semi-convergencia, y por qué el residuo interno no sirve de proxy en datos reales
+### 6.7 Lectura unificada, y una salvedad importante encontrada al refinar el sweep
 
 La tabla de la sección 6.3 sugiere algo más general que "más iteraciones
 empeoran la amplitud": en las 6 corridas (WF a 20/50/200/600 iteraciones,
 `--recover-pupil` a 200, `--adaptive-step` a 400), **la correlación contra
 la referencia real cae de forma consistente con cuánto se movió el
-residuo interno**, sin importar qué mecanismo produjo ese movimiento. Esto
-coincide con **semi-convergencia**, un fenómeno bien documentado en
-problemas inversos mal condicionados resueltos con métodos iterativos
-(Landweber, ART, y similares -- ver p. ej. Hansen, *Discrete Inverse
-Problems*): las primeras iteraciones recuperan la señal verdadera, y las
-iteraciones siguientes empiezan a ajustar el ruido de los datos en vez de
-la señal, empeorando la precisión real aunque el residuo de ajuste a los
-datos siga bajando. Encaja con que esto nunca se haya visto en los
-milestones sintéticos anteriores (1-21): ahí el ruido es el que el propio
-proyecto inyecta de forma controlada (Poisson, conocido), y `WF`/`GD` se
-evalúan contra un fantasma con fase/amplitud exactas -- la única vez que
-`compare_to_ground_truth` corrió contra una verdad de referencia real,
-recién ahora, apareció este efecto.
+residuo interno**, sin importar qué mecanismo produjo ese movimiento. La
+primera lectura de esto fue **semi-convergencia** (fenómeno bien
+documentado en problemas inversos mal condicionados resueltos con métodos
+iterativos -- Landweber, ART, y similares, ver p. ej. Hansen, *Discrete
+Inverse Problems*: las primeras iteraciones recuperan la señal verdadera,
+las siguientes empiezan a ajustar ruido de los datos).
 
-**Consecuencia práctica importante, no solo una curiosidad**: sobre datos
-reales, `metrics.convergence_summary` (el único diagnóstico disponible
-para `pipelines/reconstruct_real_images.py` sin esta referencia externa)
-**no es un proxy confiable de precisión real** -- en este dataset apunta
-en la dirección contraria. Cualquier decisión automática (agente de
-reconstrucción, agente de QC) que use exclusivamente `relative_improvement`
-o `recovery_error` para decidir "aceptar"/"reintentar con más
-iteraciones" sobre datos reales estaría optimizando en la dirección
-equivocada. Esto es exactamente la salvedad que hace sospechoso el
-veredicto del QC agent en 6.6.
+**Salvedad encontrada después, con `scripts/sweep_real_reconstruction_quality.py`
+recién construido: un sweep fino (0/1/3/5/10/15/20/30/40 iteraciones,
+green) muestra que la correlación YA es máxima en la iteración 0 -- el
+objeto inicial, antes de cualquier paso del solver -- y decae de forma
+monótona y suave desde ahí (0.7268 en iter 0-1, 0.7225 en iter 40).**
+Investigando por qué el objeto inicial ya correlaciona tan bien:
+`reconstruction.initial_hr_guess` (`reconstruction.py:33-43`) es
+literalmente la imagen capturada por el LED central (on-axis), sobre-
+muestreada por vecino-más-cercano -- una foto real de baja resolución del
+objeto, del mismo tipo que la referencia. Y la propia referencia
+(`img_mov_alineada_recortada_1120.tif`) es **400x400 nativo, la MISMA
+resolución que el crop de cámara LR** (`--crop 400`), sobremuestreada a
+1200x1200 solo para poder compararla contra la grilla HR -- no tiene
+ningún detalle real más allá de esa resolución nativa.
 
-**No confirmado todavía, con qué cuidado leer esto**: n=6 corridas, 4 de
-ellas en un solo canal (green) y solo una variable de barrido genuina
-(iteraciones de WF puro); `--recover-pupil`/`--adaptive-step` solo tienen
-un punto cada uno, así que no se sabe si también muestran semi-convergencia
-en su propio eje de iteraciones o si se comportan distinto. Antes de
-tratar esto como establecido: (a) barrer `--recover-pupil`/`--adaptive-step`
-en varios conteos de iteración cada uno, (b) repetir el sweep de WF puro
-en red/blue para confirmar que no es específico de green, (c) considerar
-si un criterio de parada temprana (early stopping) basado en esta
-referencia -- o en `pair_disagreement` una vez que haya señal de fase real
--- sería el ajuste correcto al pipeline, en vez de simplemente correr
-menos iteraciones por defecto.
+Esto abre una segunda explicación, al menos igual de plausible que la
+semi-convergencia y **no descartada todavía**: la reconstrucción por
+apertura sintética existe específicamente para ganar resolución más allá
+del píxel de cámara LR -- si WF está agregando detalle fino genuino (el
+objetivo real del algoritmo), la correlación contra una referencia que
+**no tiene ese detalle para empezar** va a bajar sin importar si el
+detalle nuevo es señal real o ruido, porque la métrica no puede
+distinguir entre ambos casos a esa escala. En otras palabras: esta
+referencia en particular sirve para validar que la reconstrucción no se
+fue por las ramas en estructura gruesa (y para eso ya sirvió -- confirmó
+la convención de ejes en 6.3), pero **no puede confirmar ni descartar por
+sí sola si las iteraciones adicionales están mejorando o empeorando la
+reconstrucción a la escala fina que WF está diseñado para recuperar**.
+
+**Conclusión, con las dos lecturas sobre la mesa sin resolver entre
+ellas**: sobre datos reales, `metrics.convergence_summary` sigue sin ser
+un proxy confiable de precisión real contra esta referencia externa
+(apunta en la dirección contraria a la correlación, sea cual sea la causa
+de fondo) -- eso se sostiene igual bajo cualquiera de las dos lecturas, y
+sigue siendo la salvedad relevante para el veredicto del QC agent en 6.6.
+Pero "correr menos iteraciones" NO se sigue automáticamente de este
+hallazgo sin antes resolver la ambigüedad -- podría estar recomendando
+exactamente lo contrario de lo correcto si la lectura de resolución es la
+que manda. **Siguiente paso necesario, no opcional, antes de actuar sobre
+este hallazgo**: conseguir o construir una referencia a la resolución HR
+real (más allá de 400x400 nativo -- p. ej. una captura de mayor aumento/NA
+del mismo target, o comparar contra la resolución que predice la apertura
+sintética del propio montaje) para poder separar estas dos hipótesis.
+
+**Otras salvedades sin cerrar**: n pequeño, mayormente un solo canal
+(green) y un solo punto para `--recover-pupil`/`--adaptive-step`; no se
+sabe si muestran la misma curva en su propio eje de iteraciones. No
+tratar ninguna de las dos lecturas como establecida todavía -- exactamente
+el patrón que ya se repitió tres veces en la sección 5 y una vez en 6.5
+esta misma sesión: la primera explicación de un hallazgo sorprendente no
+sobrevivió el siguiente control.
