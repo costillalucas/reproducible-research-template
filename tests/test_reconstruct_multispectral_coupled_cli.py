@@ -26,7 +26,7 @@ import reconstruct_multispectral_coupled as pipeline  # noqa: E402
 
 def _write_fake_lab_data(tmp_path, grid_size=9, crop=16, background_rows=4):
     A_true, B_true = 1.34, 0.004
-    setups = {ch: config.default_setup(channel=ch, grid_size=grid_size, objective="current",
+    setups = {ch: config.default_setup(channel=ch, grid_size=grid_size, objective="2_5x_na007",
                                         resolution_px=(crop, crop))
               for ch in config.CHANNEL_WAVELENGTH_NM}
     factor = optics.shared_upsampling_factor(list(setups.values()))
@@ -64,7 +64,7 @@ def test_qc_and_report_agent_wiring_dry_run(tmp_path):
     output_dir = tmp_path / "out"
 
     pipeline.main([
-        "--data-root", str(tmp_path), "--grid-size", "9", "--crop", "16",
+        "--data-root", str(tmp_path), "--grid-size", "9", "--crop", "16", "--objective", "2_5x_na007",
         "--iterations", "40", "--background-rows", "4", "--baseline-index", "1.34",
         "--qc", "--output-dir", str(output_dir),
     ])
@@ -93,7 +93,7 @@ def test_all_three_agents_chained_dry_run(tmp_path):
     output_dir = tmp_path / "out"
 
     pipeline.main([
-        "--data-root", str(tmp_path), "--grid-size", "9", "--crop", "16",
+        "--data-root", str(tmp_path), "--grid-size", "9", "--crop", "16", "--objective", "2_5x_na007",
         "--iterations", "40", "--background-rows", "4", "--baseline-index", "1.34",
         "--use-reconstruction-agent", "--max-attempts", "2",
         "--qc", "--output-dir", str(output_dir),
@@ -124,7 +124,7 @@ def test_chromatic_report_flag_writes_report_json(tmp_path):
     output_dir = tmp_path / "out"
 
     pipeline.main([
-        "--data-root", str(tmp_path), "--grid-size", "9", "--crop", "16",
+        "--data-root", str(tmp_path), "--grid-size", "9", "--crop", "16", "--objective", "2_5x_na007",
         "--iterations", "20", "--chromatic-report", "--output-dir", str(output_dir),
     ])
 

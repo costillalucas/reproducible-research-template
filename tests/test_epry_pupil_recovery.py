@@ -75,7 +75,7 @@ def _synthetic_object(shape):
 
 
 def _setup_and_pupil(grid_size=9, crop=12, defocus_rad_amplitude=2.0):
-    setup = config.default_setup(channel="green", grid_size=grid_size, objective="current",
+    setup = config.default_setup(channel="green", grid_size=grid_size, objective="2_5x_na007",
                                   resolution_px=(crop, crop))
     factor = optics.upsampling_factor(setup)
     hr_pixel_um = optics.actual_hr_pixel_size_um(setup, factor)
@@ -195,7 +195,7 @@ def test_recover_pupil_can_regress_an_already_well_converging_channel():
     recover_pupil is monotonically safe to enable.
     """
     grid_size, crop = 9, 12
-    setup = config.default_setup(channel="blue", grid_size=grid_size, objective="current",
+    setup = config.default_setup(channel="blue", grid_size=grid_size, objective="2_5x_na007",
                                   resolution_px=(crop, crop))
     factor = optics.upsampling_factor(setup)
     hr_pixel_um = optics.actual_hr_pixel_size_um(setup, factor)
@@ -291,7 +291,7 @@ def test_recover_pupil_regression_is_a_small_testbed_artifact_not_reproduced_at_
     """
     grid_size, crop, iterations = 15, 64, 40
     n_cycles = round(crop / 12)  # keep physical spatial frequency comparable to the small-scale test
-    setup = config.default_setup(channel="blue", grid_size=grid_size, objective="current",
+    setup = config.default_setup(channel="blue", grid_size=grid_size, objective="2_5x_na007",
                                   resolution_px=(crop, crop))
     factor = optics.upsampling_factor(setup)
     hr_pixel_um = optics.actual_hr_pixel_size_um(setup, factor)

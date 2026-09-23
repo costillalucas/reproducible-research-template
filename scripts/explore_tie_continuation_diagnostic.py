@@ -12,7 +12,7 @@ from ptyco_full_simulator import config, forward_model, led_array, optics, recon
 from ptyco_full_simulator.optics import circular_pupil
 from test_tie_informed_initialization import _tie_informed_initial_object
 crop=32; D=30.0
-setup=config.default_setup(channel="green",grid_size=9,objective="current",resolution_px=(crop,crop))
+setup=config.default_setup(channel="green",grid_size=9,objective="2_5x_na007",resolution_px=(crop,crop))
 factor=optics.upsampling_factor(setup); hp=optics.actual_hr_pixel_size_um(setup,factor); hs=optics.hr_shape((crop,crop),factor)
 lp=setup.lr_pixel_size_um; na=setup.objective.na; wl=setup.wavelength_um
 grid=led_array.build_led_grid(setup.led_array,wl)

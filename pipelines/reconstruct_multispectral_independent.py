@@ -14,7 +14,7 @@ unwrapping or dispersion estimate itself.
 Usage:
     python pipelines/reconstruct_multispectral_independent.py \\
         --data-root /path/to/data \\
-        --grid-size 9 --objective current --crop 400 \\
+        --grid-size 9 --objective 2x_na010 --crop 400 \\
         --output-dir results/multispectral_run1
 """
 from __future__ import annotations
@@ -38,7 +38,7 @@ import reconstruction_orchestrator  # noqa: E402
 CHANNEL_ORDER = ("red", "green", "blue")
 
 
-def reconstruct_all_channels(data_root, grid_size: int, objective: str = "current",
+def reconstruct_all_channels(data_root, grid_size: int, objective: str = config.DEFAULT_OBJECTIVE,
                               crop: int = 400, iterations: int = 20,
                               index_base: int = 1,
                               row_index_base: int | None = None,
@@ -206,7 +206,9 @@ def parse_args(argv=None):
     p.add_argument("--data-root", required=True,
                     help="folder containing <channel>/<grid>x<grid>_recortada_<crop>/fila*_columna*.tiff")
     p.add_argument("--grid-size", type=int, default=9, help="LED grid is grid_size x grid_size (must be odd)")
-    p.add_argument("--objective", choices=sorted(config.OBJECTIVES), default="current")
+    p.add_argument("--objective", choices=sorted(config.OBJECTIVES), default=config.DEFAULT_OBJECTIVE,
+                   help="objective preset (default %(default)s, the one real captures use; "
+                        "\"current\"/\"future\" are deprecated aliases, see config.OBJECTIVES)")
     p.add_argument("--crop", type=int, default=400,
                     help="the crop size named in the lab's own folder naming (...recortada_<crop>)")
     p.add_argument("--row-index-base", type=int, default=None,

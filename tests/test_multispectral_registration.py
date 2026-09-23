@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 from ptyco_full_simulator import config, forward_model, led_array, optics, reconstruction  # noqa: E402
 
 
-def _rgb_setups(grid_size, lr_size, objective="future"):
+def _rgb_setups(grid_size, lr_size, objective="2x_na010"):
     return {
         channel: config.default_setup(
             channel=channel, grid_size=grid_size, objective=objective,
@@ -35,7 +35,7 @@ def test_per_channel_upsampling_factor_disagrees_across_wavelengths():
     wavelength -> finer Nyquist target -> larger factor), so red/green/blue
     land on different HR grids if each just calls it independently.
 
-    Uses `objective="future"` (default of `_rgb_setups`): the continuous
+    Uses `objective="2x_na010"` (default of `_rgb_setups`): the continuous
     Nyquist target always differs by channel, but the *rounded-to-odd-
     integer* `factor` can coincide by chance for some grid/objective
     combinations (e.g. grid_size=9 with the "current" objective all round

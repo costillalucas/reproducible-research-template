@@ -46,7 +46,7 @@ LOSSES = ["intensity", "amplitude", "poisson"]
 
 def _small_case(crop=8, grid_size=5):
     """Exact-k synthetic captures on a tiny real-optics setup."""
-    setup = config.default_setup(channel="green", grid_size=grid_size, objective="current",
+    setup = config.default_setup(channel="green", grid_size=grid_size, objective="2_5x_na007",
                                  resolution_px=(crop, crop))
     factor = optics.upsampling_factor(setup)
     hp = optics.actual_hr_pixel_size_um(setup, factor)
@@ -253,7 +253,7 @@ def test_simulate_and_reconstruct_gd_uses_matched_data_and_recovers_phase(tmp_pa
     """Regression: --solver gd-amplitude used to run on bin-rounded simulated
     data (phase corr ~0.12); with the continuous-k simulator it reaches ~0.98
     at 100 iterations (0.86 at 40)."""
-    setup = config.default_setup(channel="green", grid_size=9, objective="current", resolution_px=(16, 16))
+    setup = config.default_setup(channel="green", grid_size=9, objective="2_5x_na007", resolution_px=(16, 16))
     hs = optics.hr_shape((16, 16), optics.upsampling_factor(setup))
     obj = _synthetic_object(hs)
     amp = np.abs(obj) / np.abs(obj).max() * 255

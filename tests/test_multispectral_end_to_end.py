@@ -86,7 +86,7 @@ def test_full_pipeline_through_real_reconstruction_recovers_thickness_shape():
     grid_size, crop, iterations = 9, 16, 40
     background_rows = 4
 
-    setups = {ch: config.default_setup(channel=ch, grid_size=grid_size, objective="current",
+    setups = {ch: config.default_setup(channel=ch, grid_size=grid_size, objective="2_5x_na007",
                                         resolution_px=(crop, crop))
               for ch in WAVELENGTHS_UM}
     factor = optics.shared_upsampling_factor(list(setups.values()))

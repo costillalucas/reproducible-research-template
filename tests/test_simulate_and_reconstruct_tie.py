@@ -44,7 +44,7 @@ def test_tie_defocus_flag_massively_improves_phase_correlation(tmp_path):
     amp_path, phase_path = _write_mixed_frequency_images(tmp_path)
     common_args = [
         "--amplitude-image", amp_path, "--phase-image", phase_path,
-        "--channel", "green", "--grid-size", "9", "--objective", "current",
+        "--channel", "green", "--grid-size", "9", "--objective", "2_5x_na007",
         "--lr-size", "32", "--iterations", "40",
     ]
 
@@ -79,7 +79,7 @@ def test_use_reconstruction_agent_flag_dry_run_matches_plain_call(tmp_path):
     amp_path, phase_path = _write_mixed_frequency_images(tmp_path)
     common_args = [
         "--amplitude-image", amp_path, "--phase-image", phase_path,
-        "--channel", "green", "--grid-size", "9", "--objective", "current",
+        "--channel", "green", "--grid-size", "9", "--objective", "2_5x_na007",
         "--lr-size", "32", "--iterations", "10",
     ]
 
@@ -111,7 +111,7 @@ def test_adaptive_step_and_reconstruction_agent_can_now_be_combined(tmp_path):
     amp_path, phase_path = _write_mixed_frequency_images(tmp_path)
     pipeline.main([
         "--amplitude-image", amp_path, "--phase-image", phase_path,
-        "--channel", "green", "--grid-size", "9", "--objective", "current",
+        "--channel", "green", "--grid-size", "9", "--objective", "2_5x_na007",
         "--lr-size", "32", "--iterations", "10",
         "--adaptive-step", "--use-reconstruction-agent",
         "--output-dir", str(tmp_path / "out"),
@@ -135,7 +135,7 @@ def test_recover_pupil_and_reconstruction_agent_still_excluded(tmp_path):
     try:
         pipeline.main([
             "--amplitude-image", amp_path, "--phase-image", phase_path,
-            "--channel", "green", "--grid-size", "9", "--objective", "current",
+            "--channel", "green", "--grid-size", "9", "--objective", "2_5x_na007",
             "--lr-size", "32", "--iterations", "10",
             "--recover-pupil", "--use-reconstruction-agent",
             "--output-dir", str(tmp_path / "out"),

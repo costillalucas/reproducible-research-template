@@ -31,7 +31,7 @@ CROP = 16
 
 
 def _channel_case(channel="green", crop=CROP):
-    setup = config.default_setup(channel=channel, grid_size=9, objective="current", resolution_px=(crop, crop))
+    setup = config.default_setup(channel=channel, grid_size=9, objective="2_5x_na007", resolution_px=(crop, crop))
     factor = optics.upsampling_factor(setup)
     hp = optics.actual_hr_pixel_size_um(setup, factor)
     hs = optics.hr_shape((crop, crop), factor)
@@ -88,7 +88,7 @@ def test_on_exact_k_data_the_bin_rounded_wirtinger_flow_fails_where_gradient_des
 
 
 def _write_exact_k_lab_captures(tmp_path, crop=CROP):
-    setups = {ch: config.default_setup(channel=ch, grid_size=9, objective="current", resolution_px=(crop, crop))
+    setups = {ch: config.default_setup(channel=ch, grid_size=9, objective="2_5x_na007", resolution_px=(crop, crop))
               for ch in multispectral.CHANNEL_ORDER}
     factor = optics.shared_upsampling_factor(list(setups.values()))
     hp = optics.actual_hr_pixel_size_um(next(iter(setups.values())), factor)
@@ -107,7 +107,7 @@ def _write_exact_k_lab_captures(tmp_path, crop=CROP):
 
 def test_multispectral_pipeline_gd_amplitude_solver_on_exact_k_captures(tmp_path):
     truth = _write_exact_k_lab_captures(tmp_path)
-    run = multispectral.reconstruct_all_channels(str(tmp_path), 9, objective="current", crop=CROP,
+    run = multispectral.reconstruct_all_channels(str(tmp_path), 9, objective="2_5x_na007", crop=CROP,
                                                   iterations=100, solver="gd-amplitude")
     shapes = {ch: c["object"].shape for ch, c in run["channels"].items()}
     assert len(set(shapes.values())) == 1

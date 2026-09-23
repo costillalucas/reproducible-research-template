@@ -107,7 +107,7 @@ def test_chromatic_registration_report_detects_injected_shift_through_real_recon
     """
     grid_size, crop, iterations = 9, 16, 40
     channels = ("red", "green", "blue")
-    setups = {ch: config.default_setup(channel=ch, grid_size=grid_size, objective="current",
+    setups = {ch: config.default_setup(channel=ch, grid_size=grid_size, objective="2_5x_na007",
                                         resolution_px=(crop, crop)) for ch in channels}
     factor = optics.shared_upsampling_factor(list(setups.values()))
     hr_pixel_um = optics.actual_hr_pixel_size_um(next(iter(setups.values())), factor)

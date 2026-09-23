@@ -88,7 +88,7 @@ def _tie_informed_initial_object(obj_true, led_grid, lr_images, hr_pixel_um, wav
 
 def test_tie_informed_initialization_massively_beats_the_standard_zero_phase_start():
     grid_size, crop, iterations = 9, 32, 40
-    setup = config.default_setup(channel="green", grid_size=grid_size, objective="current",
+    setup = config.default_setup(channel="green", grid_size=grid_size, objective="2_5x_na007",
                                   resolution_px=(crop, crop))
     factor = optics.upsampling_factor(setup)
     hr_pixel_um = optics.actual_hr_pixel_size_um(setup, factor)
@@ -140,7 +140,7 @@ def test_reconstruct_initial_object_parameter_defaults_to_unchanged_behavior():
     parameter is additive, not a behavior change for existing callers.
     """
     grid_size, crop = 9, 12
-    setup = config.default_setup(channel="green", grid_size=grid_size, objective="current",
+    setup = config.default_setup(channel="green", grid_size=grid_size, objective="2_5x_na007",
                                   resolution_px=(crop, crop))
     factor = optics.upsampling_factor(setup)
     hr_pixel_um = optics.actual_hr_pixel_size_um(setup, factor)

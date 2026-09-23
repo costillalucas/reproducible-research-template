@@ -35,7 +35,7 @@ def _synthetic_object(shape):
     return np.clip(amp, 0, 1).astype(complex)
 
 
-def _build_in_memory_case(grid_size=9, crop=12, objective="current", channel="green"):
+def _build_in_memory_case(grid_size=9, crop=12, objective="2_5x_na007", channel="green"):
     setup = config.default_setup(channel=channel, grid_size=grid_size, objective=objective,
                                   resolution_px=(crop, crop))
     factor = optics.upsampling_factor(setup)
@@ -147,7 +147,7 @@ def test_main_end_to_end_on_fake_lab_captures(tmp_path):
     output_json = tmp_path / "sweep_out.json"
     rc = sweep_tool.main([
         "--data-root", str(tmp_path), "--channel", channel,
-        "--grid-size", str(grid_size), "--crop", str(crop),
+        "--grid-size", str(grid_size), "--crop", str(crop), "--objective", "2_5x_na007",
         "--reference-image", str(reference_path),
         "--iterations", "3", "8",
         "--output-json", str(output_json),

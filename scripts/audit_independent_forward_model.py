@@ -52,7 +52,7 @@ MODELS = ("A_same_op", "B_indep", "C_indep_bin", "D_wf_model")
 
 
 def geometry():
-    setup = config.default_setup(channel="green", grid_size=9, objective="current", resolution_px=(CROP, CROP))
+    setup = config.default_setup(channel="green", grid_size=9, objective="2_5x_na007", resolution_px=(CROP, CROP))
     factor = optics.upsampling_factor(setup); hp = optics.actual_hr_pixel_size_um(setup, factor)
     hs = optics.hr_shape((CROP, CROP), factor)
     dk = 1 / (hs[1] * hp)

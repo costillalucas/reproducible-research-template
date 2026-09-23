@@ -42,7 +42,7 @@ LR_GRID = {"full": (0.01, 0.02, 0.04), "incr": (0.001, 0.002, 0.005)}
 
 
 def make_problem(obj_kind, peak, seed):
-    setup = config.default_setup(channel="green", grid_size=9, objective="current", resolution_px=(CROP, CROP))
+    setup = config.default_setup(channel="green", grid_size=9, objective="2_5x_na007", resolution_px=(CROP, CROP))
     factor = optics.upsampling_factor(setup); hp = optics.actual_hr_pixel_size_um(setup, factor)
     hs = optics.hr_shape((CROP, CROP), factor)
     truth = _synthetic_object(hs) if obj_kind == "phantom" else lena_map_object(hs, phase_max_rad=0.3 * np.pi)[0]

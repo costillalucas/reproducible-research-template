@@ -33,7 +33,7 @@ def _synthetic_object(shape):
 
 def _small_setup(grid_size):
     return config.default_setup(
-        channel="green", grid_size=grid_size, objective="current",
+        channel="green", grid_size=grid_size, objective="2_5x_na007",
         resolution_px=(12, 12),
     )
 

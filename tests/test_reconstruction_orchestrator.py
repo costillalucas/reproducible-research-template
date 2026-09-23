@@ -30,7 +30,7 @@ def _small_reconstruction_inputs():
     about reconstruction quality itself (already covered elsewhere), so
     keep every actual reconstruct() call as fast as possible.
     """
-    setup = config.default_setup(channel="green", grid_size=9, objective="current",
+    setup = config.default_setup(channel="green", grid_size=9, objective="2_5x_na007",
                                   resolution_px=(10, 10))
     factor = optics.upsampling_factor(setup)
     hr_pixel_um = optics.actual_hr_pixel_size_um(setup, factor)

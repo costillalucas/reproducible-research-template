@@ -68,7 +68,7 @@ def test_similarity_transform_fit_recovers_exact_transform_noiseless():
 
 
 def _setup_and_grids(grid_size=9, crop=16):
-    setup = config.default_setup(channel="green", grid_size=grid_size, objective="current",
+    setup = config.default_setup(channel="green", grid_size=grid_size, objective="2_5x_na007",
                                   resolution_px=(crop, crop))
     factor = optics.upsampling_factor(setup)
     hr_pixel_um = optics.actual_hr_pixel_size_um(setup, factor)

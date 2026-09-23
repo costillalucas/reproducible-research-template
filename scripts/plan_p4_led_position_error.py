@@ -68,7 +68,7 @@ def scaled(kw, m):
 def job(a, wf_epochs=200, gd_iters=100, cal_iters=150, crop_default=32):
     t = time.time()
     crop = a.get("crop", crop_default)
-    setup = build_setup(a.get("channel", "green"), 9, "current", crop, span_mm=48.0)
+    setup = build_setup(a.get("channel", "green"), 9, "2_5x_na007", crop, span_mm=48.0)
     factor, hp, hs = geometry(setup, crop)
     lp, na, wl = setup.lr_pixel_size_um, setup.objective.na, setup.wavelength_um
     rng = np.random.default_rng(1000 + a["seed"])

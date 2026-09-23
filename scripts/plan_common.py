@@ -12,7 +12,7 @@ from ptyco_full_simulator import (config, forward_model, led_array, metrics, opt
 from ptyco_full_simulator.test_objects import lena_map_object, _load_resized, DEFAULT_DATA_DIR
 
 
-def build_setup(channel="green", grid_size=9, objective="current", crop=32,
+def build_setup(channel="green", grid_size=9, objective="2_5x_na007", crop=32,
                 pitch_mm=None, span_mm=None, z_mm=None):
     """SetupConfig for the lab hardware with optional geometry overrides.
     `span_mm` (LED array side) wins over `pitch_mm`: pitch = span/(N-1),

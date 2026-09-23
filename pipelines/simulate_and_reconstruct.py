@@ -11,7 +11,7 @@ Usage:
     python pipelines/simulate_and_reconstruct.py \\
         --amplitude-image path/to/amplitude.png \\
         --phase-image path/to/phase.png \\
-        --channel green --grid-size 9 --objective current \\
+        --channel green --grid-size 9 --objective 2_5x_na007 \\
         --output-dir results/sim_run1
 """
 from __future__ import annotations
@@ -38,7 +38,9 @@ def parse_args(argv=None):
     p.add_argument("--phase-image", required=True, help="drives the object's phase")
     p.add_argument("--channel", choices=sorted(config.CHANNEL_WAVELENGTH_NM), default="green")
     p.add_argument("--grid-size", type=int, default=9, help="LED grid is grid_size x grid_size (must be odd)")
-    p.add_argument("--objective", choices=sorted(config.OBJECTIVES), default="current")
+    p.add_argument("--objective", choices=sorted(config.OBJECTIVES), default="2_5x_na007",
+                   help="objective preset (default %(default)s: synthetic runs keep the preset their "
+                        "recorded results used; real captures use 2x_na010)")
     p.add_argument("--lr-size", type=int, default=64, help="simulated LR image side, in pixels")
     p.add_argument("--iterations", type=int, default=20)
     p.add_argument("--peak-photon-count", type=float, default=None,

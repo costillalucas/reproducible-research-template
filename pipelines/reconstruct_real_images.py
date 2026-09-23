@@ -11,7 +11,7 @@ capture layout differs.
 Usage:
     python pipelines/reconstruct_real_images.py \\
         --data-root /path/to/data --channel green \\
-        --grid-size 9 --objective current --crop 400 \\
+        --grid-size 9 --objective 2x_na010 --crop 400 \\
         --output-dir results/real_run1
 """
 from __future__ import annotations
@@ -32,7 +32,9 @@ def parse_args(argv=None):
                     help="folder containing <channel>/<grid>x<grid>_recortada_<crop>/fila*_columna*.tiff")
     p.add_argument("--channel", choices=sorted(config.CHANNEL_WAVELENGTH_NM), default="green")
     p.add_argument("--grid-size", type=int, default=9, help="LED grid is grid_size x grid_size (must be odd)")
-    p.add_argument("--objective", choices=sorted(config.OBJECTIVES), default="current")
+    p.add_argument("--objective", choices=sorted(config.OBJECTIVES), default=config.DEFAULT_OBJECTIVE,
+                   help="objective preset (default %(default)s, the one real captures use; "
+                        "\"current\"/\"future\" are deprecated aliases, see config.OBJECTIVES)")
     p.add_argument("--crop", type=int, default=400,
                     help="the crop size named in the lab's own folder naming (...recortada_<crop>)")
     p.add_argument("--row-index-base", type=int, default=None,

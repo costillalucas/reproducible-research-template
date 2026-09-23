@@ -50,13 +50,13 @@ def _amplitude_blob(shape):
 
 def _future_setup_with_misalignment(grid_size=9, crop=32, shift=(0.02, -0.015),
                                      rotation_rad=0.02, scale=1.01):
-    """objective="future" (NA=0.10) is used deliberately, not "current"
+    """objective="2x_na010" (NA=0.10) is used deliberately, not "current"
     (NA=0.07): with this lab's geometry (LEDArrayConfig pitch=6mm,
     z_distance=70mm), "current" has only ONE brightfield LED (the on-axis
     one alone) -- not enough points to fit a transform at all. "future"
     has 5, still sparse but usable.
     """
-    setup = config.default_setup(channel="green", grid_size=grid_size, objective="future",
+    setup = config.default_setup(channel="green", grid_size=grid_size, objective="2x_na010",
                                   resolution_px=(crop, crop))
     factor = optics.upsampling_factor(setup)
     hr_pixel_um = optics.actual_hr_pixel_size_um(setup, factor)

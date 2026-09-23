@@ -43,7 +43,7 @@ def _weak_phase_object(shape):
     return amp * np.exp(1j * phase)
 
 
-def _write_fake_lab_captures_with_defocus(tmp_path, grid_size, crop, objective="current"):
+def _write_fake_lab_captures_with_defocus(tmp_path, grid_size, crop, objective="2_5x_na007"):
     setups = {
         channel: config.default_setup(channel=channel, grid_size=grid_size, objective=objective,
                                        resolution_px=(crop, crop))
@@ -82,10 +82,10 @@ def test_tie_defocus_flag_fixes_a_weak_phase_object_across_all_channels(tmp_path
     truth, hr_shape = _write_fake_lab_captures_with_defocus(tmp_path, grid_size, crop)
 
     baseline = pipeline.reconstruct_all_channels(
-        str(tmp_path), grid_size, objective="current", crop=crop, iterations=40,
+        str(tmp_path), grid_size, objective="2_5x_na007", crop=crop, iterations=40,
     )
     tie_run = pipeline.reconstruct_all_channels(
-        str(tmp_path), grid_size, objective="current", crop=crop, iterations=40,
+        str(tmp_path), grid_size, objective="2_5x_na007", crop=crop, iterations=40,
         tie_defocus_um=DEFOCUS_UM,
     )
 

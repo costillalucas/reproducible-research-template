@@ -48,7 +48,7 @@ from ptyco_full_simulator.spectral_ops import led_crop_window  # noqa: E402
 
 
 def _weak_phase_setup(grid_size=9, crop=16):
-    setup = config.default_setup(channel="green", grid_size=grid_size, objective="current",
+    setup = config.default_setup(channel="green", grid_size=grid_size, objective="2_5x_na007",
                                   resolution_px=(crop, crop))
     factor = optics.upsampling_factor(setup)
     hr_pixel_um = optics.actual_hr_pixel_size_um(setup, factor)

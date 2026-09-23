@@ -62,7 +62,7 @@ def multispectral_thickness_correlation():
     Cauchy dispersion fit), on one shared synthetic sample.
     """
     grid_size, crop, iterations, background_rows = 9, 16, 40, 4
-    setups = {ch: config.default_setup(channel=ch, grid_size=grid_size, objective="current",
+    setups = {ch: config.default_setup(channel=ch, grid_size=grid_size, objective="2_5x_na007",
                                         resolution_px=(crop, crop)) for ch in WAVELENGTHS_UM}
     factor = optics.shared_upsampling_factor(list(setups.values()))
     hr_pixel_um = optics.actual_hr_pixel_size_um(next(iter(setups.values())), factor)
@@ -150,7 +150,7 @@ def phase_only_object_correlation_drop():
     (phase_correlation with 0% contrast, phase_correlation with 5% contrast).
     """
     grid_size, crop, iterations = 9, 16, 40
-    setup = config.default_setup(channel="green", grid_size=grid_size, objective="current",
+    setup = config.default_setup(channel="green", grid_size=grid_size, objective="2_5x_na007",
                                   resolution_px=(crop, crop))
     factor = optics.upsampling_factor(setup)
     hr_pixel_um = optics.actual_hr_pixel_size_um(setup, factor)
@@ -186,7 +186,7 @@ def led_calibration_scale_recovery_error():
     misalignment's scale factor.
     """
     grid_size, crop = 9, 16
-    setup = config.default_setup(channel="green", grid_size=grid_size, objective="current",
+    setup = config.default_setup(channel="green", grid_size=grid_size, objective="2_5x_na007",
                                   resolution_px=(crop, crop))
     factor = optics.upsampling_factor(setup)
     hr_pixel_um = optics.actual_hr_pixel_size_um(setup, factor)
@@ -221,7 +221,7 @@ def tie_informed_initialization_phase_correlation_gain():
     phase_correlation).
     """
     grid_size, crop, iterations = 9, 32, 40
-    setup = config.default_setup(channel="green", grid_size=grid_size, objective="current",
+    setup = config.default_setup(channel="green", grid_size=grid_size, objective="2_5x_na007",
                                   resolution_px=(crop, crop))
     factor = optics.upsampling_factor(setup)
     hr_pixel_um = optics.actual_hr_pixel_size_um(setup, factor)
@@ -281,7 +281,7 @@ def epry_defocus_aberration_correction():
     correlation).
     """
     grid_size, crop, iterations, defocus_rad_amplitude = 9, 12, 40, 2.0
-    setup = config.default_setup(channel="green", grid_size=grid_size, objective="current",
+    setup = config.default_setup(channel="green", grid_size=grid_size, objective="2_5x_na007",
                                   resolution_px=(crop, crop))
     factor = optics.upsampling_factor(setup)
     hr_pixel_um = optics.actual_hr_pixel_size_um(setup, factor)
@@ -332,7 +332,7 @@ def epry_regresses_unaberrated_channel_small_scale():
     phase_correlation).
     """
     grid_size, crop, iterations = 9, 12, 40
-    setup = config.default_setup(channel="blue", grid_size=grid_size, objective="current",
+    setup = config.default_setup(channel="blue", grid_size=grid_size, objective="2_5x_na007",
                                   resolution_px=(crop, crop))
     factor = optics.upsampling_factor(setup)
     hr_pixel_um = optics.actual_hr_pixel_size_um(setup, factor)
@@ -375,7 +375,7 @@ def epry_regression_not_reproduced_at_paper_scale():
     """
     grid_size, crop, iterations = 15, 64, 40
     n_cycles = round(crop / 12)
-    setup = config.default_setup(channel="blue", grid_size=grid_size, objective="current",
+    setup = config.default_setup(channel="blue", grid_size=grid_size, objective="2_5x_na007",
                                   resolution_px=(crop, crop))
     factor = optics.upsampling_factor(setup)
     hr_pixel_um = optics.actual_hr_pixel_size_um(setup, factor)
@@ -427,7 +427,7 @@ def adaptive_step_heavy_noise_gain():
     Returns (fixed-ramp phase_correlation, adaptive_step phase_correlation).
     """
     grid_size, crop, iterations, peak_photon_count = 9, 12, 400, 3
-    setup = config.default_setup(channel="green", grid_size=grid_size, objective="current",
+    setup = config.default_setup(channel="green", grid_size=grid_size, objective="2_5x_na007",
                                   resolution_px=(crop, crop))
     factor = optics.upsampling_factor(setup)
     hr_pixel_um = optics.actual_hr_pixel_size_um(setup, factor)
@@ -488,7 +488,7 @@ def chromatic_shift_recovery_error():
     """
     grid_size, crop, iterations = 9, 16, 40
     channels = ("red", "green", "blue")
-    setups = {ch: config.default_setup(channel=ch, grid_size=grid_size, objective="current",
+    setups = {ch: config.default_setup(channel=ch, grid_size=grid_size, objective="2_5x_na007",
                                         resolution_px=(crop, crop)) for ch in channels}
     factor = optics.shared_upsampling_factor(list(setups.values()))
     hr_pixel_um = optics.actual_hr_pixel_size_um(next(iter(setups.values())), factor)
@@ -577,7 +577,7 @@ def _gd_case(channel, crop, bin_aligned, truth_fn=_gd_phantom, grid_size=9):
     fair comparison); otherwise the exact k is kept (what real hardware
     produces).
     """
-    setup = config.default_setup(channel=channel, grid_size=grid_size, objective="current",
+    setup = config.default_setup(channel=channel, grid_size=grid_size, objective="2_5x_na007",
                                   resolution_px=(crop, crop))
     factor = optics.upsampling_factor(setup)
     hr_pixel_um = optics.actual_hr_pixel_size_um(setup, factor)

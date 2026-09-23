@@ -93,7 +93,7 @@ def _synthetic_object(shape):
 
 def test_adaptive_step_shrinks_under_heavy_noise_without_diverging():
     grid_size, crop, iterations = 9, 12, 60
-    setup = config.default_setup(channel="green", grid_size=grid_size, objective="current",
+    setup = config.default_setup(channel="green", grid_size=grid_size, objective="2_5x_na007",
                                   resolution_px=(crop, crop))
     factor = optics.upsampling_factor(setup)
     hr_pixel_um = optics.actual_hr_pixel_size_um(setup, factor)
@@ -125,7 +125,7 @@ def test_adaptive_step_default_off_reproduces_original_behavior():
     the original fixed exponential ramp, unchanged.
     """
     grid_size, crop, iterations = 9, 12, 15
-    setup = config.default_setup(channel="green", grid_size=grid_size, objective="current",
+    setup = config.default_setup(channel="green", grid_size=grid_size, objective="2_5x_na007",
                                   resolution_px=(crop, crop))
     factor = optics.upsampling_factor(setup)
     hr_pixel_um = optics.actual_hr_pixel_size_um(setup, factor)
@@ -160,7 +160,7 @@ def test_adaptive_step_beats_fixed_ramp_under_heavy_noise_across_seeds():
     per-seed difference directly.
     """
     grid_size, crop, iterations, peak_photon_count = 9, 12, 400, 3
-    setup = config.default_setup(channel="green", grid_size=grid_size, objective="current",
+    setup = config.default_setup(channel="green", grid_size=grid_size, objective="2_5x_na007",
                                   resolution_px=(crop, crop))
     factor = optics.upsampling_factor(setup)
     hr_pixel_um = optics.actual_hr_pixel_size_um(setup, factor)

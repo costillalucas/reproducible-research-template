@@ -19,7 +19,7 @@ CROP=32; PHASE_MAX=0.3*np.pi; SPAN_MM=48.0
 def job(a):
     exp,grid_size,peak,seed=a
     t=time.time()
-    setup=config.default_setup(channel="green",grid_size=grid_size,objective="current",resolution_px=(CROP,CROP))
+    setup=config.default_setup(channel="green",grid_size=grid_size,objective="2_5x_na007",resolution_px=(CROP,CROP))
     setup=dataclasses.replace(setup,led_array=config.LEDArrayConfig(grid_size=grid_size,pitch_mm=SPAN_MM/(grid_size-1)))
     factor=optics.upsampling_factor(setup); hp=optics.actual_hr_pixel_size_um(setup,factor); hs=optics.hr_shape((CROP,CROP),factor)
     truth,_=lena_map_object(hs,phase_max_rad=PHASE_MAX); dk=1/(hs[1]*hp)

@@ -47,20 +47,27 @@ image from that stack. Two runnable entry points:
 # script 1: known object -> simulated LR -> reconstructed HR, compared to ground truth
 python pipelines/simulate_and_reconstruct.py \
     --amplitude-image path/to/amplitude.png --phase-image path/to/phase.png \
-    --channel green --grid-size 9 --objective current --output-dir results/sim_run1
+    --channel green --grid-size 9 --objective 2_5x_na007 --output-dir results/sim_run1
     # add --tie-defocus-um 30 to fix weak/low-frequency phase objects (see the
     # "Current limitation" note below) via a simulated defocused capture + TIE
 
 # script 2: real lab captures -> reconstructed HR, no ground truth available
 python pipelines/reconstruct_real_images.py \
     --data-root /path/to/data --channel green --grid-size 9 \
-    --objective current --crop 400 --output-dir results/real_run1
+    --objective 2x_na010 --crop 400 --output-dir results/real_run1
 
 # script 3: real lab captures, all 3 RGB channels independently, one shared HR grid
 python pipelines/reconstruct_multispectral_independent.py \
     --data-root /path/to/data --grid-size 9 \
-    --objective current --crop 400 --output-dir results/multispectral_run1
+    --objective 2x_na010 --crop 400 --output-dir results/multispectral_run1
 ```
+
+Objective presets (`config.OBJECTIVES`): `2x_na010` (2x / NA 0.10, the one
+the lab's real captures use -- default for the real-data pipelines) and
+`2_5x_na007` (2.5x / NA 0.07, default for synthetic runs so recorded
+numbers stay reproducible). `current`/`future` are deprecated aliases for
+`2_5x_na007`/`2x_na010`: real-data runs before 2026-09-23 used `current`
+by default, i.e. the wrong objective for the 2025-12-12 capture.
 
 `reconstruct_real_images.py` expects the lab's own folder convention:
 `<data-root>/<channel>/<N>x<N>_recortada_<crop>/fila<row>_columna<col>.tiff`,

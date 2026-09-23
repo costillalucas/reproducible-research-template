@@ -84,10 +84,28 @@ class ObjectiveConfig:
     name: str = ""
 
 
-#: Named presets for the two objectives currently in the lab.
+_OBJ_2X_NA010 = ObjectiveConfig(na=0.10, magnification=2.0, name="2x_na010")
+_OBJ_2_5X_NA007 = ObjectiveConfig(na=0.07, magnification=2.5, name="2_5x_na007")
+
+#: Default objective preset: the one the lab's real captures are taken
+#: with (confirmed by the user 2026-09-23 for the 2025-12-12 capture).
+DEFAULT_OBJECTIVE = "2x_na010"
+
+#: Named presets for the two objectives in the lab, keyed by what they are.
+#:
+#: "current" and "future" are DEPRECATED aliases kept only so existing
+#: scripts / result metadata / CLI invocations keep working:
+#: "current" -> "2_5x_na007", "future" -> "2x_na010". They were misleading:
+#: the real 2025-12-12 capture was taken with the 2x/0.10 ("future")
+#: objective, but "current" (2.5x/0.07) was the default, so every real-data
+#: run before 2026-09-23 silently used the wrong magnification AND NA.
+#: Synthetic results recorded before then used "current" == "2_5x_na007"
+#: and pin it explicitly so their numbers don't change.
 OBJECTIVES = {
-    "current": ObjectiveConfig(na=0.07, magnification=2.5, name="current"),
-    "future": ObjectiveConfig(na=0.10, magnification=2.0, name="future"),
+    "2x_na010": _OBJ_2X_NA010,
+    "2_5x_na007": _OBJ_2_5X_NA007,
+    "current": _OBJ_2_5X_NA007,  # deprecated alias
+    "future": _OBJ_2X_NA010,  # deprecated alias
 }
 
 
@@ -122,11 +140,16 @@ class SetupConfig:
         return self.sensor.pixel_size_um / self.objective.magnification
 
 
-def default_setup(channel: str, grid_size: int, objective: str = "current",
+def default_setup(channel: str, grid_size: int, objective: str = DEFAULT_OBJECTIVE,
                    resolution_px: tuple[int, int] = (200, 200),
                    row_index_base: int | None = None,
                    col_index_base: int | None = None) -> SetupConfig:
-    """Convenience builder for the lab's actual hardware, current values."""
+    """Convenience builder for the lab's actual hardware, current values.
+
+    `objective` defaults to DEFAULT_OBJECTIVE ("2x_na010", the one real
+    captures use); synthetic experiments that must reproduce numbers
+    recorded before 2026-09-23 pass "2_5x_na007" explicitly.
+    """
     return SetupConfig(
         led_array=LEDArrayConfig(grid_size=grid_size, row_index_base=row_index_base,
                                   col_index_base=col_index_base),

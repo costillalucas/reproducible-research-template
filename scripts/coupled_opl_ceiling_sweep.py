@@ -36,7 +36,7 @@ def _build_test_object(hr_shape, background_rows, t_scale):
 def job(a, crop=16, wf_iters=100, gd_iters=100):
     t0 = time.time()
     grid_size, background_rows = 9, 4
-    setups = {ch: config.default_setup(channel=ch, grid_size=grid_size, objective="current",
+    setups = {ch: config.default_setup(channel=ch, grid_size=grid_size, objective="2_5x_na007",
                                         resolution_px=(crop, crop)) for ch in WAVELENGTHS_UM}
     factor = optics.shared_upsampling_factor(list(setups.values()))
     hr_pixel_um = optics.actual_hr_pixel_size_um(next(iter(setups.values())), factor)
