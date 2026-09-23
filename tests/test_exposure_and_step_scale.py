@@ -218,6 +218,67 @@ def test_default_step_stalls_at_a_moderate_crop_but_step_relative_does_not():
     assert phase_relative > 0.85 and phase_relative > phase_legacy + 0.3
 
 
+def test_step_relative_scales_epry_alpha_beta_by_lr_n_px_and_default_is_unchanged():
+    """Under recover_pupil, step_relative multiplies EPRY's alpha/beta by
+    step_relative * lr_n_px (bit-identical to passing them by hand); with
+    no step_relative the EPRY branch is exactly what it was."""
+    s, f, hp, grid = _flat_setup()
+    crop = 8
+    rng = np.random.default_rng(4)
+    obj = (1 + 0.2 * rng.standard_normal((crop * f, crop * f))).astype(complex)
+    lr = forward_model.simulate_lr_stack(obj, hp, grid, (crop, crop), s.lr_pixel_size_um,
+                                         s.objective.na, s.wavelength_um)
+    args = (lr, grid, hp, s.lr_pixel_size_um, s.objective.na, s.wavelength_um, f)
+    kw = dict(iterations=3, recover_pupil=True)
+    a = reconstruction.reconstruct(*args, step_relative=0.5, **kw)
+    b = reconstruction.reconstruct(*args, epry_alpha=0.5 * crop * crop,
+                                   epry_beta=0.5 * crop * crop, **kw)
+    np.testing.assert_array_equal(a["object"], b["object"])
+    np.testing.assert_array_equal(a["pupil"], b["pupil"])
+    c = reconstruction.reconstruct(*args, step_relative=0.5, epry_alpha=2.0, **kw)
+    d = reconstruction.reconstruct(*args, epry_alpha=2.0 * 0.5 * crop * crop,
+                                   epry_beta=0.5 * crop * crop, **kw)
+    np.testing.assert_array_equal(c["object"], d["object"])
+    default = reconstruction.reconstruct(*args, **kw)
+    explicit = reconstruction.reconstruct(*args, epry_alpha=1.0, epry_beta=1.0, **kw)
+    np.testing.assert_array_equal(default["object"], explicit["object"])
+    assert not np.array_equal(default["object"], a["object"])
+
+
+def test_default_epry_stalls_at_a_moderate_crop_but_step_relative_does_not():
+    """Forks H/K: the EPRY branch divides its exit-wave correction by
+    lr_n_px, so the paper's alpha=beta=1 is a 1/lr_n_px step and stays
+    frozen at crop 48; step_relative=1.0 (== ou2014's unit step) converges."""
+    crop = 48
+    s = config.default_setup("green", 9, objective="2x_na010", resolution_px=(crop, crop))
+    f = optics.upsampling_factor(s)
+    hp = optics.actual_hr_pixel_size_um(s, f)
+    n = crop * f
+    rng = np.random.default_rng(0)
+
+    def smooth():
+        noise = np.fft.fft2(rng.standard_normal((n, n)))
+        fy = np.fft.fftfreq(n, d=hp)[:, None]
+        fx = np.fft.fftfreq(n, d=hp)[None, :]
+        return np.real(np.fft.ifft2(noise * (np.hypot(fx, fy) < 0.4 / 0.53)))
+
+    a, p = smooth(), smooth()
+    obj = (1 + 0.3 * a / a.std()) * np.exp(1j * 0.8 * p / p.std())
+    grid = led_array.build_led_grid(s.led_array, s.wavelength_um)
+    lr = forward_model.simulate_lr_stack(obj, hp, grid, (crop, crop), s.lr_pixel_size_um,
+                                         s.objective.na, s.wavelength_um)
+    args = (lr, grid, hp, s.lr_pixel_size_um, s.objective.na, s.wavelength_um, f)
+    kw = dict(iterations=20, normalize_initial_guess=True, recover_pupil=True)
+    legacy = reconstruction.reconstruct(*args, **kw)
+    relative = reconstruction.reconstruct(*args, step_relative=1.0, **kw)
+    imp_legacy = metrics.convergence_summary(legacy["history"])["relative_improvement"]
+    imp_relative = metrics.convergence_summary(relative["history"])["relative_improvement"]
+    phase_legacy = metrics.compare_to_ground_truth(legacy["object"], obj)["phase_correlation"]
+    phase_relative = metrics.compare_to_ground_truth(relative["object"], obj)["phase_correlation"]
+    assert imp_legacy < 0.1 and imp_relative > 0.8
+    assert phase_relative > 0.8 and phase_relative > phase_legacy + 0.3
+
+
 # --- CLI wiring --------------------------------------------------------------
 
 def test_multispectral_rejects_invalid_combinations_before_loading_anything(tmp_path):

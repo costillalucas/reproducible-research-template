@@ -55,7 +55,9 @@ def add_solver_scale_args(p: argparse.ArgumentParser) -> None:
                    help="Wirtinger-flow step as a fraction of the classic ePIE unit step "
                         "(crop-independent; e.g. 0.3). Default: the legacy fixed step_max=20, "
                         "which is ~1/8000 of the unit step at crop 400 and leaves the solver "
-                        "nearly frozen -- see reconstruction.py's module docstring")
+                        "nearly frozen -- see reconstruction.py's module docstring. With "
+                        "--recover-pupil it scales EPRY's alpha/beta the same way (1.0 = ou2014's "
+                        "alpha=beta=1)")
     p.add_argument("--no-normalize-initial-guess", dest="normalize_initial_guess",
                    action="store_false",
                    help="keep the legacy initial guess that is factor^2 too bright for the "

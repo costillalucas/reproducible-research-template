@@ -201,7 +201,15 @@ def reconstruct(lr_images: dict[tuple[int, int], np.ndarray],
     what fork F used (results/led_geometry_2025-12-12/). NOT the default
     and NOT validated on real data: unfrozen on the 2025-12-12 capture it
     fits dark-field LEDs but the phase comes out noise-like (roadmap 6.8).
-    Ignored under `recover_pupil`, like `step_max`.
+    Under `recover_pupil` it instead scales EPRY's alpha/beta: the
+    effective values are `epry_alpha * step_relative * lr_n_px` and
+    `epry_beta * step_relative * lr_n_px`. The EPRY branch divides its
+    exit-wave correction by lr_n_px (same adjoint-of-ifft2 convention as
+    the WF gradient), which makes alpha=beta=1 a step 1/lr_n_px of the
+    paper's -- frozen at large crops exactly like the WF default (forks
+    H/K, roadmap 6.10). With `step_relative=1.0` and the default
+    alpha=beta=1 this reproduces ou2014 Eq. 3/4 exactly. Without
+    `step_relative` the EPRY branch is unchanged.
 
     `normalize_initial_guess` (2026-09-23): when no `initial_object` is
     given, build the default guess with `initial_hr_guess(...,
@@ -223,6 +231,9 @@ def reconstruct(lr_images: dict[tuple[int, int], np.ndarray],
         if step_relative <= 0:
             raise ValueError(f"step_relative must be > 0, got {step_relative}")
         step_max = step_relative * lr_n_px
+        if recover_pupil:
+            epry_alpha = epry_alpha * step_relative * lr_n_px
+            epry_beta = epry_beta * step_relative * lr_n_px
 
     history = []
     step = step_max  # zuo2016 Eq. 16 convention: alpha^0 = 1 (see reconstruct's docstring)
