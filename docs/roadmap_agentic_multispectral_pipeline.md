@@ -2919,3 +2919,137 @@ muestra gruesa/dispersiva fuera del modelo de objeto delgado).
   inicial, y `--step-epie FRACTION` opt-in. **El default del paso NO se
   cambió**: con el solver descongelado la fase sale tipo ruido en datos
   reales, así que es decisión del usuario.
+
+### 6.10 El piso de residuo en datos reales no es ruido ni solver (2026-09-23)
+
+Dos experimentos en paralelo (hora autónoma, usuario ausente) sobre el piso
+de ~0.28 de 6.9, ya con el pipeline corregido de `7c6fc3c` (exposición
+normalizada, estimación inicial escalada, paso ePIE opt-in). Residuo =
+media sobre LEDs de ‖est−meas‖/‖meas‖ en amplitud, la misma métrica de 6.9.
+
+**1. Validación sintética con la geometría real (fork I,
+`results/synthetic_real_geometry/`).** 2x_na010, z=76 mm, 9x9, verde, crop
+128, factor 5 (px HR 0.32 µm). Ruido tipo captura: exposición por LED
+elegida para ~300 cuentas crudas (acotada a 3-1000 ms), Poisson con
+ganancia g, lectura 5.4 cuentas, resta de oscuro y normalización como en
+G. Objeto "scatter" = lena/map + textura de fase de banda ancha de 1 rad,
+con cociente DF/BF **0.050** (el real es 0.0498); "lenamap" solo (DF/BF
+0.0002, menos realista: el DF toca el tope de 1000 ms).
+
+| scatter (100 it salvo indicado) | residuo final (BF / DF) | corr. fase | std fase (rad) |
+|---|---|---|---|
+| verdad vs datos, g=1 / g=8 (piso de ruido) | 0.037 / 0.086 | – | – |
+| g=1, paso por defecto, 50 it (congelado) | 0.740 (0.15 / 0.78) | 0.09 | 0.13 |
+| sin ruido, ePIE 0.1, 20/50/100 it | 0.308 / 0.176 / 0.050 | 0.41 / 0.60 / 0.68 | 0.84 |
+| sin ruido, ePIE 0.3, 20/50/100 it | 0.051 / 0.008 / 0.002 | 0.68 / 0.69 / 0.70 | 0.84 |
+| g=1, ePIE 0.3, 20/50/100 it | 0.087 / 0.036 / 0.035 | 0.67 / 0.69 / 0.69 | 0.84 |
+| g=8, ePIE 0.3 | 0.081 | 0.69 | 0.84 |
+| **datos con centro (17.45,14.65), reconstruidos con centro nominal**, sin ruido / g=1 | **0.221 / 0.225** (BF 0.20-0.21) | **−0.003** | **1.80** |
+| ídem con el centro correcto, sin ruido / g=1 | 0.005 / 0.035 | 0.69 | 0.85 |
+
+En lenamap: ePIE 0.3 con g=1 da residuo 0.116 (piso de ruido 0.125, alto
+por su DF débil) y **correlación de fase 0.93**; con el centro mal
+supuesto, 0.26 / −0.01 / 1.81 rad; con el paso por defecto, congelado
+(0.69, std 0.01 rad).
+
+Lectura: con la geometría real y ePIE 0.3, WF recupera la fase y llega al
+piso de ruido en ~50 iteraciones (ePIE 0.1 necesita >100). El ruido tipo
+captura solo produce **0.035-0.09** con la dispersión real, aun con g=8.
+Un error de centro de medio LED reproduce casi exacta la firma real
+(residuo ~0.22-0.26, BF alto, fase tipo ruido con std ~1.8 rad), y con el
+centro correcto el residuo vuelve al piso: **en sintético los datos sí
+discriminan geometría**, cosa que los reales no hicieron (6.9). Nota: en
+scatter la correlación de fase satura en ~0.69 incluso con residuo 0.002
+sin ruido — se atribuye a que la métrica compara fase envuelta (la
+textura de 1 rad más la de map envuelven); la cifra que vale es la de
+lenamap (0.93-0.94).
+
+**2. Diagnóstico del piso en datos reales (fork H,
+`results/residual_floor_2025-12-12/`).** API oficial en `7c6fc3c`, verde,
+crop 400, 2x_na010, z=76, centro (17.45, 14.65) =
+`--led-center-offset-mm 2.1 -2.7` (signos verificados en `led_array.py`),
+paso plano (`step_alpha=50`) en tandas encadenadas de 10 iteraciones.
+
+| prueba | residuo medio por LED | std fase (rad) |
+|---|---|---|
+| base, ePIE 0.3, 100 it | 0.93 → 0.295 (BF 0.298, DF 0.295) | 1.61 (ya 1.56 en it 10) |
+| ePIE 0.1, 100 it | 0.311 | 1.56 |
+| ePIE 0.03, 30 / 100 it | 0.366 / 0.335 | 1.46 / 1.52 |
+| solo los 9 LEDs internos, 30 it | 0.267 | 1.36 |
+| brillo por LED corregido, 30 it | 0.3086 (vs 0.3098 sin corregir) | 1.53 |
+| EPRY con α=β=lr_n_px, 30 it | RMS interno 2.527 (base 2.577, −2%) | 1.49 |
+| predicción solo por ruido | 0.020 (0.027 con patrón fijo) | – |
+| **control sintético**, misma geometría y ruido, crop 400 | 0.128 (piso de ruido 0.142) | corr. con la fase verdadera **0.96** |
+
+- **Ruido medido**, no supuesto: con los pares frame_1/frame_2 de las
+  capturas 2026-09-22 (rango lineal 190-1000 ADU), ganancia **~0.30
+  ADU/e⁻**, varianza de lectura **7.2 ADU²**, cámara de 12 bits, saturación
+  <0.04%. Predice un residuo por LED de **0.02-0.03** (máximo 0.046 con
+  patrón fijo) contra **0.295 medido**: ~11 veces más (mediana).
+- **Brillo por LED**: la escala medida/modelo por LED va de 0.83 a 0.94;
+  corregirla no cambia el residuo.
+- **No es sobreajuste tardío**: la fase tipo ruido ya está en la
+  iteración 10 con cualquier paso (incluso 0.03) y con solo los 9 LEDs
+  internos.
+- **La amplitud reconstruida es un speckle de granos ~2 µm, sin la forma
+  del elefante.** Solo 23% de la energía cae dentro de NA 0.10, y aun
+  filtrada a esa banda la fase tiene std 1.27 rad. Las imágenes LR, incluso
+  las de campo claro, ya son muy texturadas y las de campo oscuro tienen
+  granos brillantes (`lr_panel.png`) — compatible con una muestra gruesa y
+  muy dispersiva, no probado.
+- **Control sintético** a crop 400 con la misma geometría y el ruido
+  medido: llega al piso de ruido y recupera la fase (0.96) en 10-30
+  iteraciones. Salvedad: genera y reconstruye con el mismo modelo, así que
+  no puede ver diferencias modelo-física (redondeo de k, muestra gruesa).
+
+**3. Lectura conjunta.** El solver corregido funciona con la geometría
+real (I y el control de H), y ni el ruido medido, ni el brillo por LED,
+ni la pupila (EPRY), ni el tamaño del paso explican el piso de ~0.29 en
+datos reales. **Hay un desajuste entre el modelo y esta muestra real que
+todavía no está identificado.** Candidatos: muestra gruesa o con
+dispersión múltiple (fuera del modelo de objeto delgado); un error de
+geometría fuera de lo probado en 6.9 (el control espejado dio lo mismo,
+pero en sintético medio LED ya basta para la firma real); el redondeo de
+k al bin de FFT a crop 400; u otro efecto no modelado.
+
+**Fork K: búsqueda más ancha de geometría** (`results/geometry_search_2025-12-12/`;
+crop central 96, 2x_na010, `step_relative=0.3`, 35 it por punto, puntuado
+también por validación cruzada: reconstruir sin 20 de los 81 LEDs y medir
+el residuo sobre esos 20):
+
+| Barrido | Residuo de entrenamiento | Residuo LEDs excluidos |
+|---|---|---|
+| Offset de centro ±1.5 pasos (169 puntos) | 0.310-0.316, plano | ±1 paso: 0.475-0.503, plano |
+| Centro nominal / estimado por F | 0.287 / 0.292 | 0.501 / 0.492 |
+| Rotación ±5° | 0.287-0.288 | 0.496-0.502 |
+| z 40 → 120 mm | 0.232 → 0.329 | 0.554 → 0.438 (sentido opuesto) |
+| Control: LEDs asignados al azar (3 semillas) | 0.36-0.39 | 0.68 / 0.72 / 1.00 |
+| EPRY (z 76 / 60) | 0.905 / 0.950, fase std 0.005 (congelado) | – |
+
+Los datos reales solo descartan geometrías groseramente equivocadas (el
+control aleatorio sí se separa); dentro de ±1 LED y ±5° todo queda en ~0.03
+sin mínimo, cuando en sintético (fork I) medio LED lleva el residuo de 0.035
+a 0.22. **Algo que no es geometría domina el residuo real y tapa la
+sensibilidad a la geometría.** Además hay sobreajuste fuerte (0.29
+entrenamiento vs 0.50 en LEDs excluidos): la reconstrucción no generaliza,
+consistente con la fase tipo ruido. z no es calibrable así (entrenamiento y
+validación se mueven en sentidos opuestos); queda la medición física de 76 mm.
+El centro por radiancia (17.45/14.65 ± 0.1) sigue siendo la mejor estimación,
+ni confirmada ni refutada. EPRY no se pudo evaluar por el bug de abajo.
+
+**4. Hallazgos laterales.**
+- **Bug abierto**: la rama EPRY (`--recover-pupil`) tiene el mismo
+  congelamiento por 1/lr_n_px (con α=β=1 queda fija en 0.93), y
+  `step_relative` de G no la cubre.
+- Todas las imágenes LR comparten una **línea horizontal fija del sensor**
+  cerca de la fila 215 del crop.
+
+**5. Próximos pasos.**
+- **Captura FPM de un target USAF** (muestra fina, poco dispersiva): es la
+  prueba decisiva para separar "muestra gruesa" de "geometría/modelo" y
+  para calibrar NA, aumento y centro de la matriz.
+- **Mosaico Zeiss 10x/0.25** del mismo FOV del elefante como referencia de
+  alta resolución (6.8).
+- **Decisión del usuario** sobre el default del paso (`--step-epie`): el
+  solver descongelado funciona en sintético pero en esta muestra real da
+  fase tipo ruido.
