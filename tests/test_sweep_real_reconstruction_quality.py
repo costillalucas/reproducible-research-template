@@ -147,7 +147,7 @@ def test_main_end_to_end_on_fake_lab_captures(tmp_path):
     output_json = tmp_path / "sweep_out.json"
     rc = sweep_tool.main([
         "--data-root", str(tmp_path), "--channel", channel,
-        "--grid-size", str(grid_size), "--crop", str(crop), "--objective", "2_5x_na007", "--z-distance-mm", "70",
+        "--grid-size", str(grid_size), "--crop", str(crop), "--objective", "2_5x_na007", "--z-distance-mm", "70", "--no-exposure-normalization", "--no-normalize-initial-guess",
         "--reference-image", str(reference_path),
         "--iterations", "3", "8",
         "--output-json", str(output_json),

@@ -144,6 +144,8 @@ def parse_args(argv=None):
                          "measured cost/latency of this call pattern")
     p.add_argument("--output-dir", default="results/reconstruct_multispectral_coupled")
     cli_args.add_geometry_args(p)
+    cli_args.add_acquisition_args(p)
+    cli_args.add_solver_scale_args(p)
     return p.parse_args(argv)
 
 
@@ -168,6 +170,8 @@ def main(argv=None) -> int:
         agent_live=args.agent_live, max_attempts=args.max_attempts,
         recover_pupil=args.recover_pupil, adaptive_step=args.adaptive_step,
         solver=args.solver, **cli_args.geometry_kwargs(args),
+        exposure_normalization=args.exposure_normalization, dark_level=args.dark_level,
+        step_relative=args.step_epie, normalize_initial_guess=args.normalize_initial_guess,
     )
     for channel in CHANNEL_ORDER:
         attempts = run["channels"][channel]["agent_attempts"]
@@ -261,6 +265,7 @@ def main(argv=None) -> int:
     metrics_out = {
         "background_rows": background_rows, "baseline_index": args.baseline_index,
         "geometry": run["geometry"],
+        "acquisition": run["acquisition"], "solver_scale": run["solver_scale"],
         "use_reconstruction_agent": args.use_reconstruction_agent,
         "recover_pupil": args.recover_pupil, "adaptive_step": args.adaptive_step,
         "agent_attempts": {ch: run["channels"][ch]["agent_attempts"] for ch in CHANNEL_ORDER},

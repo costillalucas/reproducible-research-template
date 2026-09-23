@@ -104,6 +104,15 @@ _OBJ_2_5X_NA007 = ObjectiveConfig(na=0.07, magnification=2.5, name="2_5x_na007")
 #: nominal geometry and stays pinned for synthetic reproducibility).
 REAL_CAPTURE_Z_DISTANCE_MM = 76.0
 
+#: Camera dark/bias level (counts) subtracted from real captures before
+#: exposure normalization (`io_utils.normalize_exposure`). Measured on the
+#: lab's no-LED capture `imagenes_tomadas/2026-09-22-sinleds_600000`
+#: (6 frames, 1120x1120, 600 ms): mean 188.4-189.2, median 189, std ~5.4.
+#: Only one exposure time was measured, so it's treated as an
+#: exposure-independent bias; override with `--dark-level` if a capture
+#: session has its own dark frame.
+REAL_CAPTURE_DARK_LEVEL = 188.0
+
 #: Default objective preset: the one the lab's real captures are taken
 #: with (confirmed by the user 2026-09-23 for the 2025-12-12 capture).
 DEFAULT_OBJECTIVE = "2x_na010"

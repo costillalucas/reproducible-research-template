@@ -88,6 +88,30 @@ Geometry flags (all four real-data CLIs: `reconstruct_real_images.py`,
 The effective geometry each run used is written to its metrics JSON under
 `"geometry"`.
 
+Acquisition and solver-scale flags (same four CLIs; roadmap 6.8):
+
+- Exposure normalization is ON by default: each image becomes
+  `(raw - dark) / exposure` (rescaled to the shortest exposure), with the
+  per-LED exposure read from `<data-root>/<channel>/leds_por_tiempo_*.json`
+  (keys in microseconds; `LEDS_DESCARTADOS` are dropped) or, failing that,
+  from the `<channel>/<N>ms/` folders. A capture with neither fails with an
+  error rather than reconstructing un-normalized counts.
+  `--no-exposure-normalization` turns it off (already-normalized or
+  synthetic images -- synthetic data needs it); `--dark-level` sets the
+  subtracted bias (default 188, `config.REAL_CAPTURE_DARK_LEVEL`, measured
+  on the lab's no-LED capture).
+- The Wirtinger-flow initial guess is divided by factor^2 by default so it
+  matches the forward model's scale; `--no-normalize-initial-guess` keeps
+  the legacy guess.
+- `--step-epie FRACTION` -- Wirtinger-flow step as a fraction of the ePIE
+  unit step (e.g. `0.3`), independent of crop size. Not the default: the
+  legacy fixed `step_max=20` is ~1/8000 of the unit step at crop 400 and
+  leaves the solver almost frozen, but unfreezing it on the 2025-12-12
+  capture gives noise-like phase (roadmap 6.8), so it stays opt-in for now.
+
+What each run did is recorded under `"acquisition"` and `"solver_scale"`
+in its metrics JSON.
+
 `reconstruct_real_images.py` expects the lab's own folder convention:
 `<data-root>/<channel>/<N>x<N>_recortada_<crop>/fila<row>_columna<col>.tiff`,
 where `N` (`--grid-size`) is the number of LEDs used per side and `crop`

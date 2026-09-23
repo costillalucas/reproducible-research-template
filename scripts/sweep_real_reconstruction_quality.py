@@ -80,6 +80,8 @@ def parse_args(argv=None):
     p.add_argument("--recover-pupil", action="store_true",
                     help="wirtinger only, see reconstruction.reconstruct's recover_pupil (EPRY/ou2014)")
     cli_args.add_geometry_args(p)
+    cli_args.add_acquisition_args(p)
+    cli_args.add_solver_scale_args(p)
     p.add_argument("--output-json", default=None,
                     help="if given, write the full per-run table as JSON here")
     return p.parse_args(argv)
@@ -95,18 +97,23 @@ def load_reference(path: str) -> np.ndarray:
 def sweep(lr_images: dict, led_grid: list[dict], hr_pixel_um: float, lr_pixel_um: float,
           na: float, wavelength_um: float, factor: int, iteration_values: list[int],
           reference: np.ndarray, solver: str = "wirtinger",
-          adaptive_step: bool = False, recover_pupil: bool = False) -> list[dict]:
+          adaptive_step: bool = False, recover_pupil: bool = False,
+          step_relative: float | None = None,
+          normalize_initial_guess: bool = False) -> list[dict]:
     """Filesystem-free core: runs one independent reconstruction per value
     in `iteration_values` against the given in-memory LR stack/LED grid,
     and correlates each result's amplitude against `reference` (resized as
     needed by `metrics.correlate_against_hr_reference`). Returns a list of
     per-run dicts, one per iteration value, in the same order as
     `iteration_values` -- easy to unit test with tiny synthetic arrays.
+    `step_relative` / `normalize_initial_guess` go to
+    `reconstruction.reconstruct` (wirtinger only; legacy defaults here, the
+    CLI passes its own real-data defaults).
     """
     if solver not in ("wirtinger", "gd-amplitude"):
         raise ValueError(f"solver must be 'wirtinger' or 'gd-amplitude', got {solver!r}")
-    if solver == "gd-amplitude" and (adaptive_step or recover_pupil):
-        raise ValueError("--adaptive-step/--recover-pupil are wirtinger-only "
+    if solver == "gd-amplitude" and (adaptive_step or recover_pupil or step_relative is not None):
+        raise ValueError("--adaptive-step/--recover-pupil/--step-epie are wirtinger-only "
                           "(see reconstruction.reconstruct)")
 
     rows = []
@@ -121,6 +128,7 @@ def sweep(lr_images: dict, led_grid: list[dict], hr_pixel_um: float, lr_pixel_um
             result = reconstruction.reconstruct(
                 lr_images, led_grid, hr_pixel_um, lr_pixel_um, na, wavelength_um, factor,
                 iterations=iterations, adaptive_step=adaptive_step, recover_pupil=recover_pupil,
+                step_relative=step_relative, normalize_initial_guess=normalize_initial_guess,
             )
         elapsed_s = time.perf_counter() - t0
 
@@ -155,9 +163,10 @@ def main(argv=None) -> int:
         row_index_base=args.row_index_base, col_index_base=args.col_index_base,
         **cli_args.geometry_kwargs(args),
     )
-    lr_images = io_utils.load_real_lr_stack(
+    lr_images, acquisition = io_utils.load_real_lr_stack_normalized(
         args.data_root, args.channel, args.grid_size, args.crop,
         row_index_base=setup.led_array.row_base, col_index_base=setup.led_array.col_base,
+        **cli_args.acquisition_kwargs(args),
     )
     n_expected = args.grid_size * args.grid_size
     print(f"loaded {len(lr_images)}/{n_expected} LR images  channel={args.channel}")
@@ -174,6 +183,8 @@ def main(argv=None) -> int:
         setup.objective.na, setup.wavelength_um, factor,
         args.iterations, reference, solver=args.solver,
         adaptive_step=args.adaptive_step, recover_pupil=args.recover_pupil,
+        step_relative=args.step_epie,
+        normalize_initial_guess=args.normalize_initial_guess and args.solver == "wirtinger",
     )
     _print_table(rows)
 
@@ -188,6 +199,9 @@ def main(argv=None) -> int:
                 "recover_pupil": args.recover_pupil, "data_root": args.data_root,
                 "reference_image": args.reference_image, "rows": rows,
                 "geometry": config.setup_geometry_summary(setup),
+                "acquisition": acquisition,
+                "solver_scale": {"step_epie": args.step_epie,
+                                 "normalize_initial_guess": args.normalize_initial_guess and args.solver == "wirtinger"},
             }, fh, indent=2)
         print(f"wrote {args.output_json}")
     return 0

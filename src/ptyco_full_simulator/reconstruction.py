@@ -15,6 +15,25 @@ this module's Fourier-domain-normalized gradient (grad_field is divided
 by lr_n_px -- see the adjoint-of-ifft2 comment below -- so step_max isn't
 bounded to [0, 1] the way the original real-space-domain ramp was).
 
+CAVEAT (2026-09-23, roadmap 6.8 / fork F): because the gradient carries
+that 1/lr_n_px, the classic ePIE/Gerchberg-Saxton unit step corresponds
+to step_max == lr_n_px, so a FIXED step_max is a step that shrinks as
+1/(crop^2). The default 20 was tuned on this project's tiny synthetic
+crops (~12-16 px, where 20 is ~0.1 of the unit step); at crop 400 it is
+~1/8000 of it and the solver barely moves (noiseless synthetic control,
+20 it: relative improvement 0.62/0.20/0.05 at crop 16/64/128 with the
+default, ~0.90 at every crop with 0.3 of the unit step). `step_relative`
+expresses the step as that crop-independent fraction instead. The
+default is left unchanged so recorded synthetic results reproduce.
+
+Initial-guess scale: `forward_model.simulate_lr_stack` and this module's
+own model use un-normalized fft2 (HR) / ifft2 (LR), so an HR object of
+amplitude a predicts an LR field of amplitude a * n_hr/n_lr = a*factor^2.
+`initial_hr_guess`'s plain upsample of sqrt(I) therefore starts
+factor^2 too bright (real 2025-12-12 data: initial bright-field per-LED
+residual 24.3 -> 0.24 once divided). `match_forward_model_scale=True`
+divides it out; off by default for the same reproducibility reason.
+
 Two of references/bibliography.yaml's `priority_focus` gaps are now
 implemented as opt-in params on `reconstruct` (2026-09-18, see that
 function's docstring for details and honest caveats on each):
@@ -31,15 +50,23 @@ from .spectral_ops import led_crop_window
 
 
 def initial_hr_guess(lr_images: dict[tuple[int, int], np.ndarray],
-                      led_grid: list[dict], factor: int) -> np.ndarray:
+                      led_grid: list[dict], factor: int,
+                      match_forward_model_scale: bool = False) -> np.ndarray:
     """Nearest-neighbor upsample of the center (on-axis) LED's image,
     amplitude only, zero phase -- the standard FPM starting point.
     `led_grid` must be sorted center-first (build_led_grid already does).
+
+    `match_forward_model_scale=True` divides by factor^2 so the guess,
+    pushed through the un-normalized forward model, predicts the measured
+    intensities instead of factor^4 times them (see the module docstring).
+    Off by default: recorded synthetic results used the unscaled guess.
     """
     center = led_grid[0]
     center_img = lr_images[(center["row"], center["col"])]
     amp = np.sqrt(np.clip(center_img, 0, None))
     amp_hr = np.kron(amp, np.ones((factor, factor)))
+    if match_forward_model_scale:
+        amp_hr = amp_hr / factor**2
     return amp_hr.astype(complex)
 
 
@@ -82,7 +109,9 @@ def reconstruct(lr_images: dict[tuple[int, int], np.ndarray],
                  iterations: int = 40, step_max: float = 20.0,
                  step_alpha: float = 0.3, initial_object: np.ndarray | None = None,
                  recover_pupil: bool = False, epry_alpha: float = 1.0,
-                 epry_beta: float = 1.0, adaptive_step: bool = False) -> dict:
+                 epry_beta: float = 1.0, adaptive_step: bool = False,
+                 step_relative: float | None = None,
+                 normalize_initial_guess: bool = False) -> dict:
     """Returns {"object": complex HR array, "history": [{"iteration",
     "recovery_error"} per epoch]}. `recovery_error` is the RMS amplitude
     residual across all LEDs used that epoch -- the same quantity
@@ -163,6 +192,20 @@ def reconstruct(lr_images: dict[tuple[int, int], np.ndarray],
     0.06 phase_correlation). If reconstructing under light noise or few
     iterations, don't expect adaptive_step to help much; it's the heavy-
     noise/many-cycle regime where it earns its keep.
+
+    `step_relative` (2026-09-23): if set, overrides `step_max` with
+    `step_relative * lr_n_px`, i.e. the step as a fraction of the classic
+    ePIE unit step, independent of crop size (see the module docstring's
+    CAVEAT on why a fixed `step_max` freezes the solver at large crops).
+    The ramp / adaptive schedule then applies on top as usual. 0.3 was
+    what fork F used (results/led_geometry_2025-12-12/). NOT the default
+    and NOT validated on real data: unfrozen on the 2025-12-12 capture it
+    fits dark-field LEDs but the phase comes out noise-like (roadmap 6.8).
+    Ignored under `recover_pupil`, like `step_max`.
+
+    `normalize_initial_guess` (2026-09-23): when no `initial_object` is
+    given, build the default guess with `initial_hr_guess(...,
+    match_forward_model_scale=True)` (divide by factor^2, module docstring).
     """
     lr_shape = next(iter(lr_images.values())).shape
     pupil_mask = circular_pupil(lr_shape, lr_pixel_um, na, wavelength_um)
@@ -171,10 +214,15 @@ def reconstruct(lr_images: dict[tuple[int, int], np.ndarray],
     if not used_leds:
         raise ValueError("none of led_grid's (row, col) keys are present in lr_images")
 
-    obj0 = initial_object if initial_object is not None else initial_hr_guess(lr_images, used_leds, factor)
+    obj0 = initial_object if initial_object is not None else initial_hr_guess(
+        lr_images, used_leds, factor, match_forward_model_scale=normalize_initial_guess)
     hr_shape = obj0.shape
     obj_spectrum = np.fft.fftshift(np.fft.fft2(obj0))
     lr_n_px = lr_shape[0] * lr_shape[1]
+    if step_relative is not None:
+        if step_relative <= 0:
+            raise ValueError(f"step_relative must be > 0, got {step_relative}")
+        step_max = step_relative * lr_n_px
 
     history = []
     step = step_max  # zuo2016 Eq. 16 convention: alpha^0 = 1 (see reconstruct's docstring)
@@ -216,9 +264,14 @@ def reconstruct(lr_images: dict[tuple[int, int], np.ndarray],
                 grad_field = residual * est_field / safe_amp
                 # Adjoint of ifft2 is (1/lr_n_px) * fft2, not fft2 -- numpy's
                 # ifft2 carries the 1/N normalization that fft2 doesn't, so
-                # this factor is required or the effective step size scales
-                # with LR image size (verified: omitting it diverges as
-                # lr_size grows).
+                # this is the exact gradient w.r.t. the spectrum. But the
+                # spectrum's own scale is ~lr_n_px times the field's, so the
+                # natural (ePIE unit) step for this gradient is step ==
+                # lr_n_px: a FIXED step_max therefore shrinks as 1/lr_n_px
+                # (the old note here, "omitting it diverges as lr_size
+                # grows", was the same fact seen from the other side). Use
+                # `step_relative` for a crop-independent step; see the
+                # module docstring's CAVEAT.
                 grad_spectrum = np.fft.fftshift(np.fft.fft2(grad_field)) * pupil / lr_n_px
                 obj_spectrum[ys, xs] -= step * grad_spectrum
 

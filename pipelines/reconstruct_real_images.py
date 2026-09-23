@@ -54,6 +54,8 @@ def parse_args(argv=None):
                          "(full-batch steps). ")
     p.add_argument("--output-dir", default="results/reconstruct_real_images")
     cli_args.add_geometry_args(p)
+    cli_args.add_acquisition_args(p)
+    cli_args.add_solver_scale_args(p)
     return p.parse_args(argv)
 
 
@@ -66,14 +68,15 @@ def main(argv=None) -> int:
         row_index_base=args.row_index_base, col_index_base=args.col_index_base,
         **cli_args.geometry_kwargs(args),
     )
-    lr_images = io_utils.load_real_lr_stack(
+    lr_images, acquisition = io_utils.load_real_lr_stack_normalized(
         args.data_root, args.channel, args.grid_size, args.crop,
         row_index_base=setup.led_array.row_base, col_index_base=setup.led_array.col_base,
+        **cli_args.acquisition_kwargs(args),
     )
     n_expected = args.grid_size * args.grid_size
     subdir = f"{args.grid_size}x{args.grid_size}_recortada_{args.crop}"
     print(f"loaded {len(lr_images)}/{n_expected} LR images from "
-          f"{args.data_root}/{args.channel}/{subdir}")
+          f"{args.data_root}/{args.channel}/{subdir}  exposure_normalization={acquisition}")
     if len(lr_images) < n_expected:
         print("  (scan looks incomplete -- reconstructing with what's available, "
               "at reduced synthetic-aperture resolution/SNR)")
@@ -95,6 +98,7 @@ def main(argv=None) -> int:
         result = reconstruction.reconstruct(
             lr_images, led_grid, hr_pixel_um, setup.lr_pixel_size_um,
             setup.objective.na, setup.wavelength_um, factor, iterations=args.iterations,
+            step_relative=args.step_epie, normalize_initial_guess=args.normalize_initial_guess,
         )
 
     conv = metrics.convergence_summary(result["history"])
@@ -116,6 +120,10 @@ def main(argv=None) -> int:
                 "row_index_base": setup.led_array.row_base, "col_index_base": setup.led_array.col_base,
             },
             "geometry": config.setup_geometry_summary(setup),
+            "acquisition": acquisition,
+            "solver_scale": {"step_epie": args.step_epie,
+                             "normalize_initial_guess": args.normalize_initial_guess,
+                             "applies_to": "wirtinger only (gd-amplitude has its own normalized model)"},
         }, fh, indent=2)
     print(f"wrote results to {args.output_dir}")
     return 0

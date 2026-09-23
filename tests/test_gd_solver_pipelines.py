@@ -107,7 +107,7 @@ def _write_exact_k_lab_captures(tmp_path, crop=CROP):
 
 def test_multispectral_pipeline_gd_amplitude_solver_on_exact_k_captures(tmp_path):
     truth = _write_exact_k_lab_captures(tmp_path)
-    run = multispectral.reconstruct_all_channels(str(tmp_path), 9, objective="2_5x_na007", z_distance_mm=70.0, crop=CROP,
+    run = multispectral.reconstruct_all_channels(str(tmp_path), 9, objective="2_5x_na007", z_distance_mm=70.0, exposure_normalization=False, normalize_initial_guess=False, crop=CROP,
                                                   iterations=100, solver="gd-amplitude")
     shapes = {ch: c["object"].shape for ch, c in run["channels"].items()}
     assert len(set(shapes.values())) == 1

@@ -82,10 +82,10 @@ def test_tie_defocus_flag_fixes_a_weak_phase_object_across_all_channels(tmp_path
     truth, hr_shape = _write_fake_lab_captures_with_defocus(tmp_path, grid_size, crop)
 
     baseline = pipeline.reconstruct_all_channels(
-        str(tmp_path), grid_size, objective="2_5x_na007", z_distance_mm=70.0, crop=crop, iterations=40,
+        str(tmp_path), grid_size, objective="2_5x_na007", z_distance_mm=70.0, exposure_normalization=False, normalize_initial_guess=False, crop=crop, iterations=40,
     )
     tie_run = pipeline.reconstruct_all_channels(
-        str(tmp_path), grid_size, objective="2_5x_na007", z_distance_mm=70.0, crop=crop, iterations=40,
+        str(tmp_path), grid_size, objective="2_5x_na007", z_distance_mm=70.0, exposure_normalization=False, normalize_initial_guess=False, crop=crop, iterations=40,
         tie_defocus_um=DEFOCUS_UM,
     )
 

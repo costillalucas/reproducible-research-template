@@ -51,7 +51,11 @@ def reconstruct_all_channels(data_root, grid_size: int, objective: str = config.
                               z_distance_mm: float = config.REAL_CAPTURE_Z_DISTANCE_MM,
                               led_center_offset_mm: tuple[float, float] = (0.0, 0.0),
                               na: float | None = None,
-                              magnification: float | None = None) -> dict:
+                              magnification: float | None = None,
+                              exposure_normalization: bool = True,
+                              dark_level: float | None = None,
+                              step_relative: float | None = None,
+                              normalize_initial_guess: bool = True) -> dict:
     """Reconstruct red/green/blue independently on one shared HR grid.
 
     `tie_defocus_um`, if given, initializes each channel's solver with a
@@ -102,8 +106,22 @@ def reconstruct_all_channels(data_root, grid_size: int, objective: str = config.
     `led_center_offset_mm`, `na`, `magnification` go straight to
     `config.default_setup` (array misalignment; objective overrides).
 
+    Acquisition / solver scale (2026-09-23, roadmap 6.8): by default each
+    channel's images are exposure-normalized (`io_utils.
+    load_real_lr_stack_normalized`: (raw - dark_level) / exposure, lab-
+    discarded LEDs dropped; fails if the capture has no exposure metadata)
+    -- synthetic callers pass `exposure_normalization=False`. Wirtinger-flow
+    runs start from the factor^2-corrected initial guess
+    (`normalize_initial_guess`, also applied to a TIE start) and take an
+    optional crop-independent `step_relative` (see `reconstruction.
+    reconstruct`); neither applies to gd-amplitude, whose model is already
+    normalized, and `step_relative` can't be combined with the agent
+    (its retry lever is `step_max`).
+
     Returns {"factor": int, "hr_pixel_um": float, "hr_shape": (h, w),
              "geometry": config.setup_geometry_summary(...),
+             "acquisition": {channel: normalization info},
+             "solver_scale": {"step_relative", "normalize_initial_guess"},
              "channels": {channel: {"object": complex ndarray,
                                      "history": [...], "n_leds_used": int,
                                      "n_leds_expected": int,
@@ -116,6 +134,15 @@ def reconstruct_all_channels(data_root, grid_size: int, objective: str = config.
         raise ValueError("solver='gd-amplitude' cannot be combined with recover_pupil, "
                           "adaptive_step or use_reconstruction_agent -- those tune "
                           "Wirtinger-flow internals (pupil update, step schedule, step_max retries)")
+    if tie_defocus_um is not None and exposure_normalization:
+        raise ValueError("tie_defocus_um with exposure_normalization would mix a normalized in-focus "
+                          "image with the raw defocus_plus/minus pair (which has no exposure "
+                          "metadata) -- normalize the pair yourself and pass "
+                          "exposure_normalization=False")
+    if step_relative is not None and (solver == "gd-amplitude" or use_reconstruction_agent):
+        raise ValueError("step_relative sets the Wirtinger-flow step; it has no meaning for "
+                          "solver='gd-amplitude' and conflicts with use_reconstruction_agent "
+                          "(whose retry lever is step_max)")
     if recover_pupil and use_reconstruction_agent:
         raise ValueError("recover_pupil is not wired together with use_reconstruction_agent -- "
                           "reconstruct() ignores step_max under recover_pupil (nothing for the "
@@ -137,12 +164,15 @@ def reconstruct_all_channels(data_root, grid_size: int, objective: str = config.
     hr_shape = optics.hr_shape((crop, crop), factor)
     n_expected = grid_size * grid_size
 
+    wf_scale_guess = normalize_initial_guess and solver == "wirtinger"
     channels = {}
+    acquisition = {}
     for channel in CHANNEL_ORDER:
         setup = setups[channel]
-        lr_images = io_utils.load_real_lr_stack(
+        lr_images, acquisition[channel] = io_utils.load_real_lr_stack_normalized(
             data_root, channel, grid_size, crop, index_base=index_base,
             row_index_base=setup.led_array.row_base, col_index_base=setup.led_array.col_base,
+            normalize=exposure_normalization, dark_level=dark_level,
         )
         led_grid = led_array.build_led_grid(setup.led_array, setup.wavelength_um)
 
@@ -155,7 +185,13 @@ def reconstruct_all_channels(data_root, grid_size: int, objective: str = config.
             tie_phase = prop.solve_tie(di_dz, i_focus, hr_pixel_um, setup.wavelength_um)
             amp0 = np.sqrt(np.clip(i_focus, 0, None))
             amp0_hr = np.kron(amp0, np.ones((factor, factor)))
+            if wf_scale_guess:
+                amp0_hr = amp0_hr / factor**2  # same forward-model scale as initial_hr_guess
             initial_object = (amp0_hr * np.exp(1j * tie_phase)).astype(complex)
+        elif wf_scale_guess and use_reconstruction_agent:
+            initial_object = reconstruction.initial_hr_guess(
+                lr_images, [e for e in led_grid if (e["row"], e["col"]) in lr_images], factor,
+                match_forward_model_scale=True)
 
         agent_attempts = None
         if solver == "gd-amplitude":
@@ -179,7 +215,8 @@ def reconstruct_all_channels(data_root, grid_size: int, objective: str = config.
                 lr_images, led_grid, hr_pixel_um, setup.lr_pixel_size_um,
                 setup.objective.na, setup.wavelength_um, factor, iterations=iterations,
                 initial_object=initial_object, recover_pupil=recover_pupil,
-                adaptive_step=adaptive_step,
+                adaptive_step=adaptive_step, step_relative=step_relative,
+                normalize_initial_guess=wf_scale_guess,
             )
         channels[channel] = {
             "object": result["object"],
@@ -195,7 +232,10 @@ def reconstruct_all_channels(data_root, grid_size: int, objective: str = config.
         raise AssertionError(f"channels landed on different HR grids: {shapes}")
 
     return {"factor": factor, "hr_pixel_um": hr_pixel_um, "hr_shape": hr_shape, "channels": channels,
-            "geometry": config.setup_geometry_summary(next(iter(setups.values())))}
+            "geometry": config.setup_geometry_summary(next(iter(setups.values()))),
+            "acquisition": acquisition,
+            "solver_scale": {"step_relative": step_relative,
+                             "normalize_initial_guess": wf_scale_guess}}
 
 
 def _save_rgb_composite(channels: dict, output_dir: str) -> None:
@@ -286,6 +326,8 @@ def parse_args(argv=None):
                          "reconstruction quality, not a silent oracle.")
     p.add_argument("--output-dir", default="results/reconstruct_multispectral_independent")
     cli_args.add_geometry_args(p)
+    cli_args.add_acquisition_args(p)
+    cli_args.add_solver_scale_args(p)
     return p.parse_args(argv)
 
 
@@ -301,6 +343,8 @@ def main(argv=None) -> int:
         agent_live=args.agent_live, max_attempts=args.max_attempts,
         recover_pupil=args.recover_pupil, adaptive_step=args.adaptive_step,
         solver=args.solver, **cli_args.geometry_kwargs(args),
+        exposure_normalization=args.exposure_normalization, dark_level=args.dark_level,
+        step_relative=args.step_epie, normalize_initial_guess=args.normalize_initial_guess,
     )
     print(f"grid={args.grid_size}x{args.grid_size}  objective={args.objective}  "
           f"shared_upsampling_factor={run['factor']}  hr_shape={run['hr_shape']}  "
@@ -311,7 +355,8 @@ def main(argv=None) -> int:
         "tie_defocus_um": args.tie_defocus_um,
         "use_reconstruction_agent": args.use_reconstruction_agent,
         "recover_pupil": args.recover_pupil, "adaptive_step": args.adaptive_step,
-        "solver": args.solver, "geometry": run["geometry"], "channels": {},
+        "solver": args.solver, "geometry": run["geometry"],
+        "acquisition": run["acquisition"], "solver_scale": run["solver_scale"], "channels": {},
     }
     complex_objects = {}
     pupils = {}

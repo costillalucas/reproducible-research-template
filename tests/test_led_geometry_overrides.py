@@ -173,6 +173,7 @@ def test_reconstruct_real_images_records_effective_geometry(tmp_path):
     rc = real.main(["--data-root", str(tmp_path), "--channel", "green", "--grid-size", "9",
                     "--crop", str(crop), "--objective", "2_5x_na007", "--iterations", "2",
                     "--z-distance-mm", "70", "--led-center-offset-mm", "1.5", "-2",
+                    "--no-exposure-normalization", "--no-normalize-initial-guess",
                     "--na", "0.08", "--magnification", "2.4", "--output-dir", str(out)])
     assert rc == 0
     with open(out / "metrics.json") as fh:
