@@ -29,7 +29,7 @@ import numpy as np
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
 
 from ptyco_full_simulator import chromatic_diagnostics as cd  # noqa: E402
-from ptyco_full_simulator import config, io_utils, led_array, metrics, optics  # noqa: E402
+from ptyco_full_simulator import cli_args, config, io_utils, led_array, metrics, optics  # noqa: E402
 from ptyco_full_simulator import joint_calibration, propagation as prop, reconstruction  # noqa: E402
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "agents"))
@@ -47,7 +47,11 @@ def reconstruct_all_channels(data_root, grid_size: int, objective: str = config.
                               use_reconstruction_agent: bool = False,
                               agent_live: bool = False, max_attempts: int = 3,
                               recover_pupil: bool = False, adaptive_step: bool = False,
-                              solver: str = "wirtinger") -> dict:
+                              solver: str = "wirtinger",
+                              z_distance_mm: float = config.REAL_CAPTURE_Z_DISTANCE_MM,
+                              led_center_offset_mm: tuple[float, float] = (0.0, 0.0),
+                              na: float | None = None,
+                              magnification: float | None = None) -> dict:
     """Reconstruct red/green/blue independently on one shared HR grid.
 
     `tie_defocus_um`, if given, initializes each channel's solver with a
@@ -92,7 +96,14 @@ def reconstruct_all_channels(data_root, grid_size: int, objective: str = config.
     update / `step_max` retry lever). `iterations` are full-batch steps
     under "gd-amplitude" -- ~100 was used in every comparison.
 
+    Geometry: `z_distance_mm` defaults to the real lab's 76 mm
+    (`config.REAL_CAPTURE_Z_DISTANCE_MM`) -- synthetic data made with
+    `config.default_setup`'s nominal 70 mm must pass `z_distance_mm=70.0`.
+    `led_center_offset_mm`, `na`, `magnification` go straight to
+    `config.default_setup` (array misalignment; objective overrides).
+
     Returns {"factor": int, "hr_pixel_um": float, "hr_shape": (h, w),
+             "geometry": config.setup_geometry_summary(...),
              "channels": {channel: {"object": complex ndarray,
                                      "history": [...], "n_leds_used": int,
                                      "n_leds_expected": int,
@@ -116,6 +127,8 @@ def reconstruct_all_channels(data_root, grid_size: int, objective: str = config.
             channel=channel, grid_size=grid_size, objective=objective,
             resolution_px=(crop, crop),
             row_index_base=row_index_base, col_index_base=col_index_base,
+            z_distance_mm=z_distance_mm, led_center_offset_mm=led_center_offset_mm,
+            na=na, magnification=magnification,
         )
         for channel in CHANNEL_ORDER
     }
@@ -181,7 +194,8 @@ def reconstruct_all_channels(data_root, grid_size: int, objective: str = config.
     if len(set(shapes.values())) != 1:
         raise AssertionError(f"channels landed on different HR grids: {shapes}")
 
-    return {"factor": factor, "hr_pixel_um": hr_pixel_um, "hr_shape": hr_shape, "channels": channels}
+    return {"factor": factor, "hr_pixel_um": hr_pixel_um, "hr_shape": hr_shape, "channels": channels,
+            "geometry": config.setup_geometry_summary(next(iter(setups.values())))}
 
 
 def _save_rgb_composite(channels: dict, output_dir: str) -> None:
@@ -271,6 +285,7 @@ def parse_args(argv=None):
                          "docstring for the honest caveat: accuracy depends on this run's own "
                          "reconstruction quality, not a silent oracle.")
     p.add_argument("--output-dir", default="results/reconstruct_multispectral_independent")
+    cli_args.add_geometry_args(p)
     return p.parse_args(argv)
 
 
@@ -285,7 +300,7 @@ def main(argv=None) -> int:
         use_reconstruction_agent=args.use_reconstruction_agent,
         agent_live=args.agent_live, max_attempts=args.max_attempts,
         recover_pupil=args.recover_pupil, adaptive_step=args.adaptive_step,
-        solver=args.solver,
+        solver=args.solver, **cli_args.geometry_kwargs(args),
     )
     print(f"grid={args.grid_size}x{args.grid_size}  objective={args.objective}  "
           f"shared_upsampling_factor={run['factor']}  hr_shape={run['hr_shape']}  "
@@ -296,7 +311,7 @@ def main(argv=None) -> int:
         "tie_defocus_um": args.tie_defocus_um,
         "use_reconstruction_agent": args.use_reconstruction_agent,
         "recover_pupil": args.recover_pupil, "adaptive_step": args.adaptive_step,
-        "solver": args.solver, "channels": {},
+        "solver": args.solver, "geometry": run["geometry"], "channels": {},
     }
     complex_objects = {}
     pupils = {}

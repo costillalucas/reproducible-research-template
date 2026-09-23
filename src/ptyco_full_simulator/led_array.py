@@ -14,9 +14,13 @@ from .config import LEDArrayConfig
 
 
 def led_position_mm(row: int, col: int, cfg: LEDArrayConfig) -> tuple[float, float]:
-    """Lateral (x, y) offset of LED (row, col) from the on-axis LED, in mm."""
-    dx = (col - cfg.center_col) * cfg.pitch_mm
-    dy = (row - cfg.center_row) * cfg.pitch_mm
+    """Lateral (x, y) position of LED (row, col) relative to the optical
+    axis, in mm. With `cfg.center_offset_mm == (0, 0)` (the default) that's
+    its offset from the nominal center LED; a nonzero offset shifts the
+    whole array rigidly."""
+    off_x, off_y = cfg.center_offset_mm
+    dx = (col - cfg.center_col) * cfg.pitch_mm + off_x
+    dy = (row - cfg.center_row) * cfg.pitch_mm + off_y
     return dx, dy
 
 
@@ -37,7 +41,8 @@ def illumination_spatial_freq(row: int, col: int, cfg: LEDArrayConfig,
 
 def build_led_grid(cfg: LEDArrayConfig, wavelength_um: float) -> list[dict]:
     """Every (row, col) in the grid with its position and spatial frequency,
-    ordered by distance from the center LED (matches how a real raster/
+    ordered by distance from the optical axis -- i.e. from the center LED
+    when `cfg.center_offset_mm` is zero (matches how a real raster/
     spiral scan is usually processed: center first, most information
     first) -- reconstruction quality after N images is more meaningful
     that way.
@@ -61,11 +66,17 @@ def max_illumination_na(cfg: LEDArrayConfig) -> float:
     """sin(theta) of the array's outermost LED -- the largest illumination
     angle actually available, used to size the synthetic-aperture NA.
     """
-    row_hi = cfg.row_base + cfg.grid_size - 1
-    col_hi = cfg.col_base + cfg.grid_size - 1
-    corner_dx, corner_dy = led_position_mm(row_hi, col_hi, cfg)
-    distance = np.sqrt(corner_dx**2 + corner_dy**2 + cfg.z_distance_mm**2)
-    return float(np.hypot(corner_dx, corner_dy) / distance)
+    row_lo, row_hi = cfg.row_base, cfg.row_base + cfg.grid_size - 1
+    col_lo, col_hi = cfg.col_base, cfg.col_base + cfg.grid_size - 1
+    # All four corners: identical for a centered array, but with a nonzero
+    # `center_offset_mm` the farthest corner is the one opposite the shift.
+    best = 0.0
+    for row in (row_lo, row_hi):
+        for col in (col_lo, col_hi):
+            corner_dx, corner_dy = led_position_mm(row, col, cfg)
+            distance = np.sqrt(corner_dx**2 + corner_dy**2 + cfg.z_distance_mm**2)
+            best = max(best, float(np.hypot(corner_dx, corner_dy) / distance))
+    return best
 
 
 def adjacent_led_overlap_ratio(cfg: LEDArrayConfig, wavelength_um: float, na: float) -> float:

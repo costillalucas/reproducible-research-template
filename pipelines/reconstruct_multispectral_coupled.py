@@ -56,7 +56,7 @@ import numpy as np
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
 
 from ptyco_full_simulator import chromatic_diagnostics as cd  # noqa: E402
-from ptyco_full_simulator import config, metrics, multispectral as ms  # noqa: E402
+from ptyco_full_simulator import cli_args, config, metrics, multispectral as ms  # noqa: E402
 from reconstruct_multispectral_independent import CHANNEL_ORDER, reconstruct_all_channels  # noqa: E402
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "agents"))
@@ -143,6 +143,7 @@ def parse_args(argv=None):
                          "per run, see agents/reconstruction_orchestrator.py's docstring for the "
                          "measured cost/latency of this call pattern")
     p.add_argument("--output-dir", default="results/reconstruct_multispectral_coupled")
+    cli_args.add_geometry_args(p)
     return p.parse_args(argv)
 
 
@@ -166,7 +167,7 @@ def main(argv=None) -> int:
         use_reconstruction_agent=args.use_reconstruction_agent,
         agent_live=args.agent_live, max_attempts=args.max_attempts,
         recover_pupil=args.recover_pupil, adaptive_step=args.adaptive_step,
-        solver=args.solver,
+        solver=args.solver, **cli_args.geometry_kwargs(args),
     )
     for channel in CHANNEL_ORDER:
         attempts = run["channels"][channel]["agent_attempts"]
@@ -259,6 +260,7 @@ def main(argv=None) -> int:
     )
     metrics_out = {
         "background_rows": background_rows, "baseline_index": args.baseline_index,
+        "geometry": run["geometry"],
         "use_reconstruction_agent": args.use_reconstruction_agent,
         "recover_pupil": args.recover_pupil, "adaptive_step": args.adaptive_step,
         "agent_attempts": {ch: run["channels"][ch]["agent_attempts"] for ch in CHANNEL_ORDER},

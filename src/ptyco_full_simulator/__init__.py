@@ -3,6 +3,7 @@ simulation and reconstruction.
 
 Modules:
   config           physical/geometric setup (LED array, objective, sensor)
+  cli_args         geometry-override flags shared by the real-data CLIs
   led_array        LED grid geometry -> illumination spatial frequency
   optics           pupil function, HR/LR pixel sizes, upsampling factor
   spectral_ops     the HR-spectrum crop window shared by forward + inverse

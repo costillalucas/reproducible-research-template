@@ -64,7 +64,7 @@ def test_qc_and_report_agent_wiring_dry_run(tmp_path):
     output_dir = tmp_path / "out"
 
     pipeline.main([
-        "--data-root", str(tmp_path), "--grid-size", "9", "--crop", "16", "--objective", "2_5x_na007",
+        "--data-root", str(tmp_path), "--grid-size", "9", "--crop", "16", "--objective", "2_5x_na007", "--z-distance-mm", "70",
         "--iterations", "40", "--background-rows", "4", "--baseline-index", "1.34",
         "--qc", "--output-dir", str(output_dir),
     ])
@@ -93,7 +93,7 @@ def test_all_three_agents_chained_dry_run(tmp_path):
     output_dir = tmp_path / "out"
 
     pipeline.main([
-        "--data-root", str(tmp_path), "--grid-size", "9", "--crop", "16", "--objective", "2_5x_na007",
+        "--data-root", str(tmp_path), "--grid-size", "9", "--crop", "16", "--objective", "2_5x_na007", "--z-distance-mm", "70",
         "--iterations", "40", "--background-rows", "4", "--baseline-index", "1.34",
         "--use-reconstruction-agent", "--max-attempts", "2",
         "--qc", "--output-dir", str(output_dir),
@@ -124,7 +124,7 @@ def test_chromatic_report_flag_writes_report_json(tmp_path):
     output_dir = tmp_path / "out"
 
     pipeline.main([
-        "--data-root", str(tmp_path), "--grid-size", "9", "--crop", "16", "--objective", "2_5x_na007",
+        "--data-root", str(tmp_path), "--grid-size", "9", "--crop", "16", "--objective", "2_5x_na007", "--z-distance-mm", "70",
         "--iterations", "20", "--chromatic-report", "--output-dir", str(output_dir),
     ])
 

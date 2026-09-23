@@ -96,7 +96,7 @@ def test_reconstruct_all_channels_on_fake_lab_captures(tmp_path):
     truth, hr_shape, hr_pixel_um = _write_fake_lab_captures(tmp_path, grid_size, crop)
 
     run = pipeline.reconstruct_all_channels(
-        str(tmp_path), grid_size, objective="2_5x_na007", crop=crop, iterations=40,
+        str(tmp_path), grid_size, objective="2_5x_na007", z_distance_mm=70.0, crop=crop, iterations=40,
     )
 
     assert run["hr_shape"] == hr_shape
@@ -127,7 +127,7 @@ def test_reconstruct_all_channels_recover_pupil_wiring(tmp_path):
     truth, hr_shape, hr_pixel_um = _write_fake_lab_captures(tmp_path, grid_size, crop)
 
     run = pipeline.reconstruct_all_channels(
-        str(tmp_path), grid_size, objective="2_5x_na007", crop=crop, iterations=20,
+        str(tmp_path), grid_size, objective="2_5x_na007", z_distance_mm=70.0, crop=crop, iterations=20,
         recover_pupil=True,
     )
     for channel, c in run["channels"].items():
@@ -148,7 +148,7 @@ def test_reconstruct_all_channels_adaptive_step_wiring(tmp_path):
     truth, hr_shape, hr_pixel_um = _write_fake_lab_captures(tmp_path, grid_size, crop)
 
     run = pipeline.reconstruct_all_channels(
-        str(tmp_path), grid_size, objective="2_5x_na007", crop=crop, iterations=40,
+        str(tmp_path), grid_size, objective="2_5x_na007", z_distance_mm=70.0, crop=crop, iterations=40,
         adaptive_step=True,
     )
     for channel, c in run["channels"].items():
@@ -162,7 +162,7 @@ def test_recover_pupil_and_reconstruction_agent_are_mutually_exclusive(tmp_path)
     _write_fake_lab_captures(tmp_path, grid_size, crop)
     try:
         pipeline.reconstruct_all_channels(
-            str(tmp_path), grid_size, objective="2_5x_na007", crop=crop, iterations=5,
+            str(tmp_path), grid_size, objective="2_5x_na007", z_distance_mm=70.0, crop=crop, iterations=5,
             recover_pupil=True, use_reconstruction_agent=True,
         )
         assert False, "expected ValueError for recover_pupil + use_reconstruction_agent"
@@ -178,7 +178,7 @@ def test_adaptive_step_and_reconstruction_agent_can_now_be_combined(tmp_path):
     grid_size, crop = 9, 12
     _write_fake_lab_captures(tmp_path, grid_size, crop)
     run = pipeline.reconstruct_all_channels(
-        str(tmp_path), grid_size, objective="2_5x_na007", crop=crop, iterations=5,
+        str(tmp_path), grid_size, objective="2_5x_na007", z_distance_mm=70.0, crop=crop, iterations=5,
         adaptive_step=True, use_reconstruction_agent=True,
     )
     for channel, c in run["channels"].items():
@@ -199,7 +199,7 @@ def test_chromatic_report_flag_writes_report_json(tmp_path):
     output_dir = tmp_path / "out"
     pipeline.main([
         "--data-root", str(tmp_path), "--grid-size", str(grid_size), "--crop", str(crop),
-        "--objective", "2_5x_na007", "--iterations", "20", "--chromatic-report", "--output-dir", str(output_dir),
+        "--objective", "2_5x_na007", "--z-distance-mm", "70", "--iterations", "20", "--chromatic-report", "--output-dir", str(output_dir),
     ])
     with open(output_dir / "chromatic_report.json") as fh:
         report = json.load(fh)

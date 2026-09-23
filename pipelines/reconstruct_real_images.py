@@ -23,7 +23,7 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
 
-from ptyco_full_simulator import config, io_utils, joint_calibration, led_array, metrics, optics, reconstruction  # noqa: E402
+from ptyco_full_simulator import cli_args, config, io_utils, joint_calibration, led_array, metrics, optics, reconstruction  # noqa: E402
 
 
 def parse_args(argv=None):
@@ -53,6 +53,7 @@ def parse_args(argv=None):
                          "moderate/heavy noise fails for every solver. Use ~100 --iterations "
                          "(full-batch steps). ")
     p.add_argument("--output-dir", default="results/reconstruct_real_images")
+    cli_args.add_geometry_args(p)
     return p.parse_args(argv)
 
 
@@ -63,6 +64,7 @@ def main(argv=None) -> int:
         channel=args.channel, grid_size=args.grid_size, objective=args.objective,
         resolution_px=(args.crop, args.crop),
         row_index_base=args.row_index_base, col_index_base=args.col_index_base,
+        **cli_args.geometry_kwargs(args),
     )
     lr_images = io_utils.load_real_lr_stack(
         args.data_root, args.channel, args.grid_size, args.crop,
@@ -80,6 +82,7 @@ def main(argv=None) -> int:
     hr_pixel_um = optics.actual_hr_pixel_size_um(setup, factor)
     print(f"channel={args.channel} ({setup.wavelength_nm:.0f} nm)  objective={args.objective} "
           f"(NA={setup.objective.na}, mag={setup.objective.magnification})  "
+          f"z={setup.led_array.z_distance_mm}mm  led_center_offset={setup.led_array.center_offset_mm}mm  "
           f"upsampling_factor={factor}  hr_pixel={hr_pixel_um:.4f}um")
 
     led_grid = led_array.build_led_grid(setup.led_array, setup.wavelength_um)
@@ -112,6 +115,7 @@ def main(argv=None) -> int:
                 "iterations": args.iterations, "data_root": args.data_root, "solver": args.solver,
                 "row_index_base": setup.led_array.row_base, "col_index_base": setup.led_array.col_base,
             },
+            "geometry": config.setup_geometry_summary(setup),
         }, fh, indent=2)
     print(f"wrote results to {args.output_dir}")
     return 0

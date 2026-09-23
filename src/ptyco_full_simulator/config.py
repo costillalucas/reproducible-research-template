@@ -7,7 +7,7 @@ override a field for a specific run without editing this file.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 #: nm, one entry per LED color. The array is a sequential-RGB LED grid:
 #: each grid position is captured once per color, one channel reconstructed
@@ -36,6 +36,17 @@ class LEDArrayConfig:
     because they're closest to the optical axis). Pass `row_index_base`/
     `col_index_base` for that case; either left as None falls back to the
     shared `index_base` (the common, symmetric case).
+
+    `z_distance_mm` defaults to 70.0, the simulator's nominal geometry that
+    every synthetic result recorded so far uses. The real lab array sits at
+    REAL_CAPTURE_Z_DISTANCE_MM (76 mm, confirmed by the user 2026-09-23);
+    the real-data entry points default to that instead.
+
+    `center_offset_mm = (dx, dy)` is where the array's nominal center LED
+    (`center_row`, `center_col`) actually sits relative to the optical
+    axis, in mm: dx along columns (x), dy along rows (y), same axes and
+    signs as `led_array.led_position_mm`. Default (0, 0) is the perfectly
+    aligned array; the lab isn't sure theirs is (see roadmap 6.8).
     """
 
     grid_size: int  # e.g. 9 or 31; must be odd so there's a true center LED
@@ -44,6 +55,7 @@ class LEDArrayConfig:
     index_base: int = 1
     row_index_base: int | None = None
     col_index_base: int | None = None
+    center_offset_mm: tuple[float, float] = (0.0, 0.0)
 
     def __post_init__(self):
         if self.grid_size % 2 == 0:
@@ -86,6 +98,11 @@ class ObjectiveConfig:
 
 _OBJ_2X_NA010 = ObjectiveConfig(na=0.10, magnification=2.0, name="2x_na010")
 _OBJ_2_5X_NA007 = ObjectiveConfig(na=0.07, magnification=2.5, name="2_5x_na007")
+
+#: mm, array-to-sample distance of the real lab setup (confirmed by the
+#: user 2026-09-23; LEDArrayConfig's own default, 70 mm, is the simulator's
+#: nominal geometry and stays pinned for synthetic reproducibility).
+REAL_CAPTURE_Z_DISTANCE_MM = 76.0
 
 #: Default objective preset: the one the lab's real captures are taken
 #: with (confirmed by the user 2026-09-23 for the 2025-12-12 capture).
@@ -143,17 +160,56 @@ class SetupConfig:
 def default_setup(channel: str, grid_size: int, objective: str = DEFAULT_OBJECTIVE,
                    resolution_px: tuple[int, int] = (200, 200),
                    row_index_base: int | None = None,
-                   col_index_base: int | None = None) -> SetupConfig:
+                   col_index_base: int | None = None,
+                   z_distance_mm: float | None = None,
+                   led_center_offset_mm: tuple[float, float] = (0.0, 0.0),
+                   na: float | None = None,
+                   magnification: float | None = None) -> SetupConfig:
     """Convenience builder for the lab's actual hardware, current values.
 
     `objective` defaults to DEFAULT_OBJECTIVE ("2x_na010", the one real
     captures use); synthetic experiments that must reproduce numbers
     recorded before 2026-09-23 pass "2_5x_na007" explicitly.
+
+    `z_distance_mm=None` keeps LEDArrayConfig's nominal 70 mm (what every
+    synthetic caller relies on); real-data entry points pass
+    REAL_CAPTURE_Z_DISTANCE_MM. `na` / `magnification`, if given, override
+    the preset's value (e.g. to try a measured effective 1.83x / NA 0.11
+    without inventing a preset); the objective's name then gets a
+    "+override" suffix so it can't be mistaken for the plain preset.
     """
+    led_kwargs = {} if z_distance_mm is None else {"z_distance_mm": float(z_distance_mm)}
+    objective_cfg = OBJECTIVES[objective]
+    if na is not None or magnification is not None:
+        objective_cfg = replace(
+            objective_cfg,
+            na=objective_cfg.na if na is None else float(na),
+            magnification=objective_cfg.magnification if magnification is None else float(magnification),
+            name=f"{objective}+override",
+        )
     return SetupConfig(
         led_array=LEDArrayConfig(grid_size=grid_size, row_index_base=row_index_base,
-                                  col_index_base=col_index_base),
-        objective=OBJECTIVES[objective],
+                                  col_index_base=col_index_base,
+                                  center_offset_mm=(float(led_center_offset_mm[0]),
+                                                    float(led_center_offset_mm[1])),
+                                  **led_kwargs),
+        objective=objective_cfg,
         sensor=SensorConfig(resolution_px=resolution_px),
         channel=channel,
     )
+
+
+def setup_geometry_summary(setup: SetupConfig) -> dict:
+    """The effective optical/LED geometry a run actually used, as plain
+    JSON-able values -- written into each real-data pipeline's metrics
+    so a result can't be separated from the geometry that produced it.
+    """
+    return {
+        "na": setup.objective.na,
+        "magnification": setup.objective.magnification,
+        "objective_name": setup.objective.name,
+        "lr_pixel_um": setup.lr_pixel_size_um,
+        "z_distance_mm": setup.led_array.z_distance_mm,
+        "pitch_mm": setup.led_array.pitch_mm,
+        "led_center_offset_mm": list(setup.led_array.center_offset_mm),
+    }

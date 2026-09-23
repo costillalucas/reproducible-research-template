@@ -69,6 +69,25 @@ numbers stay reproducible). `current`/`future` are deprecated aliases for
 `2_5x_na007`/`2x_na010`: real-data runs before 2026-09-23 used `current`
 by default, i.e. the wrong objective for the 2025-12-12 capture.
 
+Geometry flags (all four real-data CLIs: `reconstruct_real_images.py`,
+`reconstruct_multispectral_independent.py`,
+`reconstruct_multispectral_coupled.py`,
+`scripts/sweep_real_reconstruction_quality.py`):
+
+- `--z-distance-mm` -- LED array-to-sample distance, default 76 (the real
+  lab setup, `config.REAL_CAPTURE_Z_DISTANCE_MM`). The simulator's nominal
+  geometry is 70 mm, so synthetic data run through these CLIs needs
+  `--z-distance-mm 70`.
+- `--led-center-offset-mm DX DY` -- where the array's nominal center LED
+  sits relative to the optical axis (DX along columns, DY along rows; one
+  pitch = 6 mm). Default `0 0`, a perfectly aligned array.
+- `--na`, `--magnification` -- override the objective preset's values,
+  e.g. `--na 0.11 --magnification 1.83` to try the effective values
+  measured on the 2025-12-12 capture (roadmap section 6.8).
+
+The effective geometry each run used is written to its metrics JSON under
+`"geometry"`.
+
 `reconstruct_real_images.py` expects the lab's own folder convention:
 `<data-root>/<channel>/<N>x<N>_recortada_<crop>/fila<row>_columna<col>.tiff`,
 where `N` (`--grid-size`) is the number of LEDs used per side and `crop`
