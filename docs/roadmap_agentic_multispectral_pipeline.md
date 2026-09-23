@@ -2678,3 +2678,138 @@ tratar ninguna de las dos lecturas como establecida todavía -- exactamente
 el patrón que ya se repitió tres veces en la sección 5 y una vez en 6.5
 esta misma sesión: la primera explicación de un hallazgo sorprendente no
 sobrevivió el siguiente control.
+
+**Actualización 2026-09-23 (ver 6.8)**: la ambigüedad queda mayormente
+resuelta a favor del límite de la referencia -- resultó ser una toma Zeiss
+2.5x/0.075 con *menos* alta frecuencia que una sola captura LR. Matiz: en la
+grilla LR 400x400 (sin nada por encima del Nyquist LR) persiste una caída
+chica (0.740 -> 0.733 con `2x_na010` a 200 it), así que algo cambia también
+dentro de la banda que la referencia sí ve.
+
+### 6.8 Procedencia de la referencia, objetivo equivocado y calibración del sistema (2026-09-23)
+
+Tres hallazgos, en orden de solidez: la procedencia de la referencia
+(verificada), el objetivo equivocado en todas las corridas reales
+(confirmado por el usuario, pero su corrección casi no cambia nada), y
+una calibración del sistema que no cierra con los valores nominales
+(indicios, no confirmado).
+
+**1. Procedencia de la referencia (verificada).** En
+`~/Documents/AleYLu/` conviven dos archivos de nombre parecido:
+
+- `img_ref_recortada_1120.tif` **es la captura FPM on-axis de verde**
+  (`fila17_col15`) -- correlación cruzada 1.000. Es la imagen *fija* del
+  registro, no una referencia.
+- `img_mov_alineada_recortada_1120.tif` (la referencia usada en 6.3-6.7)
+  es el tile Zeiss `elefante/2025-12-02/3x3` registrado sobre la grilla de
+  la cámara FPM: se lo encuentra dentro del tile con NCC 0.896 a escala
+  0.745, columnas invertidas y ~2° de rotación. Metadatos del tile:
+  objetivo activo posición 6 = **Plan-Neofluar 2.5x/0.075**, tubo 1.0x,
+  **2.344 µm/px** en muestra. La torreta también tiene montados un
+  N-Achroplan 10x/0.25 y un EC Plan-Neofluar 63x/1.25 Oil, no usados.
+- Espectro de potencia radial (en fracción del Nyquist LR): la captura FPM
+  mantiene señal hasta el Nyquist (-27 dB en el borde); la referencia cae
+  mucho más rápido y toca un **piso de ruido de ~-43 dB desde ~0.7 del
+  Nyquist LR** -- firma de una imagen de píxel más grueso sobremuestreada.
+  Tiene *menos* alta frecuencia que una sola captura LR.
+
+Consecuencia: **esta referencia no puede validar superresolución**, ni
+siquiera la resolución LR completa. Cierra con los números de 6.7: la
+iteración 0 (captura on-axis sobremuestreada) da 0.727 contra la
+referencia, y la captura cruda contra la referencia da 0.706 -- la "mejor
+reconstrucción" era la foto LR. Una referencia genuina tendría que ser un
+mosaico Zeiss con el 10x/0.25 (~0.59 µm/px) sobre el mismo FOV; el límite
+de RAM aplica a la pila LR, no a la referencia.
+
+**2. Objetivo equivocado en todas las corridas reales (confirmado).** El
+usuario confirmó que la captura 2025-12-12 se tomó con el objetivo
+**2x/NA 0.10**, píxel de cámara 3.2 µm, sin nada entre objetivo y cámara.
+Todas las corridas reales previas (`results/real_run1..4`, `sweep_*`)
+usaron el default `current` = 2.5x/0.07 -- aumento y NA equivocados.
+Corregido en código: presets renombrados a `2x_na010` (nuevo default de
+`default_setup` y de los CLIs de datos reales) y `2_5x_na007`; `current`
+y `future` quedan como alias deprecated (mismos objetos); todo lo
+sintético con números registrados (incluida la cadena de
+`scripts/reproduce.sh`) fija `2_5x_na007` explícito, así que no cambia.
+Test nuevo: `tests/test_objective_presets.py`.
+
+**3. Chequeo independiente de aumento/NA, sin el Zeiss
+(`results/mag_check_2025-12-12/summary.json`).** El registro con el Zeiss
+implicaba ~1.75 µm/px en muestra, 9% más que los 1.60 esperados con 2x.
+
+- *Corte del espectro de intensidad* (espectro promedio sobre todos los
+  LEDs; el soporte en intensidad está acotado por 2NA/λ sin importar la
+  iluminación): en rojo (630 nm) el corte está en r_c = 690 px
+  (680-700) -> **NA·px_muestra = 0.194 ± 0.003 µm**. Verde y azul no
+  muestran corte antes de la esquina de 792 px, consistente con el
+  escalado 1/λ (predicho ~820 y ~925 px). Control: un artefacto de sensor
+  caería al mismo radio en los tres colores; solo rojo muestra la rodilla
+  -> es óptico.
+
+  | hipótesis | NA·px predicho (µm) | veredicto |
+  |---|---|---|
+  | `current` 2.5x/0.07 (px 1.28) | 0.090 | descartado (factor 2.2) |
+  | 2x/0.10 nominal (px 1.60) | 0.160 | no cierra (medido 21% más alto) |
+  | px del registro Zeiss (1.746) + NA 0.10 | 0.175 | 11% bajo |
+  | NA implícita con px 1.746 | 0.111 | -- |
+  | NA implícita con px 1.60 | 0.121 | -- |
+  | px implícito con NA 0.10 | 1.94 (aumento 1.65x) | choca con el registro |
+
+  Lo más consistente: **aumento ~1.83x con NA ~0.11**. Un aumento
+  distinto del nominal es plausible sin lente de tubo (depende de la
+  distancia real objetivo-sensor).
+- *Mapa campo claro/campo oscuro* (mediana/exposición, 13x13 verde): la
+  transición es gradual (~3 dB por paso de LED, sustrato muy difusor), sin
+  escalón. La meseta a -3 dB tiene radio ~2.0 pasos; con NA 0.10-0.11 eso
+  pide sinθ/paso ~0.055, pero la geometría del config (pitch 6 mm, altura
+  70 mm) da 0.0857 -> radio de campo claro de solo 1.2-1.3 pasos. **La
+  geometría de LEDs del config queda sospechosa** (criterio blando). La
+  meseta parece centrada en fila 17.5 / col 14.7 en vez de (17, 15), y el
+  LED más brillante (en brillo/exposición) es el (18, 15): posible
+  descentrado de ~medio LED, sin confirmar.
+- *Desplazamiento del disco de pupila por LED* (para separar NA de
+  aumento): no concluyente -- bordes de ~150 px de ancho, ajustes
+  inestables con esta muestra dispersiva.
+
+**4. Rerun de verde con `2x_na010` (`results/sweep_green_future/`,
+`results/real_run5_future_2025-12-12/`).** Corre sin cambios de código:
+factor de upsampling 5, grilla HR 2000x2000, píxel HR 0.32 µm (vs 3,
+1200x1200, 0.427 µm con `current`), ~3 s/iteración.
+
+| objetivo | it | corr. grilla HR | corr. grilla LR 400 | std fase (rad) | energía amp. > 0.377 ciclos/µm |
+|---|---|---|---|---|---|
+| `2x_na010` | 0 | 0.7267 | 0.7397 | 0 | 3.5% |
+| `2x_na010` | 20 | 0.7256 | 0.7391 | 0.0003 | 3.6% |
+| `2x_na010` | 50 | 0.7236 | 0.7382 | 0.0008 | 3.9% |
+| `2x_na010` | 200 | 0.7112 | 0.7329 | 0.0042 | 5.8% |
+| `2_5x_na007` | 0 | 0.7268 | 0.7389 | 0 | 3.7% |
+| `2_5x_na007` | 20 | 0.7250 | 0.7379 | 0.0006 | 3.9% |
+| `2_5x_na007` | 200 | 0.6966 | 0.7251 | 0.0089 | 8.6% |
+
+(0.377 ciclos/µm = 2·0.10/0.53 µm. El barrido oficial a 1/3/5/10/20/50/200
+it coincide punto por punto: 0.7267/0.7266/0.7266/0.7263/0.7256/0.7236/0.7112;
+mejora interna del residuo 11.4% a 200 it, no comparable entre objetivos
+porque cambia la pupila.)
+
+**Corregir el objetivo casi no cambia nada**: la curva tiene la misma
+forma (máximo en la iteración 0, caída monótona, algo más lenta con
+`2x_na010`), y la fase sigue prácticamente quieta (~0.004 rad a 200 it).
+El error de objetivo, siendo real, **no explica** el comportamiento de los
+datos reales. La caída en la grilla LR 400 (0.740 -> 0.733) es chica pero
+indica que algo cambia también dentro de la banda que la referencia ve.
+
+**5. Estado y próximos pasos.** Confirmado: la procedencia de la
+referencia y el objetivo equivocado. Todo lo demás son indicios.
+
+- (a) Confirmar con el usuario el pitch real de los LEDs, la altura de la
+  matriz sobre la muestra y el centrado.
+- (b) Probar aumento 1.83 / NA 0.11 y/o calibración de posiciones de LED
+  (con la geometría corregida si (a) la cambia).
+- (c) Referencia genuina: mosaico Zeiss 10x/0.25 del mismo FOV
+  (~0.59 µm/px), registrado contra la captura on-axis.
+- (d) Captura FPM de un target USAF: separa NA de aumento de forma directa
+  y da una medida de resolución sin necesidad de referencia.
+
+Mismo hábito que en 5 y 6.5-6.7: el primer candidato ("todo era el
+objetivo equivocado") no sobrevivió el control -- se corrigió y la curva
+casi no se movió.
