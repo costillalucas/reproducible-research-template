@@ -3038,9 +3038,13 @@ El centro por radiancia (17.45/14.65 ± 0.1) sigue siendo la mejor estimación,
 ni confirmada ni refutada. EPRY no se pudo evaluar por el bug de abajo.
 
 **4. Hallazgos laterales.**
-- **Bug abierto**: la rama EPRY (`--recover-pupil`) tiene el mismo
-  congelamiento por 1/lr_n_px (con α=β=1 queda fija en 0.93), y
-  `step_relative` de G no la cubre.
+- La rama EPRY (`--recover-pupil`) tenía el mismo congelamiento por
+  1/lr_n_px (con α=β=1 queda fija en 0.93) y `step_relative` de G no la
+  cubría. **Corregido opt-in en `bcb7cc6`** (fork M): con `step_relative`,
+  α y β se escalan por `step_relative * lr_n_px` (1.0 reproduce ou2014
+  exacto); sin él, idéntico bit a bit. Control sintético a crop 48: mejora
+  0.02 / corr. fase 0.23 por defecto vs 0.994 / 0.964 con 1.0. Todavía no
+  se probó EPRY descongelada sobre los datos reales.
 - Todas las imágenes LR comparten una **línea horizontal fija del sensor**
   cerca de la fila 215 del crop.
 
