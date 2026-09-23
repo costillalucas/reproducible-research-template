@@ -2772,7 +2772,9 @@ implicaba ~1.75 µm/px en muestra, 9% más que los 1.60 esperados con 2x.
   inestables con esta muestra dispersiva.
 
 **4. Rerun de verde con `2x_na010` (`results/sweep_green_future/`,
-`results/real_run5_future_2025-12-12/`).** Corre sin cambios de código:
+`results/real_run5_future_2025-12-12/`).** *(Ver 6.9: estas corridas, como
+todas las reales previas, tenían el solver congelado -- miden la estimación
+inicial, no el solver.)* Corre sin cambios de código:
 factor de upsampling 5, grilla HR 2000x2000, píxel HR 0.32 µm (vs 3,
 1200x1200, 0.427 µm con `current`), ~3 s/iteración.
 
@@ -2813,3 +2815,107 @@ referencia y el objetivo equivocado. Todo lo demás son indicios.
 Mismo hábito que en 5 y 6.5-6.7: el primer candidato ("todo era el
 objetivo equivocado") no sobrevivió el control -- se corrigió y la curva
 casi no se movió.
+
+### 6.9 El solver estaba congelado en datos reales: paso, exposición y escala inicial (2026-09-23)
+
+Buscando si la geometría corregida (z=76 mm, centro de la matriz estimado,
+1.83x/0.11) por fin movía la fase, apareció algo previo a la geometría: con
+la configuración por defecto, **WF prácticamente no itera sobre datos
+reales**. Tres causas independientes, las tres medidas con control
+(`results/led_geometry_2025-12-12/`, scripts copiados ahí).
+
+**1. Paso de WF ∝ 1/N a `step_max` fijo.** `reconstruct` divide el
+gradiente espectral por `lr_n_px` (`reconstruction.py:217-222`) y usa
+`step_max=20`. El comentario del adjunto es correcto en lo que dice (el
+adjunto de `ifft2` es `fft2/N`), pero su consecuencia no estaba registrada:
+el paso unitario clásico de ePIE/GS equivale a `step = lr_n_px`, así que a
+`step_max` fijo el paso efectivo escala como 1/N. A crop 400
+(`lr_n_px`=160000) es **~1/8000 del paso ePIE unitario**. Control sintético
+sin ruido, 20 iteraciones, factor 5 (`synthetic_step_size_control.json`):
+
+| crop | paso | mejora relativa | corr. de fase |
+|---|---|---|---|
+| 16 | default (20) | 0.617 | 0.527 |
+| 16 | 0.3·lr_n_px | 0.907 | 0.933 |
+| 64 | default (20) | 0.204 | 0.169 |
+| 64 | 0.3·lr_n_px | 0.898 | 0.943 |
+| 128 | default (20) | 0.051 | 0.227 |
+| 128 | 0.3·lr_n_px | 0.904 | 0.945 |
+
+Con paso relativo a ePIE la calidad es independiente del crop; con el
+default se degrada monótonamente. Los tests y los hitos sintéticos usan
+crops chicos (16-32), donde `step_max=20` todavía es una fracción
+razonable del paso ePIE -- por eso nunca se vio.
+
+**2. Datos crudos sin normalizar y estimación inicial mal escalada.**
+- La captura usa exposición por LED de 3 a 1000 ms
+  (`leds_por_tiempo_*.json`) y el cargador real no la corrige: un LED de
+  campo oscuro a 175 ms da media cruda 924 contra 389 del on-axis a 3 ms.
+  Además hay un nivel de oscuro de ~188 cuentas (medido con la captura sin
+  LEDs), saturación despreciable (<0.04%), y el laboratorio descartó el LED
+  (13,17).
+- `initial_hr_guess` queda ×factor² respecto del forward model: residuo
+  relativo inicial de campo claro 24.3 con la escala por defecto, 0.24
+  dividiéndola por factor² (controles `ctl_norm_default_20` vs
+  `ctl_norm_scaled_20`). Estaba enmascarado porque el solver no se movía.
+
+**3. Consecuencia.** Todas las corridas reales previas (run1-run5, los
+barridos de 6.3/6.7 y el rerun de 6.8.4) **no evalúan el solver**: la
+reconstrucción es esencialmente la estimación inicial (fase ~0.004-0.009
+rad de excursión). La curva correlación-vs-iteraciones de 6.3/6.7 es la
+deriva mínima de un solver congelado sobre datos sin normalizar. Lo que
+sigue en pie: la procedencia de la referencia (6.8.1) y el objetivo
+equivocado (6.8.2). El diagnóstico cromático (red-green ~-25 µm, 6.4/6.6)
+**queda a re-verificar**: se midió sobre reconstrucciones congeladas.
+
+**4. Centro de la matriz.** Ajuste del mapa de radiancia BF/DF (mediana /
+exposición, polinomio radial): **fila 17.45 ± 0.1, col 14.65 ± 0.1**
+(nominal 17/15), idéntico con z=70 y z=76, con polinomio de orden 2/4/6,
+ajuste cuadrático central y jackknife (`center_from_radiance.json`).
+`led_calibration.brightfield_calibration` no sirve con esta muestra
+dispersiva: según la hipótesis de aumento/NA da escala 0.58-0.97, rotación
+5-9° y desplazamiento que cambia de signo (`center_from_bf_calibration.json`).
+Confirmación débil independiente: el residuo BF inicial (solo datos) ordena
+estimado 0.244 < nominal 0.255 < espejado 0.297.
+
+**5. Variantes con el solver descongelado** (verde; datos normalizados,
+estimación inicial /factor², paso 0.3·lr_n_px = 48000, 200 iteraciones;
+`variants_summary.json`). Referencia: fase uniforme aleatoria tiene std
+1.81 rad.
+
+| variante | std fase (rad) | corr HR / LR400 | residuo todos (ini→fin) | BF | DF |
+|---|---|---|---|---|---|
+| (d) congelado: crudo, paso 20, 1.83x/0.11 z76 + centro | 0.0075 | 0.719 / 0.741 | 1.97→1.79 | 23.3→21.1 | 0.87→0.79 |
+| (a) 2x/0.10 z70 centrado | 1.60 | 0.305 / 0.538 | 0.927→0.280 | 0.255→0.278 | 0.972→0.281 |
+| (b) 2x/0.10 z76 centrado | 1.61 | 0.305 / 0.522 | 0.922→0.289 | 0.255→0.294 | 0.966→0.288 |
+| (c) 1.83x/0.11 z76 centrado | 1.61 | 0.290 / 0.545 | 0.917→0.278 | 0.255→0.282 | 0.961→0.277 |
+| (d_b) 2x/0.10 z76 + centro | 1.60 | 0.309 / 0.524 | 0.930→0.288 | 0.243→0.287 | 0.967→0.288 |
+| (d_c) 1.83x/0.11 z76 + centro | 1.63 | 0.293 / 0.551 | 0.926→0.278 | 0.244→0.287 | 0.961→0.278 |
+| control espejado 1.83x/0.11 (16.55, 15.35) | 1.65 | 0.288 / 0.543 | 0.927→0.278 | 0.297→0.294 | 0.961→0.278 |
+| control espejado 2x/0.10 (16.55, 15.35) | 1.62 | 0.305 / 0.519 | 0.932→0.288 | 0.297→0.293 | 0.966→0.288 |
+
+Lectura: con paso ePIE el solver se mueve y los LEDs de campo oscuro pasan
+a ajustar (0.97 → 0.28), pero **todas las geometrías, incluidos los
+controles con centro espejado, terminan en el mismo residuo ~0.28**, con
+fase de std ~1.6 rad (prácticamente ruido) y amplitud con moteado de alta
+frecuencia. A este nivel de ajuste los datos no discriminan geometría y la
+reconstrucción no es confiable. La caída de correlación contra la referencia
+(0.72 → 0.30) no dice nada sobre superresolución (6.8.1), pero sí es
+coherente con una reconstrucción dominada por artefactos. Comparar
+residuos entre NA 0.10 y 0.11 no es justo (pupila más grande = más grados
+de libertad). **El piso de ~0.28 independiente de la geometría es el
+próximo problema** (candidatos: ruido, variación de intensidad por LED,
+muestra gruesa/dispersiva fuera del modelo de objeto delgado).
+
+**6. Cambios de código.**
+- `2ec3018` (fork E): z=76 mm por defecto en los puntos de entrada de datos
+  reales (`REAL_CAPTURE_Z_DISTANCE_MM`; `LEDArrayConfig`/`default_setup`
+  siguen en 70 para lo sintético), `LEDArrayConfig.center_offset_mm` y
+  flags `--z-distance-mm`, `--led-center-offset-mm DX DY`, `--na`,
+  `--magnification` en los 4 CLIs reales; geometría efectiva en el JSON de
+  salida.
+- Fork G (`7c6fc3c`): normalización de exposición + resta de
+  oscuro en el cargador real, corrección de la escala de la estimación
+  inicial, y `--step-epie FRACTION` opt-in. **El default del paso NO se
+  cambió**: con el solver descongelado la fase sale tipo ruido en datos
+  reales, así que es decisión del usuario.
