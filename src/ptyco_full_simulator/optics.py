@@ -10,7 +10,7 @@ from __future__ import annotations
 import numpy as np
 
 from .config import SetupConfig
-from .led_array import max_illumination_na
+from .led_array import max_axis_illumination_na, max_illumination_na
 
 
 def circular_pupil(shape: tuple[int, int], pixel_size_um: float,
@@ -59,14 +59,64 @@ def hr_pixel_size_um(setup: SetupConfig, safety_factor: float = 2.0) -> float:
     return setup.wavelength_um / (safety_factor * na_synthetic)
 
 
+def _odd_ceil(ratio: float) -> int:
+    factor = int(np.ceil(ratio))
+    return factor + 1 if factor % 2 == 0 else factor
+
+
+def nyquist_upsampling_factor(setup: SetupConfig, safety_factor: float = 2.0) -> int:
+    """The resolution-driven factor: enough HR pixels per LR pixel to
+    Nyquist-sample the synthetic aperture NA_obj + NA_illum_max
+    (`hr_pixel_size_um`), rounded up to odd.
+    """
+    return _odd_ceil(setup.lr_pixel_size_um / hr_pixel_size_um(setup, safety_factor))
+
+
+def canvas_upsampling_factor(setup: SetupConfig) -> int:
+    """The *canvas*-driven factor: enough HR pixels per LR pixel that the
+    farthest LED's crop window still lies inside the HR array.
+
+    `spectral_ops.led_crop_window` cuts an `lr_shape`-sized rectangle out
+    of the HR spectrum, centered on the LED's frequency bin. The HR
+    spectrum spans f/(2*lr_pixel_um) each way (f = this factor) and the
+    crop itself is 1/(2*lr_pixel_um) wide each way -- independent of
+    `lr_shape`, because HR and LR share one frequency spacing -- so the
+    LED at |f_led| = max_axis_illumination_na/lam fits iff
+
+        f >= 1 + 2 * lr_pixel_um * max_axis_illumination_na / lam .
+
+    `nyquist_upsampling_factor` alone does NOT imply this: it gives
+    f = 2*lr_pixel_um*(NA_obj + NA_illum_max)/lam, which meets the bound
+    above only when 2*lr_pixel_um*NA_obj/lam >= 1, i.e. only when the
+    camera pixel already Nyquist-samples the objective's own passband. The
+    lab's 2.5x/NA 0.07 setup is far from that (1.28 um pixel, 530 nm:
+    2*1.28*0.07/0.53 = 0.34), so the canvas came out ~0.66 factors short
+    and `led_crop_window` raised "falls outside the HR array" for the
+    outermost LEDs once the integer rounding stopped hiding the deficit
+    (green 13x13, offset (0, 3) mm, z = 85 mm: 3 of 169 LEDs).
+
+    Note this is a property of the sampling, not of `center_offset_mm`:
+    the deficit is the same with a perfectly centered array; the offset
+    only pushes the requirement over the next odd integer.
+    """
+    na_axis = max_axis_illumination_na(setup.led_array)
+    return _odd_ceil(1.0 + 2.0 * setup.lr_pixel_size_um * na_axis / setup.wavelength_um)
+
+
 def upsampling_factor(setup: SetupConfig, safety_factor: float = 2.0) -> int:
     """How many HR pixels span one LR (camera) pixel, rounded up to an
     odd integer so the LR patch cropped from the HR spectrum is centered
     on a single Fourier bin.
+
+    The max of two independent requirements -- resolution
+    (`nyquist_upsampling_factor`) and canvas size
+    (`canvas_upsampling_factor`). Taking the max is deliberately monotone:
+    any setup whose Nyquist factor was already big enough to hold every
+    LED's crop window keeps exactly the factor it had before the canvas
+    term existed, so its numbers are unchanged.
     """
-    ratio = setup.lr_pixel_size_um / hr_pixel_size_um(setup, safety_factor)
-    factor = int(np.ceil(ratio))
-    return factor + 1 if factor % 2 == 0 else factor
+    return max(nyquist_upsampling_factor(setup, safety_factor),
+               canvas_upsampling_factor(setup))
 
 
 def hr_shape(lr_shape: tuple[int, int], factor: int) -> tuple[int, int]:

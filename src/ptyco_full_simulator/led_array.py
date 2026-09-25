@@ -79,6 +79,37 @@ def max_illumination_na(cfg: LEDArrayConfig) -> float:
     return best
 
 
+def max_axis_illumination_na(cfg: LEDArrayConfig) -> float:
+    """The largest |sin(theta)| along a *single* axis (x or y separately)
+    over the whole grid -- not the radial one `max_illumination_na`
+    returns.
+
+    This is what sizes the HR canvas, because the window
+    `spectral_ops.led_crop_window` cuts is a *rectangle* aligned with the
+    frequency axes: an LED fits iff its fx offset fits along x AND its fy
+    offset fits along y, each independently. The radial sin(theta) of the
+    corner LED (`max_illumination_na`) is up to sqrt(2) larger than either
+    axis component, so using it here would oversize the canvas -- it is
+    the right quantity for the synthetic-aperture NA (a disc in frequency
+    space), the wrong one for a rectangular crop.
+
+    Both axes are reduced into one number because the upsampling factor is
+    a single scalar shared by rows and columns.
+    """
+    row_lo, row_hi = cfg.row_base, cfg.row_base + cfg.grid_size - 1
+    col_lo, col_hi = cfg.col_base, cfg.col_base + cfg.grid_size - 1
+    best = 0.0
+    # Full grid, not just the corners: max|dx|/distance is attained at the
+    # extreme column with the *smallest* |dy| (the shortest distance), which
+    # with a nonzero `center_offset_mm` is some interior row, not a corner.
+    for row in range(row_lo, row_hi + 1):
+        for col in range(col_lo, col_hi + 1):
+            dx, dy = led_position_mm(row, col, cfg)
+            distance = np.sqrt(dx**2 + dy**2 + cfg.z_distance_mm**2)
+            best = max(best, abs(dx) / distance, abs(dy) / distance)
+    return float(best)
+
+
 def adjacent_led_overlap_ratio(cfg: LEDArrayConfig, wavelength_um: float, na: float) -> float:
     """Fraction of the pupil's own area (radius na/wavelength_um in
     cycles/um) shared between two NEAREST-NEIGHBOR LEDs' sub-aperture
