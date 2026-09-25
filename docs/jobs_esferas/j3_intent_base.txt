@@ -1,0 +1,68 @@
+# J3 - Reconstruccion real de las esferas, con validacion cruzada desde el principio
+
+Objetivo: reconstruir el canal verde y ver si aparecen las esferas, con los criterios de
+exito FIJADOS ANTES DE MIRAR. Esto ultimo es deliberado: en la campana 2025-12-12 el
+criterio se fue moviendo (roadmap 6.7-6.10) y por eso no se pudo concluir nada.
+
+## Comando base
+
+python3 pipelines/reconstruct_real_images.py \
+  --data-root /home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-07-08/organizado \
+  --channel green --grid-size 13 --crop 400 \
+  --row-index-base 11 --col-index-base 9 \
+  --objective 2x_na010 --z-distance-mm <J1/J2> \
+  --no-exposure-normalization --dark-level <J1> \
+  --step-epie 0.3 --iterations 100 \
+  --output-dir results/esferas_2026-07-08/green_epie03
+
+El --step-epie es obligatorio: a crop 400 el paso por defecto es ~1/8000 del de ePIE y el
+solver queda practicamente congelado (roadmap 6.9). Nunca sacar conclusiones sobre el
+solver corriendo con el paso por defecto.
+NO usar --no-normalize-initial-guess: la init escalada es la correcta.
+
+## Variantes
+
+Centro del arreglo: el que midio J1, el que midio J2, el geometrico (17,15) y el (18,15)
+que reporta el usuario, via --led-center-offset-mm (pitch 6 mm: un LED de corrimiento en
+fila son 6 mm; la convencion de signos la fijo J2, respetarla).
+
+Para CADA variante, validacion cruzada dejando 20 de los 169 LEDs afuera, con el
+diagnostico de results/geometry_search_2025-12-12/cv.py (leerlo y reusar el metodo: los
+held-out se eligen por indice en un orden fijo de fila/columna, el LED central siempre se
+conserva; el score es el residuo relativo de amplitud medio sobre los held-out). Es el
+unico diagnostico que separo "ajusta los datos" de "reconstruye el objeto".
+
+## Criterios de exito, decididos ANTES de mirar los resultados
+
+1. Las esferas se ven como discos del tamano esperado: 5 um dividido el pixel de muestra
+   da ~3 px en la grilla LR, ~14 px en la HR con factor 5. Medir el tamano recuperado, no
+   juzgarlo a ojo.
+2. El residuo de los LEDs excluidos BAJA respecto de la campana anterior (0.50) y se
+   acerca al de entrenamiento (que alla fue 0.29).
+3. La geometria SI DISCRIMINA: el residuo de held-out empeora al mover el centro medio
+   LED, como pasa en sintetico (0.035 -> 0.22).
+
+Si los tres fallan igual que en diciembre, entonces el problema NO era la muestra, y el
+siguiente sospechoso es el modelo directo: redondeo de k, coherencia parcial, ancho
+espectral del LED. Decirlo explicitamente en las notas si es lo que pasa. Un "fallo
+informativo" bien medido es el resultado valioso de este job; no hay que rescatarlo.
+
+## Salida
+
+- results/esferas_2026-07-08/green_epie03/ (y un subdirectorio por variante de centro).
+- JSON con la tabla: variante de centro, residuo de entrenamiento, residuo de held-out,
+  tamano recuperado de las esferas, y los tres criterios como pasa/no pasa.
+- PNGs de amplitud y fase reconstruidas de cada variante.
+- Notas con cada numero citado a su fuente.
+
+## Anti-objetivos
+
+- No leer convergence_summary (el residuo interno) como precision: en datos reales no es
+  un proxy confiable (roadmap 6.10).
+- No declarar "funciona" por correlacion contra nada sin la validacion cruzada.
+- No usar img_mov_alineada_* ni referencias Zeiss 2.5x como metrica de calidad: son ciegas
+  por encima de ~0.7 del Nyquist LR (roadmap 6.8).
+- No mover los criterios de exito despues de ver los resultados. Estan escritos arriba.
+- No cambiar el solver ni el forward model en este job.
+- Entorno: 4 nucleos, solo python3. Este es el job pesado (169 LEDs a crop 400): medir
+  primero cuanto tarda UNA corrida antes de lanzar las cuatro variantes con CV.

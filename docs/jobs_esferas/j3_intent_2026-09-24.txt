@@ -1,0 +1,107 @@
+# J3 (captura 2026-09-24) - Primera reconstruccion real de las esferas en DMSO: de donde sale el patron en red, que geometria es la correcta, y si FPM resuelve algo
+
+Este brief REEMPLAZA a j3_intent_base.txt (escrito para la captura 2026-07-08, que resulto
+subexpuesta). Todo lo de abajo esta medido el 2026-09-24; no re-derivarlo salvo que un
+resultado nuevo lo contradiga, y en ese caso decirlo explicitamente.
+
+## Lo que ya se sabe (medido hoy, en results/captura_2026-09-24/)
+
+Montaje (confirmado por el usuario): objetivo 2.5x NA 0.07 (preset `2_5x_na007`, pixel en
+muestra 3.2/2.5 = 1.28 um), camara Mono12 (satura en 4095), sin binning, pitch 6 mm, z
+nominal 75 mm (incierto; julio usaba otra altura y otro objetivo, 2x/0.10). Esferas de
+poliamida polidispersas (radios 1-10 um, formas irregulares) en DMSO: contraste de indice
+~0.05, objeto de fase debil. El foco se cambio moviendo el objetivo: z es igual en los 3
+enfoques.
+
+Captura: ~/Documents/AleYLu/imagenes_tomadas/2026-09-24_{red,green,blue}_enfocado/ + _dark/.
+13x13 LEDs (filas 12-24, cols 9-21), 1, 10 y 100 ms, 2 frames por LED. Los 3 enfoques son
+casi indistinguibles (contraste BF difiere <2%).
+
+Dataset listo para usar: `scripts/prepare_hdr_capture.py` (leerlo) ya genero
+results/captura_2026-09-24/hdr/<canal>/13x13_recortada_{400,128}/ : 10 ms para los 2 LEDs de
+campo claro, 100 ms para los 167 restantes, dark completo restado, cociente 10->100 ms MEDIDO
+(10.1-10.4), unidades = cuentas a 10 ms. Procedencia en hdr/<canal>/hdr_provenance.json.
+
+Campo claro = solo 2 LEDs, (17,15) y (18,15). Eje optico en fila ~17.5, col 15.0. Con la
+convencion de J2 (results/esferas_2026-07-08/geometria/18_sign_convention_checks.py) eso es
+`--led-center-offset-mm 0 3`. Cota desde los frames completos: R_BF en (0.62, 1.0) pasos de
+LED -> z en (53, 85) mm.
+
+SNR de estructura de la muestra a 100 ms (sin patron fijo): >=3 hasta radio ~6-7 pasos,
+esquinas 1.1-1.9. Los frames de campo oscuro muestran particulas como puntos brillantes Y
+estrias orientadas segun el azimut de iluminacion (hipotesis no verificada: dispersores
+repartidos en profundidad).
+
+Control sintetico (results/captura_2026-09-24/synth_overlap/, leer run.py y summary.json):
+con la geometria de hoy, sin ruido, el solver reconstruye bien (amp 0.995, fase 0.87, 100 it,
+epie 0.3) y NO produce patron periodico. En datos reales la misma corrida produce un patron
+en red fuerte (score espectral 0.035 vs <=0.0006 sintetico). El solapamiento de pupilas (31%)
+NO es la causa. Barrido real z 60-100 x DY -3/0/+3 (real_geometry_scan.json): el patron
+cambia mucho con la geometria pero el score es tosco y el residuo de entrenamiento no es
+confiable (overfitting, ver roadmap 6.10) -> inconcluso.
+
+BUG conocido: el lienzo HR se dimensiona con la grilla nominal sin el corrimiento del centro;
+con offset y z >= 85 (factor 3) la corrida muere con "LED ... falls outside the HR array".
+
+## Tareas, en orden de prioridad
+
+T0. Arreglar el bug del lienzo en src/ (que optics.upsampling_factor / el tamano del lienzo
+    tengan en cuenta el LED mas lejano con el offset real). Test nuevo que falle antes y pase
+    despues. Con offset 0 el comportamiento debe quedar bit-identico. Correr la suite completa
+    (python3 -m pytest -q; ~240 tests) y decir cuantos pasan.
+
+T1. Linea base sintetica con ruido realista: misma geometria, niveles de senal y ruido de la
+    captura (cuentas por anillo a 100 ms y ruido por frame: medirlos de la captura o del
+    hdr), el mismo salto 10/100 ms en campo claro. Dar el residuo de held-out esperable si el
+    modelo es correcto. Es la vara contra la que se mide T2.
+
+T2. Geometria por validacion cruzada (metodo de results/geometry_search_2025-12-12/cv.py:
+    dejar afuera 1 de cada 4 LEDs en orden fijo, el LED central siempre dentro; score =
+    residuo relativo de amplitud medio sobre los excluidos). Verde, crop 128. Barrer z 55-95,
+    centro DX/DY en +-3 mm alrededor de (0,3), rotacion +-3 grados, y un control con LEDs
+    permutados al azar. Reportar si hay un minimo y su ancho.
+
+T3. Separar las causas del patron en red, cada una con el score espectral y el held-out:
+    (a) solo LEDs de 100 ms (sin los 2 de campo claro); (b) campo claro reescalado +-10%;
+    (c) la mejor geometria de T2; (d) EPRY con step_relative (recuperacion de pupila).
+    Decir cual de estas lo elimina, o que ninguna.
+
+T4. Con la mejor configuracion: verde a crop 400 y 100 iteraciones; despues rojo y azul.
+    Criterio de particulas (abajo). Medir primero cuanto tarda UNA corrida a crop 400.
+
+## Criterios de exito, fijados ANTES de mirar
+
+1. Held-out: el residuo de held-out de la mejor geometria real queda a menos de 2x del de la
+   linea base sintetica con ruido de T1. (Diciembre: 0.50 held-out vs 0.29 entrenamiento.)
+2. La geometria discrimina: mover el centro medio LED (3 mm) empeora el held-out por mas que
+   la dispersion entre semillas/particiones.
+3. El patron en red desaparece: score espectral < 5x el del sintetico con ruido de T1.
+4. Particulas: se localizan las particulas en la suma de frames de campo oscuro a 100 ms
+   (puntos brillantes; en esa suma no hay sesgo de reconstruccion). Se cuenta cuantas
+   aparecen en la reconstruccion HR (amplitud o fase) y NO son separables en el frame LR de
+   campo claro. Definir el detector y los umbrales ANTES de correr T4 y dejarlos escritos.
+
+Si 1-3 fallan, el resultado valioso es un fallo informativo bien medido: decir cual es el
+siguiente sospechoso (muestra gruesa / multiple scattering, coherencia parcial, redondeo de
+k, ancho espectral del LED) y que experimento lo separaria. No rescatarlo.
+
+## Salida
+
+- results/captura_2026-09-24/j3/ con un subdirectorio por tarea, scripts re-ejecutables con
+  python3 desde la raiz del repo, JSON de resultados y PNGs.
+- Tabla JSON final: configuracion, residuo de entrenamiento, residuo de held-out, score del
+  patron, criterios 1-4 pasa/no pasa.
+- Notas (out/notes.tex) con cada numero citado a su fuente, en espanol.
+
+## Anti-objetivos y entorno
+
+- No usar convergence_summary / recovery_error como precision: no es comparable entre
+  factores de upsampling y sobreajusta en datos reales.
+- No mover los criterios despues de ver resultados. No cambiar el forward model ni el solver
+  salvo el bug de T0.
+- No tocar los datos del laboratorio (~/Documents/AleYLu): solo lectura.
+- El --step-epie (0.3) es obligatorio y la init normalizada tambien (roadmap 6.9).
+- Entorno: 4 nucleos, solo python3 (no hay `python`), pytest via pip --user, sin LaTeX
+  instalado. Una corrida verde crop 128 / 20 it tarda ~8 s; 100 it ~35 s. Disco: ~30 GB
+  libres, no generar datasets grandes.
+- No hacer commits ni push: el usuario revisa y decide.

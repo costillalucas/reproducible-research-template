@@ -1,0 +1,87 @@
+# J1 - Sanidad y metrologia del dataset de esferas 2026-07-08
+
+Objetivo: decidir si esta captura sirve y con que geometria, ANTES de reconstruir nada.
+Todo se mide sobre los datos crudos. No se corre el solver. No se reconstruye.
+
+## Datos
+
+Raiz: /home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-07-08/organizado
+Set: <canal>/13x13_recortada_400/fila<R>_col<C>.tiff  con canal en {red, green, blue}
+169 imagenes por canal (13x13), 400x400, uint16.
+Filas 11-23, columnas 9-21. Centro geometrico de la grilla: (17, 15).
+Pitch del arreglo de LEDs: 6 mm. z nominal: 76 mm.
+Exposicion: 1 ms para TODAS las imagenes (confirmado por el usuario).
+Muestra: esferas de poliamida (n~1.53) de 5 um nominales montadas en agua (n~1.333).
+
+NO existe metadato de exposicion (ni leds_por_tiempo_*.json ni carpetas <N>ms/ con
+archivos: esas carpetas existen pero estan vacias). Es esperado y correcto: la exposicion
+es uniforme. NO modificar src/ptyco_full_simulator/io_utils.py ni el loader por esto.
+
+Contexto del proyecto, leer primero: docs/plan_esferas_2026-07-08.md y
+docs/roadmap_agentic_multispectral_pipeline.md secciones 6.8-6.10.
+
+## Tareas
+
+1. NIVEL DE OSCURO. Histograma global por canal, percentiles bajos, y esquinas de las
+   imagenes de campo oscuro lejano (LEDs en el borde de la grilla). Dar un numero con
+   incertidumbre. Compararlo con config.REAL_CAPTURE_DARK_LEVEL (188 cuentas, sesion
+   2025-12-12, en src/ptyco_full_simulator/config.py:114). Si difiere mucho, decir por que
+   puede ser.
+
+2. SATURACION Y RANGO UTIL. Por LED: maximo, percentil 99.9, fraccion de pixeles en 65535
+   o cerca. Verificar si los LEDs centrales saturan a 1 ms (el rango observado reportado
+   para el LED central es 227-597 cuentas, media 418, o sea muy lejos de saturar:
+   confirmarlo o refutarlo). Estimar la relacion senal/ruido de lectura de los LEDs de
+   campo oscuro: con 1 ms fijo pueden estar en el piso. VEREDICTO EXPLICITO: los LEDs de
+   campo oscuro tienen senal utilizable? cuales hay que descartar?
+
+3. MAPA DE RADIANCIA 13x13. Media por imagen tras restar el oscuro. Con ese mapa, ESTIMAR
+   EL CENTRO DEL ARREGLO con su incertidumbre. Usar el mismo metodo que en la campana
+   2025-12-12 dio 17.45 +/- 0.1 / 14.65 +/- 0.1: esta en results/mag_check_2025-12-12/
+   (avgspec.py, radiance_green.npy, summary.json) y results/led_geometry_2025-12-12/.
+   Contrastar el centro estimado contra el (18,15) que reporta el usuario y contra el
+   centro geometrico (17,15).
+
+4. NA*PIXEL MEDIDO. Localizar la transicion campo claro -> campo oscuro sobre ese mapa y
+   de ahi obtener NA*pixel, y con eso el aumento y la NA efectivos. Mismo metodo que
+   results/mag_check_2025-12-12/ (fitknee.py, diskfit.py), que dio NA*px = 0.194 +/- 0.003
+   um => ~1.83x / NA ~0.11. Comparar con el objetivo nominal 2x NA 0.10 y con esos valores
+   de diciembre. Ojo: en aquella campana el metodo 2 (mapa BF/DF) dio una transicion
+   gradual y un criterio blando, y el metodo 3 (ajuste de discos de pupila) fue inestable.
+   Con esferas la transicion puede ser mas limpia; si no lo es, decirlo.
+
+5. LOS TRES CANALES. Repetir 3 y 4 en red, green y blue. El centro del arreglo NO debe
+   depender del color. Si depende, eso es un hallazgo: reportarlo con numeros, no
+   suavizarlo.
+
+6. TAMANO DE LAS ESFERAS (control independiente, barato). En una imagen de campo claro
+   central, medir el tamano aparente de las esferas en pixeles. Con 5 um nominales eso da
+   un aumento efectivo independiente del punto 4. Si las esferas no se distinguen a esta
+   resolucion, decirlo claramente en vez de forzar un numero.
+
+## Salida
+
+- results/esferas_2026-07-08/sanity/ con un JSON de numeros y PNGs de diagnostico
+  (histogramas, mapa de radiancia por canal, ajuste de la transicion BF/DF).
+- Los scripts que produjeron cada numero, reproducibles, en ese mismo directorio.
+- Notas con cada numero citado a su fuente.
+
+## Criterio de aceptacion
+
+- Centro del arreglo estimado con incertidumbre < 0.2 LED, en los tres canales.
+- Un nivel de oscuro con barra de error.
+- Un veredicto explicito y justificado sobre la senal de los LEDs de campo oscuro.
+- Si alguno de estos tres no se puede cumplir con estos datos, decirlo con el numero que
+  lo demuestra. Un "no se puede" fundamentado es un resultado valido; un numero inventado
+  para cumplir el criterio, no.
+
+## Anti-objetivos
+
+- No reconstruir nada, no correr pipelines/reconstruct_real_images.py, no tocar el solver.
+- No usar img_mov_alineada_* ni ninguna referencia Zeiss 2.5x como metrica: es ciega por
+  encima de ~0.7 del Nyquist LR (roadmap 6.8).
+- No modificar el loader ni io_utils por el tema de la exposicion.
+- No inventar el diametro real ni la dispersion de las esferas: 5 um es nominal, sin
+  confirmar por el laboratorio. Si un numero depende de eso, decirlo.
+- No escribir fuera de results/esferas_2026-07-08/sanity/ y del out/ del job.
+- Entorno: 4 nucleos, solo python3 (no existe `python` en el PATH).

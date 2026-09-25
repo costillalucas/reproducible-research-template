@@ -1,0 +1,48 @@
+# J5 - Metricas sin ground truth: que mirar cuando no hay verdad
+
+Objetivo: cerrar la pregunta metodologica que atraviesa todo el proyecto. En datos reales
+no hay verdad, y hasta ahora el proyecto no tiene un criterio defendible de calidad. J4
+dio el ranking de metricas CUANDO HAY verdad; este job decide que usar cuando no la hay,
+validando cada candidata contra la verdad sintetica de J4.
+
+## Material de entrada
+
+- Los resultados reales de J3 (results/esferas_2026-07-08/green_epie03/ y variantes).
+- Los resultados sinteticos de J4 (results/esferas_2026-07-08/sintetico/), donde cada
+  metrica sin verdad se puede contrastar CONTRA la verdad. Eso es lo que las valida.
+- Los numeros de J1 y J2.
+
+## Candidatas a evaluar
+
+1. Residuo en LEDs EXCLUIDOS (held-out). Hoy es el mejor que tenemos.
+2. FRC entre dos reconstrucciones independientes, cada una con la mitad de los LEDs: da
+   una resolucion en um sin necesidad de verdad.
+3. Consistencia ENTRE CANALES sobre el mismo objeto (el QC que ya existe en el repo:
+   ver src/ptyco_full_simulator/chromatic_diagnostics.py y multispectral.py).
+4. TAMANO CONOCIDO de las esferas como regla interna (5 um nominales).
+5. pair_disagreement como confianza por pixel: ya se calcula en el repo y nunca se uso.
+
+## Tareas
+
+1. Calcular las cinco sobre J3 (real) y sobre J4 (sintetico).
+2. En J4, donde hay verdad, medir la CORRELACION de cada metrica sin-verdad con el error
+   verdadero. Una metrica sin verdad sirve en la medida en que predice el error real.
+3. Decir cuales son ciegas, cuales saturan, y en que regimen cada una deja de servir.
+4. Cruzar con lo que se ve en real: si una metrica ordena las variantes de J3 de forma
+   distinta a otra, eso es informacion, no un empate.
+
+## Salida
+
+- Una seccion NUEVA de docs/roadmap_agentic_multispectral_pipeline.md (numerarla despues
+  de 6.10, leyendo antes 6.8-6.10 para seguir el estilo y no contradecir lo ya escrito).
+- Una TABLA DE RECOMENDACION: que mirar cuando hay verdad, que mirar cuando no, con la
+  evidencia numerica de J4 al lado de cada recomendacion.
+- results/esferas_2026-07-08/metricas/ con JSON, scripts y PNGs.
+
+## Anti-objetivos
+
+- No recomendar una metrica sin mostrar el numero de J4 que la respalda.
+- No reconstruir de nuevo lo que ya produjeron J3 y J4: este job consume esos resultados.
+  La unica excepcion son las medias-mitades para el FRC, que si requieren reconstruir.
+- No reescribir las secciones 6.8-6.10 del roadmap: se agrega una seccion nueva.
+- Entorno: 4 nucleos, solo python3.

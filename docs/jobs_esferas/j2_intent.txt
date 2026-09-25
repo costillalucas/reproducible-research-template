@@ -1,0 +1,110 @@
+# J2 - La geometria del arreglo no cierra: resolverla con los datos crudos
+
+Este job cambio de alcance respecto del plan original (docs/plan_esferas_2026-07-08.md)
+porque J1 ya corrio y cambio el panorama. Leer primero la seccion "Lo que ya se sabe".
+
+## Lo que ya se sabe (J1, ya verificado - NO rehacer)
+
+Datos: /home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-07-08/organizado
+       <canal>/13x13_recortada_400/fila<R>_col<C>.tiff, filas 11-23, cols 9-21.
+Muestra: esferas de poliamida (n~1.53) de 5 um NOMINALES en agua (n~1.333).
+Exposicion 1 ms uniforme. Resultados de J1 en results/esferas_2026-07-08/sanity/.
+
+- Nivel de oscuro 186.5 cuentas; ruido de lectura 1.36 cuentas; sin saturacion en ningun
+  lado (maximo 467 cuentas sobre una escala de 16 bits).
+- Solo 12 de 169 LEDs tienen senal. El resto esta plano en el oscuro. No hay campo oscuro.
+- Centro del arreglo ~ (fila 18.20, col 15.05) por centroide pesado por flujo. Confirma el
+  (18,15) que reporta el usuario y descarta el centro geometrico (17,15).
+- Las esferas SI se resuelven: FWHM 5.47 / 3.70 / 3.77 px en r/g/b.
+
+## El problema a resolver
+
+El radio del disco de campo claro, medido sobre los LEDs encendidos, es de 2.03 pasos de
+LED (el LED mas lejano con senal esta a esa distancia del centro; el ultimo LED fuerte
+esta a 1.80). La geometria nominal del repo predice
+
+    radio_BF = z * tan(asin(NA)) / pitch = 76 mm * tan(asin(0.10)) / 6 mm = 1.27 pasos
+
+o sea un 60% menos que lo medido. Esto NO es nuevo: la campana 2025-12-12 vio lo mismo
+(results/mag_check_2025-12-12/summary.json, method_2: "plateau radius ~2.0 LED steps"
+contra "config geometry gives BF radius ~1.2-1.3 -> LED pitch/height suspect, but soft
+criterion; not confirmed"). Son dos capturas independientes, con muestras distintas, que
+dan la misma discrepancia. Ya no es un criterio blando.
+
+Para cerrar 2.03 pasos con pitch 6 mm hacen falta, por ejemplo, z ~ 121 mm si NA = 0.10,
+z ~ 110 mm si NA = 0.11, o bien NA ~ 0.158 si z = 76 mm. Verificar estas cuentas.
+
+Esto importa porque z y NA entran en el modelo directo de TODA reconstruccion del
+proyecto, y el z = 76 mm es un default de config
+(src/ptyco_full_simulator/config.py, REAL_CAPTURE_Z_DISTANCE_MM) que nadie midio.
+
+## Tareas
+
+1. MEDIR EL RADIO DE CAMPO CLARO BIEN. Con 12 LEDs el borde esta mal muestreado: en vez
+   de "el LED mas lejano con senal", ajustar el perfil radial de radiancia y dar el radio
+   de corte con barra de error. Hacerlo en los tres canales. El radio de corte NO deberia
+   depender del color si es puramente geometrico (el disco de campo claro depende de NA,
+   que es casi acromatica); si depende del color, decirlo, porque eso apunta a otra cosa.
+
+2. ROMPER LA DEGENERACION z / NA. El radio de campo claro solo da el producto
+   z*tan(asin(NA))/pitch. Hace falta una segunda medicion independiente. Candidatas, usar
+   las que los datos banquen y decir por que se descartan las otras:
+
+   a) CORRIMIENTO POR CORRELACION CRUZADA entre LEDs vecinos encendidos (hay ~12 LEDs, o
+      sea del orden de 12-16 parejas vecinas). Cuidado con la interpretacion: para un
+      objeto delgado EN FOCO, cambiar el angulo de iluminacion NO corre la imagen. El
+      corrimiento aparece por desenfoque de la muestra: corrimiento = dz_muestra *
+      tan(theta_iluminacion), y tan(theta) = (offset lateral del LED) / z_LED. O sea que
+      la correlacion cruzada mide el producto dz_muestra * pitch / z_LED, que es OTRA
+      degeneracion. Medirlo igual (es un numero que el proyecto no tiene), pero ser
+      explicito sobre que fija y que no.
+   b) EL TAMANO DE LAS ESFERAS da el pixel de muestra, y con el el aumento, de forma
+      independiente de la geometria del arreglo. Combinado con el limite de difraccion
+      (FWHM de una esfera de 5 um convolucionada con la PSF de NA) puede acotar NA por
+      separado. Ojo con la circularidad: el diametro de 5 um es NOMINAL y sin confirmar.
+      Propagar esa incertidumbre, no esconderla.
+   c) La geometria del propio arreglo: si hay forma de medir el pitch o la altura desde
+      los datos o desde cualquier metadato de la captura, usarla.
+
+3. AJUSTE CONJUNTO. Con todas las restricciones medidas, dar la mejor estimacion conjunta
+   de (centro, z, NA, pitch efectivo, rotacion, desenfoque de muestra) CON barras de error
+   y con la matriz de correlacion entre parametros: lo que importa no es solo el optimo,
+   sino QUE COMBINACIONES quedan indeterminadas. Decir explicitamente cuales de esos
+   parametros estos datos NO pueden fijar.
+
+4. VEREDICTO SOBRE config.REAL_CAPTURE_Z_DISTANCE_MM = 76. Es correcto, o hay que
+   cambiarlo? Si los datos no alcanzan para decidirlo, decir QUE MEDICION EN EL
+   LABORATORIO lo decidiria (por ejemplo medir con una regla la distancia del arreglo a la
+   muestra, que es gratis y termina con la discusion). Esa recomendacion concreta vale mas
+   que un ajuste con barras enormes.
+
+5. CONVENCION DE SIGNOS de --led-center-offset-mm en src/ptyco_full_simulator/cli_args.py
+   y led_array.py: dejar escrito sin ambiguedad que DX DY corresponde a un centro dado, y
+   comprobarlo con un caso de prueba. Cualquier reconstruccion futura lo necesita.
+
+## Salida
+
+- results/esferas_2026-07-08/geometria/ con JSON, scripts reproducibles y PNGs (perfil
+  radial de radiancia y su ajuste por canal, campo de corrimientos, region de confianza
+  conjunta en el plano z-NA).
+- Notas con cada numero citado a su fuente.
+
+## Criterio de aceptacion
+
+- Un radio de campo claro con barra de error, en los tres canales.
+- Una region de confianza en el plano z-NA, y una frase clara sobre si z=76 sobrevive.
+- La convencion de signos escrita y comprobada.
+- Si los datos no alcanzan para romper la degeneracion, decirlo con el numero que lo
+  muestra y proponer la medicion de laboratorio que la rompe. Eso es un resultado valido.
+
+## Anti-objetivos
+
+- No correr el solver ni usar el residuo de reconstruccion como funcion de costo. En
+  2025-12-12 se busco la geometria minimizando el residuo y el paisaje salio plano
+  (roadmap 6.10): el punto de este job es no depender del solver.
+- No usar los 157 LEDs sin senal como si tuvieran informacion: son ruido de lectura puro.
+- No usar img_mov_alineada_* ni referencias Zeiss.
+- No inventar el diametro de las esferas: 5 um es nominal y sin confirmar.
+- No cambiar config.py en este job: recomendar, con el numero al lado. El cambio lo
+  decide el usuario.
+- Entorno: 4 nucleos, solo python3 (no existe `python` en el PATH).

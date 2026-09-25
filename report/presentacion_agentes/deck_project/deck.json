@@ -1,0 +1,55 @@
+{
+ "v": 4,
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-09-25T15:00:20Z"
+ },
+ "title": "Un mes con agentes de IA en microscopía",
+ "order": [
+  "portada",
+  "respuesta",
+  "problema",
+  "como",
+  "simulado",
+  "congelado",
+  "errores",
+  "captura",
+  "confianza",
+  "lecciones",
+  "siguiente"
+ ],
+ "sections": {
+  "s1": {
+   "description": "La respuesta corta y el problema",
+   "start": "portada"
+  },
+  "s2": {
+   "description": "Cómo trabajamos y qué funcionó",
+   "start": "como"
+  },
+  "s3": {
+   "description": "Errores encontrados",
+   "start": "congelado"
+  },
+  "s4": {
+   "description": "La captura nueva y por qué no confiamos todavía",
+   "start": "captura"
+  },
+  "s5": {
+   "description": "Lecciones y próximos pasos",
+   "start": "lecciones"
+  }
+ },
+ "cover": "portada",
+ "faces": {
+  "ibm-plex-sans": {
+   "family": "IBM Plex Sans",
+   "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600&display=swap"
+  },
+  "source-serif-4": {
+   "family": "Source Serif 4",
+   "href": "https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600&display=swap"
+  }
+ },
+ "designSystems": []
+}

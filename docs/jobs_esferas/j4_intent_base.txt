@@ -1,0 +1,65 @@
+# J4 - Ground truth sintetico de esferas: que metrica usar cuando hay verdad
+
+Objetivo: construir un patron de comparacion cuantitativo con verdad conocida, y decidir
+CUAL METRICA detecta antes un error de geometria. Esto responde una de las preguntas de
+fondo del proyecto: la correlacion de fase satura y engana (techo de pi), el residuo de
+datos no distingue geometria (roadmap 6.10), y el tamano recuperado si es interpretable.
+
+## Muestra a simular
+
+Esferas de poliamida, n ~ 1.53, de 5 um de diametro nominal, montadas en agua, n ~ 1.333.
+Contraste de indice delta_n ~ 0.20. Calcular el retardo de fase de una esfera de 5 um con
+ese delta_n a la longitud de onda de cada canal y DEJAR ESE NUMERO ESCRITO: es el que
+determina si el objeto es de fase debil o no, y si toca el techo de pi.
+Ojo: el diametro de 5 um es NOMINAL, el laboratorio no confirmo ni el diametro real ni la
+dispersion. El material y el medio si los confirmo el usuario. Todo numero que dependa del
+diametro tiene que decir que depende de un nominal.
+
+Usar el forward model del repo (src/ptyco_full_simulator/forward_model.py,
+test_objects.py) con la geometria que salga de J1/J2 (ver abajo) y ruido de tipo captura:
+ganancia y varianza de lectura medidas en J1, y el nivel de oscuro medido en J1.
+
+## Tareas
+
+1. Simular el campo de esferas con esa geometria y ese ruido. Verdad conocida de amplitud
+   y fase.
+
+2. Reconstruir con exactamente el mismo camino que J3 (pipelines/reconstruct_real_images.py
+   o el equivalente programatico, --step-epie 0.3, mismas iteraciones) y medir TODO:
+   - correlacion y RMSE de fase y de amplitud;
+   - metricas sensibles a la forma: perfil radial de una esfera, tamano recuperado,
+     contraste de borde;
+   - FRC contra la verdad.
+
+3. BARRIDO DE ERROR DE GEOMETRIA. Repetir 2 desplazando el centro del arreglo en pasos
+   (por ejemplo 0, 0.25, 0.5, 1, 1.5 LED) y variando z. Para cada metrica, graficar como
+   responde al error. La pregunta a responder con numeros: QUE METRICA SE DEGRADA PRIMERO
+   Y DE FORMA MONOTONA. En sintetico la campana anterior vio el residuo de held-out pasar
+   de 0.035 a 0.22 al mover medio LED; contrastar con eso.
+
+4. Ranking final de metricas por sensibilidad a error de geometria, con la evidencia
+   numerica al lado. Decir tambien cuales saturan o enganan, y a partir de que punto.
+
+## Salida
+
+- results/esferas_2026-07-08/sintetico/ con JSON, scripts reproducibles y PNGs
+  (verdad vs. reconstruccion, perfiles radiales, curvas metrica-vs-error-de-geometria).
+- Notas con cada numero citado a su fuente.
+
+## Criterio de aceptacion
+
+- Una tabla de metricas contra error de geometria, con al menos 4 metricas y 4 niveles de
+  error, cada celda reproducible.
+- Un veredicto ordenado: que metrica mirar primero cuando hay verdad, y por que.
+
+## Anti-objetivos
+
+- No usar datos reales en este job: aca la verdad es sintetica. La comparacion con lo real
+  la hace J5.
+- No cambiar el forward model ni el solver para que los numeros salgan mejor. Si el forward
+  model no puede representar la esfera (objeto grueso, no delgado), eso es un HALLAZGO y
+  hay que reportarlo con el numero que lo muestra, no esconderlo.
+- No escribir fuera de results/esferas_2026-07-08/sintetico/ y del out/ del job.
+- Entorno: 4 nucleos, solo python3 (no existe `python` en el PATH). Cuidado con el costo:
+  el barrido del punto 3 puede ser caro, dimensionarlo antes de lanzarlo (crop menor o
+  menos iteraciones para el barrido, y el caso nominal completo).

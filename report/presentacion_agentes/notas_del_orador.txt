@@ -1,0 +1,32 @@
+1. portada
+Presentarse. Contar en una frase de qué se trata: durante un mes le pedimos a agentes de inteligencia artificial que trabajaran sobre un problema real de microscopía. La charla no es sobre la técnica sino sobre qué pudieron y qué no pudieron resolver.
+
+2. respuesta
+Adelantar la conclusión para que todos sepan hacia dónde va la charla. Lo que se logró es sobre todo infraestructura y auditoría. Lo que no se logró es el objetivo científico final: una imagen real mejorada en la que confiemos.
+
+3. problema
+Explicar con la analogía del rompecabezas: cada ángulo de luz trae una pieza distinta del detalle fino. Enfatizar que el programa siempre devuelve una imagen; el problema es saber si esa imagen es la muestra o un artefacto. Esa es la pregunta que atraviesa toda la charla.
+
+4. como
+Tres modos de trabajo, de menos a más autonomía. El que más nos enseñó fue el tercero: un equipo donde un agente distinto rehace cada número con su propio código antes de aceptarlo. Las personas eligen la pregunta, fijan los criterios y deciden al final; los agentes no guardan cambios por su cuenta.
+
+5. simulado
+Se inventa una muestra, se simulan las 169 fotos y el programa reconstruye a partir de ellas. Como conocemos la respuesta, podemos medir cuánto acierta. Esto es la base: si no funcionara aquí, no tendría sentido probar con datos reales.
+
+6. congelado
+Analogía: bajar una montaña con pasos de una décima de milímetro; después de 100 pasos seguís donde empezaste. El programa entregaba la foto de partida como si fuera la reconstrucción. Lección: pasar todas las pruebas no garantiza que el código funcione en el caso real.
+
+7. errores
+Varios errores los habían introducido o pasado por alto los propios agentes, y los encontraron otros agentes al auditar con una pregunta distinta. El de la referencia es ilustrativo: la imagen con la que validábamos tenía menos detalle que una sola foto cruda, así que la mejor 'reconstrucción' era la foto sin procesar.
+
+8. captura
+Los agentes calcularon que la captura de julio tenía muy poca luz y propusieron repetirla con varios tiempos de exposición. El laboratorio la hizo el 24/09: 4.563 imágenes. El centro del mapa es luz directa; los bordes son ángulos grandes, con poca señal pero con la información de los detalles finos. También sirvió para medir la geometría: la matriz está a unos 80 mm. [Opcional: mostrar fig_crudas.png con las fotos crudas.]
+
+9. confianza
+Cuatro criterios escritos antes de mirar, para no acomodarlos después. El 2 es el central: si mover los LEDs medio paso casi no cambia nada, los datos no restringen al programa. El 3: el indicador numérico dijo que pasaba, pero al mirar las imágenes el patrón en red sigue ahí; el número lo subestimaba. El 4: las partículas están tan separadas que una foto cruda ya las distingue, así que no hay detalle nuevo que ganar.
+
+10. lecciones
+Estas reglas no las teníamos al principio: cada una apareció después de ver fallar la versión sin ella. Un ejemplo de exceso de confianza: el asistente afirmó un 'sobreajuste' que tuvo que corregir mientras escribíamos el informe, al comparar con la simulación.
+
+11. siguiente
+Cerrar con el paso decisivo, que es de laboratorio: una muestra con detalles más finos que 3,8 µm. Invitar a preguntas.
