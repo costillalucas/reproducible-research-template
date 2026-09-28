@@ -3107,3 +3107,15 @@ Resumen para no especialistas: `report/resumen/resumen.pdf`. Detalle de cada pas
 - **Rojo y azul** salen con partículas agrandadas y textura de red. El reenfoque numérico (óptimo en −100 / −75 µm) no lo corrige, y solo el verde se parece a la muestra.
 - **Primera prueba multiespectral real:** confirma por un camino independiente que no hay detalle confiable más allá del objetivo.
 - **Toma desenfocada para el signo:** no es concluyente, porque domina un patrón fijo del sensor.
+
+**7. Captura 28/09 (b) (`results/captura_2026-09-28b/INFORME.md`).** Matriz a ~98 mm (solapamiento de 31 % a 46 %), 15×15 LEDs, **cada color en su foco**, exposición por LED calculada y calibrada sobre la marcha (`scripts/exposicion_z100.py`, `data/captura_2026-09-28b/`), flats RGB y oscuros bien tomados.
+- **Geometría:** los 6 LEDs de campo claro previstos se confirman en los tres colores.
+- **C1 pasa en los tres colores:** rojo 0.461 (el mejor del proyecto), verde 0.615 y azul 0.596, contra ~0.98 sin FPM.
+- **C2 sigue bajo el umbral** (0.083 / 0.043 / 0.099), pero de 5 a 14 veces el nulo y de 3 a 10 veces más que en las capturas anteriores.
+- **Entre colores:**
+  - fotos crudas 0.84–0.92;
+  - azul–verde reconstruido: 0.56 en la banda del objetivo y 0.14 en todo el espectro, mejor que a la tarde;
+  - rojo–verde, bajo: 0.11 / 0.06;
+  - **a la vista, los tres colores dan las mismas partículas.**
+- Como cambiaron dos cosas a la vez (solapamiento y foco), no se puede atribuir la mejora a una sola.
+- Umbrales sin recalibrar con una simulación de esta geometría (declarado).

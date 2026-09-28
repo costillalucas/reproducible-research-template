@@ -189,6 +189,30 @@ def entries():
         "resumen_rgb_todo_max": dict(value=max(band["todo"].values()), type="data", reproduce=f"{R}/multiespectral_por_banda.json",
                                      statement="RGB 28/09: la misma correlación con todo el espectro reconstruido (máximo de los tres pares)"),
     })
+    Rb = "results/captura_2026-09-28b"
+    cb, cc2 = _j(f"{Rb}/criterios_b.json"), _j(f"{Rb}/comparar_colores.json")
+    E.update({
+        "resumen_b_solapamiento_pct": dict(value=solapamiento_vecinos_pct(98.0), type="script",
+                                           reproduce="scripts/resumen_numbers.py::solapamiento_vecinos_pct",
+                                           statement="Solapamiento entre las pupilas de dos LEDs vecinos en el espectro, z = 98 mm (rojo), en % del área"),
+        "resumen_b_R_rojo": dict(value=cb["red"]["C1_R"], type="data", reproduce=f"{Rb}/criterios_b.json",
+                                 statement="28/09 (b), matriz a 98 mm, cada color en su foco: rojo, error de predicción de LEDs no vistos (red.C1_R)"),
+        "resumen_b_R_verde": dict(value=cb["green"]["C1_R"], type="data", reproduce=f"{Rb}/criterios_b.json", statement="Ídem, verde (green.C1_R)"),
+        "resumen_b_R_azul": dict(value=cb["blue"]["C1_R"], type="data", reproduce=f"{Rb}/criterios_b.json", statement="Ídem, azul (blue.C1_R)"),
+        "resumen_b_sinfpm_max": dict(value=max(cb[c]["C1_nofpm"] for c in cb), type="data", reproduce=f"{Rb}/criterios_b.json",
+                                     statement="28/09 (b): el mismo error sin reconstruir (máximo de los tres colores; el mínimo es 0.977)"),
+        "resumen_b_frc_max": dict(value=max(cb[c]["C2_frc"] for c in cb), type="data", reproduce=f"{Rb}/criterios_b.json",
+                                  statement="28/09 (b): coincidencia entre mitades en la banda más allá del objetivo, máximo de los tres colores (azul; rojo 0.083, verde 0.043)"),
+        "resumen_b_frc_min": dict(value=min(cb[c]["C2_frc"] for c in cb), type="data", reproduce=f"{Rb}/criterios_b.json",
+                                  statement="Ídem, mínimo (verde)"),
+        "resumen_b_crudas_min": dict(value=min(v["corr"] for v in cc2["crudas"].values()), type="data", reproduce=f"{Rb}/comparar_colores.json",
+                                     statement="28/09 (b): correlación entre colores de la foto cruda (18,15) registrada, mínimo de rojo-verde y azul-verde"),
+        "resumen_b_crudas_max": dict(value=max(v["corr"] for v in cc2["crudas"].values()), type="data", reproduce=f"{Rb}/comparar_colores.json", statement="Ídem, máximo"),
+        "resumen_b_azulverde_banda": dict(value=cc2["reconstrucciones"]["banda_objetivo"]["blue_green"], type="data", reproduce=f"{Rb}/comparar_colores.json",
+                                          statement="28/09 (b): correlación azul-verde del brillo reconstruido y registrado, en la banda del objetivo"),
+        "resumen_b_azulverde_todo": dict(value=cc2["reconstrucciones"]["todo"]["blue_green"], type="data", reproduce=f"{Rb}/comparar_colores.json",
+                                         statement="Ídem, con todo el espectro reconstruido"),
+    })
     return E
 
 

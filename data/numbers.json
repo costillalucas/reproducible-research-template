@@ -174,6 +174,72 @@
     "type": "script",
     "value": 1.41129423761462
   },
+  "resumen_b_R_azul": {
+    "reproduce": "results/captura_2026-09-28b/criterios_b.json",
+    "statement": "\u00cddem, azul (blue.C1_R)",
+    "type": "data",
+    "value": 0.595842209535042
+  },
+  "resumen_b_R_rojo": {
+    "reproduce": "results/captura_2026-09-28b/criterios_b.json",
+    "statement": "28/09 (b), matriz a 98 mm, cada color en su foco: rojo, error de predicci\u00f3n de LEDs no vistos (red.C1_R)",
+    "type": "data",
+    "value": 0.46127038404335047
+  },
+  "resumen_b_R_verde": {
+    "reproduce": "results/captura_2026-09-28b/criterios_b.json",
+    "statement": "\u00cddem, verde (green.C1_R)",
+    "type": "data",
+    "value": 0.6152588480787682
+  },
+  "resumen_b_azulverde_banda": {
+    "reproduce": "results/captura_2026-09-28b/comparar_colores.json",
+    "statement": "28/09 (b): correlaci\u00f3n azul-verde del brillo reconstruido y registrado, en la banda del objetivo",
+    "type": "data",
+    "value": 0.5587218829226543
+  },
+  "resumen_b_azulverde_todo": {
+    "reproduce": "results/captura_2026-09-28b/comparar_colores.json",
+    "statement": "\u00cddem, con todo el espectro reconstruido",
+    "type": "data",
+    "value": 0.14467158304959885
+  },
+  "resumen_b_crudas_max": {
+    "reproduce": "results/captura_2026-09-28b/comparar_colores.json",
+    "statement": "\u00cddem, m\u00e1ximo",
+    "type": "data",
+    "value": 0.9168390593716278
+  },
+  "resumen_b_crudas_min": {
+    "reproduce": "results/captura_2026-09-28b/comparar_colores.json",
+    "statement": "28/09 (b): correlaci\u00f3n entre colores de la foto cruda (18,15) registrada, m\u00ednimo de rojo-verde y azul-verde",
+    "type": "data",
+    "value": 0.837368887790534
+  },
+  "resumen_b_frc_max": {
+    "reproduce": "results/captura_2026-09-28b/criterios_b.json",
+    "statement": "28/09 (b): coincidencia entre mitades en la banda m\u00e1s all\u00e1 del objetivo, m\u00e1ximo de los tres colores (azul; rojo 0.083, verde 0.043)",
+    "type": "data",
+    "value": 0.09863090328872204
+  },
+  "resumen_b_frc_min": {
+    "reproduce": "results/captura_2026-09-28b/criterios_b.json",
+    "statement": "\u00cddem, m\u00ednimo (verde)",
+    "type": "data",
+    "value": 0.042867142939940095
+  },
+  "resumen_b_sinfpm_max": {
+    "reproduce": "results/captura_2026-09-28b/criterios_b.json",
+    "statement": "28/09 (b): el mismo error sin reconstruir (m\u00e1ximo de los tres colores; el m\u00ednimo es 0.977)",
+    "type": "data",
+    "value": 0.9836492733535045
+  },
+  "resumen_b_solapamiento_pct": {
+    "reproduce": "scripts/resumen_numbers.py::solapamiento_vecinos_pct",
+    "statement": "Solapamiento entre las pupilas de dos LEDs vecinos en el espectro, z = 98 mm (rojo), en % del \u00e1rea",
+    "type": "script",
+    "value": 46.26544149181634
+  },
   "resumen_centro_col": {
     "reproduce": "results/led_geometry_2025-12-12/center_from_radiance.json",
     "statement": "Captura 12/12/2025: columna del eje \u00f3ptico ajustada con el brillo por LED (main_z76_poly4.col)",
