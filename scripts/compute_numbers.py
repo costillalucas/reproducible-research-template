@@ -15,7 +15,8 @@ noted in comments) -- this script recomputes the actual numbers those
 tests only threshold-check, for the report to quote and
 scripts/check_provenance.py to verify against.
 
-Run: python scripts/compute_numbers.py
+Run: python scripts/compute_numbers.py            (todo)
+     python scripts/compute_numbers.py --solo-resumen   (solo las entradas de report/resumen/)
 """
 import json
 import os
@@ -690,6 +691,16 @@ def lena_map_gd_phase_correlation_by_photon_count():
 
 
 def main():
+    if "--solo-resumen" in sys.argv:
+        # Actualiza solo las entradas del resumen (report/resumen/resumen.md) sin recalcular las demás.
+        import resumen_numbers
+        registry = json.load(open(OUT))
+        registry.update(resumen_numbers.entries())
+        with open(OUT, "w") as fh:
+            json.dump(registry, fh, indent=2, sort_keys=True)
+            fh.write("\n")
+        print(f"wrote {os.path.relpath(OUT, ROOT)} ({len(registry)} entries, resumen actualizado)")
+        return
     thickness_corr = multispectral_thickness_correlation()
     unwrap_factor = unwrapping_error_reduction_factor()
     phase_corr_uniform, phase_corr_contrast = phase_only_object_correlation_drop()
@@ -997,6 +1008,8 @@ def main():
         },
     }
 
+    import resumen_numbers  # entradas del resumen en castellano (datos reales), ver scripts/resumen_numbers.py
+    registry.update(resumen_numbers.entries())
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, "w") as fh:
         json.dump(registry, fh, indent=2, sort_keys=True)

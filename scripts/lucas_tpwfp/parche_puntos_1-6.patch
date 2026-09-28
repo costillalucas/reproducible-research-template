@@ -1,0 +1,413 @@
+diff --git a/common.py b/common.py
+index d54a05c..fcce186 100644
+--- a/common.py
++++ b/common.py
+@@ -36,15 +36,33 @@ def calculate_k_vectors_k_indices_integral(led_positions: dict[tuple[int, int],
+         k_indices[key] = construir_indices(k_pixel)
+     return k_vectors, k_indices
+ 
++def k_a_ejes(k_vector, orientacion="original"):
++    """[PARCHE punto 4] Qué componente de k va a cada eje del arreglo (eje 0 = filas de la imagen).
++
++    "original": (k_x, k_y) -> (eje 0, eje 1), como estaba. Con calculate_led_positions_equi
++                (x = (col_central - col)*p, y = (fila - fila_central)*p), la COLUMNA del LED mueve el
++                espectro a lo largo de las filas de la imagen.
++    "actual":   (-k_y, k_x) -> (eje 0, eje 1): la FILA del LED mueve el espectro a lo largo de las filas
++                de la imagen, que es lo que muestran las capturas con la cámara montada como ahora
++                (25/09: espectros crudos y paralaje entre LEDs vecinos). El signo todavía no está
++                confirmado con datos: hace falta una toma con la muestra desenfocada.
++    En simulaciones da igual cuál se use mientras la simulación y la reconstrucción usen la misma."""
++    if orientacion == "original":
++        return np.asarray(k_vector[:2])
++    if orientacion == "actual":
++        return np.array([-k_vector[1], k_vector[0]])
++    raise ValueError(orientacion)
++
+ def calculate_k_vectors_k_indices(led_positions: dict[tuple[int, int], RealSpace3],
+-                                wavelength, sample_position, dc_location, fourier_pixel_factor) -> (dict, dict):
++                                wavelength, sample_position, dc_location, fourier_pixel_factor,
++                                orientacion="original") -> (dict, dict):
+     k_vectors = {}
+     k_pixels = {}
+     k_indices = {}
+     for key, led_position in led_positions.items():
+         k_vectors[key] = calculate_k_vector(led_position, wavelength, sample_position, 0)
+     for key, k_vector in k_vectors.items():
+-        k_pixels[key] = dc_location + k_vector[:2] / (2 * np.pi * fourier_pixel_factor)
++        k_pixels[key] = dc_location + k_a_ejes(k_vector, orientacion) / (2 * np.pi * fourier_pixel_factor)
+     for key, k_pixel in k_pixels.items():
+         k_indices[key] = construir_indices(k_pixel)
+     return k_vectors, k_indices
+@@ -816,28 +834,34 @@ def inverse_linear_operator_real_images_vectorized(xx_c: npt.NDArray[np.complex1
+                              pupil: npt.NDArray[np.uint8],
+                              return_fft_xx_c: bool = False,
+                              )-> npt.NDArray[np.complex128]:
+-    # ¡Bórrar la línea de indices_stack = np.asarray(...) que tenías aquí adentro!
++    # [PARCHE punto 1] Antes el bloque acumulado se armaba con ventanas relativas a mn0 - n0//2
++    # (ndx0 - mn0 - n0//2) pero se pegaba en el lienzo empezando en mn0; safe_slice lo corría para que
++    # entrara y recortaba en 0 las ventanas de los LEDs cercanos a mn0. El resultado no era el adjunto
++    # del operador directo (test de adjunto: error relativo 1.42, falla con cualquier distribución de
++    # LEDs). Ahora cada LED vuelve a la MISMA ventana que usa linear_operator_vectorized:
++    # ndx - n//2 ... ndx - n//2 + n, y si esa ventana se sale del lienzo la corre EXACTAMENTE igual que
++    # safe_slice_lo en el directo (así sigue siendo su adjunto y las simulaciones con ventanas en el borde
++    # no se rompen). Misma normalización que antes (fft2 sin normalizar, / L).
++    # Aviso: una ventana corrida es un LED en el ángulo equivocado; en datos reales conviene que no pase
++    # (ver punto 3 del parche: lienzo donde entren todas).
++    def _ventana(inicio, n, maximo):              # = safe_slice_lo, sin el print
++        inicio = max(inicio, 0)
++        fin = inicio + n
++        if fin > maximo:
++            fin = maximo
++            inicio = fin - n
++        return slice(inicio, fin)
+     n0_LR, n1_LR, L = xx_c.shape
+     xx_c = np.fft.fftshift(np.fft.fft2(xx_c, axes=(0, 1)), axes=(0, 1))
+-    mn0, mn1 = np.min(indices_stack, axis=0)
+-    mx0, mx1 = np.max(indices_stack, axis=0)
+-    xx_sum = safe_zero_2D(mx0, mn0, mx1, mn1, n0_LR, n1_LR, xx_mean_large_buffer.shape)
+-
+-    for k in range(L):
+-        ndx0 = indices_stack[k, 0]
+-        ndx1 = indices_stack[k, 1]
+-
+-        s0 = safe_slice_ilo(ndx0 - mn0 - n0_LR//2, n0_LR, 0, xx_mean_large_buffer.shape[0])
+-        s1 = safe_slice_ilo(ndx1 - mn1 - n1_LR//2, n1_LR, 0, xx_mean_large_buffer.shape[1])
+-
+-        xx_sum[s0, s1] += xx_c[:, :, k] * np.conj(pupil)
+-
+-    xx_mean = xx_sum/L
+     xx_mean_large = xx_mean_large_buffer
+-
+-    s0 = safe_slice_ilo2(mn0, xx_mean.shape[0], 0, xx_mean_large_buffer.shape[0])
+-    s1 = safe_slice_ilo2(mn1, xx_mean.shape[1], 0, xx_mean_large_buffer.shape[1])
+-    xx_mean_large[s0, s1] = xx_mean
++    xx_mean_large[:] = 0
++    H0, H1 = xx_mean_large.shape
++    cpupil = np.conj(pupil)
++    for k in range(L):
++        s0 = _ventana(int(indices_stack[k, 0]) - n0_LR // 2, n0_LR, H0)
++        s1 = _ventana(int(indices_stack[k, 1]) - n1_LR // 2, n1_LR, H1)
++        xx_mean_large[s0, s1] += xx_c[:, :, k] * cpupil
++    xx_mean_large /= L
+ 
+     # return_fft_xx_c=False (default): comportamiento sin cambios, un solo
+     # valor de retorno. En True, además devuelve xx_c ya transformado a
+@@ -1984,7 +2008,8 @@ def reconstruct_real_images_test(
+         weight: float,
+         on_iteration: Callable[[int, np.ndarray], None], 
+         iteraciones_a_guardar: int,
+-        congelar_leds= False
++        congelar_leds= False,
++        mask: np.ndarray = None,   # [PARCHE punto 5] True = píxel válido; None = todos (como antes)
+     ) -> tuple:
+     """
+     Optimized TPWFP algorithm for FP reconstruction of real data.
+@@ -1995,7 +2020,8 @@ def reconstruct_real_images_test(
+     lr_shape = (int(n0), int(n1))
+ 
+     # Inicialización z_im
+-    z_im = np.sqrt(data[:, :, int(np.fix(L/2))]) * \
++    # [PARCHE punto 5] clip a 0: tras restar el flat, los LEDs de campo oscuro pueden tener píxeles negativos
++    z_im = np.sqrt(np.clip(data[:, :, int(np.fix(L/2))], 0, None)) * \
+            (lr_shape[0] * lr_shape[1]) / (hr_shape[0] * hr_shape[1])
+ 
+     # Resize to HR shape
+@@ -2060,6 +2086,8 @@ def reconstruct_real_images_test(
+         error_term **= 2
+         error_term += N
+         error_term -= data
++        if mask is not None:
++            error_term[~mask] = 0          # [PARCHE punto 5] píxeles saturados: sin gradiente
+         Cz = error_term * Bz_array
+         """# --- NUEVO: Apagar el gradiente de los LEDs congelados ---
+         Esto hace que la diferencia entre la data y las imágenes simuladas sea cero
+@@ -2362,7 +2390,8 @@ def calculate_k_vectors_k_indices_sample_tilt_integral(led_positions: dict[tuple
+     return k_vectors_tilt, k_indices
+ 
+ def calculate_k_vectors_k_indices_sample_tilt(led_positions: dict[tuple[int, int], RealSpace3],
+-                                wavelength, sample_position, dc_location, fourier_pixel_factor, sample_tilt, h_error) -> (dict, dict):
++                                wavelength, sample_position, dc_location, fourier_pixel_factor, sample_tilt, h_error,
++                                orientacion="original") -> (dict, dict):
+     k_vectors = {}
+     k_vectors_tilt = {}
+     k_pixels = {}
+@@ -2372,7 +2401,7 @@ def calculate_k_vectors_k_indices_sample_tilt(led_positions: dict[tuple[int, int
+     for key, k_vector in k_vectors.items():
+         k_vectors_tilt[key] = sample_tilt_incorporated(k_vector, sample_tilt)    
+     for key, k_vector in k_vectors_tilt.items():
+-        k_pixels[key] = dc_location + k_vector[:2] / (2 * np.pi * fourier_pixel_factor)
++        k_pixels[key] = dc_location + k_a_ejes(k_vector, orientacion) / (2 * np.pi * fourier_pixel_factor)
+     for key, k_pixel in k_pixels.items():
+         k_indices[key] = construir_indices(k_pixel)
+     return k_vectors_tilt, k_indices
+diff --git a/real_images_reconstruction.py b/real_images_reconstruction.py
+index bc931f6..a11c841 100644
+--- a/real_images_reconstruction.py
++++ b/real_images_reconstruction.py
+@@ -169,6 +169,40 @@ import os
+ 
+ """funcion reconstruction_pipeline antes de memap"""
+ 
++def cargar_captura(dir_color, dir_oscuro, dir_flat, recorte):
++    """[PARCHE punto 5] Lee una captura con exposición por LED, organizada como
++    <dir_color>/<t>ms_recortada_<recorte>/filaR_colC.tiff (un tiempo t por LED), y devuelve por LED:
++      S    = (muestra - oscuro_t) / t          [cuentas/ms]
++      F    = (flat - oscuro_t) / t              (flat = misma captura sin muestra; None si no hay)
++      sat  = píxeles saturados (4095) en alguno de los cuadros crudos, si están; si no, en la organizada
++    El oscuro de cada t es cualquier archivo de <dir_oscuro>/<t>ms_recortada_<recorte>/."""
++    import glob, re
++    import tifffile
++    S, F, SAT = {}, {}, {}
++    for carpeta in sorted(glob.glob(os.path.join(dir_color, f"*ms_recortada_{recorte}"))):
++        t_ms = int(re.match(r"(\d+)ms", os.path.basename(carpeta)).group(1))
++        oscuro = tifffile.imread(sorted(glob.glob(os.path.join(dir_oscuro, os.path.basename(carpeta), "*.tiff")))[0]).astype(np.float64)
++        for path in sorted(Path(carpeta).glob("fila*.tiff")):
++            key = (int(path.stem[4:6]), int(path.stem[10:12]))       # mismo formato de etiqueta que antes
++            muestra = tifffile.imread(path).astype(np.float64)
++            S[key] = (muestra - oscuro) / t_ms
++            if dir_flat is not None:
++                F[key] = (tifffile.imread(os.path.join(dir_flat, os.path.basename(carpeta), path.name)).astype(np.float64) - oscuro) / t_ms
++            # cuadros crudos: <captura>/filaR_colC_color?/<t>ms/imagen_frame_*.tiff, recorte centrado
++            base = Path(dir_color).parents[1]
++            crudos = sorted(glob.glob(str(base / f"{path.stem}_color*" / f"{t_ms}ms" / "imagen_frame_*.tiff")))
++            if crudos:
++                sat = np.zeros(muestra.shape, bool)
++                for c in crudos:
++                    a = tifffile.imread(c)
++                    o0, o1 = (a.shape[0] - recorte) // 2, (a.shape[1] - recorte) // 2
++                    sat |= a[o0:o0 + recorte, o1:o1 + recorte] >= 4095
++            else:
++                sat = muestra >= 4095
++            SAT[key] = sat
++    return S, (F if dir_flat is not None else None), SAT
++
++
+ def recontruction_pipeline_real_images(
+         recovery_error_cut,
+         output_filedir, 
+@@ -205,28 +239,15 @@ def recontruction_pipeline_real_images(
+         led_beta,
+         led_gamma,
+         sample_beta,
+-        h_error):
+-    
+-    # Tomamos las imágenes tomadas y las cargamos identificando a que led corresponden (key)
+-    imglist = sorted([filename for filename in input_filedir.glob("fila*.tiff")])
+-
+-    data = leds_indexes = None
++        h_error,
++        dark_filedir=None,
++        flat_filedir=None,
++        recorte=400):
+ 
+-    for ndx, path in enumerate(imglist):
+-        
+-        if debug:
+-            if ndx == 0:
+-                img = np.array(Image.open(path))
+-        else:
+-            img = np.array(Image.open(path))
+-            
+-        if data is None:
+-            data = {}
+-            leds_indexes = []
+-            
+-        key = (int(path.stem[4:6]),int(path.stem[10:12]))
+-        data[key] = img
+-        leds_indexes.append(key)
++    # [PARCHE punto 5] Antes se leían los fila*.tiff crudos de una sola carpeta, sin restar el oscuro ni
++    # normalizar por la exposición de cada LED. Ahora: (muestra - oscuro)/t por LED, flat y saturados.
++    data, flat, saturados = cargar_captura(input_filedir, dark_filedir, flat_filedir, recorte)
++    leds_indexes = sorted(data.keys())
+ 
+     # Añadimos ruido
+     # data_original_max = np.max([np.max(arr) for arr in data.values()])
+@@ -257,18 +278,21 @@ def recontruction_pipeline_real_images(
+     #     raise Exception(f"No se que hacer con {transmission_image}")
+ 
+     # objf = np.fft.fftshift(np.fft.fft2(obj))
+-    hr_shape = np.int64(np.round(lr_shape / ratio_LR))
+-    dc_location = np.asarray(hr_shape) // 2
++    # [PARCHE punto 3] hr = lr/ratio_LR supone que la pupila ocupa toda la imagen LR (píxel = lambda/(2 NA)).
++    # Ahora el lienzo se dimensiona para que entren TODAS las ventanas LR: primero se calculan los
++    # corrimientos k de cada LED (no dependen del lienzo) y después el lienzo y el centro.
++    dc_location = np.zeros(2, dtype=np.int64)
+ 
+     #Calculamos los vectores en el espacio de frecuencias y los indices en el espacio de frecuencias en pixeles que usaremos en la reconstruccion
+     
+     led_positions_tilted = led_errors_incorporated(filtered_leds, x_offset, y_offset, 0, led_alpha, led_beta, led_gamma)
+ 
+     k_vectors_tilt, k_indexes_tilt = calculate_k_vectors_k_indices_sample_tilt(
+-            led_positions_tilted, wavelength, sample_position, dc_location, fourier_pixel_factor, sample_beta, h_error)   
++            led_positions_tilted, wavelength, sample_position, dc_location, fourier_pixel_factor, sample_beta, h_error,
++            orientacion=orientacion)                                   # [PARCHE punto 4]
+ 
+-    k_vectors, k_indexes = calculate_k_vectors_k_indices( 
+-    filtered_leds, wavelength, sample_position, dc_location, fourier_pixel_factor)  
++    k_vectors, k_indexes = calculate_k_vectors_k_indices(
++    filtered_leds, wavelength, sample_position, dc_location, fourier_pixel_factor, orientacion=orientacion)
+ 
+     # Filtramos los datos quitando un número de imagenes correspondientes a un número de leds en cada lado de las filas y columnas
+     # 1. Definir los límites del cuadrado (como ya lo hacías)
+@@ -302,6 +326,31 @@ def recontruction_pipeline_real_images(
+     # Filtramos los datos quitando un número de imagenes correspondientes a un número de leds en cada lado de las filas y columnas
+     filtered_indexes = {key: k_indexes[key] for key in filtered_coordinates if key in leds_indexes}
+     filtered_indexes_tilt = {key: k_indexes_tilt[key] for key in filtered_coordinates if key in leds_indexes}
++    # [PARCHE punto 3] lienzo cuadrado: 2*(corrimiento máximo + media ventana + 1); luego se centra
++    n_lr = np.asarray(lr_shape)
++    desplaz = np.abs(np.asarray(list(filtered_indexes_tilt.values()) + list(filtered_indexes.values())))
++    lado = int(2 * (desplaz.max() + n_lr.max() // 2 + 1))     # cuadrado: mismo tamaño de píxel HR en los dos ejes
++    hr_shape = np.array([max(lado, n_lr[0]), max(lado, n_lr[1])])
++    dc_location = hr_shape // 2
++    filtered_indexes = {k: v + dc_location for k, v in filtered_indexes.items()}
++    filtered_indexes_tilt = {k: v + dc_location for k, v in filtered_indexes_tilt.items()}
++    for key, (a0, a1) in filtered_indexes_tilt.items():
++        assert a0 - n_lr[0] // 2 >= 0 and a1 - n_lr[1] // 2 >= 0 and \
++            a0 - n_lr[0] // 2 + n_lr[0] <= hr_shape[0] and a1 - n_lr[1] // 2 + n_lr[1] <= hr_shape[1], key
++    hr_shape = tuple(int(v) for v in hr_shape)
++    print(f"Lienzo HR {hr_shape} (factor {hr_shape[0] / lr_shape[0]:.2f}); la fórmula anterior daba "
++          f"{int(np.round(lr_shape[0] / ratio_LR))} px")
++
++    # [PARCHE punto 5] flat: campo claro dividido por el flat; campo oscuro menos el flat suavizado
++    # (la luz parásita sin muestra). Campo claro = LEDs con seno del ángulo menor que la NA.
++    if flat is not None:
++        from scipy.ndimage import gaussian_filter
++        for key in filtered_indexes_tilt:
++            kv = k_vectors_tilt[key]
++            if np.hypot(kv[0], kv[1]) / np.linalg.norm(kv) < numerical_aperture:
++                data[key] = data[key] / flat[key] * flat[key].mean()
++            else:
++                data[key] = data[key] - gaussian_filter(flat[key], 8)
+     filtered_data = {key: data[key] for key in filtered_indexes_tilt if key in leds_indexes}
+ 
+     def _on_iteration(ndx: int, z: npt.NDArray[np.complex128]):
+@@ -311,15 +360,20 @@ def recontruction_pipeline_real_images(
+             return
+ 
+     # Creamos la pupila que usaremos en cada imagen simulada al reconstruir
+-    synthetic_pupil = create_pupil(round(.5 * np.min(data[list(data.keys())[0]].shape)), data[list(data.keys())[0]].shape)
++    # [PARCHE punto 2] radio físico NA/lambda en píxeles del espectro LR. Antes: 0.5*min(lr_shape), que
++    # supone píxel en la muestra = lambda/(2 NA); con 2.5x y 3.2 um el píxel es 1.28 um y la pupila mide
++    # 57 px de 400, no 200.
++    radio_pupila = numerical_aperture / wavelength * lr_shape[0] * pixel_size / magnification
++    synthetic_pupil = create_pupil(radio_pupila, lr_shape)
++    print(f"Radio de la pupila: {radio_pupila:.1f} px (antes {round(.5 * np.min(lr_shape))})")
+ 
+     # Definimos los indices en los que reconstruiremos, sumando y restando diez pixeles a los valores de los indices calculados anteriormente
+     # z0 = im_r = np.zeros((hr_shape[0],hr_shape[1])).astype(complex)
+     # recovery_errs = np.zeros((iterations))
+ 
+     # Sumo las pupilas utilizadas en la reconstruccion para luego visualizarlas
+-    filtered_matrix_overlapped_with_pupils = sum_pupils(hr_shape, lr_shape, round(min(lr_shape)* 0.5), filtered_indexes)
+-    filtered_matrix_overlapped_with_pupils_tilt = sum_pupils(hr_shape, lr_shape, round(min(lr_shape)* 0.5), filtered_indexes_tilt)
++    filtered_matrix_overlapped_with_pupils = sum_pupils(hr_shape, lr_shape, radio_pupila, filtered_indexes)
++    filtered_matrix_overlapped_with_pupils_tilt = sum_pupils(hr_shape, lr_shape, radio_pupila, filtered_indexes_tilt)
+ 
+ 
+     # Tomamos las llaves de tu diccionario de índices
+@@ -335,10 +389,10 @@ def recontruction_pipeline_real_images(
+     }
+ 
+     # 1. Generamos la matriz solo para estas dos pupilas
+-    matriz_pareja = sum_pupils(hr_shape, lr_shape, round(min(lr_shape) * 0.5), indices_pareja)
++    matriz_pareja = sum_pupils(hr_shape, lr_shape, radio_pupila, indices_pareja)
+ 
+     # 2. Contamos el área de una sola pupila
+-    matriz_una_pupila = sum_pupils(hr_shape, lr_shape, round(min(lr_shape) * 0.5), {led_1: filtered_indexes[led_1]})
++    matriz_una_pupila = sum_pupils(hr_shape, lr_shape, radio_pupila, {led_1: filtered_indexes[led_1]})
+     area_una_pupila = np.sum(matriz_una_pupila > 0)
+ 
+     # 3. Contamos los píxeles donde AMBAS pupilas se cruzan (valor == 2)
+@@ -394,9 +448,10 @@ def recontruction_pipeline_real_images(
+     print(f"\nSample height: {h_error}, Sample beta: {sample_beta}\nOffset_y: {y_offset}, Offset_x: {x_offset}\nAlpha led: {led_alpha}, Beta led: {led_beta}, Gamma led: {led_gamma}\nUsed Leds: {leds_number_y - 2*numb_external_leds_discarded_row_column_y}x{leds_number_y - 2*numb_external_leds_discarded_row_column_y}")
+                     
+ 
+-    data_array = np.stack([filtered_data[key] for key in sorted(filtered_data.keys())], axis=-1) 
++    data_array = np.stack([filtered_data[key] for key in sorted(filtered_data.keys())], axis=-1)
++    mask_array = np.stack([~saturados[key] for key in sorted(filtered_data.keys())], axis=-1)   # [PARCHE punto 5]
+ # return z0, im_r, diccionario_records, imagenes_intermedias, phase_max_list, phase_min_list, pasos, registros, perfiles_radiales_records
+-    z0, im_r, dictionary, imagenes_intermedias, phase_max, phase_min, pasos, diferencias, perfiles = reconstruct_real_images_test(recovery_error_cut, data_array, hr_shape, 0, filtered_indexes_tilt, synthetic_pupil, iterations, mu_max, weight, _on_iteration, iteraciones_a_guardar, congelar)
++    z0, im_r, dictionary, imagenes_intermedias, phase_max, phase_min, pasos, diferencias, perfiles = reconstruct_real_images_test(recovery_error_cut, data_array, hr_shape, 0, filtered_indexes_tilt, synthetic_pupil, iterations, mu_max, weight, _on_iteration, iteraciones_a_guardar, congelar, mask=mask_array)
+     os.makedirs(output_filedir, exist_ok=True)
+     iteraciones_x = np.arange(iteraciones_a_guardar, (len(phase_max) + 1) * iteraciones_a_guardar, iteraciones_a_guardar)
+     recovery_errs_df = pd.DataFrame.from_records(dictionary)
+@@ -519,41 +574,47 @@ alturas_mm = [0]
+ sigmaN = 0.004
+ mu_max = 0.4
+ weight = 1
+-numb_external_leds_discarded_row_column_x = 12
+-numb_external_leds_discarded_row_column_y = 10
++# [PARCHE punto 6] captura 25/09: filas 12-24, columnas 9-21. Con el filtro de siempre (cuadrado + círculo
++# centrado en el LED (17,15)) esto usa el círculo de radio 5 LEDs que entra en lo capturado.
++numb_external_leds_discarded_row_column_x = 11
++numb_external_leds_discarded_row_column_y = 9
+ numb_internal_leds_discarded_row_column = 0
+ extra_leds_for_max_angle = 5
+ # filedir = '/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-06-05/organizado/red/13x13_bis_recortada_200'
+ # input_filedir = Path(filedir)
+ leds_number_x = 33
+ leds_number_y = 29
+-wavelength = 6.8e-7 # g=5.3e-7, r=6.8e-7, b=4.7e-7
++wavelength = 6.3e-7 # [PARCHE punto 6] rojo 630 nm (antes 6.8e-7)
+ central_led = 17, 15
+ led_spacing = 6e-3
+ matrix_center = (0,0,0)
+ led_positions = calculate_led_positions_equi(leds_number_x, leds_number_y ,led_spacing, matrix_center)
+-sample_height = 76e-3
++sample_height = 74e-3   # [PARCHE punto 6] z = 74 mm medido (antes 76 mm)
+ sample_position = (0, 0, sample_height)
+-numerical_aperture = 0.10
++numerical_aperture = 0.07   # [PARCHE punto 6] objetivo 2.5x NA 0.07 (antes 2x NA 0.10)
+ # max_angle = calulate_max_angle(led_positions, central_led, sample_height)
+ # ratio_LR = calculate_LR_ratio(numerical_aperture, max_angle)
+ pixel_size = 3.2e-6
+-magnification = 2
++magnification = 2.5   # [PARCHE punto 6]
++orientacion = "actual"   # [PARCHE punto 4] la fila del LED corresponde a las filas de la imagen
++# [PARCHE punto 6] el 25/09 solo el rojo tiene flat (sin muestra) y oscuro
+ config_colores = {
+-    4.7e-07: {"name": "blue", "wave": 4.7e-07},
+-    5.3e-07: {"name": "green", "wave": 5.3e-07},
+-    6.8e-07: {"name": "red", "wave": 6.8e-07}
++    6.3e-07: {"name": "red", "wave": 6.3e-07},
+ }
+ n_leds_usados = leds_number_x - 2*numb_external_leds_discarded_row_column_x
+-size_de_imagenes = 600
++size_de_imagenes = 400   # [PARCHE punto 6] recortes de 400 px
+ congelar = False
+ ROOT = pathlib.Path("/home/chanoscopio/Documents/")
+ for wave, info in config_colores.items():
+     print()
+     print(f"Recontruccion en el color {info['name']}")
+     for altura_mm in alturas_mm:
+-        input_filedir = ROOT / f"LucasC/code/ptyco-full-simulator/test/imagenes_tomadas/2025-07-15/organizado/{info['name']}/9x9_recortada_{size_de_imagenes}"
+-        output_filedir = ROOT / f"LucasC/code/ptyco-full-simulator/muestra_2025-07-15/{info['name']}/h_{altura_mm}mm"
++        # [PARCHE punto 6] captura 25/09 set 3, con su oscuro y su flat (sin muestra)
++        captura = ROOT / "AleYLu/imagenes_tomadas"
++        input_filedir = captura / f"2026-09-25_red_enfocado_3/organizado/{info['name']}"
++        dark_filedir = captura / f"2026-09-25_red_enfocado_dark/organizado/{info['name']}"
++        flat_filedir = captura / f"2026-09-25_red_enfocado_sin_muestra/organizado/{info['name']}"
++        output_filedir = ROOT / f"LucasC/code/ptyco-full-simulator/muestra_2026-09-25/{info['name']}/h_{altura_mm}mm"
+         # Nombres de las imágenes de magnitud y fase
+         # mag_image = f"magnitud_13_particulas_wavelength_{info["name"]}_disminucionruido_100.tiff"
+         # phase_image = f"fase_envuelta_13_particulas_wavelength_{info["name"]}_ruido_0.tiff"
+@@ -589,13 +650,16 @@ for wave, info in config_colores.items():
+             numb_internal_leds_discarded_row_column,
+             extra_leds_for_max_angle,
+             0,
+-            0.004,
+-            0.002, 
++            0.0,        # [PARCHE punto 6] x_offset: eje óptico en la columna 15 (antes 4 mm)
++            -0.003,     # [PARCHE punto 6] y_offset: eje entre las filas 17 y 18 -> -3 mm (antes 2 mm)
+             0,
+             0,
+             0,
+             0,
+-            altura_mm/1000)
++            altura_mm/1000,
++            dark_filedir=dark_filedir,
++            flat_filedir=flat_filedir,
++            recorte=size_de_imagenes)
+         
+         file_name_reconstruccion_exacta = f"resultados_errores_reconstruccion_exacta_{info['name']}_{size_de_imagenes}_iteraciones_{iterations}_used_leds_{n_leds_usados}.csv"
+         ruta_final = os.path.join(output_filedir, file_name_reconstruccion_exacta)

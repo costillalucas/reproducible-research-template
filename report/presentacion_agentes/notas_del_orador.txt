@@ -2,7 +2,7 @@
 Presentarse. Contar en una frase de qué se trata: durante un mes le pedimos a agentes de inteligencia artificial que trabajaran sobre un problema real de microscopía. La charla no es sobre la técnica sino sobre qué pudieron y qué no pudieron resolver.
 
 2. respuesta
-Adelantar la conclusión para que todos sepan hacia dónde va la charla. Lo que se logró es sobre todo infraestructura y auditoría. Lo que no se logró es el objetivo científico final: una imagen real mejorada en la que confiemos.
+Adelantar la conclusión para que todos sepan hacia dónde va la charla. Lo que se logró es sobre todo infraestructura y auditoría. Lo que no se logró es el objetivo científico final: una imagen real con más detalle en la que confiemos. La reconstrucción roja del viernes 25 es la primera que se parece a la muestra, pero todavía no muestra detalle nuevo.
 
 3. problema
 Explicar con la analogía del rompecabezas: cada ángulo de luz trae una pieza distinta del detalle fino. Enfatizar que el programa siempre devuelve una imagen; el problema es saber si esa imagen es la muestra o un artefacto. Esa es la pregunta que atraviesa toda la charla.
@@ -25,8 +25,11 @@ Los agentes calcularon que la captura de julio tenía muy poca luz y propusieron
 9. confianza
 Cuatro criterios escritos antes de mirar, para no acomodarlos después. El 2 es el central: si mover los LEDs medio paso casi no cambia nada, los datos no restringen al programa. El 3: el indicador numérico dijo que pasaba, pero al mirar las imágenes el patrón en red sigue ahí; el número lo subestimaba. El 4: las partículas están tan separadas que una foto cruda ya las distingue, así que no hay detalle nuevo que ganar.
 
-10. lecciones
-Estas reglas no las teníamos al principio: cada una apareció después de ver fallar la versión sin ella. Un ejemplo de exceso de confianza: el asistente afirmó un 'sobreajuste' que tuvo que corregir mientras escribíamos el informe, al comparar con la simulación.
+10. rojo
+Captura nueva del viernes 25, solo en rojo y ahora con fotos sin muestra y fotos a oscuras para corregir. Mismos cuatro criterios, fijados antes de mirar. Predice las fotos que no vio con error 0,52, contra 0,99 sin reconstruir. El 3: a la vista el patrón en red casi desaparece, pero el número no bajó a la mitad, que era la exigencia. El 4: las partículas nuevas se repiten en las dos mitades, pero son fase dentro de lo que el objetivo ya resuelve. Los criterios se calibraron antes con una simulación de esta misma captura. Es la primera reconstrucción real que se parece a la muestra: se ven las partículas y su fase, que ninguna foto registra. Pero la prueba central sigue fallando: si reconstruimos por separado con la mitad de los LEDs y con la otra mitad, coinciden hasta el límite del objetivo y más allá no coinciden nada. O sea: recuperamos la fase, no ganamos resolución. Tres cosas de la tarde sirven como lecciones sobre agentes: los umbrales escritos de antemano no los pasaba ni la simulación, y hubo que corregirlos antes de tocar los datos reales, dejándolo escrito; la hipótesis del propio equipo de agentes (que la red venía de no pesar cada foto por su luz) se probó y resultó falsa, porque pesar empeora; y el patrón en red venía en parte de cómo se arrancaba la reconstrucción.
 
-11. siguiente
-Cerrar con el paso decisivo, que es de laboratorio: una muestra con detalles más finos que 3,8 µm. Invitar a preguntas.
+11. lecciones
+Estas reglas no las teníamos al principio: cada una apareció después de ver fallar la versión sin ella. Un ejemplo de exceso de confianza: el asistente afirmó un 'sobreajuste' que tuvo que corregir mientras escribíamos el informe, al comparar con la simulación. Otro, del viernes 25: la explicación que había dado el equipo de agentes para el patrón en red se probó y resultó falsa.
+
+12. siguiente
+Cerrar con el paso decisivo, que es de laboratorio: una muestra con detalles más finos que 3,8 µm. El segundo sale del rojo: con luz inclinada llega más luz de la que el modelo explica, y dos tomas simples dicen si viene del volumen de la muestra o de la celda. Invitar a preguntas.

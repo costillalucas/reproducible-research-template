@@ -3057,3 +3057,53 @@ ni confirmada ni refutada. EPRY no se pudo evaluar por el bug de abajo.
 - **Decisión del usuario** sobre el default del paso (`--step-epie`): el
   solver descongelado funciona en sintético pero en esta muestra real da
   fase tipo ruido.
+
+### 6.11 Capturas de septiembre, código previo de Lucas y cierre (2026-09-24 a 2026-09-28)
+
+Resumen para no especialistas: `report/resumen/resumen.pdf`. Detalle de cada paso en los `INFORME.md` / README citados.
+
+**1. Captura 24/09 (verde, J3, `results/captura_2026-09-24/j3/`).** Receta nueva de exposición (1/10/100 ms por LED, fotos a oscuras). La reconstrucción predice LEDs no vistos (C1), pero está dominada por un patrón en red que depende del recorte y de qué LEDs se usan. C2 falla. C4 no es evaluable: la separación mínima entre partículas es mayor que el límite de Abbe.
+
+**2. Captura 25/09, rojo, set 3 (`results/captura_2026-09-25_red/INFORME.md`).** Primera con flats (sin muestra) y fotos a oscuras. Método elegido: A+init (init Fourier del promedio de campo claro).
+- C1 pasa: 0.517 contra 0.991 sin FPM.
+- C2 falla: FRC entre mitades 0.026, con umbral 0.143 (el sintético da 0.185).
+- C3 mejora a la vista, pero no alcanza el umbral.
+- C4 solo muestra fase dentro de la banda del objetivo.
+- Hallazgos:
+  - z no es identificable en datos reales;
+  - pesar por ruido empeora, lo que refuta la hipótesis de J3;
+  - sobra luz en campo oscuro en los anillos 4–5.
+
+**3. Código previo de Lucas (`scripts/lucas_tpwfp/`, 2026-09-28).** Copia textual de `ptyco-full-simulator` (commit `fea5c80`), una copia adaptada y un parche para los puntos 1–6, no aplicado.
+- Tres errores verificados de forma independiente:
+  - el inverso de `common.py` no es el adjunto del directo (error 1.41) con ninguna distribución de LEDs;
+  - la orientación LED → espectro está traspuesta respecto de los datos; el signo sigue abierto;
+  - la pupila tiene n/2 píxeles en vez de NA/λ·N·dx (57 px).
+- Su TPWFP corregido, con /L, queda casi congelado: R held-out 0.985. La cobertura es de 2–3 LEDs por frecuencia, así que el paso efectivo es ~1/60.
+- Lo que sí aporta:
+  - una verificación independiente de nuestra geometría (ventanas a ≤ 1 px);
+  - el diagnóstico de solapamiento: **31 % entre vecinos**, con η = 1.9 < 6. En el sintético, pasar la matriz de 75 a 100 mm sube la fase de 0.87 a 0.97 (`results/captura_2026-09-24/synth_overlap/summary.json`).
+
+**4. Erratas corregidas en la presentación y en el resumen (2026-09-28).**
+- La fase sintética "0.87–0.97 con la misma geometría" era 0.87 (el 0.97 es z = 100 mm).
+- El "129 de 169" no tenía un script que lo generara; `an.py` da 131.
+- El "12" de julio es otra métrica: ≥ 10 % del brillo máximo, de 182 LEDs.
+- En J1, el ruido del oscuro no era de disparo sino un patrón fijo de píxeles calientes.
+
+**5. Rojo, set 1 (`results/captura_2026-09-25_red_set1/INFORME.md`, 2026-09-28).** Otra zona, con ~14 veces más señal en campo oscuro, HDR desde los cuadros crudos, A+init a z = 74 mm y criterios fijados antes de mirar.
+- La simulación con esa señal pasa C1–C4: C1 0.44 y C2 0.191.
+- El real **falla C1**: 0.998 contra 0.9999 sin FPM, y ni siquiera ajusta los LEDs que usó.
+- La luz inclinada está dominada por **estrías alineadas con la dirección de cada LED**, es decir, dispersión en el volumen fuera del modelo 2D.
+- Es la evidencia más directa de que la luz de campo oscuro sobrante no es ruido ni solver sino muestra gruesa. El siguiente modelo tendría que ser multi-slice, o hacen falta muestras más delgadas.
+
+**6. Captura RGB del 28/09 (`results/captura_2026-09-28_rgb/INFORME.md`).** Un mismo campo en los tres colores, con el foco fijo en verde, flats con la celda vacía y toma desenfocada.
+- **Los oscuros del 28/09 están saturados**, así que se usaron los del 25/09.
+- **Por color:**
+  - rojo: C1 0.901 contra 0.992 sin FPM, falla por poco;
+  - C2 falla en los tres (FRC en banda 0.014 / 0.024 / 0.009).
+- **Entre colores:**
+  - las fotos crudas coinciden (0.71–0.78);
+  - las reconstrucciones coinciden en parte dentro de la banda del objetivo (0.18–0.52) y casi nada en todo el espectro (0.02–0.06): el detalle agregado por FPM no es consistente entre colores.
+- **Rojo y azul** salen con partículas agrandadas y textura de red. El reenfoque numérico (óptimo en −100 / −75 µm) no lo corrige, y solo el verde se parece a la muestra.
+- **Primera prueba multiespectral real:** confirma por un camino independiente que no hay detalle confiable más allá del objetivo.
+- **Toma desenfocada para el signo:** no es concluyente, porque domina un patrón fijo del sensor.
