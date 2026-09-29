@@ -110,14 +110,14 @@ sup.ref a { color: #D9692B; text-decoration: none; font-size: 7pt }
 <h2>3. La cadena multiespectral, en simulación</h2>
 <p>El repositorio tiene un <strong>simulador</strong> del microscopio y un <strong>programa de reconstrucción</strong> por color (ePIE y Wirtinger flow). Además tiene una <strong>cadena multiespectral</strong>: lleva los tres colores a una grilla común, los reconstruye y los acopla desenvolviendo la fase con una longitud de onda sintética. Después ajusta la dispersión del material (cómo cambia el índice de refracción con el color) para obtener el <strong>espesor</strong> de la muestra.</p>
 <ul>
-<li><strong>Un color, con la geometría real y sin ruido:</strong> el brillo reconstruido coincide con la muestra inventada en 0,995 (1 = perfecto) <sup class="ref"><a href="#f-resumen_sint_amplitud">5</a></sup> y la fase en 0,87 <sup class="ref"><a href="#f-resumen_sint_fase">6</a></sup>. Con la matriz a 100 mm, que da más solapamiento entre LEDs vecinos, la fase sube a 0,97 <sup class="ref"><a href="#f-resumen_sint_fase_z100">7</a></sup>.</li>
+<li><strong>Un color, con la geometría real y sin ruido:</strong> la amplitud reconstruida (la raíz del brillo) coincide con la muestra inventada en 0,995 (1 = perfecto) <sup class="ref"><a href="#f-resumen_sint_amplitud">5</a></sup> y la fase en 0,87 <sup class="ref"><a href="#f-resumen_sint_fase">6</a></sup>. Con la matriz a 100 mm, que da más solapamiento entre LEDs vecinos, la fase sube a 0,97 <sup class="ref"><a href="#f-resumen_sint_fase_z100">7</a></sup>.</li>
 <li><strong>Tres colores acoplados:</strong> en un objeto diseñado para necesitar el acople, el espesor recuperado correlaciona 0,88 con el verdadero <sup class="ref"><a href="#f-multispectral_thickness_correlation">8</a></sup>, y el error es 183 veces menor que sin acoplar <sup class="ref"><a href="#f-unwrapping_error_reduction_factor">9</a></sup>.</li>
 <li><strong>El límite:</strong> un barrido con el solver real sobre la magnitud de la fase (roadmap, milestone 20) muestra que acoplar <strong>empeora</strong> cuando no hace falta desenvolver, y solo rescata en parte cuando sí hace falta. La cadena funciona, pero no mejora en general sobre reconstruir cada color por separado.</li>
 </ul>
 <h2>4. Los agentes</h2>
 <p><strong>Dentro del pipeline</strong> (<code>agents/</code>) hay tres agentes, construidos y probados en simulación. Los tres usan el propio Claude Code con respuestas de formato fijo:</p>
 <ul>
-<li>un <strong>orquestador</strong> que lee la convergencia de una reconstrucción y decide aceptar, reintentar con otro paso o declararla estancada;</li>
+<li>un <strong>orquestador</strong> que lee la convergencia de una reconstrucción y decide aceptar, reintentar con una corrección por vuelta distinta o declararla estancada;</li>
 <li>un agente de <strong>control de calidad</strong> que, sin la muestra verdadera, juzga si los tres colores son consistentes y si el resultado es confiable;</li>
 <li>un agente de <strong>reporte</strong>, que redacta cada hallazgo con sus números citados.</li>
 </ul>
@@ -128,7 +128,7 @@ sup.ref a { color: #D9692B; text-decoration: none; font-size: 7pt }
 <li>agentes en paralelo para auditar;</li>
 <li>equipos con un <strong>verificador</strong> que rehace cada número con su propio código antes de aceptarlo.</li>
 </ul>
-<p>Con eso aparecieron cinco errores que daban resultados equivocados <strong>sin avisar</strong>: tres en nuestro programa de reconstrucción (el paso, la escala inicial y la exposición) y dos en los datos de validación y configuración (la referencia y el objetivo). Aparte, tres en el código previo:</p>
+<p>Con eso aparecieron cinco errores que daban resultados equivocados <strong>sin avisar</strong>: tres en nuestro programa de reconstrucción (el tamaño de la corrección, la escala inicial y la exposición) y dos en los datos de validación y configuración (la referencia y el objetivo). Aparte, tres en el código previo:</p>
 <table>
 <thead>
 <tr>
@@ -139,7 +139,7 @@ sup.ref a { color: #D9692B; text-decoration: none; font-size: 7pt }
 </thead>
 <tbody>
 <tr>
-<td>El paso de corrección era ~8000 veces más chico de lo debido con imágenes reales <sup class="ref"><a href="#f-resumen_paso_congelado_factor">10</a></sup></td>
+<td>La corrección que el programa aplica en cada vuelta era ~8000 veces más chica de lo debido con imágenes reales <sup class="ref"><a href="#f-resumen_paso_congelado_factor">10</a></sup></td>
 <td>el programa devolvía casi la foto de partida: todo lo real anterior quedó invalidado, incluida la corrida multiespectral de diciembre</td>
 <td>un agente que investigaba otra cosa; las pruebas usaban imágenes de 16–32 píxeles</td>
 </tr>
@@ -175,7 +175,7 @@ sup.ref a { color: #D9692B; text-decoration: none; font-size: 7pt }
 <li><strong>Criterio 2, falla:</strong> las mitades coinciden 0,026, cuando el umbral era 0,143; la simulación da 0,185 <sup class="ref"><a href="#f-resumen_frc_real">14</a></sup>.</li>
 <li><strong>Criterio 4:</strong> se recupera la fase, no resolución.</li>
 </ul>
-<figure><img src="../informe/img/fig_reconstruccion_roja.png" style="width:46%"><figcaption>Rojo, 25/09, set 3: foto cruda, brillo y fase reconstruidos de la misma zona de 128 µm.</figcaption></figure>
+<figure><img src="../informe/img/fig_reconstruccion_roja.png" style="width:46%"><figcaption>Rojo, 25/09, set 3: foto cruda, amplitud y fase reconstruidas de la misma zona de 128 µm.</figcaption></figure>
 
 <p><strong>Rojo, 25/09, set 1</strong> (otra zona, con mucha más señal en campo oscuro; corrida del 28/09).</p>
 <ul>

@@ -42,14 +42,14 @@ Desde las imágenes se puede medir dónde cae el eje óptico respecto de la matr
 
 El repositorio tiene un **simulador** del microscopio y un **programa de reconstrucción** por color (ePIE y Wirtinger flow). Además tiene una **cadena multiespectral**: lleva los tres colores a una grilla común, los reconstruye y los acopla desenvolviendo la fase con una longitud de onda sintética. Después ajusta la dispersión del material (cómo cambia el índice de refracción con el color) para obtener el **espesor** de la muestra.
 
-- **Un color, con la geometría real y sin ruido:** el brillo reconstruido coincide con la muestra inventada en [srcnum:resumen_sint_amplitud:0.995] (1 = perfecto) [src:resumen_sint_amplitud] y la fase en [srcnum:resumen_sint_fase:0.87] [src:resumen_sint_fase]. Con la matriz a 100 mm, que da más solapamiento entre LEDs vecinos, la fase sube a [srcnum:resumen_sint_fase_z100:0.97] [src:resumen_sint_fase_z100].
+- **Un color, con la geometría real y sin ruido:** la amplitud reconstruida (la raíz del brillo) coincide con la muestra inventada en [srcnum:resumen_sint_amplitud:0.995] (1 = perfecto) [src:resumen_sint_amplitud] y la fase en [srcnum:resumen_sint_fase:0.87] [src:resumen_sint_fase]. Con la matriz a 100 mm, que da más solapamiento entre LEDs vecinos, la fase sube a [srcnum:resumen_sint_fase_z100:0.97] [src:resumen_sint_fase_z100].
 - **Tres colores acoplados:** en un objeto diseñado para necesitar el acople, el espesor recuperado correlaciona [srcnum:multispectral_thickness_correlation:0.88] con el verdadero [src:multispectral_thickness_correlation], y el error es [srcnum:unwrapping_error_reduction_factor:183] veces menor que sin acoplar [src:unwrapping_error_reduction_factor].
 - **El límite:** un barrido con el solver real sobre la magnitud de la fase (roadmap, milestone 20) muestra que acoplar **empeora** cuando no hace falta desenvolver, y solo rescata en parte cuando sí hace falta. La cadena funciona, pero no mejora en general sobre reconstruir cada color por separado.
 
 ## 4. Los agentes
 
 **Dentro del pipeline** (`agents/`) hay tres agentes, construidos y probados en simulación. Los tres usan el propio Claude Code con respuestas de formato fijo:
-- un **orquestador** que lee la convergencia de una reconstrucción y decide aceptar, reintentar con otro paso o declararla estancada;
+- un **orquestador** que lee la convergencia de una reconstrucción y decide aceptar, reintentar con una corrección por vuelta distinta o declararla estancada;
 - un agente de **control de calidad** que, sin la muestra verdadera, juzga si los tres colores son consistentes y si el resultado es confiable;
 - un agente de **reporte**, que redacta cada hallazgo con sus números citados.
 
@@ -60,11 +60,11 @@ Con datos reales, el control de calidad (en modo de prueba, con una regla fija e
 - agentes en paralelo para auditar;
 - equipos con un **verificador** que rehace cada número con su propio código antes de aceptarlo.
 
-Con eso aparecieron cinco errores que daban resultados equivocados **sin avisar**: tres en nuestro programa de reconstrucción (el paso, la escala inicial y la exposición) y dos en los datos de validación y configuración (la referencia y el objetivo). Aparte, tres en el código previo:
+Con eso aparecieron cinco errores que daban resultados equivocados **sin avisar**: tres en nuestro programa de reconstrucción (el tamaño de la corrección, la escala inicial y la exposición) y dos en los datos de validación y configuración (la referencia y el objetivo). Aparte, tres en el código previo:
 
 | error | consecuencia | cómo se encontró |
 |---|---|---|
-| El paso de corrección era ~[srcnum:resumen_paso_congelado_factor:8000] veces más chico de lo debido con imágenes reales [src:resumen_paso_congelado_factor] | el programa devolvía casi la foto de partida: todo lo real anterior quedó invalidado, incluida la corrida multiespectral de diciembre | un agente que investigaba otra cosa; las pruebas usaban imágenes de 16–32 píxeles |
+| La corrección que el programa aplica en cada vuelta era ~[srcnum:resumen_paso_congelado_factor:8000] veces más chica de lo debido con imágenes reales [src:resumen_paso_congelado_factor] | el programa devolvía casi la foto de partida: todo lo real anterior quedó invalidado, incluida la corrida multiespectral de diciembre | un agente que investigaba otra cosa; las pruebas usaban imágenes de 16–32 píxeles |
 | La imagen de referencia (Zeiss, objetivo 2,5x, [srcnum:resumen_zeiss_um_px:2.344] µm/píxel [src:resumen_zeiss_um_px]) tenía menos detalle que una foto cruda | no servía para validar ganancia de resolución | rastreando su origen |
 | Fotos sin corregir por exposición; escala inicial equivocada; las corridas de diciembre suponían otro objetivo | reconstrucciones sesgadas; geometría equivocada | revisando datos; el objetivo, al confirmar el hardware |
 | Código previo (`ptyco-full-simulator`): el gradiente caía en frecuencias corridas (error de adjunto [srcnum:resumen_adjunto_error:1.41]; 0 es correcto) [src:resumen_adjunto_error], la pupila ocupaba toda la imagen y la orientación de los LEDs estaba traspuesta | esas reconstrucciones no reflejan la muestra | al adaptarlo a los datos del 25/09; confirmado por un verificador independiente |
@@ -85,7 +85,7 @@ Antes de mirar cada reconstrucción real se fijaron **cuatro criterios**, con um
 - **Criterio 2, falla:** las mitades coinciden [srcnum:resumen_frc_real:0.026], cuando el umbral era [srcnum:resumen_frc_umbral:0.143]; la simulación da [srcnum:resumen_frc_sint:0.185] [src:resumen_frc_real].
 - **Criterio 4:** se recupera la fase, no resolución.
 
-![Rojo, 25/09, set 3: foto cruda, brillo y fase reconstruidos de la misma zona de 128 µm.](../informe/img/fig_reconstruccion_roja.png){w=46}
+![Rojo, 25/09, set 3: foto cruda, amplitud y fase reconstruidas de la misma zona de 128 µm.](../informe/img/fig_reconstruccion_roja.png){w=46}
 
 **Rojo, 25/09, set 1** (otra zona, con mucha más señal en campo oscuro; corrida del 28/09).
 - **En simulación, con esa señal, todo pasa:** error [srcnum:resumen_set1_sint_R:0.440], mitades [srcnum:resumen_set1_sint_frc:0.191] [src:resumen_set1_sint_R].
