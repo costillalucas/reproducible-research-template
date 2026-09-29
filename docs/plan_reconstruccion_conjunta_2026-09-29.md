@@ -97,6 +97,20 @@ datos reales ~12 (4 variantes en el grupo 0, 4 grupos más, 2 mitades, 2 nulos) 
 | 3:15-4:00 | informe y figuras | INFORME.md, figs/ |
 Prioridad si falta tiempo: chequeo de gradiente → S1-S3 y D2 → amplitud distinta → datos reales.
 
+## Relanzamiento programado (autorizado por Lucas el 2026-09-29)
+Si se acaban los tokens de la cuenta, las llamadas del job fallan, la ronda termina sin afirmaciones y el job queda
+"detenido". Los tokens se reinician a las ~21:10 del 29/09. Lucas autorizó retomar el job a esa hora y, si todavía no
+terminó (por ejemplo, porque es muy largo), otra vez a las 04:00 del 30/09.
+- Script: `jobs/2026-09-29_170433_derive-conjunta-3colores-v3/relanzar.sh "2026-09-29 21:15" "2026-09-30 04:00"`, lanzado
+  junto con el job, en segundo plano y desacoplado de la sesión (la computadora tiene que quedar encendida y sin suspender).
+  Registro en `relanzar.log` en la misma carpeta.
+- En cada hora: no hace nada si el job terminó, sigue corriendo (`job.pid` vivo) o el líder pidió ayuda humana
+  ([[BLOCKED]]). Si no, `job resume --rounds 2` con un aviso al equipo: seguir desde donde quedó, sin rehacer lo verificado.
+- Presupuesto: `job resume` no hace nada si el tope está agotado. Si quedan menos de 8M tokens, el script sube el tope 15M,
+  sin pasar de 60M en total (~USD 75). En el tope no relanza.
+- Probado en seco el 2026-09-29 (`DRYRUN=1`): relanza un job detenido o sin lanzar, no toca uno en marcha, no cambia el
+  presupuesto si sobra.
+
 ## Reglas
 - Escribir solo en `results/conjunta_2026-09-30/` y en la carpeta del job. No tocar `src/`, `tests/`, `report/`, `docs/`,
   otras carpetas de `results/` ni `~/Documents/LucasC/code/ptyco-full-simulator`. Sin commits ni push.
