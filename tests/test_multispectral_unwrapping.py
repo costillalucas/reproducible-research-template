@@ -164,3 +164,25 @@ def test_reference_phase_to_background_rejects_empty_mask():
         pass
     else:
         raise AssertionError("expected ValueError for an all-False background_mask")
+
+
+def test_couple_rgb_channels_known_dispersion_recovers_thickness():
+    lam = {"red": 0.63, "green": 0.53, "blue": 0.47}
+    A, B = 0.045, 0.0015
+    yy, xx = np.mgrid[:64, :64]
+    t = np.clip(8.0 - 0.02 * ((yy - 32) ** 2 + (xx - 32) ** 2), 0, None)
+    bg = t == 0
+    ph = {c: ms.wrap_phase(2 * np.pi * (A + B / l ** 2) * t / l) for c, l in lam.items()}
+    out = ms.couple_rgb_channels(ph, lam, bg, baseline_index_A=A, dispersion_B=B)
+    assert np.allclose(out["thickness_known_dispersion_um"], t, atol=1e-6)
+    assert ms.couple_rgb_channels(ph, lam, bg, baseline_index_A=A)["thickness_known_dispersion_um"] is None
+
+
+def test_couple_rgb_channels_dispersion_B_needs_A():
+    lam = {"red": 0.63, "green": 0.53, "blue": 0.47}
+    ph = {c: np.zeros((8, 8)) for c in lam}
+    try:
+        ms.couple_rgb_channels(ph, lam, np.ones((8, 8), bool), dispersion_B=0.0015)
+    except ValueError:
+        return
+    raise AssertionError("expected ValueError")

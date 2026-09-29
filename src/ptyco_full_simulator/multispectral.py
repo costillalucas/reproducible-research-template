@@ -341,7 +341,8 @@ def reference_phase_to_background(phase_wrapped: np.ndarray, background_mask: np
 
 def couple_rgb_channels(phases_wrapped: dict, wavelengths_um: dict, background_mask: np.ndarray,
                          baseline_index_A: float | None = None,
-                         k_range: range = range(-4, 5), **unwrap_kwargs) -> dict:
+                         k_range: range = range(-4, 5), dispersion_B: float | None = None,
+                         **unwrap_kwargs) -> dict:
     """The full milestone 2b step, wiring together everything above:
     given each RGB channel's raw (piston-ambiguous) wrapped phase from an
     independent per-channel reconstruction (milestone 2a,
@@ -367,6 +368,14 @@ def couple_rgb_channels(phases_wrapped: dict, wavelengths_um: dict, background_m
     "green_blue": array} -- each pair's cross-channel OPL disagreement, a
     per-pixel confidence diagnostic (large values flag pixels where even
     the best wrap-number pair didn't agree well)}.
+
+    `dispersion_B` (opt-in, needs `baseline_index_A`): with the sample's
+    dispersion KNOWN, n(lambda) = A + B/lambda^2, the thickness is taken
+    directly as the channel mean of OPL_c / n(lambda_c) instead of from the
+    free Cauchy fit, and returned as "thickness_known_dispersion_um". The
+    free fit extrapolates C to 1/lambda^2 = 0, which amplifies wrap-number
+    errors when the dispersion is small (results/sim_multiespectral_2026-09-29/
+    DIAGNOSTICO.md: 0.11 -> 0.55 correlation on simulated reconstructions).
     """
     channels = ("red", "green", "blue")
     referenced = {ch: reference_phase_to_background(phases_wrapped[ch], background_mask)
@@ -389,7 +398,14 @@ def couple_rgb_channels(phases_wrapped: dict, wavelengths_um: dict, background_m
     resolved = (resolve_thickness_and_dispersion(fit["C"], fit["D"], baseline_index_A)
                 if baseline_index_A is not None else None)
 
+    known = None
+    if dispersion_B is not None:
+        if baseline_index_A is None:
+            raise ValueError("dispersion_B needs baseline_index_A")
+        known = np.mean([opl[ch] / (baseline_index_A + dispersion_B / wavelengths_um[ch] ** 2)
+                         for ch in channels], axis=0)
+
     return {
-        "opl": opl, "fit": fit, "resolved": resolved,
+        "opl": opl, "fit": fit, "resolved": resolved, "thickness_known_dispersion_um": known,
         "pair_disagreement": {"red_green": rg["disagreement"], "green_blue": gb["disagreement"]},
     }
