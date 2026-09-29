@@ -1,0 +1,21 @@
+<section id="respuesta" data-transition="fade" style="display:flex; flex-direction:column; gap:48px; padding:128px 128px 160px; background:#fbfbf8">
+  <h2 style="font-family:'Source Serif 4', Georgia, serif; font-size:72px; font-weight:600; line-height:1.1; color:#14213d">The short answer</h2>
+  <div style="display:flex; flex-direction:row; gap:32px; flex:1">
+    <div style="display:flex; flex-direction:column; gap:16px; flex:1; padding:40px; background:#ffffff; border:1px solid #dddbd2; border-radius:16px">
+      <h3 style="font-family:'IBM Plex Sans', Arial, sans-serif; font-size:40px; font-weight:600; color:#2f6fb0">Achieved</h3>
+      <p style="font-family:'IBM Plex Sans', Arial, sans-serif; font-size:30px; line-height:1.35; color:#3d4a5c">A microscope simulator and a reconstruction program that work on simulated data</p>
+      <p style="font-family:'IBM Plex Sans', Arial, sans-serif; font-size:30px; line-height:1.35; color:#3d4a5c">Five errors that silently gave wrong results: three in our reconstruction program and two in the validation and configuration data; one invalidated everything done with real data</p>
+      <p style="font-family:'IBM Plex Sans', Arial, sans-serif; font-size:30px; line-height:1.35; color:#3d4a5c">The centre of the matrix relative to the axis, measured from the images (not the height: that was measured by hand)</p>
+      <p style="font-family:'IBM Plex Sans', Arial, sans-serif; font-size:30px; line-height:1.35; color:#3d4a5c">A capture recipe: from 12 to 131 useful light angles</p>
+      <p style="font-family:'IBM Plex Sans', Arial, sans-serif; font-size:30px; line-height:1.35; color:#3d4a5c">Recovering the phase of the real sample in all three colours, consistent with photos it did not use (28 Sep)</p>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:16px; flex:1; padding:40px; background:#ffffff; border:1px solid #dddbd2; border-radius:16px">
+      <h3 style="font-family:'IBM Plex Sans', Arial, sans-serif; font-size:40px; font-weight:600; color:#d9692b">Not achieved</h3>
+      <p style="font-family:'IBM Plex Sans', Arial, sans-serif; font-size:30px; line-height:1.35; color:#3d4a5c">A real reconstruction with more detail than the objective that passes every test</p>
+      <p style="font-family:'IBM Plex Sans', Arial, sans-serif; font-size:30px; line-height:1.35; color:#3d4a5c">Showing a resolution gain: there is no evidence yet, and not only because of the sample</p>
+      <p style="font-family:'IBM Plex Sans', Arial, sans-serif; font-size:30px; line-height:1.35; color:#3d4a5c">Fully combining the three colours on real data: they show the same sample, but the fine detail does not match yet</p>
+    </div>
+  </div>
+  <p style="position:absolute; bottom:64px; left:128px; width:600px; font-family:'IBM Plex Sans', Arial, sans-serif; font-size:24px; color:#6a7382">3 / 14</p>
+  <aside>Give the conclusion up front so everyone knows where the talk is going. What was achieved is mostly infrastructure and auditing. What was not achieved is the final scientific goal: a real image with more detail that we trust. The red reconstruction from Friday the 25th is the first one that looks like the sample, but it still shows no new detail. The five errors: in our program, the frozen solver, the scale of the initial image and the uncorrected exposure; in the data, the reference image without detail and the wrong objective in the configuration. The three problems in Lucas's earlier code are separate. The centre of the matrix was measured from the images; the height z cannot be pinned down from the images, so the hand measurement (74 mm) was used. On resolution: the spheres are large and a single photo already separates them, but the two-halves test does not need small objects; in simulation with similar particles it passes and on real data it does not, so something in the model or the data is also failing. Important distinction: predicting photos the reconstruction did not use proves that it recovers the real phase of the sample (and the test can fail: it failed in the zone with volume scattering). It does not prove a resolution gain, because each unseen photo shares much of its spectrum with its neighbours; that is what the two-halves test measures, and it does not pass yet.</aside>
+</section>

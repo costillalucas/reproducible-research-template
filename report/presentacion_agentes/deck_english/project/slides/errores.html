@@ -1,0 +1,13 @@
+<section id="errores" data-transition="fade" style="display:flex; flex-direction:column; gap:48px; padding:128px 128px 160px; background:#fbfbf8">
+  <h2 style="font-family:'Source Serif 4', Georgia, serif; font-size:72px; font-weight:600; line-height:1.1; color:#14213d">Other errors, including the agents' own</h2>
+  <table style="font-family:'IBM Plex Sans', Arial, sans-serif; font-size:28px; color:#3d4a5c">
+    <tr><th style="width:62%">Error</th><th style="width:38%">Who found it</th></tr>
+    <tr><td>The reference image (Zeiss, 2.5x objective) had less detail than a raw photo</td><td>An agent traced its origin</td></tr>
+    <tr><td>The photos were not corrected for their exposure time</td><td>An agent, while reviewing the data</td></tr>
+    <tr><td>The real-data runs assumed a different objective: nobody had asked</td><td>The person, when confirming the hardware</td></tr>
+    <tr><td>The assistant misexplained the noise in the dark frames: it was not random, it was hot pixels</td><td>The first team's verifier, by measuring</td></tr>
+  </table>
+  <p style="padding:28px 36px; font-family:'IBM Plex Sans', Arial, sans-serif; font-size:30px; line-height:1.35; color:#3d4a5c; background:#f6d9c6; border-radius:12px">The assistant also assumed things about the hardware that turned out false: the camera, the objective, the height. <b>They do not know what they are not told.</b></p>
+  <p style="position:absolute; bottom:64px; left:128px; width:600px; font-family:'IBM Plex Sans', Arial, sans-serif; font-size:24px; color:#6a7382">7 / 14</p>
+  <aside>Several errors had been introduced or missed by the agents themselves, and other agents found them while auditing with a different question. The reference one is telling: the image we validated against had less detail than a single raw photo, so the best 'reconstruction' was the unprocessed photo. It was taken with another microscope (Zeiss), but with a 2.5x/0.075 objective and 2.34 µm per pixel: a useful reference would be the 10x/0.25 on that same Zeiss. The objective: the program defaulted to the 2.5x/0.07 and the December capture was taken with the 2x/0.10; nobody asked until the person confirmed the hardware. The noise: in the dark frames, the verifier measured 2.6 counts of temporal noise; the assistant had explained the 5.4-count spread of the dark map as dark-current shot noise, when it actually came from hot pixels (a fixed pattern of the sensor).</aside>
+</section>

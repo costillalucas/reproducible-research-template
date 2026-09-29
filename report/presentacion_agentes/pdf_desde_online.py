@@ -2,8 +2,11 @@
 
 1. Bajar las slides con la herramienta de Artifacts (read de project/deck.json y project/slides/*.html) a una carpeta.
 2. python3 report/presentacion_agentes/pdf_desde_online.py <carpeta con project/>
+   (inglés: python3 report/presentacion_agentes/pdf_desde_online.py report/presentacion_agentes/deck_english --en)
 Cada recuadro de figura online es un <img alt="... (archivo NOMBRE.png)"> sin src: acá se reemplaza por la figura
 de report/informe/img/NOMBRE.png. Escribe presentacion_agentes_ia.html, .pdf y notas_del_orador.txt.
+Con --en (carpeta con las slides traducidas): figuras de report/informe/img_en/ y salida
+presentacion_agentes_ia_english.html, .pdf y notas_del_orador_english.txt.
 """
 import json
 import os
@@ -12,10 +15,15 @@ import subprocess
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-IMG = os.path.normpath(os.path.join(HERE, "..", "informe", "img"))
-src = os.path.join(sys.argv[1], "project")
+EN = "--en" in sys.argv[1:]
+args = [a for a in sys.argv[1:] if a != "--en"]
+SUF = "_english" if EN else ""
+IMG = os.path.normpath(os.path.join(HERE, "..", "informe", "img_en" if EN else "img"))
+src = os.path.join(args[0], "project")
 deck = json.load(open(os.path.join(src, "deck.json")))
 head = open(os.path.join(HERE, "head.html")).read()  # fuentes + CSS de impresión 1920x1080
+if EN:
+    head = head.replace('lang="es"', 'lang="en"').replace("Un mes con agentes de IA en microscopía", "A month with AI agents in microscopy")
 
 
 def figura(m):
@@ -38,10 +46,10 @@ for n, sid in enumerate(deck["order"], 1):
     a = re.search(r"<aside>(.*?)</aside>", t, re.S)
     notas.append(f"{n}. {sid}\n{a.group(1).strip() if a else ''}")
 html = head + "<body>" + "".join(body) + "</body></html>"
-out = os.path.join(HERE, "presentacion_agentes_ia.html")
+out = os.path.join(HERE, f"presentacion_agentes_ia{SUF}.html")
 open(out, "w").write(html)
-open(os.path.join(HERE, "notas_del_orador.txt"), "w").write("\n\n".join(notas) + "\n")
+open(os.path.join(HERE, f"notas_del_orador{SUF}.txt"), "w").write("\n\n".join(notas) + "\n")
 subprocess.run(["google-chrome", "--headless=new", "--disable-gpu", "--no-pdf-header-footer",
-                f"--print-to-pdf={os.path.join(HERE, 'presentacion_agentes_ia.pdf')}", f"file://{out}"],
+                f"--print-to-pdf={os.path.join(HERE, f'presentacion_agentes_ia{SUF}.pdf')}", f"file://{out}"],
                check=True, stderr=subprocess.DEVNULL)
-print(len(deck["order"]), "slides ->", os.path.join(HERE, "presentacion_agentes_ia.pdf"))
+print(len(deck["order"]), "slides ->", os.path.join(HERE, f"presentacion_agentes_ia{SUF}.pdf"))
