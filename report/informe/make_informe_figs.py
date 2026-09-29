@@ -87,7 +87,7 @@ y0 = (lr.shape[0] - 128) // 2; lr_c = np.sqrt(np.clip(lr[y0:y0 + 128, y0:y0 + 12
 fro = np.load("results/led_geometry_2025-12-12/fig09_frozen_panel.npz")["amplitude"]
 tha = np.load("results/residual_floor_2025-12-12/fig09_thawed_panels.npz")["amplitude"]
 fig, ax = plt.subplots(1, 3, figsize=(13, 4.9))
-for a, im, t in zip(ax, [lr_c, fro, tha], ["Foto cruda\n ", "Algoritmo congelado\ndevuelve casi la misma foto", "Algoritmo corregido\nse mueve, pero da un moteado"]):
+for a, im, t in zip(ax, [lr_c, fro, tha], ["Foto cruda\n ", "Algoritmo congelado\ndevuelve casi la misma foto", "Con el paso corregido: cambia la imagen,\npero con estos datos da ruido"]):
     a.imshow(stretch(im, 1, 99), cmap="gray"); a.set_title(t); a.axis("off")
 fig.suptitle("Con los datos reales, el algoritmo no hacía nada", fontsize=15, y=0.99)
 fig.text(0.5, 0.01, "Captura de diciembre de 2025, verde, zona de 205 µm. El congelamiento no se veía en las pruebas porque usaban imágenes diminutas.", ha="center", fontsize=10.5, color="0.35")
