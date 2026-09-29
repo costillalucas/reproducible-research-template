@@ -60,7 +60,7 @@ Con datos reales, el control de calidad (en modo de prueba, con una regla fija e
 - agentes en paralelo para auditar;
 - equipos con un **verificador** que rehace cada número con su propio código antes de aceptarlo.
 
-Con eso aparecieron varios errores que daban resultados equivocados **sin avisar**:
+Con eso aparecieron cinco errores que daban resultados equivocados **sin avisar**: tres en nuestro programa de reconstrucción (el paso, la escala inicial y la exposición) y dos en los datos de validación y configuración (la referencia y el objetivo). Aparte, tres en el código previo:
 
 | error | consecuencia | cómo se encontró |
 |---|---|---|
