@@ -61,7 +61,8 @@ recalculan con el MISMO código que la conjunta.
   dispersión conocida verde + azul (0.55 y 0.80 contra la verdad sin filtrar; recalcular con esta métrica).
 - **S2** (fase por color): desvío estándar de la diferencia de fase contra la verdad sobre los píxeles de partícula, tras quitar
   la constante con el fondo. valor = máx sobre colores de (error conjunto − error independiente), en rad; pasa si < 0.
-  Referencia independiente (grilla 1200): 0.54 / 0.17 / 0.17 rad (rojo / verde / azul).
+  Referencia independiente medida el 2026-09-29 en la grilla de 1200 px: 0.54 / 0.17 / 0.17 rad (rojo / verde / azul);
+  recalcularla en la grilla de 1600 px con el mismo código que la conjunta.
 - **S3** (mitades): reconstrucción conjunta con cada mitad del damero ((fila+col) % 2) → O_c de cada mitad →
   FRC en [2NA/λ_c, 0.45] 1/µm por color (la métrica C2). valor = mín sobre colores de (conjunta − independiente); pasa si ≥ 0.
   Referencia independiente: 0.66 / 0.86 / 0.93 (`analisis.json`, z98, frc_mitades).
@@ -99,9 +100,13 @@ Prioridad si falta tiempo: chequeo de gradiente → S1-S3 y D2 → amplitud dist
 ## Reglas
 - Escribir solo en `results/conjunta_2026-09-30/` y en la carpeta del job. No tocar `src/`, `tests/`, `report/`, `docs/`,
   otras carpetas de `results/` ni `~/Documents/LucasC/code/ptyco-full-simulator`. Sin commits ni push.
-- Corridas largas en segundo plano, reanudables (guardar estado), con un latido en un log DENTRO de la carpeta del job
-  (`jobs/<id>/work/logs/`) al menos una vez por minuto: el vigilante del job solo cuenta escrituras en su carpeta y corta una
-  llamada tras 30 min sin actividad.
+- `results/conjunta_2026-09-30` es un enlace a `jobs/<id>/work/conjunta_2026-09-30`: el vigilante del job solo cuenta
+  escrituras dentro de su carpeta (en el J3 cortó dos turnos de trabajadores a los 30 min, "idle-timeout, no output salvaged").
+  Con el enlace, todo lo que se escribe en resultados cuenta como actividad; el corte se subió a 60 min.
+- Corridas largas en segundo plano, con OMP_NUM_THREADS=1, reanudables, con un latido en `logs/<corrida>.log` al menos una
+  vez por minuto. Máximo 3 procesos pesados en total para todo el equipo.
+- El verificador recalcula desde lo guardado (chequeo de gradiente, métricas con su propio código); no repite
+  reconstrucciones completas (a lo sumo una prueba corta de <= 10 vueltas).
 - Si algo se traba más de 30 min, anotarlo y pasar a lo siguiente.
 - Aceptación (fija, el job no puede editarla): `pytest tests/test_acceptance_conjunta.py` — exige los entregables, no que el
   método funcione; un resultado negativo bien explicado es válido.
