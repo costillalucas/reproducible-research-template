@@ -13,7 +13,8 @@ El proyecto se proponía tres cosas: (1) reconstruir con FPM cada color; (2) com
 | pieza | estado |
 |---|---|
 | FPM por color, en simulación | **logrado** |
-| FPM por color, con datos reales | **parcial**: los tres colores predicen las fotos que no vieron (28/09 b); todavía sin evidencia de ganancia de resolución |
+| FPM por color, con datos reales: **recuperación de la fase** | **logrado**: en los tres colores (28/09 b), y la reconstrucción predice fotos que no usó |
+| FPM por color, con datos reales: **ganancia de resolución** | **no demostrado**: el detalle más allá del objetivo no pasa la prueba de las dos mitades |
 | Combinación multiespectral, en simulación | **parcial**: funciona en el caso para el que fue diseñada, no en general |
 | Combinación multiespectral, con datos reales | **parcial**: con cada color en su foco, los tres reconstruyen las mismas partículas; el detalle fino todavía no coincide entre colores |
 | Agentes dentro del pipeline | **construidos y probados en simulación**; con datos reales su juicio no fue confiable |
@@ -111,7 +112,7 @@ Otros dos indicios del mismo tipo:
 
 ## 6. Conclusión respecto del objetivo, y próximos pasos
 
-El pipeline existe y funciona **en simulación**: por color, multiespectral y con agentes. Con datos reales se llegó a reconstruir la fase de un color. **El paso multiespectral real quedó a medio camino.** Con cada color en su foco y más solapamiento (28/09 b), los tres colores reconstruyen la misma muestra y predicen las fotos que no vieron. Pero el detalle más allá del objetivo todavía no coincide lo suficiente, ni entre mitades ni entre colores, como para hablar de ganancia de resolución. Los agentes fueron más útiles para **auditar** (encontrar errores que nadie había visto) que para **juzgar** resultados reales sin referencia.
+El pipeline existe y funciona **en simulación**: por color, multiespectral y con agentes. **Con datos reales recupera la fase de la muestra en los tres colores**: predecir fotos que no usó es evidencia de eso, y la prueba puede fallar (falló en el set 1). **No demuestra ganancia de resolución**: cada foto no vista comparte con sus vecinas buena parte del espectro, así que se puede predecir sin haber recuperado detalle más fino que el objetivo. Para eso está la prueba de las dos mitades, que todavía no pasa. **El paso multiespectral real quedó a medio camino.** Con cada color en su foco y más solapamiento (28/09 b), los tres colores reconstruyen la misma muestra y predicen las fotos que no vieron. Pero el detalle más allá del objetivo todavía no coincide lo suficiente, ni entre mitades ni entre colores, como para hablar de ganancia de resolución. Los agentes fueron más útiles para **auditar** (encontrar errores que nadie había visto) que para **juzgar** resultados reales sin referencia.
 
 Próximos pasos:
 1. **Separar los dos cambios del 28/09 (b):** repetir a 98 mm con el foco fijo, o a 74 mm con cada color en su foco, para saber qué mejoró los resultados. Además, **una simulación de esta geometría** para recalibrar los umbrales, y más épocas de reconstrucción.
