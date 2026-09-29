@@ -106,8 +106,9 @@ terminó (por ejemplo, porque es muy largo), otra vez a las 04:00 del 30/09.
   Registro en `relanzar.log` en la misma carpeta.
 - En cada hora: no hace nada si el job terminó, sigue corriendo (`job.pid` vivo) o el líder pidió ayuda humana
   ([[BLOCKED]]). Si no, `job resume --rounds 2` con un aviso al equipo: seguir desde donde quedó, sin rehacer lo verificado.
-- Presupuesto: `job resume` no hace nada si el tope está agotado. Si quedan menos de 8M tokens, el script sube el tope 15M,
-  sin pasar de 60M en total (~USD 75). En el tope no relanza.
+- Presupuesto: sin tope propio; el límite es el de tokens disponibles en la cuenta (decisión de Lucas, 2026-09-29). El tope
+  interno del job se puso en 1.000M para que nunca lo frene (`job resume` no hace nada, sin avisar, si ese tope se agota).
+- La computadora queda encendida (confirmado por Lucas).
 - Probado en seco el 2026-09-29 (`DRYRUN=1`): relanza un job detenido o sin lanzar, no toca uno en marcha, no cambia el
   presupuesto si sobra.
 
