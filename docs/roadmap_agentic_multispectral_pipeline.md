@@ -3119,3 +3119,36 @@ Resumen para no especialistas: `report/resumen/resumen.pdf`. Detalle de cada pas
   - **a la vista, los tres colores dan las mismas partículas.**
 - Como cambiaron dos cosas a la vez (solapamiento y foco), no se puede atribuir la mejora a una sola.
 - Umbrales sin recalibrar con una simulación de esta geometría (declarado).
+
+**8. Simulación multiespectral con las condiciones del laboratorio (`results/sim_multiespectral_2026-09-29/`, 2026-09-29).** Partículas de fase con espesor conocido y dispersión dn(λ) = 0.045 + 0.0015/λ², fotos con la señal y el ruido medidos por LED, a 98 mm y a 74 mm.
+- **Por color funciona a 98 mm:** contra la verdad 0.985–0.99; mitades 0.66–0.93. A 74 mm las mitades caen a 0.15–0.19.
+- **La combinación de colores falla:** la cadena libre (`couple_rgb_channels`) da 0.11 en espesor.
+- **Diagnóstico (`DIAGNOSTICO.md`, `diag_cadena.py`):**
+  - con fases exactas la cadena da 1.00, así que no hay un error de programación;
+  - el límite es el ruido de fase: por encima de ~0.1 rad el desenvolvimiento con longitudes de onda sintéticas elige mal la vuelta en 6–24 % de los píxeles, y las reconstrucciones por color tienen 0.17–0.54 rad;
+  - el ajuste de dispersión libre amplifica esos errores.
+- **Opción nueva `couple_rgb_channels(..., dispersion_B=B)`** (commit `e274bbd`, con pruebas): espesor con la dispersión conocida, sin ajustarla.
+
+**9. Qué mejoró la captura (b): sobre todo el foco (`results/captura_2026-09-28b/FOCO_VS_SOLAPAMIENTO.md`, `criterios_foco.py`).**
+- **Solo el foco:** rojo a 98 mm en su foco, C1 0.46 y C2 0.083; con el foco del verde o del azul (misma noche, mismo campo), C1 0.81–0.86 y C2 0.021–0.024.
+- **Solo la geometría:** verde en foco, 74 → 98 mm, C2 0.024 → 0.043 (×1.8).
+- **Conclusión:** el foco de cada color pesa más que el solapamiento. El modelo no incluye el desenfoque.
+
+**10. Dispersión real de la muestra (2026-09-29).**
+- **DMSO** (refractiveindex.info, Li 2022 y Kozma 2005): n = 1.492 / 1.485 / 1.477 a 470 / 530 / 630 nm.
+- **Nylon 12:** n_d ≈ 1.52–1.53, sin dato de dispersión (supuesto Abbe 40–55).
+- **Diferencia partícula − medio:** A = 0.04–0.05 y B entre −0.002 y 0. Las dos dispersiones casi se cancelan, así que con esta muestra el color no permite separar índice y espesor.
+
+**11. Reconstrucción conjunta de los tres colores: negativa en simulación (job `jobs/2026-09-29_170433_derive-conjunta-3colores-v3`, congelado; plan `docs/plan_reconstruccion_conjunta_2026-09-29.md`; informe `results/conjunta_2026-09-30/INFORME.md`).** Un solo espesor compartido, ajustado directo contra las fotos de los tres colores.
+- **Gradiente verificado:** 1e-8 contra diferencias finitas.
+- **El ajuste baja del piso de ruido con un espesor sin relación con la verdad:** S1 −0.09, y empeora con más vueltas. Arrancando desde un espesor bueno (0.56), el ajuste lo abandona. Costo y calidad del espesor apuntan en direcciones opuestas.
+- **Otros criterios:**
+  - S2 falla;
+  - S3 "pasa", pero solo mide la amplitud: criterio mal planteado;
+  - B ajustado −0.0023, cuando el verdadero es +0.0015.
+- **Datos reales:** no se corrieron, por la regla del plan.
+- **Hallazgo positivo:** la cadena por color con la dispersión conocida y **solo verde y azul** da **0.945** en simulación (0.98 con fases exactas). El 0.80 anterior incluía el rojo sin querer, por cómo `couple_rgb_channels` arma el verde. El umbral de S1 (0.90) quedó por debajo de esa referencia.
+- **Siguiente, según el informe:** empezar por el rojo y agregar verde y azul; regularizar el espesor; un criterio de parada con LEDs reservados, no el costo. Antes, lo barato: aplicar la cadena verde + azul con dispersión conocida a los datos reales de (b) y medirla con mitades y nulo.
+- **Costo del job:** 5 rondas, 70.8M tokens (~USD 86). Los relanzamientos programados de las 21:15 y las 04:00 funcionaron.
+
+Nota: `results/` está fuera de git. Los informes citados en los puntos 8–11 están solo en la máquina local, y `results/conjunta_2026-09-30` es un enlace a la carpeta del job (`jobs/`, también fuera de git).

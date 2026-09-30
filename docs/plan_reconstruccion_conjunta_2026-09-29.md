@@ -125,3 +125,6 @@ terminó (por ejemplo, porque es muy largo), otra vez a las 04:00 del 30/09.
 - Si algo se traba más de 30 min, anotarlo y pasar a lo siguiente.
 - Aceptación (fija, el job no puede editarla): `pytest tests/test_acceptance_conjunta.py` — exige los entregables, no que el
   método funcione; un resultado negativo bien explicado es válido.
+
+## Resultado (2026-09-30)
+Negativo en simulación; datos reales omitidos por la regla de arriba. Resumen y números: `docs/roadmap_agentic_multispectral_pipeline.md`, 6.11 punto 11; detalle: `results/conjunta_2026-09-30/INFORME.md` y `resultados.json` (solo locales). Lo que conviene corregir en un plan siguiente: S3 no mide el espesor; el umbral de S1 tiene que superar 0.945 (cadena verde + azul con dispersión conocida); hace falta un criterio de parada que no sea el costo (LEDs reservados).
