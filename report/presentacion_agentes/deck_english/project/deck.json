@@ -1,0 +1,59 @@
+{
+  "v": 4,
+  "attachments": {},
+  "cover": "portada",
+  "createdOnFiles": {
+    "at": "2026-09-28T14:43:16Z",
+    "v": 1
+  },
+  "designSystems": [],
+  "faces": {
+    "ibm-plex-sans": {
+      "family": "IBM Plex Sans",
+      "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600&display=swap"
+    },
+    "source-serif-4": {
+      "family": "Source Serif 4",
+      "href": "https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600&display=swap"
+    }
+  },
+  "order": [
+    "portada",
+    "problema",
+    "respuesta",
+    "como",
+    "simulado",
+    "congelado",
+    "errores",
+    "captura",
+    "confianza",
+    "rojo",
+    "rgb",
+    "rgb_b",
+    "lecciones",
+    "siguiente"
+  ],
+  "sections": {
+    "s1": {
+      "description": "The short answer and the problem",
+      "start": "portada"
+    },
+    "s2": {
+      "description": "How we worked and what worked",
+      "start": "como"
+    },
+    "s3": {
+      "description": "Errors found",
+      "start": "congelado"
+    },
+    "s4": {
+      "description": "The new captures and why we do not trust them yet",
+      "start": "captura"
+    },
+    "s5": {
+      "description": "Lessons and next steps",
+      "start": "lecciones"
+    }
+  },
+  "title": "A month with AI agents in microscopy"
+}

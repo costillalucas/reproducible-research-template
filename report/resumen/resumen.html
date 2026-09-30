@@ -1,0 +1,223 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Resumen del trabajo FPM</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap"><style>
+@page { size: A4; margin: 14mm 16mm 13mm 16mm }
+body { font-family: 'Source Serif 4', Georgia, serif; font-size: 10pt; line-height: 1.33; color: #1d2433 }
+h1 { font-family: 'IBM Plex Sans', Arial, sans-serif; font-size: 17pt; line-height: 1.2; color: #14213D; margin: 0 0 4px }
+h1 + p { color: #6A7382; margin-top: 0 }
+h2 { font-family: 'IBM Plex Sans', Arial, sans-serif; font-size: 12.5pt; color: #14213D; margin: 14px 0 4px;
+     border-bottom: 1px solid #DDDBD2; padding-bottom: 2px }
+p, li { margin: 4px 0 }
+table { border-collapse: collapse; width: 100%; font-size: 9pt; margin: 6px 0; font-family: 'IBM Plex Sans', Arial, sans-serif }
+th, td { border-bottom: 1px solid #DDDBD2; padding: 3px 5px; text-align: left; vertical-align: top }
+th { border-bottom: 1.5px solid #14213D }
+figure { display: inline-block; vertical-align: top; width: 100%; margin: 5px 0; text-align: center; break-inside: avoid }
+figure.medio { width: 49% }
+figcaption { font-size: 8.8pt; color: #4a5568; margin-top: 2px; text-align: left; padding: 0 6% }
+code { font-size: 8.6pt; background: #F1F0EA; padding: 0 2px }
+sup.ref a { color: #D9692B; text-decoration: none; font-size: 7pt }
+.anexo { break-before: page; font-size: 8.4pt; line-height: 1.3 }
+.anexo li { margin: 3px 0 }
+</style></head><body><h1>Pipeline de microscopía pticográfica de Fourier multiespectral asistido por agentes</h1>
+<p><em>Resumen del trabajo, septiembre de 2026. Lucas Costilla. Repositorio <code>reproducible-research-template</code>.</em></p>
+<h2>1. El objetivo y dónde quedamos</h2>
+<p>Un microscopio no distingue detalles más chicos que cierto límite, que depende de la apertura numérica (NA) del objetivo y del color de la luz. Con nuestro objetivo de NA 0,07, ese límite es de unos 3,8 µm en luz verde <sup class="ref"><a href="#f-resumen_abbe_verde_um">1</a></sup>.</p>
+<p>La <strong>microscopía pticográfica de Fourier (FPM)</strong> busca superarlo sin cambiar el objetivo. Una matriz de LEDs ilumina la muestra desde muchos ángulos, uno por foto, y un programa combina las fotos en una imagen de mayor resolución. De paso recupera la <strong>fase</strong>, es decir, cuánto se retrasa la luz al atravesar la muestra, algo que ninguna foto registra.</p>
+<p>El proyecto se proponía tres cosas: (1) reconstruir con FPM cada color; (2) combinar los tres colores (rojo 630 nm, verde 530 nm, azul 470 nm) en una reconstrucción <strong>multiespectral</strong>; y (3) que <strong>agentes de IA</strong> asistan tanto dentro del pipeline (decidir, controlar la calidad, reportar) como en su desarrollo.</p>
+<table>
+<thead>
+<tr>
+<th>pieza</th>
+<th>estado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FPM por color, en simulación</td>
+<td><strong>logrado</strong></td>
+</tr>
+<tr>
+<td>FPM por color, con datos reales: <strong>recuperación de la fase</strong></td>
+<td><strong>logrado</strong>: en los tres colores (28/09 b), y la reconstrucción predice fotos que no usó</td>
+</tr>
+<tr>
+<td>FPM por color, con datos reales: <strong>ganancia de resolución</strong></td>
+<td><strong>no demostrado</strong>: el detalle más allá del objetivo no pasa la prueba de las dos mitades</td>
+</tr>
+<tr>
+<td>Combinación multiespectral, en simulación</td>
+<td><strong>parcial</strong>: funciona en el caso para el que fue diseñada, no en general</td>
+</tr>
+<tr>
+<td>Combinación multiespectral, con datos reales</td>
+<td><strong>parcial</strong>: con cada color en su foco, los tres reconstruyen las mismas partículas; el detalle fino todavía no coincide entre colores</td>
+</tr>
+<tr>
+<td>Agentes dentro del pipeline</td>
+<td><strong>construidos y probados en simulación</strong>; con datos reales su juicio no fue confiable</td>
+</tr>
+<tr>
+<td>Agentes en el desarrollo</td>
+<td><strong>logrado</strong>: encontraron los errores que invalidaban los resultados reales</td>
+</tr>
+</tbody>
+</table>
+<h2>2. El montaje y las capturas</h2>
+<p>El montaje tiene una matriz de LEDs RGB con paso de 6 mm a unos 74 mm de la muestra, un objetivo 2,5x de NA 0,07 y una cámara de 12 bits con píxel de 3,2 µm (1,28 µm en la muestra). Se usan 13 × 13 = 169 LEDs, uno por foto y por color. La muestra son partículas de unos 5 µm (tamaño nominal; en la práctica, de tamaños variados) en DMSO.</p>
+<table>
+<thead>
+<tr>
+<th>captura</th>
+<th>qué tenía</th>
+<th>para qué sirvió</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>12/12/2025</td>
+<td>RGB, objetivo 2x NA 0,10</td>
+<td>primeras reconstrucciones, incluida una multiespectral; ahí aparecieron los errores de la sección 4</td>
+</tr>
+<tr>
+<td>08/07/2026</td>
+<td>RGB, 1 ms para todos los LEDs</td>
+<td>muy poca luz: solo 12 de 182 LEDs llegaban al 10 % del brillo del más brillante <sup class="ref"><a href="#f-resumen_leds_utiles_julio">2</a></sup></td>
+</tr>
+<tr>
+<td>24/09/2026</td>
+<td>RGB, 1/10/100 ms por LED, fotos a oscuras</td>
+<td><strong>receta nueva de exposición</strong>: 131 de 169 LEDs con señal/ruido mayor que 3 <sup class="ref"><a href="#f-resumen_leds_utiles_2409">3</a></sup></td>
+</tr>
+<tr>
+<td>25/09/2026</td>
+<td>solo rojo, dos zonas (sets 1 y 3), fotos a oscuras y <strong>sin muestra</strong> (flats)</td>
+<td>la reconstrucción real más confiable (set 3) y el diagnóstico de por qué falla (set 1)</td>
+</tr>
+<tr>
+<td>28/09/2026</td>
+<td>RGB del <strong>mismo campo</strong>, foco fijo en verde, flats (oscuros saturados: se usaron los del 25/09)</td>
+<td>la primera comparación multiespectral real (sección 5)</td>
+</tr>
+<tr>
+<td>28/09/2026 (b)</td>
+<td>RGB, matriz a <strong>98 mm</strong>, 15×15 LEDs, <strong>cada color en su foco</strong>, exposición calculada por LED, flats y oscuros</td>
+<td>la mejor captura real del proyecto (sección 5)</td>
+</tr>
+</tbody>
+</table>
+<figure class="medio"><img src="img/fig_montaje.png" style="width:92%"><figcaption>Esquema del montaje con los valores de la captura del 25/09.</figcaption></figure>
+<figure class="medio"><img src="img/fig_senal.png" style="width:92%"><figcaption>Señal útil por LED en la captura del 24/09 (verde, 100 ms). El centro es luz directa (campo claro); los bordes son ángulos grandes (campo oscuro), con poca señal pero con la información del detalle fino.</figcaption></figure>
+
+<p>Desde las imágenes se puede medir dónde cae el eje óptico respecto de la matriz: en diciembre, el ajuste del brillo por LED dio fila 17,45 y columna 14,65 <sup class="ref"><a href="#f-resumen_centro_fila">4</a></sup>; en septiembre, el eje cae entre los LEDs (17,15) y (18,15). La <strong>altura</strong> z, en cambio, no se puede fijar desde las imágenes (sección 5); se usó la medida a mano, 74 mm.</p>
+<h2>3. La cadena multiespectral, en simulación</h2>
+<p>El repositorio tiene un <strong>simulador</strong> del microscopio y un <strong>programa de reconstrucción</strong> por color (ePIE y Wirtinger flow). Además tiene una <strong>cadena multiespectral</strong>: lleva los tres colores a una grilla común, los reconstruye y los acopla desenvolviendo la fase con una longitud de onda sintética. Después ajusta la dispersión del material (cómo cambia el índice de refracción con el color) para obtener el <strong>espesor</strong> de la muestra.</p>
+<ul>
+<li><strong>Un color, con la geometría real y sin ruido:</strong> la amplitud reconstruida (la raíz del brillo) coincide con la muestra inventada en 0,995 (1 = perfecto) <sup class="ref"><a href="#f-resumen_sint_amplitud">5</a></sup> y la fase en 0,87 <sup class="ref"><a href="#f-resumen_sint_fase">6</a></sup>. Con la matriz a 100 mm, que da más solapamiento entre LEDs vecinos, la fase sube a 0,97 <sup class="ref"><a href="#f-resumen_sint_fase_z100">7</a></sup>.</li>
+<li><strong>Tres colores acoplados:</strong> en un objeto diseñado para necesitar el acople, el espesor recuperado correlaciona 0,88 con el verdadero <sup class="ref"><a href="#f-multispectral_thickness_correlation">8</a></sup>, y el error es 183 veces menor que sin acoplar <sup class="ref"><a href="#f-unwrapping_error_reduction_factor">9</a></sup>.</li>
+<li><strong>El límite:</strong> un barrido con el solver real sobre la magnitud de la fase (roadmap, milestone 20) muestra que acoplar <strong>empeora</strong> cuando no hace falta desenvolver, y solo rescata en parte cuando sí hace falta. La cadena funciona, pero no mejora en general sobre reconstruir cada color por separado.</li>
+</ul>
+<h2>4. Los agentes</h2>
+<p><strong>Dentro del pipeline</strong> (<code>agents/</code>) hay tres agentes, construidos y probados en simulación. Los tres usan el propio Claude Code con respuestas de formato fijo:</p>
+<ul>
+<li>un <strong>orquestador</strong> que lee la convergencia de una reconstrucción y decide aceptar, reintentar con una corrección por vuelta distinta o declararla estancada;</li>
+<li>un agente de <strong>control de calidad</strong> que, sin la muestra verdadera, juzga si los tres colores son consistentes y si el resultado es confiable;</li>
+<li>un agente de <strong>reporte</strong>, que redacta cada hallazgo con sus números citados.</li>
+</ul>
+<p>Con datos reales, el control de calidad (en modo de prueba, con una regla fija en vez del modelo) dio "confianza alta" a una reconstrucción de diciembre que en realidad estaba congelada. Los colores coincidían porque la fase casi no se había movido, no porque el acople funcionara. Sin buenas reconstrucciones, el juicio automático no distingue "bien" de "vacío".</p>
+<p><strong>En el desarrollo</strong>, los agentes trabajaron en tres modos:</p>
+<ul>
+<li>sesiones directas con una persona;</li>
+<li>agentes en paralelo para auditar;</li>
+<li>equipos con un <strong>verificador</strong> que rehace cada número con su propio código antes de aceptarlo.</li>
+</ul>
+<p>Con eso aparecieron cinco errores que daban resultados equivocados <strong>sin avisar</strong>: tres en nuestro programa de reconstrucción (el tamaño de la corrección, la escala inicial y la exposición) y dos en los datos de validación y configuración (la referencia y el objetivo). Aparte, tres en el código previo:</p>
+<table>
+<thead>
+<tr>
+<th>error</th>
+<th>consecuencia</th>
+<th>cómo se encontró</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>La corrección que el programa aplica en cada vuelta era ~8000 veces más chica de lo debido con imágenes reales <sup class="ref"><a href="#f-resumen_paso_congelado_factor">10</a></sup></td>
+<td>el programa devolvía casi la foto de partida: todo lo real anterior quedó invalidado, incluida la corrida multiespectral de diciembre</td>
+<td>un agente que investigaba otra cosa; las pruebas usaban imágenes de 16–32 píxeles</td>
+</tr>
+<tr>
+<td>La imagen de referencia (Zeiss, objetivo 2,5x, 2,344 µm/píxel <sup class="ref"><a href="#f-resumen_zeiss_um_px">11</a></sup>) tenía menos detalle que una foto cruda</td>
+<td>no servía para validar ganancia de resolución</td>
+<td>rastreando su origen</td>
+</tr>
+<tr>
+<td>Fotos sin corregir por exposición; escala inicial equivocada; las corridas de diciembre suponían otro objetivo</td>
+<td>reconstrucciones sesgadas; geometría equivocada</td>
+<td>revisando datos; el objetivo, al confirmar el hardware</td>
+</tr>
+<tr>
+<td>Código previo (<code>ptyco-full-simulator</code>): el gradiente caía en frecuencias corridas (error de adjunto 1,41; 0 es correcto) <sup class="ref"><a href="#f-resumen_adjunto_error">12</a></sup>, la pupila ocupaba toda la imagen y la orientación de los LEDs estaba traspuesta</td>
+<td>esas reconstrucciones no reflejan la muestra</td>
+<td>al adaptarlo a los datos del 25/09; confirmado por un verificador independiente</td>
+</tr>
+</tbody>
+</table>
+<h2>5. Datos reales, color por color</h2>
+<p>Antes de mirar cada reconstrucción real se fijaron <strong>cuatro criterios</strong>, con umbrales calibrados en una simulación de la misma captura:</p>
+<ol>
+<li>predice las fotos de LEDs que no usó;</li>
+<li>dos reconstrucciones independientes, cada una con la mitad de los LEDs, coinciden en el detalle más allá del límite del objetivo;</li>
+<li>no aparecen patrones que no están en la muestra;</li>
+<li>aparece detalle nuevo.</li>
+</ol>
+<p><strong>Verde, 24/09.</strong> Predice fotos no vistas, pero está dominada por un patrón en red que cambia con decisiones del programa. Más señal no alcanzó para sacarlo.</p>
+<p><strong>Rojo, 25/09, set 3.</strong> Es la primera reconstrucción real que se parece a la muestra: se ven las partículas y su fase, sin el patrón en red.</p>
+<ul>
+<li><strong>Criterio 1, pasa:</strong> error 0,517 contra 0,991 sin reconstruir (1 = no mejor que una constante) <sup class="ref"><a href="#f-resumen_R_Ainit">13</a></sup>.</li>
+<li><strong>Criterio 2, falla:</strong> las mitades coinciden 0,026, cuando el umbral era 0,143; la simulación da 0,185 <sup class="ref"><a href="#f-resumen_frc_real">14</a></sup>.</li>
+<li><strong>Criterio 4:</strong> se recupera la fase, no resolución.</li>
+</ul>
+<figure><img src="../informe/img/fig_reconstruccion_roja.png" style="width:46%"><figcaption>Rojo, 25/09, set 3: foto cruda, amplitud y fase reconstruidas de la misma zona de 128 µm.</figcaption></figure>
+
+<p><strong>Rojo, 25/09, set 1</strong> (otra zona, con mucha más señal en campo oscuro; corrida del 28/09).</p>
+<ul>
+<li><strong>En simulación, con esa señal, todo pasa:</strong> error 0,440, mitades 0,191 <sup class="ref"><a href="#f-resumen_set1_sint_R">15</a></sup>.</li>
+<li><strong>Con los datos reales no predice nada:</strong> 0,998 contra 1,000 sin reconstruir <sup class="ref"><a href="#f-resumen_set1_R">16</a></sup>.</li>
+<li><strong>La causa se ve en las fotos.</strong> La luz inclinada está dominada por estrías que siguen la dirección de cada LED: luz dispersada por material fuera de foco, en el volumen de la muestra, que el modelo de muestra delgada no tiene. Es la explicación más directa de la "luz de más en campo oscuro" que también aparece, en menor medida, en el set 3.</li>
+</ul>
+<figure><img src="../informe/img/fig_set1_vs_set3.png" style="width:54%"><figcaption>Las dos zonas del 25/09 con los mismos LEDs: en la zona 3, partículas aisladas; en la zona 1, estrías en la dirección de la luz.</figcaption></figure>
+
+<p><strong>Los tres colores del mismo campo, 28/09, con el foco fijo en verde.</strong> Fue la primera prueba multiespectral real. Las fotos crudas coincidían entre colores (0,71–0,78) <sup class="ref"><a href="#f-resumen_rgb_crudas_min">17</a></sup>, pero las reconstrucciones solo dentro de la banda del objetivo (hasta 0,52) <sup class="ref"><a href="#f-resumen_rgb_banda_max">18</a></sup>, y casi nada con todo el detalle (hasta 0,06) <sup class="ref"><a href="#f-resumen_rgb_todo_max">19</a></sup>. Solo el verde, el color enfocado, se parecía a la muestra, y el rojo predecía apenas las fotos no vistas (0,901 contra 0,992) <sup class="ref"><a href="#f-resumen_rgb_R_rojo">20</a></sup>. Eso llevó a la captura siguiente.</p>
+<p><strong>Los tres colores, 28/09 (b), con la matriz a 98 mm y cada color en su foco.</strong> Se cambiaron dos cosas a la vez: más solapamiento entre LEDs vecinos (de 31 % a 46 %) y el foco de cada color. Por eso no se puede separar cuánto aporta cada una.</p>
+<ul>
+<li><strong>Los tres colores predicen las fotos que no vieron:</strong> rojo 0,461, verde 0,615 y azul 0,596, contra ~0,98 sin reconstruir <sup class="ref"><a href="#f-resumen_b_R_rojo">21</a></sup>. El rojo da el mejor resultado del proyecto.</li>
+<li><strong>Las mitades coinciden más que nunca en el detalle fino</strong> (0,043 a 0,099, de 5 a 14 veces lo esperable por azar) <sup class="ref"><a href="#f-resumen_b_frc_max">22</a></sup>, pero todavía por debajo del umbral (0,143).</li>
+<li><strong>Entre colores:</strong><ul>
+<li>las fotos crudas coinciden 0,84–0,92 <sup class="ref"><a href="#f-resumen_b_crudas_min">23</a></sup>;</li>
+<li>azul y verde reconstruidos coinciden 0,56 en la banda del objetivo y 0,14 con todo el detalle <sup class="ref"><a href="#f-resumen_b_azulverde_banda">24</a></sup>, mejor que a la tarde;</li>
+<li>a la vista, los tres colores reconstruyen <strong>las mismas partículas en los mismos lugares</strong>.</li>
+</ul>
+</li>
+</ul>
+<figure><img src="../informe/img/fig_rgb_2809b.png" style="width:50%"><figcaption>28/09 (b), matriz a 98 mm, cada color en su foco: arriba, la foto cruda de cada color; abajo, su reconstrucción. Los tres muestran las mismas partículas.</figcaption></figure>
+
+<p>Otros dos indicios del mismo tipo:</p>
+<ul>
+<li><strong>La altura no se puede fijar desde las imágenes.</strong> Con datos reales, el error sigue bajando, con altibajos, hasta z = 115 mm, donde llega a 0,437 <sup class="ref"><a href="#f-resumen_z115_R">25</a></sup>. En la simulación, el mínimo cae en el valor verdadero: z está compensando un error del modelo.</li>
+<li><strong>Poco solapamiento entre LEDs vecinos a 74 mm:</strong> solo 31 % <sup class="ref"><a href="#f-resumen_solapamiento_pct">26</a></sup>, en el límite bajo de lo recomendado para FPM. A 98 mm sube a 46 % <sup class="ref"><a href="#f-resumen_b_solapamiento_pct">27</a></sup>, y esa captura dio los mejores resultados.</li>
+</ul>
+<h2>6. Conclusión respecto del objetivo, y próximos pasos</h2>
+<p>El pipeline existe y funciona <strong>en simulación</strong>: por color, multiespectral y con agentes. <strong>Con datos reales recupera la fase de la muestra en los tres colores</strong>: predecir fotos que no usó es evidencia de eso, y la prueba puede fallar (falló en el set 1). <strong>No demuestra ganancia de resolución</strong>: cada foto no vista comparte con sus vecinas buena parte del espectro, así que se puede predecir sin haber recuperado detalle más fino que el objetivo. Para eso está la prueba de las dos mitades, que todavía no pasa. <strong>El paso multiespectral real quedó a medio camino.</strong> Con cada color en su foco y más solapamiento (28/09 b), los tres colores reconstruyen la misma muestra y predicen las fotos que no vieron. Pero el detalle más allá del objetivo todavía no coincide lo suficiente, ni entre mitades ni entre colores, como para hablar de ganancia de resolución. Los agentes fueron más útiles para <strong>auditar</strong> (encontrar errores que nadie había visto) que para <strong>juzgar</strong> resultados reales sin referencia.</p>
+<p>Próximos pasos:</p>
+<ol>
+<li><strong>Separar los dos cambios del 28/09 (b):</strong> repetir a 98 mm con el foco fijo, o a 74 mm con cada color en su foco, para saber qué mejoró los resultados. Además, <strong>una simulación de esta geometría</strong> para recalibrar los umbrales, y más épocas de reconstrucción.</li>
+<li><strong>Muestras más delgadas y menos densas</strong>, o un modelo de muestra gruesa (multi-slice); y una muestra con detalle conocido más fino que el límite, como una placa de calibración o las pistas de un CD (1,6 µm).</li>
+<li><strong>Separar volumen de celda:</strong> fotos de la celda solo con DMSO y de la muestra desenfocada. En la misma toma, cuatro LEDs extra fijan la orientación de la matriz con signo.</li>
+</ol>
+<h2>7. Dónde está cada cosa</h2>
+<ul>
+<li><strong>Código</strong> del simulador, la reconstrucción y la cadena multiespectral: <code>src/ptyco_full_simulator/</code>. <strong>Agentes:</strong> <code>agents/</code>.</li>
+<li><strong>Reconstrucciones reales:</strong> <code>results/captura_2026-09-25_red/</code> (set 3), <code>results/captura_2026-09-25_red_set1/</code> (set 1), <code>results/captura_2026-09-28_rgb/</code> y <code>results/captura_2026-09-28b/</code>, cada una con su <code>INFORME.md</code>. Mapas de exposición de la última captura: <code>data/captura_2026-09-28b/</code>.</li>
+<li><strong>Historia de decisiones y hallazgos:</strong> <code>docs/roadmap_agentic_multispectral_pipeline.md</code>, secciones 6.x.</li>
+<li><strong>Código previo, copia adaptada y parche:</strong> <code>scripts/lucas_tpwfp/</code>.</li>
+<li><strong>Qué resolvieron los agentes y qué no:</strong> el informe aparte (https://claude.ai/code/artifact/de7eab31-d9e0-4828-a62d-285ba0d46a98) y la presentación.</li>
+<li><strong>Este resumen:</strong> <code>report/resumen/</code> (<code>make_figs.py</code>, <code>build.py</code>). Cada número tiene su fuente en <code>data/numbers.json</code> (anexo).</li>
+</ul><section class="anexo"><h2>Anexo: fuente de cada número</h2><p>Cada número del texto está en <code>data/numbers.json</code>, escrito por <code>scripts/compute_numbers.py</code>, y se verifica con <code>scripts/check_provenance.py report/resumen/resumen.md</code>.</p><ol><li id="f-resumen_abbe_verde_um"><b>Límite de resolución (Abbe) del objetivo 2.5x NA 0.07 en luz verde, en µm</b><br><code>lambda/(2 NA) con lambda = 0.53 um y NA = 0.07</code></li><li id="f-resumen_leds_utiles_julio"><b>Captura 08/07/2026, verde, 1 ms: LEDs (de 182) con al menos 10 % del brillo del LED más brillante (channels.green.census.n_ge_10pct_peak)</b><br><code>results/esferas_2026-07-08/sanity/radiance_census.json</code></li><li id="f-resumen_leds_utiles_2409"><b>Captura 24/09, verde con enfoque verde, 100 ms: LEDs (de 169) con señal estructural/ruido > 3 (fórmula de results/captura_2026-09-24/stats_por_led/an.py)</b><br><code>scripts/resumen_numbers.py::leds_utiles_2409</code></li><li id="f-resumen_centro_fila"><b>Captura 12/12/2025: fila del eje óptico ajustada con el brillo por LED (main_z76_poly4.row; la columna es main_z76_poly4.col)</b><br><code>results/led_geometry_2025-12-12/center_from_radiance.json</code></li><li id="f-resumen_sint_amplitud"><b>Simulación sin ruido con la geometría real (2.5x, z = 75 mm, 100 iteraciones): correlación del brillo reconstruido con el de la muestra (runs[hoy_2.5x_z75, 100].amplitude_correlation)</b><br><code>results/captura_2026-09-24/synth_overlap/summary.json</code></li><li id="f-resumen_sint_fase"><b>La misma simulación: correlación de la fase (runs[hoy_2.5x_z75, 100].phase_correlation)</b><br><code>results/captura_2026-09-24/synth_overlap/summary.json</code></li><li id="f-resumen_sint_fase_z100"><b>La misma simulación con la matriz a 100 mm, es decir más solapamiento entre LEDs vecinos (runs[2.5x_z100, 100].phase_correlation)</b><br><code>results/captura_2026-09-24/synth_overlap/summary.json</code></li><li id="f-multispectral_thickness_correlation"><b>correlation between the milestone-2 coupled pipeline's recovered sample-thickness field and the true field, on a synthetic 3-channel dispersion object reconstructed through the actual Wirtinger flow solver (not injected phase)</b><br><code>scripts/compute_numbers.py::multispectral_thickness_correlation</code></li><li id="f-unwrapping_error_reduction_factor"><b>how many times smaller the coupled (unwrap + dispersion-fit) pipeline's thickness RMSE is than a naive baseline that treats each channel's raw wrapped phase as already-unwrapped OPL, on a synthetic dispersion signal large enough to require real unwrapping</b><br><code>scripts/compute_numbers.py::unwrapping_error_reduction_factor</code></li><li id="f-resumen_paso_congelado_factor"><b>Cuántas veces más chico que el paso ePIE unitario era el paso de Wirtinger flow con recortes de 400 px (roadmap sección 6.9)</b><br><code>lr_n_px / step_max = (400*400)/20, src/ptyco_full_simulator/reconstruction.py (step_max = 20)</code></li><li id="f-resumen_zeiss_um_px"><b>Tamaño de píxel en la muestra de la imagen de referencia Zeiss, en µm</b><br><code>~/Documents/AleYLu/elefante/2025-12-02/3x3/3x3_Metadata(tif).xml (Scaling Distance X = 2.344e-6 m; objetivo Plan-Neofluar 2.5x/0.075)</code></li><li id="f-resumen_adjunto_error"><b>Error relativo del operador inverso original (common.py de ptyco-full-simulator) frente al adjunto exacto del operador directo (0 = correcto)</b><br><code>scripts/resumen_numbers.py::error_adjunto_original</code></li><li id="f-resumen_R_Ainit"><b>Rojo 25/09 set 3, método A+init: error de predicción de LEDs no vistos, promedio de 5 folds (cv.A+init.mean; 1 = no mejor que una constante)</b><br><code>results/captura_2026-09-25_red/resumen_real.json</code></li><li id="f-resumen_frc_real"><b>Rojo 25/09: coincidencia (FRC) entre las dos mitades de LEDs en la banda 0.222-0.45 1/µm, más allá del límite del objetivo (C2.frc_sel)</b><br><code>results/captura_2026-09-25_red/resumen_real.json</code></li><li id="f-resumen_set1_sint_R"><b>Simulación con los niveles de señal y ruido del set 1 (muestra delgada): error de predicción de LEDs no vistos (sintetico.C1.sel_mean)</b><br><code>results/captura_2026-09-25_red_set1/veredicto.json</code></li><li id="f-resumen_set1_R"><b>Rojo 25/09 set 1 (otra zona), A+init: error de predicción de LEDs no vistos (C1.sel_mean)</b><br><code>results/captura_2026-09-25_red_set1/veredicto.json</code></li><li id="f-resumen_rgb_crudas_min"><b>RGB 28/09: correlación entre colores de la foto cruda (18,15), registrada (mínimo de rojo-verde y azul-verde)</b><br><code>results/captura_2026-09-28_rgb/fotos_crudas_entre_colores.json</code></li><li id="f-resumen_rgb_banda_max"><b>RGB 28/09: correlación del brillo reconstruido entre colores dentro de la banda del objetivo (máximo de los tres pares; el mínimo es 0.18)</b><br><code>results/captura_2026-09-28_rgb/multiespectral_por_banda.json</code></li><li id="f-resumen_rgb_todo_max"><b>RGB 28/09: la misma correlación con todo el espectro reconstruido (máximo de los tres pares)</b><br><code>results/captura_2026-09-28_rgb/multiespectral_por_banda.json</code></li><li id="f-resumen_rgb_R_rojo"><b>RGB 28/09, rojo, A+init: error de predicción de LEDs no vistos (5 folds, C1_rojo)</b><br><code>results/captura_2026-09-28_rgb/multiespectral_registrado.json</code></li><li id="f-resumen_b_R_rojo"><b>28/09 (b), matriz a 98 mm, cada color en su foco: rojo, error de predicción de LEDs no vistos (red.C1_R)</b><br><code>results/captura_2026-09-28b/criterios_b.json</code></li><li id="f-resumen_b_frc_max"><b>28/09 (b): coincidencia entre mitades en la banda más allá del objetivo, máximo de los tres colores (azul; rojo 0.083, verde 0.043)</b><br><code>results/captura_2026-09-28b/criterios_b.json</code></li><li id="f-resumen_b_crudas_min"><b>28/09 (b): correlación entre colores de la foto cruda (18,15) registrada, mínimo de rojo-verde y azul-verde</b><br><code>results/captura_2026-09-28b/comparar_colores.json</code></li><li id="f-resumen_b_azulverde_banda"><b>28/09 (b): correlación azul-verde del brillo reconstruido y registrado, en la banda del objetivo</b><br><code>results/captura_2026-09-28b/comparar_colores.json</code></li><li id="f-resumen_z115_R"><b>Rojo 25/09, método B con z = 115 mm: error de predicción de LEDs no vistos (results/captura_2026-09-25_red/out/tasks/real_B_z115.0_f*.json)</b><br><code>scripts/resumen_numbers.py::cv_heldout</code></li><li id="f-resumen_solapamiento_pct"><b>Solapamiento entre las pupilas de dos LEDs vecinos en el espectro, z = 74 mm, en % del área</b><br><code>scripts/resumen_numbers.py::solapamiento_vecinos_pct</code></li><li id="f-resumen_b_solapamiento_pct"><b>Solapamiento entre las pupilas de dos LEDs vecinos en el espectro, z = 98 mm (rojo), en % del área</b><br><code>scripts/resumen_numbers.py::solapamiento_vecinos_pct</code></li></ol></section></body></html>

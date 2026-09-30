@@ -1,0 +1,139 @@
+{
+ "piso_ruido": 412831.323861137,
+ "costo_verdad": 414027.90904093144,
+ "figuras": {
+  "fig1_costo_vs_epoca.png": {
+   "A1_D1": {
+    "epocas": 240,
+    "costo_inicial": 2176714.5592282326,
+    "costo_final": 400161.97061770305,
+    "razon_contra_piso": 0.9693110660185866
+   },
+   "A1_D2": {
+    "epocas": 240,
+    "costo_inicial": 2089524.7747472767,
+    "costo_final": 394177.621628896,
+    "razon_contra_piso": 0.9548151965365024
+   },
+   "A1_D1_cad": {
+    "epocas": 240,
+    "costo_inicial": 17882965.921690166,
+    "costo_final": 611493.7861007027,
+    "razon_contra_piso": 1.4812194490997233
+   },
+   "A2_D1": {
+    "epocas": 240,
+    "costo_inicial": 2093627.1209593671,
+    "costo_final": 889295.6218305825,
+    "razon_contra_piso": 2.154137950369562
+   }
+  },
+  "fig2_S1_vs_epoca.png": {
+   "corridas": {
+    "A1_D1": {
+     "epocas": [
+      0,
+      80,
+      180,
+      240
+     ],
+     "valores": [
+      -0.15166931896597605,
+      -0.03749,
+      -0.079,
+      -0.0914657234082056
+     ],
+     "convergida": true,
+     "caida_de_costo_ultimas_10_epocas_pct": 0.6547551950220595
+    },
+    "A1_D2": {
+     "epocas": [
+      0,
+      80,
+      180,
+      240
+     ],
+     "valores": [
+      -0.15166931896597605,
+      -0.04343,
+      -0.077,
+      -0.09121911973473244
+     ],
+     "convergida": true,
+     "caida_de_costo_ultimas_10_epocas_pct": 0.5033416171115339
+    },
+    "A1_D1_cad": {
+     "epocas": [
+      0,
+      80,
+      180,
+      240
+     ],
+     "valores": [
+      0.5574167691640861,
+      0.45634,
+      0.44,
+      0.43849385710597255
+     ],
+     "convergida": false,
+     "caida_de_costo_ultimas_10_epocas_pct": 3.5404052303310873,
+     "advertencia": "valor EN TRANSITO: el costo todavia cae 3.54 % en las ultimas 10 epocas (umbral de continuacion del plan: 1 %), asi que este S1 no es el valor final de la corrida"
+    },
+    "A2_D1": {
+     "epocas": [
+      0,
+      80,
+      120,
+      240
+     ],
+     "valores": [
+      -0.15166931896597605,
+      -0.01546837672818736,
+      -0.0233,
+      -0.02586840168375981
+     ],
+     "convergida": true,
+     "caida_de_costo_ultimas_10_epocas_pct": 0.5403576871737357
+    }
+   },
+   "umbral": 0.9,
+   "referencia": 0.94488,
+   "cadena_libre": 0.11532
+  },
+  "fig3_mapas_t.png": {
+   "verdad (filtrada a la banda de los LEDs)": {
+    "S1": 1.0,
+    "p99_um": 7.964919886207001,
+    "min_um": -0.48934946816179775,
+    "max_um": 21.04230864125515
+   },
+   "conjunta A1_D1, 240 epocas": {
+    "S1": -0.0914657234082056,
+    "p99_um": 4.921278214454651,
+    "min_um": -11.35902214050293,
+    "max_um": 10.469329833984375
+   },
+   "conjunta A1_D1 desde la cadena, 240 epocas": {
+    "S1": 0.43849385710597255,
+    "p99_um": 13.366195058822631,
+    "min_um": -31.430583953857422,
+    "max_um": 42.21354293823242
+   },
+   "cadena libre de 3 colores (linea base)": {
+    "S1": 0.11532296159388007,
+    "p99_um": 28.88978558508994,
+    "min_um": -150.68786115623024,
+    "max_um": 122.83559172676499
+   }
+  },
+  "fig4_B_vs_epoca.png": {
+   "B_verdad": 0.0015,
+   "B_epoca_1": 0.0,
+   "B_final": -0.002341,
+   "epoca_del_cambio_de_signo": 1,
+   "B_min": -0.002341,
+   "tolerancia_del_plan": 0.0005,
+   "error": 0.0038410000000000002
+  }
+ }
+}

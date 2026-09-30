@@ -3057,3 +3057,98 @@ ni confirmada ni refutada. EPRY no se pudo evaluar por el bug de abajo.
 - **Decisión del usuario** sobre el default del paso (`--step-epie`): el
   solver descongelado funciona en sintético pero en esta muestra real da
   fase tipo ruido.
+
+### 6.11 Capturas de septiembre, código previo de Lucas y cierre (2026-09-24 a 2026-09-28)
+
+Resumen para no especialistas: `report/resumen/resumen.pdf`. Detalle de cada paso en los `INFORME.md` / README citados.
+
+**1. Captura 24/09 (verde, J3, `results/captura_2026-09-24/j3/`).** Receta nueva de exposición (1/10/100 ms por LED, fotos a oscuras). La reconstrucción predice LEDs no vistos (C1), pero está dominada por un patrón en red que depende del recorte y de qué LEDs se usan. C2 falla. C4 no es evaluable: la separación mínima entre partículas es mayor que el límite de Abbe.
+
+**2. Captura 25/09, rojo, set 3 (`results/captura_2026-09-25_red/INFORME.md`).** Primera con flats (sin muestra) y fotos a oscuras. Método elegido: A+init (init Fourier del promedio de campo claro).
+- C1 pasa: 0.517 contra 0.991 sin FPM.
+- C2 falla: FRC entre mitades 0.026, con umbral 0.143 (el sintético da 0.185).
+- C3 mejora a la vista, pero no alcanza el umbral.
+- C4 solo muestra fase dentro de la banda del objetivo.
+- Hallazgos:
+  - z no es identificable en datos reales;
+  - pesar por ruido empeora, lo que refuta la hipótesis de J3;
+  - sobra luz en campo oscuro en los anillos 4–5.
+
+**3. Código previo de Lucas (`scripts/lucas_tpwfp/`, 2026-09-28).** Copia textual de `ptyco-full-simulator` (commit `fea5c80`), una copia adaptada y un parche para los puntos 1–6, no aplicado.
+- Tres errores verificados de forma independiente:
+  - el inverso de `common.py` no es el adjunto del directo (error 1.41) con ninguna distribución de LEDs;
+  - la orientación LED → espectro está traspuesta respecto de los datos; el signo sigue abierto;
+  - la pupila tiene n/2 píxeles en vez de NA/λ·N·dx (57 px).
+- Su TPWFP corregido, con /L, queda casi congelado: R held-out 0.985. La cobertura es de 2–3 LEDs por frecuencia, así que el paso efectivo es ~1/60.
+- Lo que sí aporta:
+  - una verificación independiente de nuestra geometría (ventanas a ≤ 1 px);
+  - el diagnóstico de solapamiento: **31 % entre vecinos**, con η = 1.9 < 6. En el sintético, pasar la matriz de 75 a 100 mm sube la fase de 0.87 a 0.97 (`results/captura_2026-09-24/synth_overlap/summary.json`).
+
+**4. Erratas corregidas en la presentación y en el resumen (2026-09-28).**
+- La fase sintética "0.87–0.97 con la misma geometría" era 0.87 (el 0.97 es z = 100 mm).
+- El "129 de 169" no tenía un script que lo generara; `an.py` da 131.
+- El "12" de julio es otra métrica: ≥ 10 % del brillo máximo, de 182 LEDs.
+- En J1, el ruido del oscuro no era de disparo sino un patrón fijo de píxeles calientes.
+
+**5. Rojo, set 1 (`results/captura_2026-09-25_red_set1/INFORME.md`, 2026-09-28).** Otra zona, con ~14 veces más señal en campo oscuro, HDR desde los cuadros crudos, A+init a z = 74 mm y criterios fijados antes de mirar.
+- La simulación con esa señal pasa C1–C4: C1 0.44 y C2 0.191.
+- El real **falla C1**: 0.998 contra 0.9999 sin FPM, y ni siquiera ajusta los LEDs que usó.
+- La luz inclinada está dominada por **estrías alineadas con la dirección de cada LED**, es decir, dispersión en el volumen fuera del modelo 2D.
+- Es la evidencia más directa de que la luz de campo oscuro sobrante no es ruido ni solver sino muestra gruesa. El siguiente modelo tendría que ser multi-slice, o hacen falta muestras más delgadas.
+
+**6. Captura RGB del 28/09 (`results/captura_2026-09-28_rgb/INFORME.md`).** Un mismo campo en los tres colores, con el foco fijo en verde, flats con la celda vacía y toma desenfocada.
+- **Los oscuros del 28/09 están saturados**, así que se usaron los del 25/09.
+- **Por color:**
+  - rojo: C1 0.901 contra 0.992 sin FPM, falla por poco;
+  - C2 falla en los tres (FRC en banda 0.014 / 0.024 / 0.009).
+- **Entre colores:**
+  - las fotos crudas coinciden (0.71–0.78);
+  - las reconstrucciones coinciden en parte dentro de la banda del objetivo (0.18–0.52) y casi nada en todo el espectro (0.02–0.06): el detalle agregado por FPM no es consistente entre colores.
+- **Rojo y azul** salen con partículas agrandadas y textura de red. El reenfoque numérico (óptimo en −100 / −75 µm) no lo corrige, y solo el verde se parece a la muestra.
+- **Primera prueba multiespectral real:** confirma por un camino independiente que no hay detalle confiable más allá del objetivo.
+- **Toma desenfocada para el signo:** no es concluyente, porque domina un patrón fijo del sensor.
+
+**7. Captura 28/09 (b) (`results/captura_2026-09-28b/INFORME.md`).** Matriz a ~98 mm (solapamiento de 31 % a 46 %), 15×15 LEDs, **cada color en su foco**, exposición por LED calculada y calibrada sobre la marcha (`scripts/exposicion_z100.py`, `data/captura_2026-09-28b/`), flats RGB y oscuros bien tomados.
+- **Geometría:** los 6 LEDs de campo claro previstos se confirman en los tres colores.
+- **C1 pasa en los tres colores:** rojo 0.461 (el mejor del proyecto), verde 0.615 y azul 0.596, contra ~0.98 sin FPM.
+- **C2 sigue bajo el umbral** (0.083 / 0.043 / 0.099), pero de 5 a 14 veces el nulo y de 3 a 10 veces más que en las capturas anteriores.
+- **Entre colores:**
+  - fotos crudas 0.84–0.92;
+  - azul–verde reconstruido: 0.56 en la banda del objetivo y 0.14 en todo el espectro, mejor que a la tarde;
+  - rojo–verde, bajo: 0.11 / 0.06;
+  - **a la vista, los tres colores dan las mismas partículas.**
+- Como cambiaron dos cosas a la vez (solapamiento y foco), no se puede atribuir la mejora a una sola.
+- Umbrales sin recalibrar con una simulación de esta geometría (declarado).
+
+**8. Simulación multiespectral con las condiciones del laboratorio (`results/sim_multiespectral_2026-09-29/`, 2026-09-29).** Partículas de fase con espesor conocido y dispersión dn(λ) = 0.045 + 0.0015/λ², fotos con la señal y el ruido medidos por LED, a 98 mm y a 74 mm.
+- **Por color funciona a 98 mm:** contra la verdad 0.985–0.99; mitades 0.66–0.93. A 74 mm las mitades caen a 0.15–0.19.
+- **La combinación de colores falla:** la cadena libre (`couple_rgb_channels`) da 0.11 en espesor.
+- **Diagnóstico (`DIAGNOSTICO.md`, `diag_cadena.py`):**
+  - con fases exactas la cadena da 1.00, así que no hay un error de programación;
+  - el límite es el ruido de fase: por encima de ~0.1 rad el desenvolvimiento con longitudes de onda sintéticas elige mal la vuelta en 6–24 % de los píxeles, y las reconstrucciones por color tienen 0.17–0.54 rad;
+  - el ajuste de dispersión libre amplifica esos errores.
+- **Opción nueva `couple_rgb_channels(..., dispersion_B=B)`** (commit `e274bbd`, con pruebas): espesor con la dispersión conocida, sin ajustarla.
+
+**9. Qué mejoró la captura (b): sobre todo el foco (`results/captura_2026-09-28b/FOCO_VS_SOLAPAMIENTO.md`, `criterios_foco.py`).**
+- **Solo el foco:** rojo a 98 mm en su foco, C1 0.46 y C2 0.083; con el foco del verde o del azul (misma noche, mismo campo), C1 0.81–0.86 y C2 0.021–0.024.
+- **Solo la geometría:** verde en foco, 74 → 98 mm, C2 0.024 → 0.043 (×1.8).
+- **Conclusión:** el foco de cada color pesa más que el solapamiento. El modelo no incluye el desenfoque.
+
+**10. Dispersión real de la muestra (2026-09-29).**
+- **DMSO** (refractiveindex.info, Li 2022 y Kozma 2005): n = 1.492 / 1.485 / 1.477 a 470 / 530 / 630 nm.
+- **Nylon 12:** n_d ≈ 1.52–1.53, sin dato de dispersión (supuesto Abbe 40–55).
+- **Diferencia partícula − medio:** A = 0.04–0.05 y B entre −0.002 y 0. Las dos dispersiones casi se cancelan, así que con esta muestra el color no permite separar índice y espesor.
+
+**11. Reconstrucción conjunta de los tres colores: negativa en simulación (job `jobs/2026-09-29_170433_derive-conjunta-3colores-v3`, congelado; plan `docs/plan_reconstruccion_conjunta_2026-09-29.md`; informe `results/conjunta_2026-09-30/INFORME.md`).** Un solo espesor compartido, ajustado directo contra las fotos de los tres colores.
+- **Gradiente verificado:** 1e-8 contra diferencias finitas.
+- **El ajuste baja del piso de ruido con un espesor sin relación con la verdad:** S1 −0.09, y empeora con más vueltas. Arrancando desde un espesor bueno (0.56), el ajuste lo abandona. Costo y calidad del espesor apuntan en direcciones opuestas.
+- **Otros criterios:**
+  - S2 falla;
+  - S3 "pasa", pero solo mide la amplitud: criterio mal planteado;
+  - B ajustado −0.0023, cuando el verdadero es +0.0015.
+- **Datos reales:** no se corrieron, por la regla del plan.
+- **Hallazgo positivo:** la cadena por color con la dispersión conocida y **solo verde y azul** da **0.945** en simulación (0.98 con fases exactas). El 0.80 anterior incluía el rojo sin querer, por cómo `couple_rgb_channels` arma el verde. El umbral de S1 (0.90) quedó por debajo de esa referencia.
+- **Siguiente, según el informe:** empezar por el rojo y agregar verde y azul; regularizar el espesor; un criterio de parada con LEDs reservados, no el costo. Antes, lo barato: aplicar la cadena verde + azul con dispersión conocida a los datos reales de (b) y medirla con mitades y nulo.
+- **Costo del job:** 5 rondas, 70.8M tokens (~USD 86). Los relanzamientos programados de las 21:15 y las 04:00 funcionaron.
+
+Nota: `results/` está fuera de git. Los informes citados en los puntos 8–11 están solo en la máquina local, y `results/conjunta_2026-09-30` es un enlace a la carpeta del job (`jobs/`, también fuera de git).

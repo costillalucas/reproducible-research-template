@@ -1,7 +1,7 @@
 import json, datetime
 DARK, LIGHT, LIGHT2, INK, BODY, MUTED, ACC, ACC2, LINE = "#14213D", "#FBFBF8", "#F1F0EA", "#14213D", "#3D4A5C", "#6A7382", "#D9692B", "#2F6FB0", "#DDDBD2"
 SANS = "'IBM Plex Sans', Arial, sans-serif"; SERIF = "'Source Serif 4', Georgia, serif"
-N = 11
+N = 12
 def sec(id, body, notes, bg=LIGHT, fg=INK, n=None, extra=""):
     foot = f'<p style="position:absolute; left:128px; bottom:64px; width:600px; font-size:24px; color:{MUTED}">{n} / {N}</p>' if n else ""
     return (f'<section id="{id}" data-transition="fade" style="background:{bg}; color:{fg}; font-family:{SANS}; '
@@ -11,9 +11,13 @@ def card(title, lines, color=INK, bg="#FFFFFF", border=LINE, size=30):
     inner = "".join(f'<p style="font-size:{size}px; line-height:1.35; color:{BODY}">{l}</p>' for l in lines)
     return (f'<div style="flex:1; display:flex; flex-direction:column; gap:16px; background:{bg}; padding:40px; '
             f'border:1px solid {border}; border-radius:16px"><h3 style="font-size:40px; font-weight:600; color:{color}">{title}</h3>{inner}</div>')
+IMG = "file:///home/chanoscopio/Documents/LucasC/reproducible-research-template/report/informe/img/"
+import os
 def ph(name, w, h, label):
-    return (f'<img alt="{label} (archivo {name})" style="width:{w}px; height:{h}px; object-fit:contain; background:{LIGHT2}; '
-            f'border:2px dashed {MUTED}; border-radius:12px">')
+    if os.environ.get("ONLINE"):  # the online deck cannot take the image files: a dashed box naming the file to drag in
+        return (f'<img alt="{label} (archivo {name})" style="width:{w}px; height:{h}px; object-fit:contain; background:{LIGHT2}; '
+                f'border:2px dashed {MUTED}; border-radius:12px">')
+    return f'<img src="{IMG}{name}" alt="{label}" style="width:{w}px; height:{h}px; object-fit:contain">'
 S = {}
 
 S["portada"] = sec("portada",
@@ -32,11 +36,12 @@ S["respuesta"] = sec("respuesta",
   card("Se logró", ["Un simulador del microscopio y un programa de reconstrucción que funcionan con datos simulados",
                     "Cinco errores de fondo encontrados; uno invalidaba todo lo hecho con datos reales",
                     "La geometría del montaje, medida desde las propias imágenes",
-                    "Una receta de captura: de 12 a 129 ángulos de luz útiles"], color=ACC2) +
+                    "Una receta de captura: de 12 a 129 ángulos de luz útiles",
+                    "Una primera reconstrucción real sin el patrón en red (rojo, 25/09)"], color=ACC2) +
   card("No se logró", ["Una reconstrucción de una muestra real en la que podamos confiar",
-                       "Demostrar que se gana resolución: la muestra actual no lo permite"], color=ACC) +
+                       "Demostrar que se gana resolución: todavía no hay evidencia"], color=ACC) +
   '</div>',
-  "Adelantar la conclusión para que todos sepan hacia dónde va la charla. Lo que se logró es sobre todo infraestructura y auditoría. Lo que no se logró es el objetivo científico final: una imagen real mejorada en la que confiemos.", n=2)
+  "Adelantar la conclusión para que todos sepan hacia dónde va la charla. Lo que se logró es sobre todo infraestructura y auditoría. Lo que no se logró es el objetivo científico final: una imagen real con más detalle en la que confiemos. La reconstrucción roja del viernes 25 es la primera que se parece a la muestra, pero todavía no muestra detalle nuevo.", n=2)
 
 rig = ('<svg aria-label="Esquema del montaje: matriz de LEDs arriba, luz inclinada hacia la muestra, objetivo y cámara abajo" width="620" height="700" viewBox="0 0 620 700">'
        + "".join(f'<circle cx="{70+i*60}" cy="70" r="16" fill="{ACC if i==6 else "none"}" stroke="{ACC if i==6 else MUTED}" stroke-width="3"/>' for i in range(9))
@@ -131,13 +136,24 @@ S["captura"] = sec("captura",
 crit = lambda n_, t, r, c: (f'<div style="flex:1; display:flex; flex-direction:column; gap:8px; background:#FFFFFF; padding:24px 28px; border:1px solid {LINE}; border-left:8px solid {c}; border-radius:12px">'
                             f'<p style="font-size:26px; color:{BODY}">{n_}. {t}</p><p style="font-size:28px; font-weight:600; color:{c}">{r}</p></div>')
 S["confianza"] = sec("confianza",
-  h2("Por qué todavía no confiamos en la reconstrucción") +
+  h2("Verde, 24/09: por qué no confiamos en esa reconstrucción") +
   ph("fig_reconstruccion_real.png", 1664, 400, "Foto cruda y tres reconstrucciones con patrones en red") +
   '<div style="display:flex; gap:24px">' +
   crit(1, "Predice fotos que no vio", "Pasa", ACC2) + crit(2, "Una geometría equivocada se nota", "Falla", ACC) +
   crit(3, "Sin patrones que no están en la muestra", "Falla a la vista", ACC) + crit(4, "Aparece detalle nuevo", "No evaluable", MUTED) +
   '</div>',
   "Cuatro criterios escritos antes de mirar, para no acomodarlos después. El 2 es el central: si mover los LEDs medio paso casi no cambia nada, los datos no restringen al programa. El 3: el indicador numérico dijo que pasaba, pero al mirar las imágenes el patrón en red sigue ahí; el número lo subestimaba. El 4: las partículas están tan separadas que una foto cruda ya las distingue, así que no hay detalle nuevo que ganar.", n=9)
+
+S["rojo"] = sec("rojo",
+  h2("Rojo, 25/09: mejor imagen, sin más detalle") +
+  ph("fig_reconstruccion_roja.png", 1664, 500, "Foto cruda, brillo y fase reconstruidos de la misma zona, captura roja") +
+  '<div style="display:flex; gap:24px">' +
+  crit(1, "Predice fotos que no vio", "Pasa", ACC2) +
+  crit(2, "Una geometría equivocada se nota", "Falla", ACC) +
+  crit(3, "Sin patrones que no están en la muestra", "Mejora, pero no alcanza", MUTED) +
+  crit(4, "Aparece detalle nuevo", "Solo fase, sin detalle nuevo", MUTED) +
+  '</div>',
+  "Captura nueva del viernes 25, solo en rojo y ahora con fotos sin muestra y fotos a oscuras para corregir. Mismos cuatro criterios, fijados antes de mirar. Predice las fotos que no vio con error 0,52, contra 0,99 sin reconstruir. El 3: a la vista el patrón en red casi desaparece, pero el número no bajó a la mitad, que era la exigencia. El 4: las partículas nuevas se repiten en las dos mitades, pero son fase dentro de lo que el objetivo ya resuelve. Los criterios se calibraron antes con una simulación de esta misma captura. Es la primera reconstrucción real que se parece a la muestra: se ven las partículas y su fase, que ninguna foto registra. Pero la prueba central sigue fallando: si reconstruimos por separado con la mitad de los LEDs y con la otra mitad, coinciden hasta el límite del objetivo y más allá no coinciden nada. O sea: recuperamos la fase, no ganamos resolución. Tres cosas de la tarde sirven como lecciones sobre agentes: los umbrales escritos de antemano no los pasaba ni la simulación, y hubo que corregirlos antes de tocar los datos reales, dejándolo escrito; la hipótesis del propio equipo de agentes (que la red venía de no pesar cada foto por su luz) se probó y resultó falsa, porque pesar empeora; y el patrón en red venía en parte de cómo se arrancaba la reconstrucción.", n=10)
 
 rule = lambda n_, t, d: (f'<div style="flex:1; display:flex; flex-direction:column; gap:12px; background:#FFFFFF; padding:32px; border:1px solid {LINE}; border-radius:16px">'
                          f'<p style="font-family:{SERIF}; font-size:56px; font-weight:600; color:{ACC}; line-height:1">{n_}</p>'
@@ -152,7 +168,7 @@ S["lecciones"] = sec("lecciones",
   rule(5, "Una persona que conozca el equipo", "Las preguntas del hardware no las contesta el agente") +
   '</div>'
   f'<p style="font-size:30px; line-height:1.35; color:{BODY}"><b>Aportan:</b> volumen, auditoría, diseño de experimentos. <b>Fallan:</b> el mundo físico y el exceso de confianza.</p>',
-  "Estas reglas no las teníamos al principio: cada una apareció después de ver fallar la versión sin ella. Un ejemplo de exceso de confianza: el asistente afirmó un 'sobreajuste' que tuvo que corregir mientras escribíamos el informe, al comparar con la simulación.", n=10)
+  "Estas reglas no las teníamos al principio: cada una apareció después de ver fallar la versión sin ella. Un ejemplo de exceso de confianza: el asistente afirmó un 'sobreajuste' que tuvo que corregir mientras escribíamos el informe, al comparar con la simulación. Otro, del viernes 25: la explicación que había dado el equipo de agentes para el patrón en red se probó y resultó falsa.", n=11)
 
 step = lambda t, d: (f'<div style="display:flex; flex-direction:column; gap:8px"><h3 style="font-size:40px; font-weight:600; color:{LIGHT}">{t}</h3>'
                      f'<p style="font-size:30px; line-height:1.35; color:#BFD0E6">{d}</p></div>')
@@ -160,25 +176,28 @@ S["siguiente"] = sec("siguiente",
   f'<h2 style="font-family:{SERIF}; font-size:72px; font-weight:600; line-height:1.1; color:{LIGHT}">Próximos pasos</h2>'
   '<div style="display:flex; flex-direction:column; gap:40px; flex:1">' +
   step("1. Una placa de calibración con líneas de ancho conocido", "Decide si el método gana detalle en nuestro montaje") +
-  step("2. Que el programa pese cada foto según su luz", "Decide si el patrón en red es un defecto del programa") +
-  step("3. Terminar rojo y azul", "Una ronda más del equipo de agentes") +
+  step("2. Separar la luz que sobra con ángulos grandes", "Fotos de la celda sin partículas y de la muestra desenfocada") +
+  step("3. El otro campo rojo, con más señal, y el azul", "Una ronda más del equipo de agentes") +
   '</div>'
-  f'<p style="font-size:30px; color:{ACC}">Informe completo: [enlace al informe]</p>',
-  "Cerrar con el paso decisivo, que es de laboratorio: una muestra con detalles más finos que 3,8 µm. Invitar a preguntas.",
-  bg=DARK, fg=LIGHT, n=11)
+  f'<p style="font-size:30px; color:{ACC}">Informe completo: https://claude.ai/code/artifact/de7eab31-d9e0-4828-a62d-285ba0d46a98</p>',
+  "Cerrar con el paso decisivo, que es de laboratorio: una muestra con detalles más finos que 3,8 µm. El segundo sale del rojo: con luz inclinada llega más luz de la que el modelo explica, y dos tomas simples dicen si viene del volumen de la muestra o de la celda. Invitar a preguntas.",
+  bg=DARK, fg=LIGHT, n=12)
 
-order = ["portada", "respuesta", "problema", "como", "simulado", "congelado", "errores", "captura", "confianza", "lecciones", "siguiente"]
+order = ["portada", "respuesta", "problema", "como", "simulado", "congelado", "errores", "captura", "confianza", "rojo", "lecciones", "siguiente"]
 for k in order: open(f"project/slides/{k}.html", "w").write(S[k])
 deck = {"v": 4, "createdOnFiles": {"v": 1, "at": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")},
         "title": "Un mes con agentes de IA en microscopía", "order": order,
         "sections": {"s1": {"description": "La respuesta corta y el problema", "start": "portada"},
                      "s2": {"description": "Cómo trabajamos y qué funcionó", "start": "como"},
                      "s3": {"description": "Errores encontrados", "start": "congelado"},
-                     "s4": {"description": "La captura nueva y por qué no confiamos todavía", "start": "captura"},
+                     "s4": {"description": "Las capturas nuevas y por qué no confiamos todavía", "start": "captura"},
                      "s5": {"description": "Lecciones y próximos pasos", "start": "lecciones"}},
         "cover": "portada",
         "faces": {"ibm-plex-sans": {"family": "IBM Plex Sans", "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600&display=swap"},
                   "source-serif-4": {"family": "Source Serif 4", "href": "https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600&display=swap"}},
         "designSystems": []}
 json.dump(deck, open("project/deck.json", "w"), ensure_ascii=False, indent=1)
+HEAD = open("head.html").read()   # <head> (fonts + print CSS) of presentacion_agentes_ia.html
+body = "".join(S[k].replace("<section ", '<section class="slide" ', 1).replace(arrow, f'<p style="font-size:44px; color:{MUTED}">&#8594;</p>') for k in order)
+open("presentacion_agentes_ia.html", "w").write(HEAD + "<body>" + body + "</body></html>")
 print({k: len(S[k]) for k in order})

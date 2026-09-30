@@ -2,7 +2,7 @@
  "v": 4,
  "createdOnFiles": {
   "v": 1,
-  "at": "2026-09-25T15:00:20Z"
+  "at": "2026-09-28T14:31:55Z"
  },
  "title": "Un mes con agentes de IA en microscopía",
  "order": [
@@ -15,6 +15,7 @@
   "errores",
   "captura",
   "confianza",
+  "rojo",
   "lecciones",
   "siguiente"
  ],
@@ -32,7 +33,7 @@
    "start": "congelado"
   },
   "s4": {
-   "description": "La captura nueva y por qué no confiamos todavía",
+   "description": "Las capturas nuevas y por qué no confiamos todavía",
    "start": "captura"
   },
   "s5": {

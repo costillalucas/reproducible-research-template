@@ -150,6 +150,246 @@
     "type": "script",
     "value": 5.551115123125783e-17
   },
+  "resumen_R_Ainit": {
+    "reproduce": "results/captura_2026-09-25_red/resumen_real.json",
+    "statement": "Rojo 25/09 set 3, m\u00e9todo A+init: error de predicci\u00f3n de LEDs no vistos, promedio de 5 folds (cv.A+init.mean; 1 = no mejor que una constante)",
+    "type": "data",
+    "value": 0.5172269679041535
+  },
+  "resumen_R_sinfpm": {
+    "reproduce": "results/captura_2026-09-25_red/resumen_real.json",
+    "statement": "El mismo error sin reconstruir, prediciendo desde la imagen inicial (nofpm.mean)",
+    "type": "data",
+    "value": 0.9912209106118134
+  },
+  "resumen_abbe_verde_um": {
+    "reproduce": "lambda/(2 NA) con lambda = 0.53 um y NA = 0.07",
+    "statement": "L\u00edmite de resoluci\u00f3n (Abbe) del objetivo 2.5x NA 0.07 en luz verde, en \u00b5m",
+    "type": "derivation",
+    "value": 3.7857142857142856
+  },
+  "resumen_adjunto_error": {
+    "reproduce": "scripts/resumen_numbers.py::error_adjunto_original",
+    "statement": "Error relativo del operador inverso original (common.py de ptyco-full-simulator) frente al adjunto exacto del operador directo (0 = correcto)",
+    "type": "script",
+    "value": 1.41129423761462
+  },
+  "resumen_b_R_azul": {
+    "reproduce": "results/captura_2026-09-28b/criterios_b.json",
+    "statement": "\u00cddem, azul (blue.C1_R)",
+    "type": "data",
+    "value": 0.595842209535042
+  },
+  "resumen_b_R_rojo": {
+    "reproduce": "results/captura_2026-09-28b/criterios_b.json",
+    "statement": "28/09 (b), matriz a 98 mm, cada color en su foco: rojo, error de predicci\u00f3n de LEDs no vistos (red.C1_R)",
+    "type": "data",
+    "value": 0.46127038404335047
+  },
+  "resumen_b_R_verde": {
+    "reproduce": "results/captura_2026-09-28b/criterios_b.json",
+    "statement": "\u00cddem, verde (green.C1_R)",
+    "type": "data",
+    "value": 0.6152588480787682
+  },
+  "resumen_b_azulverde_banda": {
+    "reproduce": "results/captura_2026-09-28b/comparar_colores.json",
+    "statement": "28/09 (b): correlaci\u00f3n azul-verde del brillo reconstruido y registrado, en la banda del objetivo",
+    "type": "data",
+    "value": 0.5587218829226543
+  },
+  "resumen_b_azulverde_todo": {
+    "reproduce": "results/captura_2026-09-28b/comparar_colores.json",
+    "statement": "\u00cddem, con todo el espectro reconstruido",
+    "type": "data",
+    "value": 0.14467158304959885
+  },
+  "resumen_b_crudas_max": {
+    "reproduce": "results/captura_2026-09-28b/comparar_colores.json",
+    "statement": "\u00cddem, m\u00e1ximo",
+    "type": "data",
+    "value": 0.9168390593716278
+  },
+  "resumen_b_crudas_min": {
+    "reproduce": "results/captura_2026-09-28b/comparar_colores.json",
+    "statement": "28/09 (b): correlaci\u00f3n entre colores de la foto cruda (18,15) registrada, m\u00ednimo de rojo-verde y azul-verde",
+    "type": "data",
+    "value": 0.837368887790534
+  },
+  "resumen_b_frc_max": {
+    "reproduce": "results/captura_2026-09-28b/criterios_b.json",
+    "statement": "28/09 (b): coincidencia entre mitades en la banda m\u00e1s all\u00e1 del objetivo, m\u00e1ximo de los tres colores (azul; rojo 0.083, verde 0.043)",
+    "type": "data",
+    "value": 0.09863090328872204
+  },
+  "resumen_b_frc_min": {
+    "reproduce": "results/captura_2026-09-28b/criterios_b.json",
+    "statement": "\u00cddem, m\u00ednimo (verde)",
+    "type": "data",
+    "value": 0.042867142939940095
+  },
+  "resumen_b_sinfpm_max": {
+    "reproduce": "results/captura_2026-09-28b/criterios_b.json",
+    "statement": "28/09 (b): el mismo error sin reconstruir (m\u00e1ximo de los tres colores; el m\u00ednimo es 0.977)",
+    "type": "data",
+    "value": 0.9836492733535045
+  },
+  "resumen_b_solapamiento_pct": {
+    "reproduce": "scripts/resumen_numbers.py::solapamiento_vecinos_pct",
+    "statement": "Solapamiento entre las pupilas de dos LEDs vecinos en el espectro, z = 98 mm (rojo), en % del \u00e1rea",
+    "type": "script",
+    "value": 46.26544149181634
+  },
+  "resumen_centro_col": {
+    "reproduce": "results/led_geometry_2025-12-12/center_from_radiance.json",
+    "statement": "Captura 12/12/2025: columna del eje \u00f3ptico ajustada con el brillo por LED (main_z76_poly4.col)",
+    "type": "data",
+    "value": 14.650000000000016
+  },
+  "resumen_centro_fila": {
+    "reproduce": "results/led_geometry_2025-12-12/center_from_radiance.json",
+    "statement": "Captura 12/12/2025: fila del eje \u00f3ptico ajustada con el brillo por LED (main_z76_poly4.row; la columna es main_z76_poly4.col)",
+    "type": "data",
+    "value": 17.45000000000002
+  },
+  "resumen_frc_real": {
+    "reproduce": "results/captura_2026-09-25_red/resumen_real.json",
+    "statement": "Rojo 25/09: coincidencia (FRC) entre las dos mitades de LEDs en la banda 0.222-0.45 1/\u00b5m, m\u00e1s all\u00e1 del l\u00edmite del objetivo (C2.frc_sel)",
+    "type": "data",
+    "value": 0.025526684373799
+  },
+  "resumen_frc_sint": {
+    "reproduce": "results/captura_2026-09-25_red/resumen_synth.json",
+    "statement": "La misma coincidencia entre mitades en la simulaci\u00f3n de la captura (C2.frc_sel, m\u00e9todo B)",
+    "type": "data",
+    "value": 0.1853939691038594
+  },
+  "resumen_frc_umbral": {
+    "reproduce": "clip(0.5 x FRC sint\u00e9tico, 0.143, 0.5), regla de results/captura_2026-09-25_red/criterios.md",
+    "statement": "Umbral de C2, fijado con la simulaci\u00f3n antes de mirar los datos reales",
+    "type": "derivation",
+    "value": 0.143
+  },
+  "resumen_leds_utiles_2409": {
+    "reproduce": "scripts/resumen_numbers.py::leds_utiles_2409",
+    "statement": "Captura 24/09, verde con enfoque verde, 100 ms: LEDs (de 169) con se\u00f1al estructural/ruido > 3 (f\u00f3rmula de results/captura_2026-09-24/stats_por_led/an.py)",
+    "type": "script",
+    "value": 131
+  },
+  "resumen_leds_utiles_julio": {
+    "reproduce": "results/esferas_2026-07-08/sanity/radiance_census.json",
+    "statement": "Captura 08/07/2026, verde, 1 ms: LEDs (de 182) con al menos 10 % del brillo del LED m\u00e1s brillante (channels.green.census.n_ge_10pct_peak)",
+    "type": "data",
+    "value": 12
+  },
+  "resumen_paso_congelado_factor": {
+    "reproduce": "lr_n_px / step_max = (400*400)/20, src/ptyco_full_simulator/reconstruction.py (step_max = 20)",
+    "statement": "Cu\u00e1ntas veces m\u00e1s chico que el paso ePIE unitario era el paso de Wirtinger flow con recortes de 400 px (roadmap secci\u00f3n 6.9)",
+    "type": "derivation",
+    "value": 8000.0
+  },
+  "resumen_rgb_R_rojo": {
+    "reproduce": "results/captura_2026-09-28_rgb/multiespectral_registrado.json",
+    "statement": "RGB 28/09, rojo, A+init: error de predicci\u00f3n de LEDs no vistos (5 folds, C1_rojo)",
+    "type": "data",
+    "value": 0.9005082841897287
+  },
+  "resumen_rgb_banda_max": {
+    "reproduce": "results/captura_2026-09-28_rgb/multiespectral_por_banda.json",
+    "statement": "RGB 28/09: correlaci\u00f3n del brillo reconstruido entre colores dentro de la banda del objetivo (m\u00e1ximo de los tres pares; el m\u00ednimo es 0.18)",
+    "type": "data",
+    "value": 0.522
+  },
+  "resumen_rgb_crudas_max": {
+    "reproduce": "results/captura_2026-09-28_rgb/fotos_crudas_entre_colores.json",
+    "statement": "\u00cddem, m\u00e1ximo",
+    "type": "data",
+    "value": 0.7781153541179037
+  },
+  "resumen_rgb_crudas_min": {
+    "reproduce": "results/captura_2026-09-28_rgb/fotos_crudas_entre_colores.json",
+    "statement": "RGB 28/09: correlaci\u00f3n entre colores de la foto cruda (18,15), registrada (m\u00ednimo de rojo-verde y azul-verde)",
+    "type": "data",
+    "value": 0.7055142400126864
+  },
+  "resumen_rgb_frc_verde": {
+    "reproduce": "results/captura_2026-09-28_rgb/multiespectral.json",
+    "statement": "RGB 28/09, verde: coincidencia entre mitades de LEDs en la banda [2NA/lambda, 0.45] 1/\u00b5m (el rojo da 0.014 y el azul 0.009, mismo archivo)",
+    "type": "data",
+    "value": 0.024417841557802834
+  },
+  "resumen_rgb_sinfpm_rojo": {
+    "reproduce": "results/captura_2026-09-28_rgb/red/out/tasks/real_nofpm_z74.0.json",
+    "statement": "RGB 28/09, rojo: el mismo error sin reconstruir",
+    "type": "data",
+    "value": 0.9923466536990339
+  },
+  "resumen_rgb_todo_max": {
+    "reproduce": "results/captura_2026-09-28_rgb/multiespectral_por_banda.json",
+    "statement": "RGB 28/09: la misma correlaci\u00f3n con todo el espectro reconstruido (m\u00e1ximo de los tres pares)",
+    "type": "data",
+    "value": 0.055
+  },
+  "resumen_set1_R": {
+    "reproduce": "results/captura_2026-09-25_red_set1/veredicto.json",
+    "statement": "Rojo 25/09 set 1 (otra zona), A+init: error de predicci\u00f3n de LEDs no vistos (C1.sel_mean)",
+    "type": "data",
+    "value": 0.9981395217887854
+  },
+  "resumen_set1_sinfpm": {
+    "reproduce": "results/captura_2026-09-25_red_set1/veredicto.json",
+    "statement": "Set 1: el mismo error sin reconstruir (C1.nofpm)",
+    "type": "data",
+    "value": 0.9998692034139017
+  },
+  "resumen_set1_sint_R": {
+    "reproduce": "results/captura_2026-09-25_red_set1/veredicto.json",
+    "statement": "Simulaci\u00f3n con los niveles de se\u00f1al y ruido del set 1 (muestra delgada): error de predicci\u00f3n de LEDs no vistos (sintetico.C1.sel_mean)",
+    "type": "data",
+    "value": 0.4398862491745869
+  },
+  "resumen_set1_sint_frc": {
+    "reproduce": "results/captura_2026-09-25_red_set1/veredicto.json",
+    "statement": "La misma simulaci\u00f3n: coincidencia entre las dos mitades en la banda m\u00e1s all\u00e1 del objetivo (sintetico.C2.frc_sel)",
+    "type": "data",
+    "value": 0.19078585757732627
+  },
+  "resumen_sint_amplitud": {
+    "reproduce": "results/captura_2026-09-24/synth_overlap/summary.json",
+    "statement": "Simulaci\u00f3n sin ruido con la geometr\u00eda real (2.5x, z = 75 mm, 100 iteraciones): correlaci\u00f3n del brillo reconstruido con el de la muestra (runs[hoy_2.5x_z75, 100].amplitude_correlation)",
+    "type": "data",
+    "value": 0.9950325106784339
+  },
+  "resumen_sint_fase": {
+    "reproduce": "results/captura_2026-09-24/synth_overlap/summary.json",
+    "statement": "La misma simulaci\u00f3n: correlaci\u00f3n de la fase (runs[hoy_2.5x_z75, 100].phase_correlation)",
+    "type": "data",
+    "value": 0.866816551858095
+  },
+  "resumen_sint_fase_z100": {
+    "reproduce": "results/captura_2026-09-24/synth_overlap/summary.json",
+    "statement": "La misma simulaci\u00f3n con la matriz a 100 mm, es decir m\u00e1s solapamiento entre LEDs vecinos (runs[2.5x_z100, 100].phase_correlation)",
+    "type": "data",
+    "value": 0.972539601961405
+  },
+  "resumen_solapamiento_pct": {
+    "reproduce": "scripts/resumen_numbers.py::solapamiento_vecinos_pct",
+    "statement": "Solapamiento entre las pupilas de dos LEDs vecinos en el espectro, z = 74 mm, en % del \u00e1rea",
+    "type": "script",
+    "value": 30.865446956394933
+  },
+  "resumen_z115_R": {
+    "reproduce": "scripts/resumen_numbers.py::cv_heldout",
+    "statement": "Rojo 25/09, m\u00e9todo B con z = 115 mm: error de predicci\u00f3n de LEDs no vistos (results/captura_2026-09-25_red/out/tasks/real_B_z115.0_f*.json)",
+    "type": "script",
+    "value": 0.43720239374390174
+  },
+  "resumen_zeiss_um_px": {
+    "reproduce": "~/Documents/AleYLu/elefante/2025-12-02/3x3/3x3_Metadata(tif).xml (Scaling Distance X = 2.344e-6 m; objetivo Plan-Neofluar 2.5x/0.075)",
+    "statement": "Tama\u00f1o de p\u00edxel en la muestra de la imagen de referencia Zeiss, en \u00b5m",
+    "type": "source",
+    "value": 2.344
+  },
   "suite_coverage": {
     "reproduce": "scripts/checks.py",
     "statement": "checks.py pass/fail coverage for this project's correctness suite",
