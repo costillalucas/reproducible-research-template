@@ -1,0 +1,68 @@
+{
+ "z98": {
+  "por_color": {
+   "red": {
+    "frc_mitades": 0.6634327011887401,
+    "frc_verdad": 0.9852822872006175
+   },
+   "green": {
+    "frc_mitades": 0.8576319090516918,
+    "frc_verdad": 0.9902658916134084
+   },
+   "blue": {
+    "frc_mitades": 0.9258979741268016,
+    "frc_verdad": 0.9918192809356312
+   }
+  },
+  "espesor": {
+   "banda_1_um": 0.9553839518682821,
+   "combinado": 0.11411231917452358,
+   "techo_cadena_fases_verdaderas": 0.5873144756418667,
+   "ingenuo": {
+    "red": 0.03259177011433816,
+    "green": -0.15059697599474167,
+    "blue": -0.18471193862314
+   },
+   "rmse_um": {
+    "combinado": 12.56643159812751,
+    "ingenuo_red": 2.2560531229013554,
+    "ingenuo_green": 2.086222466822627,
+    "ingenuo_blue": 1.9898535326818143
+   },
+   "espesor_max_um": 21.126176216557017
+  }
+ },
+ "z74": {
+  "por_color": {
+   "red": {
+    "frc_mitades": 0.14764512310744451,
+    "frc_verdad": 0.854140132118721
+   },
+   "green": {
+    "frc_mitades": 0.18658126445490425,
+    "frc_verdad": 0.8957483195943258
+   },
+   "blue": {
+    "frc_mitades": 0.16107155548570387,
+    "frc_verdad": 0.9150279284699814
+   }
+  },
+  "espesor": {
+   "banda_1_um": 1.036228919933033,
+   "combinado": -0.05695121702112931,
+   "techo_cadena_fases_verdaderas": 0.5874557219207927,
+   "ingenuo": {
+    "red": 0.280714467047211,
+    "green": 0.03507214608678442,
+    "blue": -0.05225663270775733
+   },
+   "rmse_um": {
+    "combinado": 9.770275932454076,
+    "ingenuo_red": 1.5912780107000861,
+    "ingenuo_green": 1.7365922091891282,
+    "ingenuo_blue": 1.7813940945936853
+   },
+   "espesor_max_um": 21.05368056723732
+  }
+ }
+}

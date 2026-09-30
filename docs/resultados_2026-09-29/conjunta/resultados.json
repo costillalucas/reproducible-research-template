@@ -1,0 +1,926 @@
+{
+ "que_es": "Reconstruccion conjunta de tres colores con espesor compartido (plan docs/plan_reconstruccion_conjunta_2026-09-29.md). Resultado NEGATIVO, ver sim.resumen_del_negativo.",
+ "sim": {
+  "S1": {
+   "valor": -0.0914657234082056,
+   "referencia": 0.9448841693917637,
+   "pasa": false,
+   "umbral_del_plan": 0.9,
+   "supera_referencia": false,
+   "de_la_corrida": "A1_D1",
+   "epoca": 240,
+   "que_es": "correlacion de Pearson entre el espesor t de la conjunta y la verdad filtrada a la banda de los LEDs (fmax = 0.9554 1/um), grilla 1600 px, margen 100 px",
+   "todas_las_referencias": {
+    "ingenuo_red": 0.027756415283729814,
+    "ingenuo_green": -0.1493245630712047,
+    "ingenuo_blue": -0.18103393539901436,
+    "cadena_libre": 0.11532295573177126,
+    "dispersion_conocida_3": 0.5597321031643658,
+    "dispersion_conocida_verde_azul": 0.9448841693917637,
+    "techo_cadena_fases_verdaderas": 0.7039843724833019,
+    "techo_dispersion_conocida_3_fases_verdaderas": 0.9823432931942774
+   },
+   "S1_por_corrida": {
+    "A1_D1": -0.0914657234082056,
+    "A2_D1": -0.02586840168375981,
+    "A1_D2": -0.09121911973473244,
+    "A1_D1_cad": 0.43849385710597255,
+    "A1_D1_half0": -0.11232980095879998,
+    "A1_D1_half1": -0.02661178004353907
+   },
+   "comentario": "NINGUNA variante se acerca al umbral. La unica corrida con S1 apreciable (A1_D1_cad, +0.4385, valor EN TRANSITO: esa corrida NO esta convergida, su costo todavia cae 3.54 % en las ultimas 10 epocas y la tendencia de su S1 es a BAJAR, 0.557 -> 0.456 -> 0.440 -> 0.4385; ver corridas.A1_D1_cad.convergencia) es la que arranca DESDE la cadena y sale peor en costo (6.115e5) que las que arrancan de 'verde': el ajuste a las fotos la empuja a abandonar el espesor correcto."
+  },
+  "S2": {
+   "valor": 0.668638329875193,
+   "referencia": 0.0,
+   "pasa": false,
+   "de_la_corrida": "A1_D1",
+   "epoca": 240,
+   "que_es": "max sobre colores de (error de fase conjunto - error de fase independiente), en rad; pasa si < 0",
+   "conjunta_por_color": {
+    "red": 0.938491038940944,
+    "green": 0.6822615733312226,
+    "blue": 0.8473572204287476
+   },
+   "independiente_por_color": {
+    "red": 0.5307877510847954,
+    "green": 0.1754234364750867,
+    "blue": 0.17871889055355455
+   },
+   "diferencia_por_color": {
+    "red": 0.4077032878561486,
+    "green": 0.5068381368561359,
+    "blue": 0.668638329875193
+   },
+   "S2_valor_por_corrida": {
+    "A1_D1": 0.668638329875193,
+    "A2_D1": 0.7298098134904785,
+    "A1_D2": 0.530750835907259,
+    "A1_D1_cad": 0.7739308783946159,
+    "A1_D1_half0": 0.6666304644283447,
+    "A1_D1_half1": 0.6187345010086602
+   }
+  },
+  "S3": {
+   "valor": 0.06751243791753236,
+   "referencia": 0.0,
+   "pasa": true,
+   "de_la_corrida": "A1_D1",
+   "que_es": "min sobre colores de (FRC de las dos mitades del damero conjunta - independiente); pasa si >= 0",
+   "conjunta_por_color": {
+    "red": 0.9671248248706127,
+    "green": 0.988702563395309,
+    "blue": 0.9930836562211852
+   },
+   "independiente_por_color": {
+    "red": 0.6635328072924186,
+    "green": 0.8644017842393463,
+    "blue": 0.9255712183036529
+   },
+   "diferencia_por_color": {
+    "red": 0.3035920175781941,
+    "green": 0.12430077915596272,
+    "blue": 0.06751243791753236
+   },
+   "epocas_de_las_mitades": 240,
+   "epocas_de_la_completa": 240,
+   "mitades_a_las_mismas_epocas_que_la_completa": true,
+   "advertencia": "S3 pasa pero NO mide el espesor: verificado en r01 que las dos mitades tienen S1 = -0.068 y +0.035 (ambas sin relacion con la verdad) y aun asi su FRC es 0.94-0.99. La FRC de O_c esta dominada por la amplitud a_c, que si se reconstruye bien. El verificador (r03) lo confirmo a 145 epocas: la FRC MEJORA (S3 = +0.066) mientras el S1 de las mitades EMPEORA. El valor +0.0675 no dice nada sobre t.",
+   "S1_de_las_mitades": {
+    "A1_D1_half0": -0.11232980095879998,
+    "A1_D1_half1": -0.02661178004353907
+   }
+  },
+  "B_ajustado": -0.002341395267848355,
+  "B": {
+   "ajustado": -0.002341395267848355,
+   "verdadero": 0.0015,
+   "de_la_corrida": "A1_D2",
+   "epoca": 240,
+   "error": -0.003841395267848355,
+   "tolerancia_del_plan": 0.0005,
+   "dentro_de_tolerancia": false,
+   "comentario": "D2 falla su propia tolerancia por un factor ~8 y ademas con el SIGNO cambiado. Deja de ser un ajuste de dispersion: B se va a la cota mientras el costo baja."
+  },
+  "variante_mejor": "A1_D1",
+  "criterio_de_mejor": "menor costo final entre A1_D1 y A2_D1 (plan, linea 70)",
+  "mejor_medida_a_igual_numero_de_epocas": true,
+  "corridas": {
+   "A1_D1": {
+    "evaluada": true,
+    "epoca_alcanzada": 240,
+    "epocas_pedidas": 240,
+    "variante": "A1_D1",
+    "init": "verde",
+    "s_led": true,
+    "epocas": 240,
+    "lr_t": 0.2,
+    "B": 0.0015,
+    "costo_inicial": 2176714.5592282326,
+    "costo_final": 400161.97061770305,
+    "S1": -0.0914657234082056,
+    "S2_conjunta": {
+     "red": 0.938491038940944,
+     "green": 0.6822615733312226,
+     "blue": 0.8473572204287476
+    },
+    "S2_independiente": {
+     "red": 0.5307877510847954,
+     "green": 0.1754234364750867,
+     "blue": 0.17871889055355455
+    },
+    "S2_valor": 0.668638329875193,
+    "S3_conjunta": {
+     "red": 0.9671248248706127,
+     "green": 0.988702563395309,
+     "blue": 0.9930836562211852
+    },
+    "S3_independiente": {
+     "red": 0.6635328072924186,
+     "green": 0.8644017842393463,
+     "blue": 0.9255712183036529
+    },
+    "S3_valor": 0.06751243791753236,
+    "costo_sobre_piso_de_ruido": 0.9693110660185866,
+    "convergencia": {
+     "epoca": 240,
+     "caida_de_costo_ultimas_10_epocas_pct": 0.6547550775408427,
+     "umbral_de_continuacion_del_plan_pct": 1.0,
+     "convergida": true,
+     "cruza_el_piso_de_ruido_en_la_epoca": 195
+    }
+   },
+   "A2_D1": {
+    "evaluada": true,
+    "epoca_alcanzada": 240,
+    "epocas_pedidas": 240,
+    "variante": "A2_D1",
+    "init": "verde",
+    "s_led": true,
+    "epocas": 240,
+    "lr_t": 0.2,
+    "B": 0.0015,
+    "costo_inicial": 2093627.1209593671,
+    "costo_final": 889295.6218305825,
+    "S1": -0.02586840168375981,
+    "S2_conjunta": {
+     "red": 0.796290046528561,
+     "green": 0.790022384619193,
+     "blue": 0.9085287040440331
+    },
+    "S2_independiente": {
+     "red": 0.5307877510847954,
+     "green": 0.1754234364750867,
+     "blue": 0.17871889055355455
+    },
+    "S2_valor": 0.7298098134904785,
+    "costo_sobre_piso_de_ruido": 2.154137950369562,
+    "convergencia": {
+     "epoca": 240,
+     "caida_de_costo_ultimas_10_epocas_pct": 0.540357625619288,
+     "umbral_de_continuacion_del_plan_pct": 1.0,
+     "convergida": true,
+     "cruza_el_piso_de_ruido_en_la_epoca": null
+    }
+   },
+   "A1_D2": {
+    "evaluada": true,
+    "epoca_alcanzada": 240,
+    "epocas_pedidas": 240,
+    "variante": "A1_D2",
+    "init": "verde",
+    "s_led": true,
+    "epocas": 240,
+    "lr_t": 0.2,
+    "B": -0.002341395267848355,
+    "costo_inicial": 2089524.7747472767,
+    "costo_final": 394177.621628896,
+    "S1": -0.09121911973473244,
+    "S2_conjunta": {
+     "red": 0.8575414512952152,
+     "green": 0.6419831595407824,
+     "blue": 0.7094697264608135
+    },
+    "S2_independiente": {
+     "red": 0.5307877510847954,
+     "green": 0.1754234364750867,
+     "blue": 0.17871889055355455
+    },
+    "S2_valor": 0.530750835907259,
+    "costo_sobre_piso_de_ruido": 0.9548151965365024,
+    "convergencia": {
+     "epoca": 240,
+     "caida_de_costo_ultimas_10_epocas_pct": 0.5033415825423947,
+     "umbral_de_continuacion_del_plan_pct": 1.0,
+     "convergida": true,
+     "cruza_el_piso_de_ruido_en_la_epoca": 175
+    }
+   },
+   "A1_D1_cad": {
+    "evaluada": true,
+    "epoca_alcanzada": 240,
+    "epocas_pedidas": 240,
+    "variante": "A1_D1",
+    "init": "cadena",
+    "s_led": true,
+    "epocas": 240,
+    "lr_t": 0.2,
+    "B": 0.0015,
+    "costo_inicial": 17882965.921690166,
+    "costo_final": 611493.7861007027,
+    "S1": 0.43849385710597255,
+    "S2_conjunta": {
+     "red": 0.8401189197464858,
+     "green": 0.8483371924233282,
+     "blue": 0.9526497689481704
+    },
+    "S2_independiente": {
+     "red": 0.5307877510847954,
+     "green": 0.1754234364750867,
+     "blue": 0.17871889055355455
+    },
+    "S2_valor": 0.7739308783946159,
+    "costo_sobre_piso_de_ruido": 1.4812194490997233,
+    "convergencia": {
+     "epoca": 240,
+     "caida_de_costo_ultimas_10_epocas_pct": 3.540405184041498,
+     "umbral_de_continuacion_del_plan_pct": 1.0,
+     "convergida": false,
+     "advertencia": "NO convergida: el costo todavia cae mas del 1 % en las ultimas 10 epocas, asi que su S1 es un valor EN TRANSITO, no el valor final de la corrida",
+     "cruza_el_piso_de_ruido_en_la_epoca": null
+    }
+   },
+   "A1_D1_half0": {
+    "evaluada": true,
+    "epoca_alcanzada": 240,
+    "epocas_pedidas": 240,
+    "variante": "A1_D1",
+    "init": "verde",
+    "s_led": true,
+    "epocas": 240,
+    "lr_t": 0.2,
+    "B": 0.0015,
+    "costo_inicial": 1862331.5221172406,
+    "costo_final": 170309.6317374449,
+    "S1": -0.11232980095879998,
+    "S2_conjunta": {
+     "red": 0.9798844144627618,
+     "green": 0.677899023457351,
+     "blue": 0.8453493549818992
+    },
+    "S2_independiente": {
+     "red": 0.5307877510847954,
+     "green": 0.1754234364750867,
+     "blue": 0.17871889055355455
+    },
+    "S2_valor": 0.6666304644283447,
+    "costo_sobre_piso_de_ruido": 0.41254047814145883,
+    "convergencia": {
+     "epoca": 240,
+     "caida_de_costo_ultimas_10_epocas_pct": 0.752607580667514,
+     "umbral_de_continuacion_del_plan_pct": 1.0,
+     "convergida": true,
+     "cruza_el_piso_de_ruido_en_la_epoca": null,
+     "por_que_no_hay_cruce": "es media tanda de LEDs: su costo no es comparable con el piso de ruido, que esta medido sobre los 225 LEDs"
+    }
+   },
+   "A1_D1_half1": {
+    "evaluada": true,
+    "epoca_alcanzada": 240,
+    "epocas_pedidas": 240,
+    "variante": "A1_D1",
+    "init": "verde",
+    "s_led": true,
+    "epocas": 240,
+    "lr_t": 0.2,
+    "B": 0.0015,
+    "costo_inicial": 1009624.691684409,
+    "costo_final": 207207.16954160627,
+    "S1": -0.02661178004353907,
+    "S2_conjunta": {
+     "red": 0.9583584477607066,
+     "green": 0.6418520387353169,
+     "blue": 0.7974533915622147
+    },
+    "S2_independiente": {
+     "red": 0.5307877510847954,
+     "green": 0.1754234364750867,
+     "blue": 0.17871889055355455
+    },
+    "S2_valor": 0.6187345010086602,
+    "costo_sobre_piso_de_ruido": 0.5019172663634992,
+    "convergencia": {
+     "epoca": 240,
+     "caida_de_costo_ultimas_10_epocas_pct": 0.8688990052270281,
+     "umbral_de_continuacion_del_plan_pct": 1.0,
+     "convergida": true,
+     "cruza_el_piso_de_ruido_en_la_epoca": null,
+     "por_que_no_hay_cruce": "es media tanda de LEDs: su costo no es comparable con el piso de ruido, que esta medido sobre los 225 LEDs"
+    }
+   }
+  },
+  "piso_de_ruido_medido": 412831.323861137,
+  "costo_en_la_verdad": 414027.90904093144,
+  "resultado": "NEGATIVO",
+  "resumen_del_negativo": "El ajuste a las fotos NO identifica el espesor t. A 240 epocas A1_D2 llega a un costo de 3.9418e5 y A1_D1 a 4.0016e5, AMBOS POR DEBAJO del piso de ruido medido (4.1283e5) y del costo que tiene la verdad misma (4.1403e5), y sin embargo su S1 es -0.091: el espesor que encuentran no tiene ninguna relacion con el verdadero. No es un minimo local malo ni falta de epocas; es que el minimo global del costo especificado no esta donde esta la verdad. Ademas S1 EMPEORA monotonamente al optimizar mas: epoca 80 -> 180 -> 240 da -0.037 -> -0.079 -> -0.091 (A1_D1) y -0.043 -> -0.077 -> -0.091 (A1_D2).",
+  "degradacion_con_las_epocas": {
+   "que_es": "S1 (correlacion del espesor con la verdad) contra la epoca. Todas las corridas EMPEORAN monotonamente al optimizar mas. Las epocas 80/180 vienen de work/verif (verificador r01/r03); la final, de out/eval_*.json.",
+   "S1": {
+    "A1_D1": {
+     "0": -0.1517,
+     "80": -0.03749,
+     "180": -0.079,
+     "240": -0.0914657234082056
+    },
+    "A1_D2": {
+     "0": -0.1517,
+     "80": -0.04343,
+     "180": -0.0771,
+     "240": -0.09121911973473244
+    },
+    "A1_D1_cad": {
+     "0": 0.5574,
+     "80": 0.45634,
+     "180": 0.44,
+     "240": 0.43849385710597255,
+     "nota": "corrida NO convergida, el 240 es un valor en transito"
+    },
+    "A2_D1": {
+     "80": -0.01547,
+     "120": -0.0233,
+     "240": -0.02586840168375981
+    },
+    "A1_D1_half0": {
+     "80": -0.0679,
+     "240": -0.11232980095879998
+    },
+    "A1_D1_half1": {
+     "80": 0.0354,
+     "240": -0.02661178004353907
+    }
+   },
+   "S3": {
+    "80": 0.05594059738424573,
+    "240": 0.06751243791753236
+   },
+   "lectura": "Entre la epoca 80 y la 240, S3 MEJORA (+0.0559 -> +0.0675) mientras el S1 de LAS DOS mitades con las que se calcula EMPEORA (-0.068 -> -0.112 y +0.035 -> -0.027). Las dos mitades se parecen cada vez mas entre si y cada vez menos a la verdad: S3 mide autoconsistencia, y el modo de falla de este problema es un ajuste autoconsistente y equivocado."
+  },
+  "A1_vs_A2": {
+   "que_es": "comparacion a IGUAL numero de epocas (240 las dos), que era el caveat abierto en r03",
+   "costo_final": {
+    "A1_D1": 400161.97061770305,
+    "A2_D1": 889295.6218305825
+   },
+   "razon_A2_sobre_A1": 2.2223391704559954,
+   "costo_sobre_el_piso_de_ruido": {
+    "A1_D1": 0.9693110660185866,
+    "A2_D1": 2.154137950369562
+   },
+   "S1": {
+    "A1_D1": -0.0914657234082056,
+    "A2_D1": -0.02586840168375981
+   },
+   "lectura": "A1 (una amplitud por color) le gana a A2 (amplitud compartida) en costo en toda epoca medida: 80, 105, 120 y ahora tambien 240 (factor 2.2). A2 nunca baja del piso de ruido (se queda en 2.15x) porque tiene un tercio de los grados de libertad de amplitud. Y sin embargo A2 tampoco recupera el espesor (S1 = -0.026, y EMPEORANDO: -0.0155 a 80, -0.0233 a 120, -0.0259 a 240). Dicho de otro modo: el fracaso de S1 NO se explica solo por exceso de grados de libertad en la amplitud; la variante mas restringida falla igual."
+  },
+  "muestra_amplitud_distinta_por_color": {
+   "corrida": true,
+   "que_es": "Muestra identica a la principal salvo la amplitud dentro de la particula, que ahora es distinta por color (red 0.95, green 0.90, blue 0.85) en vez de 0.9 en los tres. A2 (una sola amplitud compartida) supone algo FALSO en esta muestra; A1 (una amplitud por color) no. Con el espesor no identificado por el ajuste, la amplitud es el diagnostico que si distingue A1 de A2.",
+   "amplitud_nominal": {
+    "red": 0.95,
+    "green": 0.9,
+    "blue": 0.85
+   },
+   "epocas": 80,
+   "epocas_declaradas": "80 para A1 y 80 para A2, el MISMO numero, con los mismos hiperparametros (lr_t=0.2, lr_a=0.01, ganancia por LED exacta, B fijo en el valor verdadero) y el inicio elegido por COSTO en las dos.",
+   "como_se_genero": {
+    "script": "amp_gen.py",
+    "mismo_generador_y_ruido_que_sim_py": true,
+    "espesor_verdadero_identico_a_verdad_npz": true,
+    "prueba_espesor": "amp_gen.py regenera sim.truth(seed=0, n=1500) y compara con verdad.npz: max|dt| = 0.0 um y 0 pixeles 'inside' distintos (logs/amp_gen.log). Por eso S1 es directamente comparable con el S1 de las corridas principales.",
+    "prueba_generador": "datos_amp_green.npz es IDENTICO BIT A BIT a sim_multiespectral_2026-09-29/datos_z98_green.npz (md5 e8b5d2c7f5f3a84b9de3576ca1773553): el verde nominal de esta muestra es 0.90, el mismo 0.9 de sim.py, asi que el generador y el ruido tienen que reproducirse exactamente, y lo hacen.",
+    "prueba_independientes": "out/amp_indep_green_full.npy es identico bit a bit a sim_multiespectral/out/obj_z98_green_full.npy: la reconstruccion independiente tambien es el mismo camino de codigo (fpm_red.reconstruct, 40 iteraciones, fourier_avg)."
+   },
+   "metrica_de_amplitud": {
+    "definicion": "mediana de a_c dentro de la particula, normalizada por la mediana de a_c en el fondo (el producto g_c*a_c es lo unico determinado). 'nucleo' = mascara de particula erosionada 3 px, que es la que reproduce el nominal sobre la verdad remuestreada; 'dentro' = sin erosionar.",
+    "script": "amp_eval.py",
+    "referencias": {
+     "verdad_en_grilla": {
+      "red": 0.9504627148348733,
+      "green": 0.9005894424038889,
+      "blue": 0.8503698723240655
+     },
+     "independiente": {
+      "red": 0.8548665366741316,
+      "green": 0.7500372953991473,
+      "blue": 0.6677978790973852
+     }
+    }
+   },
+   "corridas": {
+    "amp_A1_D1": {
+     "evaluada": true,
+     "variante": "A1_D1",
+     "init": "verde",
+     "epoca_alcanzada": 80,
+     "epocas_pedidas": 80,
+     "costo_inicial": 2178596.6493487107,
+     "costo_final": 580455.1947842796,
+     "S1": -0.05222121489452151,
+     "S2_conjunta": {
+      "red": 0.8070223904018785,
+      "green": 0.525875015068347,
+      "blue": 0.7163281945965508
+     },
+     "n_amplitudes": 3,
+     "amplitud_nucleo": {
+      "red": 0.8263793102440918,
+      "green": 1.1611215430259514,
+      "blue": 0.9301344895764325
+     },
+     "amplitud_dentro": {
+      "red": 1.0496214176229117,
+      "green": 1.0426091164159297,
+      "blue": 0.9719577272666057
+     },
+     "error_vs_nominal": {
+      "red": -0.12362068975590812,
+      "green": 0.26112154302595136,
+      "blue": 0.08013448957643254
+     },
+     "error_vs_verdad_en_grilla": {
+      "red": -0.12408340459078149,
+      "green": 0.26053210062206245,
+      "blue": 0.07976461725236705
+     },
+     "error_max_abs_vs_verdad_en_grilla": 0.26053210062206245,
+     "S2_diferencia_vs_independiente": {
+      "red": 0.2696305413118152,
+      "green": 0.35045157859414866,
+      "blue": 0.5426917189989832
+     },
+     "S2_valor": 0.5426917189989832,
+     "S2_pasa": false
+    },
+    "amp_A2_D1": {
+     "evaluada": true,
+     "variante": "A2_D1",
+     "init": "verde",
+     "epoca_alcanzada": 80,
+     "epocas_pedidas": 80,
+     "costo_inicial": 2114197.1738288365,
+     "costo_final": 1040778.9331337071,
+     "S1": -0.02416787221699662,
+     "S2_conjunta": {
+      "red": 0.670855847362161,
+      "green": 0.4983434475205718,
+      "blue": 0.6459864653425337
+     },
+     "n_amplitudes": 1,
+     "amplitud_nucleo": {
+      "compartida": 0.8033765261320485
+     },
+     "amplitud_dentro": {
+      "compartida": 1.0139501880872155
+     },
+     "error_vs_nominal": {
+      "red": -0.1466234738679515,
+      "green": -0.09662347386795156,
+      "blue": -0.046623473867951515
+     },
+     "error_vs_verdad_en_grilla": {
+      "red": -0.14708618870282486,
+      "green": -0.09721291627184048,
+      "blue": -0.046993346192017005
+     },
+     "error_max_abs_vs_verdad_en_grilla": 0.14708618870282486,
+     "S2_diferencia_vs_independiente": {
+      "red": 0.13346399827209765,
+      "green": 0.32292001104637347,
+      "blue": 0.472349989744966
+     },
+     "S2_valor": 0.472349989744966,
+     "S2_pasa": false
+    }
+   },
+   "S2_independiente": {
+    "red": 0.5373918490900633,
+    "green": 0.17542343647419836,
+    "blue": 0.17363647559756765
+   },
+   "comparacion": {
+    "costo_final_A1": 580455.1947842796,
+    "costo_final_A2": 1040778.9331337071,
+    "gana_en_costo": "A1",
+    "razon_costos_A2_sobre_A1": 1.7930392259139007,
+    "error_max_amplitud_A1": 0.26053210062206245,
+    "error_max_amplitud_A2": 0.14708618870282486,
+    "S1_A1": -0.05222121489452151,
+    "S1_A2": -0.02416787221699662
+   },
+   "fuente": "out/amplitud_variable.json"
+  },
+  "cota_amplitud_fisica": {
+   "corrida": true,
+   "parcial": false,
+   "que_es": "Control de la ronda 5. La corrida A1 de la muestra de amplitud por color (0.95/0.90/0.85), repetida con la COTA FISICA a_c <= 1 (joint.resolver a_rango=(0,1)) y todo lo demas identico: mismas fotos, mismas independientes de arranque, mismas 80 epocas, mismos hiperparametros, inicio elegido por costo. Contesta si la cota arregla el verde 1.161 o solo mueve el error a otro color.",
+   "con_cota": {
+    "nombre": "amp_A1_D1_cota1",
+    "parcial": false,
+    "epoca_alcanzada": 80,
+    "epocas_pedidas": 80,
+    "cota_a_max": 1.0,
+    "a_rango": [
+     0.0,
+     1.0
+    ],
+    "init": "verde",
+    "lr_t": 0.2,
+    "lr_a": 0.01,
+    "lr_B": 0.0002,
+    "B": 0.0015,
+    "n_amplitudes": 3,
+    "costo_inicial": 2043075.6746622925,
+    "costo_final": 687449.857620406,
+    "S1": -0.049591499202244795,
+    "S2_conjunta": {
+     "red": 0.8155401236416224,
+     "green": 0.46647950737622046,
+     "blue": 0.6353716944854112
+    },
+    "S2_valor": 0.4617352188878435,
+    "amplitud_estadisticas": {
+     "red": {
+      "mediana_nucleo": 0.7467856034887289,
+      "mediana_dentro": 1.032014741605654,
+      "media_nucleo": 0.6819575921097725,
+      "fondo_ref": 0.8770713210105896,
+      "max_normalizado": 1.140158133146764,
+      "a_max_bruto": 1.0,
+      "frac_pegada_a_1": 0.07643125,
+      "frac_pegada_a_2": 0.0
+     },
+     "green": {
+      "mediana_nucleo": 1.1221626579147534,
+      "mediana_dentro": 1.0326923236420715,
+      "media_nucleo": 0.9916430803967712,
+      "fondo_ref": 0.8911364078521729,
+      "max_normalizado": 1.1221626579147534,
+      "a_max_bruto": 1.0,
+      "frac_pegada_a_1": 0.067730859375,
+      "frac_pegada_a_2": 0.0
+     },
+     "blue": {
+      "mediana_nucleo": 0.9119027249224694,
+      "mediana_dentro": 0.9536215187785699,
+      "media_nucleo": 0.7752645720287462,
+      "fondo_ref": 0.9186638593673706,
+      "max_normalizado": 1.0885374337993885,
+      "a_max_bruto": 1.0,
+      "frac_pegada_a_1": 0.10286484375,
+      "frac_pegada_a_2": 0.0
+     }
+    },
+    "por_definicion_de_mascara": {
+     "mediana_nucleo": {
+      "descripcion": "mediana, nucleo erosionado 3 px (la declarada)",
+      "amplitud": {
+       "red": 0.7467856034887289,
+       "green": 1.1221626579147534,
+       "blue": 0.9119027249224694
+      },
+      "verdad_en_grilla": {
+       "red": 0.9504627148348733,
+       "green": 0.9005894424038889,
+       "blue": 0.8503698723240655
+      },
+      "error_max_vs_verdad_en_grilla": 0.2215732155108645,
+      "error_max_vs_nominal": 0.22216265791475343,
+      "orden_r_mayor_v_mayor_a": false,
+      "algun_color_mayor_que_1": true
+     },
+     "mediana_dentro": {
+      "descripcion": "mediana, mascara 'dentro' sin erosionar",
+      "amplitud": {
+       "red": 1.032014741605654,
+       "green": 1.0326923236420715,
+       "blue": 0.9536215187785699
+      },
+      "verdad_en_grilla": {
+       "red": 0.9583002818212452,
+       "green": 0.910923262939213,
+       "blue": 0.8631381355508501
+      },
+      "error_max_vs_verdad_en_grilla": 0.12176906070285853,
+      "error_max_vs_nominal": 0.1326923236420715,
+      "orden_r_mayor_v_mayor_a": false,
+      "algun_color_mayor_que_1": true
+     },
+     "media_nucleo": {
+      "descripcion": "media, nucleo erosionado 3 px",
+      "amplitud": {
+       "red": 0.6819575921097725,
+       "green": 0.9916430803967712,
+       "blue": 0.7752645720287462
+      },
+      "verdad_en_grilla": {
+       "red": 0.9505529245566474,
+       "green": 0.9002631632647713,
+       "blue": 0.8497840023817039
+      },
+      "error_max_vs_verdad_en_grilla": 0.26859533244687495,
+      "error_max_vs_nominal": 0.2680424078902275,
+      "orden_r_mayor_v_mayor_a": false,
+      "algun_color_mayor_que_1": false
+     }
+    }
+   },
+   "sin_cota": {
+    "nombre": "amp_A1_D1",
+    "parcial": false,
+    "epoca_alcanzada": 80,
+    "epocas_pedidas": 80,
+    "cota_a_max": null,
+    "a_rango": null,
+    "init": "verde",
+    "lr_t": 0.2,
+    "lr_a": 0.01,
+    "lr_B": 0.0002,
+    "B": 0.0015,
+    "n_amplitudes": 3,
+    "costo_inicial": 2178596.6493487107,
+    "costo_final": 580455.1947842796,
+    "S1": -0.05222121489452151,
+    "S2_conjunta": {
+     "red": 0.8070223904018785,
+     "green": 0.525875015068347,
+     "blue": 0.7163281945965508
+    },
+    "S2_valor": 0.5426917189989832,
+    "amplitud_estadisticas": {
+     "red": {
+      "mediana_nucleo": 0.8263793102440918,
+      "mediana_dentro": 1.0496214176229117,
+      "media_nucleo": 0.8513217458376365,
+      "fondo_ref": 0.9181447625160217,
+      "max_normalizado": 2.1783057330952205,
+      "a_max_bruto": 2.0,
+      "frac_pegada_a_1": 0.181580859375,
+      "frac_pegada_a_2": 0.00089921875
+     },
+     "green": {
+      "mediana_nucleo": 1.1611215430259514,
+      "mediana_dentro": 1.0426091164159297,
+      "media_nucleo": 1.141976334083031,
+      "fondo_ref": 0.899714469909668,
+      "max_normalizado": 2.1987009483591065,
+      "a_max_bruto": 1.9782030582427979,
+      "frac_pegada_a_1": 0.096444921875,
+      "frac_pegada_a_2": 0.0
+     },
+     "blue": {
+      "mediana_nucleo": 0.9301344895764325,
+      "mediana_dentro": 0.9719577272666057,
+      "media_nucleo": 0.8803523175893786,
+      "fondo_ref": 0.9294170141220093,
+      "max_normalizado": 2.010753266042584,
+      "a_max_bruto": 1.868828296661377,
+      "frac_pegada_a_1": 0.167580078125,
+      "frac_pegada_a_2": 0.0
+     }
+    },
+    "por_definicion_de_mascara": {
+     "mediana_nucleo": {
+      "descripcion": "mediana, nucleo erosionado 3 px (la declarada)",
+      "amplitud": {
+       "red": 0.8263793102440918,
+       "green": 1.1611215430259514,
+       "blue": 0.9301344895764325
+      },
+      "verdad_en_grilla": {
+       "red": 0.9504627148348733,
+       "green": 0.9005894424038889,
+       "blue": 0.8503698723240655
+      },
+      "error_max_vs_verdad_en_grilla": 0.26053210062206245,
+      "error_max_vs_nominal": 0.26112154302595136,
+      "orden_r_mayor_v_mayor_a": false,
+      "algun_color_mayor_que_1": true
+     },
+     "mediana_dentro": {
+      "descripcion": "mediana, mascara 'dentro' sin erosionar",
+      "amplitud": {
+       "red": 1.0496214176229117,
+       "green": 1.0426091164159297,
+       "blue": 0.9719577272666057
+      },
+      "verdad_en_grilla": {
+       "red": 0.9583002818212452,
+       "green": 0.910923262939213,
+       "blue": 0.8631381355508501
+      },
+      "error_max_vs_verdad_en_grilla": 0.13168585347671669,
+      "error_max_vs_nominal": 0.14260911641592966,
+      "orden_r_mayor_v_mayor_a": true,
+      "algun_color_mayor_que_1": true
+     },
+     "media_nucleo": {
+      "descripcion": "media, nucleo erosionado 3 px",
+      "amplitud": {
+       "red": 0.8513217458376365,
+       "green": 1.141976334083031,
+       "blue": 0.8803523175893786
+      },
+      "verdad_en_grilla": {
+       "red": 0.9505529245566474,
+       "green": 0.9002631632647713,
+       "blue": 0.8497840023817039
+      },
+      "error_max_vs_verdad_en_grilla": 0.2417131708182596,
+      "error_max_vs_nominal": 0.24197633408303088,
+      "orden_r_mayor_v_mayor_a": false,
+      "algun_color_mayor_que_1": true
+     }
+    }
+   },
+   "comparacion": {
+    "costo_final": {
+     "con_cota": 687449.857620406,
+     "sin_cota": 580455.1947842796,
+     "razon_con_sobre_sin": 1.1843288918723347
+    },
+    "S1": {
+     "con_cota": -0.049591499202244795,
+     "sin_cota": -0.05222121489452151
+    },
+    "S2_valor": {
+     "con_cota": 0.4617352188878435,
+     "sin_cota": 0.5426917189989832
+    },
+    "error_max_por_definicion": {
+     "mediana_nucleo": {
+      "con_cota": 0.2215732155108645,
+      "sin_cota": 0.26053210062206245
+     },
+     "mediana_dentro": {
+      "con_cota": 0.12176906070285853,
+      "sin_cota": 0.13168585347671669
+     },
+     "media_nucleo": {
+      "con_cota": 0.26859533244687495,
+      "sin_cota": 0.2417131708182596
+     }
+    },
+    "orden_correcto_por_definicion": {
+     "mediana_nucleo": {
+      "con_cota": false,
+      "sin_cota": false
+     },
+     "mediana_dentro": {
+      "con_cota": false,
+      "sin_cota": true
+     },
+     "media_nucleo": {
+      "con_cota": false,
+      "sin_cota": false
+     }
+    }
+   },
+   "fuente": "out/cota_amplitud.json"
+  },
+  "variante_de_algoritmo_ii": {
+   "implementada": true,
+   "que_es": "(ii) = una barrida ePIE por color (el bucle de fpm_red.reconstruct con epry=False y paso 0.3) partiendo del O_c del modelo conjunto, y despues proyeccion de los tres O_c^ePIE sobre el modelo conjunto: min_{t,a} sum_c ||O_c - a_c exp(i kappa_c t)||^2, con a_c en forma cerrada y t por Adam desde el t anterior, sin desenvolver. Codigo: variante_ii.py; la comparacion, correr_recorte.py.",
+   "gradcheck_de_la_proyeccion": 4.486763035782269e-08,
+   "recorte": {
+    "lado_um": 128.0,
+    "H": 400,
+    "camara": 100,
+    "paso_um": 0.32,
+    "margen_px": 25,
+    "leds": {
+     "red": 225,
+     "green": 225,
+     "blue": 225
+    }
+   },
+   "variante_de_modelo": "A1_D1",
+   "hiperparametros": {
+    "lr_t": 0.05,
+    "lr_a": 0.01,
+    "mu_epie": 0.3,
+    "iters_proj": 20
+   },
+   "las_dos_corren_con": "el mismo recorte, el mismo inicio (elegido por costo), el mismo numero de epocas y el MISMO costo de evaluacion (joint.costo_grad con s_ck)",
+   "inicio_elegido_por_costo": "verde",
+   "costos_del_inicio": {
+    "cadena": 936447.1095397077,
+    "verde": 124975.01563026494
+   },
+   "S1_de_los_dos_inicios": {
+    "verde": -0.05450769260469139,
+    "cadena": 0.6597080889425554
+   },
+   "cortes": {
+    "80": {
+     "epocas": 80,
+     "costo_final": {
+      "(i)": 37826.69101496378,
+      "(ii)": 30010.70140746489
+     },
+     "caida_del_costo_en_las_ultimas_10_epocas_pct": {
+      "(i)": 6.348506307176141,
+      "(ii)": 1.2724430529979762
+     },
+     "gana_por_costo": "(ii)",
+     "S1": {
+      "(i)": 0.06526525345755838,
+      "(ii)": 0.00114732621625467,
+      "inicio": -0.05450769260469139
+     },
+     "gana_por_S1": "(i)",
+     "la_regla_del_plan_y_S1_coinciden": false
+    },
+    "240": {
+     "epocas": 240,
+     "costo_final": {
+      "(i)": 25598.639570365474,
+      "(ii)": 28950.701425882107
+     },
+     "caida_del_costo_en_las_ultimas_10_epocas_pct": {
+      "(i)": 0.6713356615786864,
+      "(ii)": 0.029548780639167514
+     },
+     "gana_por_costo": "(i)",
+     "S1": {
+      "(i)": -0.0018406363683273084,
+      "(ii)": -0.031511125441543025,
+      "inicio": -0.05450769260469139
+     },
+     "gana_por_S1": "(i)",
+     "la_regla_del_plan_y_S1_coinciden": true
+    }
+   },
+   "corte_valido_por_el_plan": 240,
+   "elegida": "(i)",
+   "S1_de_la_elegida": -0.0018406363683273084,
+   "S1_de_la_otra": -0.031511125441543025,
+   "lectura": "La regla del plan se ejecuto literalmente. En el punto de corte valido (240 epocas, las dos convergidas) selecciona la variante (i): costo 25598.6 (i) contra 28950.7 (ii). Pero la regla NO es estable: a las 80 epocas (el default del plan) el orden esta dado vuelta y gana la (ii) (30010.7 contra 37826.7), y ahi el ganador por costo es ademas el PEOR por S1 (+0.00115 contra +0.06527). Es decir: quien gana depende de donde se pare, y el unico criterio de parada que da el plan es el mismo costo.",
+   "lo_que_importa": "Las dos variantes dan S1 practicamente nulo en el recorte (-0.00184 y -0.03151 a 240 epocas; +0.06527 y +0.00115 a 80), muy lejos del umbral 0.90. El algoritmo no es la causa del fracaso: cambiarlo por el otro permitido por el plan no recupera el espesor. Lo mismo pasa con el inicio, que el plan tambien manda elegir por costo: en el recorte el costo elige 'verde' (S1 del inicio -0.0545) sobre 'cadena' (S1 del inicio +0.6597), o sea elige el peor de los dos.",
+   "consecuencia": "Todas las corridas grandes de este trabajo (A1_D1, A1_D2, A2_D1, las mitades, la muestra de amplitud) son de la variante (i), que es la que la regla selecciona en el corte valido: el cuerpo de resultados es consistente con la seleccion. No se rehicieron con la (ii) porque en el recorte las dos dan S1 ~ 0 y el veredicto NEGATIVO no cambiaria.",
+   "archivos": [
+    "recorte.py",
+    "variante_ii.py",
+    "correr_recorte.py",
+    "out/variante_algoritmo.json",
+    "out/variante_algoritmo_240.json",
+    "out/recorte_i.npz",
+    "out/recorte_ii.npz",
+    "out/recorte_i_240.npz",
+    "out/recorte_ii_240.npz",
+    "logs/recorte.log",
+    "logs/recorte_240.log"
+   ],
+   "advertencia": "La historia de costo de (ii) a 240 epocas NO es monotona (hay subidas pequenas); la de (i) si lo es."
+  }
+ },
+ "real": {
+  "omitido": "Regla del plan, linea 74: 'Si S1 falla para todas las variantes, NO se pasa a datos reales'. S1 falla en las cuatro corridas de simulacion evaluadas (A1_D1 -0.0915, A1_D2 -0.0912, A2_D1 -0.0259, A1_D1_cad +0.4385), todas muy por debajo del umbral 0.90, y ademas el costo baja del piso de ruido medido sin que el espesor mejore. Correr datos reales sin un modelo que identifique t en simulacion solo produciria un numero sin interpretacion. Omision por regla, NO por falta de tiempo de computo."
+ },
+ "desviaciones_del_plan": [
+  {
+   "que": "ganancia por LED s_ck en el costo",
+   "el_plan_dice": "costo = suma_c suma_k || |psi_ck| - sqrt(I_ck) ||^2, con peso 1 por LED (plan, seccion del modelo)",
+   "que_se_hizo": "se agrego un escalar s_ck por (color, LED) ajustado en forma cerrada en cada paso, es decir || s_ck |psi_ck| - sqrt(I_ck) ||^2",
+   "por_que": "el generador de las fotos reescala CADA LED por su propio factor (results/sim_multiespectral_2026-09-29/sim.py, linea 79: s = mean(I_real_k)/mean(clean_k)), con un rango de 0.0928 a 0.9194 en rojo (factor 9.9 entre LEDs). Una sola ganancia por color no puede absorberlo.",
+   "evidencia_de_que_hacia_falta": "con el costo literal del plan, la VERDAD cuesta 1.0949e7 y 15 epocas de Adam bajan a 1.0141e7, o sea el costo literal ya esta minimizado por algo que no es la verdad (verificado en r01).",
+   "autorizada_por": "PI, reports/r02-lead.md decision 2"
+  },
+  {
+   "que": "referencia de S1",
+   "el_plan_dice": "dispersion conocida verde+azul = 0.80",
+   "que_se_hizo": "se usa 0.9449 como `referencia` (el spec pide 'best baseline under the same metric') y se conserva 0.90 como umbral de `pasa`",
+   "por_que": "el 0.80 del plan es la receta de couple_rgb_channels de TRES colores, donde el rojo entra igual por opl['green'] (src/ptyco_full_simulator/multispectral.py linea 393, verificado); el par verde-azul genuinamente limpio de rojo da 0.9449.",
+   "autorizada_por": "PI, reports/r02-lead.md decision 1"
+  }
+ ],
+ "criterios_mal_planteados": [
+  {
+   "criterio": "S1",
+   "problema": "el umbral fijo del plan (>= 0.90) queda POR DEBAJO de la mejor linea base bajo la misma metrica (par verde+azul limpio, 0.9449). Un metodo podria 'pasar' S1 siendo peor que la linea base que pretende superar.",
+   "que_se_hizo": "se informa, NO se retoca: el umbral y la regla quedan como estaban (spec: los criterios son FIJOS). Se agrega la clave `supera_referencia` como dato adicional. No cambia ningun resultado: el valor medido es -0.091, lejos de ambos numeros."
+  },
+  {
+   "criterio": "S3",
+   "problema": "no mide lo que el trabajo quiere medir. La FRC entre las dos mitades esta dominada por la amplitud a_c, que se reconstruye bien aunque t sea basura: las dos mitades tienen S1 = -0.068 y +0.035 y aun asi FRC 0.94-0.99. S3 da +0.056 (pasa) mientras S1 fracasa.",
+   "que_se_hizo": "se informa, NO se retoca. S3 se reporta como pasa=true con la advertencia adjunta en sim.S3.advertencia."
+  }
+ ],
+ "procedencia": {
+  "metricas": "metricas.py (mismo codigo para las referencias y para la conjunta)",
+  "referencias": "referencias.json (recalculadas en la grilla comun de 1600 px / 0.32 um, margen 100)",
+  "evaluaciones": "out/eval_<corrida>.json, producidas por evaluar.py sobre los .npz guardados",
+  "piso_de_ruido": "work/verif/v_sled.json costo_total_ideal (verificador, ronda 1): costo del objeto exactamente limitado en banda que genero las fotos",
+  "grilla": "H=1600, paso 0.32 um (optics.actual_hr_pixel_size_um(setup, 4)), z=98 mm, margen 100 px",
+  "gradcheck": "joint.gradcheck(seed=0) = 1.03e-8 (< 1e-5); el verificador lo rehizo desde cero: 6.0e-9"
+ }
+}
