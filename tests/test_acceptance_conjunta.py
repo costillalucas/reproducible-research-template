@@ -12,6 +12,12 @@ import pytest
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 D = os.path.join(ROOT, "results", "conjunta_2026-09-30")
 
+# results/ is gitignored: in a fresh clone the job's outputs are not there (a copy of the report is in
+# docs/resultados_2026-09-29/conjunta/). The job is frozen, so this gate only applies where its outputs exist.
+if not os.path.isdir(D):
+    pytest.skip("results/conjunta_2026-09-30 not present (local job outputs; see docs/resultados_2026-09-29/)",
+                allow_module_level=True)
+
 
 def _joint():
     p = os.path.join(D, "joint.py")
