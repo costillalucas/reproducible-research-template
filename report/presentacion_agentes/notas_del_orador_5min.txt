@@ -1,23 +1,39 @@
-Charla corta: 5 minutos en total (300 s). Entre corchetes, segundos por slide.
-El deck de 14 slides (presentacion_agentes_ia.pdf) queda como respaldo para las preguntas.
+Charla corta: 5 minutos en total (300 s). Entre corchetes, segundos por bloque.
+Deck: presentacion_5min.pptx (versión de Lucas, 01/10/2026): 26 diapos de charla con pasos + apéndice A1-A4.
+[clic → N] = avanzar a la diapo N del pptx en ese momento de la frase.
+(opcional) = frase que se puede cortar si se va justo de tiempo.
 
-1. portada (15 s)
-[15 s] Soy Lucas Costilla. Durante un mes le pedimos a agentes de inteligencia artificial que trabajaran sobre un problema real de microscopía. En cinco minutos: el problema, el mejor resultado, cómo lo validamos y qué aprendimos trabajando con agentes.
+1. PORTADA (15 s) · diapo 1
+Soy Lucas Costilla. Durante un mes le pedimos a agentes de inteligencia artificial que trabajaran sobre un problema real de microscopía. En cinco minutos: el problema, el mejor resultado, cómo lo validamos y qué aprendimos trabajando con agentes.
 
-2. problema (60 s)
-[60 s] Un microscopio no separa detalles más chicos que cierto límite; con nuestro objetivo, unos 3,8 micrones. La pticografía de Fourier, FPM, lo ataca sin cambiar el objetivo: se toma una foto por cada LED de una matriz, cada una con la iluminación desde otro ángulo, y un programa las combina. En teoría baja a 0,5 a 1 micrón, y además recupera la fase, cuánto se retrasa la luz al atravesar la muestra, que la cámara no registra. La trampa: el programa siempre devuelve una imagen, y hay que saber si es la muestra en alta resolución o si lo inventó. Y nuestra pregunta de fondo: qué parte de este trabajo pudieron hacer agentes de IA, que escribieron, corrieron y auditaron el código, y qué parte no.
+2. PROBLEMA / PREGUNTA (60 s) · diapo 2
+[clic → 2] Un microscopio no separa detalles más chicos que cierto límite; con nuestro objetivo, unos 3,8 micrones. La pticografía de Fourier, FPM, lo ataca sin cambiar el objetivo: se toma una foto por cada LED de una matriz, cada una con la iluminación desde otro ángulo, y un programa las combina. En teoría baja a 0,5 a 1 micrón, y además recupera la fase, cuánto se retrasa la luz al atravesar la muestra, que la cámara no registra. La trampa: el programa siempre devuelve una imagen, y hay que saber si es la muestra en alta resolución o si lo inventó. Y nuestra pregunta de fondo: qué parte de este trabajo pudieron hacer agentes de IA, que escribieron, corrieron y auditaron el código, y qué parte no.
 
-3. rgb_b (75 s)
-[75 s] El mejor resultado es la última captura, del lunes 28 a la noche: el mismo campo en rojo, verde y azul; arriba la foto cruda de cada color, abajo la reconstrucción. Los tres colores reconstruyen las mismas partículas en los mismos lugares, y cada reconstrucción predice fotos que no usó. A esta captura se llegó con sugerencias de los agentes, a partir de lo que medían en cada captura anterior. Julio tenía casi nada de luz en los ángulos grandes, así que propusieron varios tiempos por LED: corto para la luz directa y largo para la inclinada; el 24/09, 131 de 169 LEDs ya tenían señal útil. Fotos a oscuras para restar el fondo del sensor, y repetirlas cuando salieron saturadas. El tiempo de cada LED lo calcularon a partir de la captura anterior. Alejar la matriz, de 74 a unos 98 milímetros, para que las fotos de LEDs vecinos se solapen más. Y enfocar cada color por separado: con un solo foco, solo el color enfocado salía bien.
+3. RESULTADO PRINCIPAL (75 s) · diapos 3-14
+[clic → 3] El mejor resultado es la última captura, del lunes 28 a la noche. Para llegar a ella hicieron falta varias capturas: en cada una los agentes midieron qué faltaba y sugirieron qué cambiar.
+[clic → 4] En julio, con el mismo tiempo para todos los LEDs, la luz inclinada salía casi negra.
+[clic → 5] Propusieron varios tiempos por LED: corto para la luz directa y largo para la inclinada. Así pasamos de 12 a 131 de 169 LEDs con señal útil.
+[clic → 6] Con los LEDs apagados, el sensor no da cero.
+[clic → 7] Fotos a oscuras para restar ese fondo, repetidas cuando salieron saturadas.
+[clic → 8] [clic → 9] El tiempo de cada LED lo calcularon a partir de la captura anterior: un mapa por LED y por color.
+[clic → 10] [clic → 11] Alejar la matriz, de 74 a unos 98 milímetros, para que las fotos de LEDs vecinos se solapen más: del 31 al 46 por ciento.
+[clic → 12] [clic → 13] Y enfocar cada color por separado: con un solo foco, solo el color enfocado se parecía a la muestra.
+[clic → 14] El resultado: el mismo campo en rojo, verde y azul; arriba la foto cruda de cada color, abajo la reconstrucción. Los tres colores reconstruyen las mismas partículas en los mismos lugares, y cada reconstrucción predice fotos que no usó.
 
-4. validacion (75 s)
-[75 s] ¿Cómo decidimos si confiar? Tres pruebas, con criterios escritos antes de mirar los datos reales. Uno: en simulación, donde conocemos la respuesta, la amplitud coincide 0,997 con la muestra inventada y la fase 0,64 con la matriz a 75 milímetros, donde 1 es perfecto; alejándola a 100, con más solapamiento, la fase sube a 0,97. Dos: con datos reales, apartamos algunos LEDs, reconstruimos sin ellos y comparamos las fotos que el programa predice con las medidas. El error va de 0,46 a 0,62, donde 0 es perfecto y sin reconstruir da 0,98. Tres, la que decide la resolución: reconstruimos dos veces, cada una con la mitad de los LEDs, y medimos cuánto coinciden en el detalle más fino que el objetivo. Da entre 0,04 y 0,10: de 5 a 14 veces más que por azar, pero debajo del umbral, 0,14. A la izquierda, en verde y en la misma zona, la foto cruda y la fase que recuperó el programa, que ninguna foto registra. Las partículas grandes retrasan la luz varios radianes y las chicas muy poco; por eso casi no aparecen en la fase. Conclusión honesta: recuperamos la fase de la muestra real, pero ganar resolución todavía no está demostrado.
+4. VALIDACIÓN (75 s) · diapos 15-19
+[clic → 15] ¿Cómo decidimos si confiar? Tres pruebas, con criterios escritos antes de mirar los datos reales. Uno: en simulación, donde conocemos la respuesta, la amplitud coincide 0,997 con la muestra inventada y la fase 0,64 con la matriz a 75 milímetros, donde 1 es perfecto; alejándola a 100, con más solapamiento, la fase sube a 0,97.
+[clic → 16] Dos: con datos reales, apartamos algunos LEDs, reconstruimos sin ellos y comparamos las fotos que el programa predice con las medidas. El error va de 0,46 a 0,62, donde 0 es perfecto y sin reconstruir da 0,98.
+[clic → 17] Tres, la que decide la resolución: reconstruimos dos veces, cada una con la mitad de los LEDs, y medimos cuánto coinciden en el detalle más fino que el objetivo. Da entre 0,04 y 0,10: de 5 a 14 veces más que por azar, pero debajo del umbral, 0,14.
+[clic → 18] A la izquierda, en verde y en la misma zona, la foto cruda y la fase que recuperó el programa, que ninguna foto registra. (opcional) Las partículas grandes retrasan la luz varios radianes y las chicas muy poco; por eso casi no aparecen en la fase.
+[clic → 19] Conclusión honesta: recuperamos la fase de la muestra real, pero ganar resolución todavía no está demostrado.
 
-5. aprendizaje (60 s)
-[60 s] Lo que más nos enseñó, y creo que sirve para cualquier grupo: pasar todas las pruebas no alcanza. El programa mejora la imagen de a poco: compara las fotos que predice con las medidas y la corrige un poco en cada vuelta. Con imágenes reales, esas correcciones eran unas 8.000 veces más chicas de lo debido: después de cientos de vueltas devolvía casi la foto original. Y aun así pasaba cientos de pruebas automáticas, porque estaban hechas con imágenes chiquitas, de 16 a 32 píxeles. Lo encontró un agente que investigaba otra cosa. Los agentes también se equivocaron: supusieron mal datos del hardware y explicaron mal el ruido del sensor. Cuatro consejos: probar con datos del tamaño real; escribir el criterio de éxito antes de ver el resultado; que otro agente, con su propio código, rehaga cada número; y una persona que conozca el equipo, porque los agentes no saben lo que no se les dice.
+5. EXPERIENCIA / APRENDIZAJE (60 s) · diapos 20-25
+[clic → 20] Lo que más nos enseñó, y creo que sirve para cualquier grupo: pasar todas las pruebas no alcanza.
+[clic → 21] El programa mejora la imagen de a poco: compara las fotos que predice con las medidas y la corrige un poco en cada vuelta. Con imágenes reales, esas correcciones eran unas 8.000 veces más chicas de lo debido: después de cientos de vueltas devolvía casi la foto original. Y aun así pasaba cientos de pruebas automáticas, porque estaban hechas con imágenes chiquitas, de 16 a 32 píxeles. Lo encontró un agente que investigaba otra cosa. Los agentes también se equivocaron: supusieron mal datos del hardware (opcional) y explicaron mal el ruido del sensor.
+Cuatro consejos: [clic → 22] probar con datos del tamaño real; [clic → 23] escribir el criterio de éxito antes de ver el resultado; [clic → 24] que otro agente, con su propio código, rehaga cada número; [clic → 25] y una persona que conozca el equipo, porque los agentes no saben lo que no se les dice.
 
-6. cierre (15 s)
-[15 s] En resumen: los agentes fueron más útiles para auditar que para juzgar resultados reales. Ya medimos qué mejoró la última captura: sobre todo el foco de cada color, de forma provisional. Lo que sigue: una placa de calibración con detalle conocido, y probar con datos reales la combinación de verde y azul. Gracias.
+6. CIERRE (15 s) · diapo 26
+[clic → 26] En resumen: los agentes fueron más útiles para auditar que para juzgar resultados reales. (opcional) Ya medimos qué mejoró la última captura: sobre todo el foco de cada color, de forma provisional. Lo que sigue: una placa de calibración con detalle conocido, y probar con datos reales la combinación de verde y azul. Gracias.
 
 APÉNDICE PARA PREGUNTAS (no cuenta en los 5 minutos)
 
@@ -35,3 +51,71 @@ Un ejemplo de por qué pasar las pruebas no alcanza. Probamos reconstruir los tr
 
 A4. a_foco
 En la última captura cambiamos dos cosas a la vez, así que después las separamos. Solo el foco: el rojo, la misma noche y el mismo campo, en su foco o con el foco del verde o del azul. En su foco predice las fotos no usadas con error 0,46; desenfocado, 0,81 a 0,86. Las mitades coinciden 0,083 contra 0,021 a 0,024: de 3,5 a 4 veces más. Solo la geometría: el verde en foco, al pasar de 74 a 98 milímetros, sube de 0,024 a 0,043, 1,8 veces. O sea, el foco pesa más. Es provisional: el modelo no incluye el desenfoque, y un modelo con el desenfoque de cada color podría recuperar parte.
+
+PREGUNTAS PROBABLES (respuestas para decir; cada número tiene fuente en el repo)
+
+SOBRE EL RESULTADO
+
+P1. ¿Qué haría falta para demostrar que se gana resolución?
+Una muestra con detalle conocido más fino que el límite: una placa de calibración con líneas de ancho conocido, o las pistas de un CD, de 1,6 µm. Contaría si la reconstrucción separa líneas que la foto cruda no separa, y si las dos mitades de LEDs superan el umbral fijado antes. El criterio exacto para la placa todavía no lo escribimos.
+
+P2. ¿De dónde sale el umbral 0,143?
+Es el valor convencional de 1/7 que se usa en microscopía electrónica para comparar dos mitades independientes. Lo usamos como piso: el umbral era la mitad de lo que da una simulación con el modelo correcto (0,185, o sea 0,09), pero nunca menos de 0,143, así que manda el piso. Se mide en la banda que va desde el corte del objetivo hasta 0,45 ciclos por micrón: en rojo, detalles de 4,5 a 2,2 µm de período.
+
+P3. ¿Cómo se dividen las mitades? ¿Por qué la Mitad A tiene manchas oscuras? (causa: confianza baja)
+Como un tablero de ajedrez: fila más columna par a una mitad, impar a la otra, así las dos tienen LEDs de luz directa. Las manchas no las investigamos; no lo sabemos. Una candidata: los dos LEDs de luz directa más débiles en rojo, con menos de la mitad de luz que los otros cuatro, caen los dos en la mitad A.
+
+P4. ¿Qué mide el "error 0,46"? ¿Por qué sin reconstruir da 0,98?
+Apartamos un quinto de los LEDs, reconstruimos sin ellos y predecimos esas fotos; se ajusta brillo y fondo y se mide el residuo relativo a la variación de la foto. 0 es perfecto, 1 es no mejor que una constante. Son 5 turnos; la luz directa nunca se aparta. Sin reconstruir se predice desde la foto de luz directa agrandada, que no sabe nada de la luz inclinada: por eso da casi 1.
+
+P5. ¿Por qué la reconstrucción se ve más ruidosa que la foto cruda? (confianza media)
+Está en una grilla tres veces más fina, 0,43 µm contra 1,28 µm, y agrega frecuencias altas que la foto no tiene: aparecen anillos alrededor de las partículas, y en rojo un gradiente de fondo. El residuo, 0,4 a 0,6, está muy por encima del ruido del sensor, 0,05: es error del modelo, no ruido. El método no tiene regularización explícita.
+
+P6. ¿Se gana algo con más iteraciones?
+En rojo sí: la predicción mejora de 0,46 a 0,40 a 400 épocas, y las mitades de 0,083 a 0,105. En verde y azul no, lo mejor está cerca de 5 épocas. Ningún color llega al umbral; con 5 particiones al azar en rojo, 1 de 5 lo cruza apenas (0,147). La super-resolución sigue sin demostrarse.
+
+P7. Si predice fotos que no usó, ¿eso no prueba la resolución?
+No. Cada foto comparte buena parte de sus frecuencias con las vecinas, así que se puede predecir sin haber recuperado detalle fino. Para eso está la prueba de las mitades.
+
+SOBRE EL MONTAJE Y LA FÍSICA
+
+P8. ¿Por qué la fase da 0,64 a 75 mm y 0,97 a 100 mm? ¿Qué es el solapamiento?
+Es qué fracción del círculo de frecuencias que ve un LED comparte con el de su vecino: 31 % a 74 mm, 46 % a 98 mm. La literatura pide al menos un 35 %. La fase no se mide, se deduce de la coherencia entre fotos que comparten frecuencias: más solapamiento, más restricciones. El número exacto depende de la muestra: con otra imagen sintética da 0,87 a 75 mm.
+
+P9. ¿Le faltó luz al rojo? (casi todo quedó en 250 ms) (confianza media)
+Los 250 ms son el máximo del programa, y la luz inclinada quedó limitada por eso en los tres colores (rojo 217 de 225 LEDs, verde 181, azul 185). Pero a 250 ms el rojo no tiene menos señal que los otros, y es el que mejor predice. A todos les falta luz en los bordes.
+
+P10. ¿Qué muestra es?
+Partículas de poliamida (nylon) en DMSO, de 5 µm nominales pero de tamaños variados, de 1 a 10 µm de radio y formas irregulares. La diferencia de índice con el DMSO es de unos 0,05, así que retrasan poco la luz. Se eligieron para tener una regla de tamaño conocido; resultaron polidispersas.
+
+P11. ¿De dónde salen 3,8 µm y 0,5 µm?
+Del límite de Abbe, λ/2NA: verde a 530 nm con NA 0,07 da 3,8 µm (en rojo, 4,5 µm). Con LEDs hasta un seno de 0,44, queda λ/(2(NA+0,44)), unos 0,5 µm. La apertura sintética de esta captura es 0,48.
+
+P12. ¿Se puede estimar la distancia de la matriz (z) a partir de los datos?
+No. Con datos reales el error sigue bajando hasta 115 mm sin un mínimo; en simulación la misma prueba sí encuentra el z verdadero, o sea que z está compensando un error del modelo. Usamos la medida a mano, 98 ± 2 mm, y la confirma que los 6 LEDs más brillantes son justo los de luz directa que predice ese z.
+
+P13. ¿Vale el modelo de muestra delgada?
+No siempre. En otra zona de la muestra falla del todo (0,998): la luz inclinada muestra estrías en la dirección de cada LED, luz dispersada en el volumen. También sobra luz en campo oscuro.
+
+P14. ¿Qué es la "dispersión conocida"? ¿Por qué verde y azul?
+Para pasar de fase a espesor se divide por la diferencia de índice entre partícula y DMSO en cada color, tomada de tablas en vez de ajustarla. En simulación da 0,945. El rojo queda afuera porque su fase es la más ruidosa (0,54 rad de error contra 0,17 en verde y azul). Con datos reales todavía no se probó.
+
+P15. ¿Por qué 40 épocas y paso 0,3?
+Las 40 épocas no tenían justificación; el paso 0,3 solo está justificado en simulación, donde llega al piso de ruido en unas 50 iteraciones. Por eso después hicimos el estudio de iteraciones (P6).
+
+SOBRE LOS AGENTES
+
+P16. ¿Cuál fue exactamente el error de las correcciones 8.000 veces más chicas?
+El programa dividía la corrección por la cantidad de píxeles y usaba un paso fijo. Con recortes de 400×400, 160.000 píxeles, eso daba 1/8.000 del paso estándar; con las imágenes de 16 a 32 píxeles de las pruebas todavía andaba. Se arregló definiendo el paso relativo al estándar del método (ePIE). Apareció cuando un agente revisaba si la geometría corregida movía la fase.
+
+P17. ¿Qué agentes usaron? ¿Cuánto costó? (confianza media: son estimaciones de la herramienta)
+Claude Code de forma interactiva, y cuatro trabajos de equipos de agentes, todos con Claude. Esos cuatro registran unos 138 millones de tokens y unos 170 dólares; el más grande, la reconstrucción conjunta, 86 dólares en una noche. El costo de las sesiones interactivas y las horas humanas no lo medimos.
+
+P18. ¿Cómo saben que los números no son inventados?
+Cada número del resumen tiene una marca con su clave, y un script comprueba que coincide con un registro que solo escribe un programa. En los equipos, un verificador recalcula cada métrica con su propio código. La prueba de aceptación tenía el hash fijado. Pero ojo: esto garantiza que el número sale del código, no que el método sea correcto (ver A3).
+
+P19. ¿Cuánto tiempo se ahorró frente a hacerlo una persona sola? (confianza baja)
+No lo medimos. Lo que sí sabemos: casi todos los commits del repositorio tienen a Claude como coautor, y el proyecto en este repo empezó el 10/09.
+
+P20. ¿Por qué no usar un programa de FPM ya publicado?
+No lo comparamos con un paquete publicado, y es una buena sugerencia. Sí comparamos con mi código previo, basado en un método publicado (Bian 2016): tenía tres errores verificados (el inverso no correspondía al directo, la orientación de los LEDs traspuesta y la pupila con mal tamaño). Corregido, queda casi congelado: 0,985 contra 0,517 del nuestro.

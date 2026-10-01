@@ -38,6 +38,29 @@ plt.rcParams.update({"font.size": 15, "axes.titlesize": 21})  # como fig_fase_28
 LED, FOLD = (16, 19), 1
 
 
+CHARLA = "--charla" in sys.argv  # versión charla: barra de escala en cada imagen, sale en report/presentacion_agentes/img_charla/
+if CHARLA:
+    OUT = "report/presentacion_agentes/img_charla"; os.makedirs(OUT, exist_ok=True)
+
+
+def barra(a, img, umpx, um):
+    """Barra de escala como la de make_fig_fase_2809b.py (abajo a la izquierda, lw 5, rótulo encima, 17 pt), en píxeles
+    de la imagen mostrada; blanca si el fondo bajo la barra es oscuro y negra si es claro (según el colormap del eje)."""
+    if not CHARLA:
+        return
+    n = img.shape[0]; L = n * umpx; k = 1 / umpx  # px por µm
+    x0, x1, yb, yt = 8 / 128 * L, 8 / 128 * L + um, 120 / 128 * L, 113 / 128 * L
+    im = a.get_images()[0]; rgb = im.cmap(im.norm(img[int(0.82 * n):, :int((x1 + 8 / 128 * L) * k)]))[..., :3]
+    lum = (0.2126 * rgb[..., 0] + 0.7152 * rgb[..., 1] + 0.0722 * rgb[..., 2]).mean()
+    c, o = ("k", "w") if lum > 0.5 else ("w", "k")  # borde fino del color opuesto: legible aunque pase sobre una partícula
+    from matplotlib import patheffects as pe
+    a.plot([x0 * k - 0.5, x1 * k - 0.5], [yb * k - 0.5] * 2, color=c, lw=5, solid_capstyle="butt",
+           path_effects=[pe.withStroke(linewidth=7, foreground=o)])
+    a.text((x0 + um / 2) * k - 0.5, yt * k - 0.5, f"{um:g} µm", color=c, ha="center", fontsize=17,
+           path_effects=[pe.withStroke(linewidth=2.5, foreground=o)])
+    a.set_xlim(-0.5, n - 0.5); a.set_ylim(n - 0.5, -0.5)
+
+
 def panels3():  # ancho 1210 px como fig_fase_2809b (11 in a 110 dpi); alto justo para 3 cuadrados + rótulo
     g = 0.008; W = (1 - 0.02 - 2 * g) / 3; lado = W * 1210; HPX = round(lado + 8 + 42)
     fig = plt.figure(figsize=(11, HPX / 110))
@@ -89,12 +112,14 @@ def fig1():
               assert abs(cmp["phase_correlation"] - ref[z]["phase_correlation"]) < 1e-6 and abs(cmp["amplitude_correlation"] - ref[z]["amplitude_correlation"]) < 1e-6
               continue
           key = min(lr, key=lambda k: abs(k[0] - 17.5) + abs(k[1] - 15))
-          R[z] = dict(obj=obj, rec=o * np.exp(-1j * np.angle(np.vdot(o, obj).conj())), photo=lr[key], cmp=cmp)
+          R[z] = dict(obj=obj, rec=o * np.exp(-1j * np.angle(np.vdot(o, obj).conj())), photo=lr[key], cmp=cmp, hp=hp)
     a75, a100 = R[75.0], R[100.0]
     fig, ax = panels3()
     kw = dict(cmap="viridis", vmin=0, vmax=1.2)
-    for a, im, tt in zip(ax, (np.angle(a75["obj"]), np.angle(a75["rec"]), np.angle(a100["rec"])), ("Verdad (fase)", "75 mm", "100 mm")):
+    for a, im, tt, px in zip(ax, (np.angle(a75["obj"]), np.angle(a75["rec"]), np.angle(a100["rec"])), ("Verdad (fase)", "75 mm", "100 mm"),
+                             (a75["hp"], a75["hp"], a100["hp"])):
         a.imshow(im, **kw); a.set_title(tt); a.axis("off")
+        barra(a, im, px, 40)  # px = píxel del objeto simulado a esa z (lr 1,28 µm / factor de optics.upsampling_factor), sin recorte
     fig.savefig(f"{OUT}/fig_valid_1_simulacion.png", dpi=110); plt.close(fig)
 
 
@@ -118,6 +143,7 @@ def fig2():
     fig, ax = panels3()
     for a, im, tt in zip(ax, (meas, fit(p1), fit(p0)), ("Medida", "Predicha", "Sin reconstruir")):
         a.imshow(im[z], cmap="gray", vmin=lo, vmax=hi); a.set_title(tt); a.axis("off")
+        barra(a, im[z], geo["lrpx"], 50)  # fotos (medida y predichas) en la grilla de la cámara, 1,28 µm; recorte 200 px
     fig.savefig(f"{OUT}/fig_valid_2_prediccion.png", dpi=110); plt.close(fig)
 
 
@@ -133,6 +159,7 @@ def fig3():
     fig, ax = panels3(); ax[2].remove()
     for a, im, tt in zip(ax[:2], (h0, h1), ("Mitad A", "Mitad B")):
         l, h = np.percentile(im[z], [1, 99.5]); a.imshow(im[z], cmap="gray", vmin=l, vmax=h); a.set_title(tt); a.axis("off")
+        barra(a, im[z], geo["hrpx"], 30)  # objeto en la grilla de la reconstrucción, 1,28 / 3 = 0,427 µm; recorte 300 px
     HPX = fig.get_figheight() * 110; top = ax[0].get_position().y1
     c = fig.add_axes([0.72, 70 / HPX, 0.265, top - 70 / HPX])
     c.axvspan(lo, 0.45, color="#F6D9C6")
@@ -145,7 +172,7 @@ def fig3():
     fig.savefig(f"{OUT}/fig_valid_3_mitades.png", dpi=110); plt.close(fig)
 
 
-pedidos = sys.argv[1:] or ["1", "2", "3"]
+pedidos = [a for a in sys.argv[1:] if a != "--charla"] or ["1", "2", "3"]
 for k in pedidos:
     {"fold": fold_obj, "1": fig1, "2": fig2, "3": fig3}[k]()
     print("figura", k)

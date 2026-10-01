@@ -1,6 +1,7 @@
 """Figuras del informe para no especialistas (captura 2026-09-24 y control sintetico).
 Correr desde la raiz del repo: python3 report/informe/make_informe_figs.py
-FIG_LANG=en: textos en ingles, salida en report/informe/img_en/ (mismos nombres)."""
+FIG_LANG=en: textos en ingles, salida en report/informe/img_en/ (mismos nombres).
+Con --charla: solo fig_congelado sin pie y con barras de escala, en report/presentacion_agentes/img_charla/."""
 import os, shutil, sys, numpy as np, tifffile
 import matplotlib; matplotlib.use("Agg"); import matplotlib.pyplot as plt
 EN = os.environ.get("FIG_LANG", "es") == "en"
@@ -20,6 +21,48 @@ def raw(r, c, ms):
 def scalebar(ax, px_um, n, um=100):
     L = um / px_um; ax.plot([n * 0.06, n * 0.06 + L], [n * 0.93] * 2, color="w", lw=4)
     ax.text(n * 0.06 + L / 2, n * 0.89, f"{um} µm", color="w", ha="center", fontsize=11)
+
+def barra_um(ax, img, ancho_um, um, fs=15):
+    """Barra de escala abajo a la izquierda (estilo make_fig_fase_2809b.py), en ejes con extent en µm.
+    Blanca sobre fondo oscuro, negra sobre claro, con borde de contraste para que siempre se lea."""
+    import matplotlib.patheffects as pe
+    n = img.shape[0]; x0, y = 0.05 * ancho_um, 0.93 * ancho_um
+    zona = img[int(0.80 * n):, :int(0.40 * n)]
+    c, o = ("w", "k") if np.mean(zona) < 0.5 else ("k", "w")
+    borde = [pe.withStroke(linewidth=3, foreground=o)]
+    ax.plot([x0, x0 + um], [y, y], color=c, lw=5, solid_capstyle="butt",
+            path_effects=[pe.Stroke(linewidth=8, foreground=o), pe.Normal()])
+    ax.text(x0 + um / 2, y - 0.035 * ancho_um, f"{um} µm", color=c, ha="center", va="bottom", fontsize=fs, path_effects=borde)
+
+def fig_congelado(out, charla=False):
+    """charla=True: sin pie, con barra de escala en los tres paneles, más compacta.
+    Escala: recorte LR de 128 px x 1.6 µm (3.2 µm de píxel de cámara, config.py:140, / 2x de
+    results/led_geometry_2025-12-12/ctl_norm_scaled_20/summary.json) = 204.8 µm; los paneles
+    reconstruidos son 640 px x 0.32 µm = 204.8 µm (fig09_*_panel(s).json, "transform")."""
+    from PIL import Image
+    LRD = os.path.expanduser("~/Documents/AleYLu/imagenes_tomadas/2025-12-12/organizado/green/9x9_recortada_400")
+    lr = np.asarray(Image.open(os.path.join(LRD, "fila17_col15.tiff")), float)
+    y0 = (lr.shape[0] - 128) // 2; lr_c = np.sqrt(np.clip(lr[y0:y0 + 128, y0:y0 + 128], 0, None))
+    fro = np.load("results/led_geometry_2025-12-12/fig09_frozen_panel.npz")["amplitude"]
+    tha = np.load("results/residual_floor_2025-12-12/fig09_thawed_panels.npz")["amplitude"]
+    fig, ax = plt.subplots(1, 3, figsize=(13, 4.9) if not charla else (13, 4.75))
+    LADO = 128 * 1.6   # µm; = 640 * 0.32
+    for a, im, t in zip(ax, [lr_c, fro, tha], T(["Foto cruda\n ", "Algoritmo congelado\ndevuelve casi la misma foto", "Con el paso corregido: cambia la imagen,\npero con estos datos da ruido"],
+                                          ["Raw photo\n ", "Frozen algorithm\nreturns almost the same photo", "With the step fixed: the image changes,\nbut with these data it is noise"])):
+        if charla:
+            sim = stretch(im, 1, 99); a.imshow(sim, cmap="gray", extent=[0, LADO, LADO, 0]); barra_um(a, sim, LADO, 50)
+        else:
+            a.imshow(stretch(im, 1, 99), cmap="gray")
+        a.set_title(t); a.axis("off")
+    fig.suptitle(T("Con los datos reales, el algoritmo no hacía nada", "With the real data, the algorithm did nothing"), fontsize=15, y=0.99)
+    if charla:
+        plt.tight_layout(rect=(0, 0, 1, 0.94)); plt.savefig(f"{out}/fig_congelado.png", dpi=110, bbox_inches="tight", pad_inches=0.08); plt.close(); return
+    fig.text(0.5, 0.01, T("Captura de diciembre de 2025, verde, zona de 205 µm. El congelamiento no se veía en las pruebas porque usaban imágenes diminutas.",
+                          "December 2025 capture, green, 205 µm area. The freeze did not show in the tests because they used tiny images."), ha="center", fontsize=10.5, color="0.35")
+    plt.tight_layout(rect=(0, 0.05, 1, 0.94)); plt.savefig(f"{out}/fig_congelado.png", dpi=110); plt.close()
+
+if "--charla" in sys.argv:   # solo la versión para la charla, en otra carpeta; el resto no se toca
+    _o = "report/presentacion_agentes/img_charla"; os.makedirs(_o, exist_ok=True); fig_congelado(_o, charla=True); print("ok", _o); sys.exit(0)
 
 # 1. fotos crudas
 sel = [((18, 15), "10ms", T("Luz directa", "Direct light")), ((18, 17), "100ms", T("Luz inclinada, 2 LEDs", "Oblique light, 2 LEDs")),
@@ -86,17 +129,5 @@ fig.text(0.5, 0.01, T("Geometría real del montaje (13×13 LEDs, 75 mm, objetivo
 plt.subplots_adjust(top=0.9, bottom=0.06); plt.savefig(f"{OUT}/fig_sintetico.png", dpi=100); plt.close()
 
 # 4. congelado vs corregido: la figura ya existente de la presentación
-LRD = os.path.expanduser("~/Documents/AleYLu/imagenes_tomadas/2025-12-12/organizado/green/9x9_recortada_400")
-lr = np.asarray(Image.open(os.path.join(LRD, "fila17_col15.tiff")), float)
-y0 = (lr.shape[0] - 128) // 2; lr_c = np.sqrt(np.clip(lr[y0:y0 + 128, y0:y0 + 128], 0, None))
-fro = np.load("results/led_geometry_2025-12-12/fig09_frozen_panel.npz")["amplitude"]
-tha = np.load("results/residual_floor_2025-12-12/fig09_thawed_panels.npz")["amplitude"]
-fig, ax = plt.subplots(1, 3, figsize=(13, 4.9))
-for a, im, t in zip(ax, [lr_c, fro, tha], T(["Foto cruda\n ", "Algoritmo congelado\ndevuelve casi la misma foto", "Con el paso corregido: cambia la imagen,\npero con estos datos da ruido"],
-                                      ["Raw photo\n ", "Frozen algorithm\nreturns almost the same photo", "With the step fixed: the image changes,\nbut with these data it is noise"])):
-    a.imshow(stretch(im, 1, 99), cmap="gray"); a.set_title(t); a.axis("off")
-fig.suptitle(T("Con los datos reales, el algoritmo no hacía nada", "With the real data, the algorithm did nothing"), fontsize=15, y=0.99)
-fig.text(0.5, 0.01, T("Captura de diciembre de 2025, verde, zona de 205 µm. El congelamiento no se veía en las pruebas porque usaban imágenes diminutas.",
-                      "December 2025 capture, green, 205 µm area. The freeze did not show in the tests because they used tiny images."), ha="center", fontsize=10.5, color="0.35")
-plt.tight_layout(rect=(0, 0.05, 1, 0.94)); plt.savefig(f"{OUT}/fig_congelado.png", dpi=110); plt.close()
+fig_congelado(OUT)
 print("ok", os.listdir(OUT))
