@@ -1,0 +1,37 @@
+Charla corta: 5 minutos en total (300 s). Entre corchetes, segundos por slide.
+El deck de 14 slides (presentacion_agentes_ia.pdf) queda como respaldo para las preguntas.
+
+1. portada (15 s)
+[15 s] Soy Lucas Costilla. Durante un mes le pedimos a agentes de inteligencia artificial que trabajaran sobre un problema real de microscopía. En cinco minutos: el problema, el mejor resultado, cómo lo validamos y qué aprendimos trabajando con agentes.
+
+2. problema (60 s)
+[60 s] Un microscopio no separa detalles más chicos que cierto límite; con nuestro objetivo, unos 3,8 micrones. La pticografía de Fourier, FPM, lo ataca sin cambiar el objetivo: se toma una foto por cada LED de una matriz, cada una con la iluminación desde otro ángulo, y un programa las combina. En teoría baja a 0,5 a 1 micrón, y además recupera la fase, cuánto se retrasa la luz al atravesar la muestra, que la cámara no registra. La trampa: el programa siempre devuelve una imagen, y hay que saber si es la muestra en alta resolución o si lo inventó. Y nuestra pregunta de fondo: qué parte de este trabajo pudieron hacer agentes de IA, que escribieron, corrieron y auditaron el código, y qué parte no.
+
+3. rgb_b (75 s)
+[75 s] El mejor resultado es la última captura, del lunes 28 a la noche: el mismo campo en rojo, verde y azul; arriba la foto cruda de cada color, abajo la reconstrucción. Los tres colores reconstruyen las mismas partículas en los mismos lugares, y cada reconstrucción predice fotos que no usó. A esta captura se llegó con sugerencias de los agentes, a partir de lo que medían en cada captura anterior. Julio tenía casi nada de luz en los ángulos grandes, así que propusieron varios tiempos por LED: corto para la luz directa y largo para la inclinada; el 24/09, 131 de 169 LEDs ya tenían señal útil. Fotos a oscuras para restar el fondo del sensor, y repetirlas cuando salieron saturadas. El tiempo de cada LED lo calcularon a partir de la captura anterior. Alejar la matriz, de 74 a unos 98 milímetros, para que las fotos de LEDs vecinos se solapen más. Y enfocar cada color por separado: con un solo foco, solo el color enfocado salía bien.
+
+4. validacion (75 s)
+[75 s] ¿Cómo decidimos si confiar? Tres pruebas, con criterios escritos antes de mirar los datos reales. Uno: en simulación, donde conocemos la respuesta, la amplitud coincide 0,997 con la muestra inventada y la fase 0,64 con la matriz a 75 milímetros, donde 1 es perfecto; alejándola a 100, con más solapamiento, la fase sube a 0,97. Dos: con datos reales, apartamos algunos LEDs, reconstruimos sin ellos y comparamos las fotos que el programa predice con las medidas. El error va de 0,46 a 0,62, donde 0 es perfecto y sin reconstruir da 0,98. Tres, la que decide la resolución: reconstruimos dos veces, cada una con la mitad de los LEDs, y medimos cuánto coinciden en el detalle más fino que el objetivo. Da entre 0,04 y 0,10: de 5 a 14 veces más que por azar, pero debajo del umbral, 0,14. A la izquierda, en verde y en la misma zona, la foto cruda y la fase que recuperó el programa, que ninguna foto registra. Las partículas grandes retrasan la luz varios radianes y las chicas muy poco; por eso casi no aparecen en la fase. Conclusión honesta: recuperamos la fase de la muestra real, pero ganar resolución todavía no está demostrado.
+
+5. aprendizaje (60 s)
+[60 s] Lo que más nos enseñó, y creo que sirve para cualquier grupo: pasar todas las pruebas no alcanza. El programa mejora la imagen de a poco: compara las fotos que predice con las medidas y la corrige un poco en cada vuelta. Con imágenes reales, esas correcciones eran unas 8.000 veces más chicas de lo debido: después de cientos de vueltas devolvía casi la foto original. Y aun así pasaba cientos de pruebas automáticas, porque estaban hechas con imágenes chiquitas, de 16 a 32 píxeles. Lo encontró un agente que investigaba otra cosa. Los agentes también se equivocaron: supusieron mal datos del hardware y explicaron mal el ruido del sensor. Cuatro consejos: probar con datos del tamaño real; escribir el criterio de éxito antes de ver el resultado; que otro agente, con su propio código, rehaga cada número; y una persona que conozca el equipo, porque los agentes no saben lo que no se les dice.
+
+6. cierre (15 s)
+[15 s] En resumen: los agentes fueron más útiles para auditar que para juzgar resultados reales. Ya medimos qué mejoró la última captura: sobre todo el foco de cada color, de forma provisional. Lo que sigue: una placa de calibración con detalle conocido, y probar con datos reales la combinación de verde y azul. Gracias.
+
+APÉNDICE PARA PREGUNTAS (no cuenta en los 5 minutos)
+
+apendice. apendice
+Separador. No cuenta en los 5 minutos: slides para responder preguntas.
+
+A1. a_control
+Cuatro controles, cada uno nació de un error. Uno: cada número del resumen lleva una marca con su clave, y un script comprueba que coincide con el registro de números, que solo escribe un programa; si alguien, persona o agente, cambia un número a mano, la verificación falla. Dos: en la reconstrucción conjunta, la prueba de aceptación tenía el hash fijado y el agente no la podía editar; los criterios y umbrales tampoco se pueden cambiar después de ver resultados. Tres: un verificador independiente rehace cada número con su propio código; en la reconstrucción conjunta el gradiente dio 1,03e-8 y el verificador obtuvo 6,0e-9. Cuatro: los planes escriben los criterios antes de correr (carpeta docs).
+
+A2. a_quien
+La división del trabajo. Lucas armó el montaje y tomó todas las capturas en el laboratorio; confirmó los datos del hardware, que los agentes no podían saber y a veces supusieron mal; decidió qué probar y tuvo la última palabra. Los agentes escribieron casi todo el código: 97 de los 99 commits del repositorio tienen a Claude como coautor. También hicieron los análisis, encontraron los errores, escribieron los informes, propusieron cómo tomar las capturas y armaron esta presentación. Los agentes no hacen commits por su cuenta: solo cuando la persona lo pide.
+
+A3. a_conjunta
+Un ejemplo de por qué pasar las pruebas no alcanza. Probamos reconstruir los tres colores juntos, con un solo espesor para la muestra. Todo en simulación, donde conocemos la respuesta. El gradiente estaba verificado y la prueba de aceptación pasó, pero esa prueba solo exige que los entregables existan, no que el método funcione. El ajuste reproduce las fotos mejor que la muestra verdadera: queda en 0,97 veces el piso de ruido. Y sin embargo el espesor que encuentra no tiene nada que ver con el verdadero: correlación −0,09. Optimizar más lo empeora: de −0,04 en la época 80 a −0,09 en la 240. Por la regla del plan, no se pasó a datos reales. La cadena simple, verde y azul por separado con la dispersión conocida, da 0,945 en la misma simulación.
+
+A4. a_foco
+En la última captura cambiamos dos cosas a la vez, así que después las separamos. Solo el foco: el rojo, la misma noche y el mismo campo, en su foco o con el foco del verde o del azul. En su foco predice las fotos no usadas con error 0,46; desenfocado, 0,81 a 0,86. Las mitades coinciden 0,083 contra 0,021 a 0,024: de 3,5 a 4 veces más. Solo la geometría: el verde en foco, al pasar de 74 a 98 milímetros, sube de 0,024 a 0,043, 1,8 veces. O sea, el foco pesa más. Es provisional: el modelo no incluye el desenfoque, y un modelo con el desenfoque de cada color podría recuperar parte.
