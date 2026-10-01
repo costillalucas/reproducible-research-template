@@ -1,0 +1,19 @@
+{
+ "bitwise_3ep_maxabsdiff": 0.0,
+ "f0_40ep_heldout_R_ring_lt7": 0.472964924257311,
+ "f0_ref_heldout_R_ring_lt7": 0.472964924257311,
+ "f0_per_led_maxabsdiff": 0.0,
+ "f0_wall_s": 326.39840745925903,
+ "s_per_epoch_b_red": 7.423458218574524,
+ "factor_b_red": 3,
+ "n_leds_b_red": 225,
+ "s_per_epoch_b_green": 7.153318643569946,
+ "factor_b_green": 5,
+ "n_leds_b_green": 225,
+ "s_per_epoch_b_blue": 8.330542087554932,
+ "factor_b_blue": 5,
+ "n_leds_b_blue": 225,
+ "s_per_epoch_s3_red": 6.399137496948242,
+ "factor_s3_red": 3,
+ "n_leds_s3_red": 169
+}
