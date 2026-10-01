@@ -1,0 +1,20 @@
+red 1200 0.4266666666666667 umbral 6.271586050885381 candidatas 19 elegidas 16
+red 0 {'bgstd': 0.0, 'bgstd_rob': 0.0, 'frac_gt_pi': 0.0, 'frac_wrap': 0.0, 'sup_ptp': 0.0, 'lf_bg_std': 0.0, 'rel_ph': None, 'rel_c': None}
+red 1 {'bgstd': 0.0, 'bgstd_rob': 0.0, 'frac_gt_pi': 0.0, 'frac_wrap': 0.0, 'sup_ptp': 0.0, 'lf_bg_std': 0.0, 'rel_ph': 0.0, 'rel_c': 0.0}
+red 2 {'bgstd': 0.0339, 'bgstd_rob': 0.0117, 'frac_gt_pi': 0.0, 'frac_wrap': 0.0, 'sup_ptp': 0.0009, 'lf_bg_std': 0.0026, 'rel_ph': 1.0, 'rel_c': 0.0597}
+red 3 {'bgstd': 0.3691, 'bgstd_rob': 0.0309, 'frac_gt_pi': 0.0158, 'frac_wrap': 0.0158, 'sup_ptp': 0.0023, 'lf_bg_std': 0.0765, 'rel_ph': 1.0079, 'rel_c': 0.0875}
+red 5 {'bgstd': 0.4564, 'bgstd_rob': 0.0601, 'frac_gt_pi': 0.0205, 'frac_wrap': 0.0205, 'sup_ptp': 0.007, 'lf_bg_std': 0.0923, 'rel_ph': 0.5487, 'rel_c': 0.1146}
+red 8 {'bgstd': 0.5134, 'bgstd_rob': 0.09, 'frac_gt_pi': 0.0205, 'frac_wrap': 0.0205, 'sup_ptp': 0.0132, 'lf_bg_std': 0.1131, 'rel_ph': 0.2976, 'rel_c': 0.0812}
+red 12 {'bgstd': 0.5628, 'bgstd_rob': 0.1225, 'frac_gt_pi': 0.0208, 'frac_wrap': 0.0208, 'sup_ptp': 0.0235, 'lf_bg_std': 0.1299, 'rel_ph': 0.3036, 'rel_c': 0.0736}
+red 20 {'bgstd': 0.5724, 'bgstd_rob': 0.1728, 'frac_gt_pi': 0.0217, 'frac_wrap': 0.0217, 'sup_ptp': 0.0338, 'lf_bg_std': 0.1443, 'rel_ph': 0.4009, 'rel_c': 0.1151}
+red 30 {'bgstd': 0.6273, 'bgstd_rob': 0.2373, 'frac_gt_pi': 0.0225, 'frac_wrap': 0.0225, 'sup_ptp': 0.0417, 'lf_bg_std': 0.1853, 'rel_ph': 0.4459, 'rel_c': 0.1531}
+red 40 {'bgstd': 3.0957, 'bgstd_rob': 3.1781, 'frac_gt_pi': 0.3263, 'frac_wrap': 0.7427, 'sup_ptp': 12.7629, 'lf_bg_std': 2.7549, 'rel_ph': 0.9853, 'rel_c': 0.2404}
+red 60 {'bgstd': 2.2417, 'bgstd_rob': 2.3084, 'frac_gt_pi': 0.1916, 'frac_wrap': 0.6947, 'sup_ptp': 14.1092, 'lf_bg_std': 1.9426, 'rel_ph': 1.321, 'rel_c': 0.532}
+red 80 {'bgstd': 1.7719, 'bgstd_rob': 1.4674, 'frac_gt_pi': 0.1265, 'frac_wrap': 0.6922, 'sup_ptp': 16.2542, 'lf_bg_std': 1.4917, 'rel_ph': 0.8055, 'rel_c': 0.4328}
+red 120 {'bgstd': 1.6717, 'bgstd_rob': 1.5155, 'frac_gt_pi': 0.0875, 'frac_wrap': 0.6835, 'sup_ptp': 25.6268, 'lf_bg_std': 1.4223, 'rel_ph': 0.9821, 'rel_c': 0.3695}
+red 160 {'bgstd': 1.1366, 'bgstd_rob': 1.1863, 'frac_gt_pi': 0.0199, 'frac_wrap': 0.7013, 'sup_ptp': 28.3479, 'lf_bg_std': 0.9405, 'rel_ph': 1.0466, 'rel_c': 0.1416}
+red 240 {'bgstd': 1.0529, 'bgstd_rob': 1.1282, 'frac_gt_pi': 0.0192, 'frac_wrap': 0.7032, 'sup_ptp': 28.0811, 'lf_bg_std': 0.8639, 'rel_ph': 0.394, 'rel_c': 0.2352}
+red 320 {'bgstd': 1.0362, 'bgstd_rob': 1.0912, 'frac_gt_pi': 0.0204, 'frac_wrap': 0.8218, 'sup_ptp': 27.9685, 'lf_bg_std': 0.8315, 'rel_ph': 0.4618, 'rel_c': 0.1999}
+red 400 {'bgstd': 0.9752, 'bgstd_rob': 1.0337, 'frac_gt_pi': 0.02, 'frac_wrap': 0.7083, 'sup_ptp': 27.8379, 'lf_bg_std': 0.774, 'rel_ph': 0.396, 'rel_c': 0.1773}
+green 2000 0.256 umbral 1.4514279886469912 candidatas 12 elegidas 12
+green 0 {'bgstd': 0.0, 'bgstd_rob': 0.0, 'frac_gt_pi': 0.0, 'frac_wrap': 0.0, 'sup_ptp': 0.0, 'lf_bg_std': 0.0, 'rel_ph': None, 'rel_c': None}

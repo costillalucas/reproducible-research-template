@@ -1,0 +1,18 @@
+red 1200 0.4266666666666667 umbral 1.1533034347402318 candidatas 44 elegidas 16
+red 0 {'bgstd': 0.0, 'bgstd_rob': 0.0, 'frac_gt_pi': 0.0, 'frac_wrap': 0.0, 'sup_ptp': 0.0, 'lf_bg_std': 0.0, 'bgstd_hp': 0.0, 'rel_ph': None, 'rel_c': None}
+red 1 {'bgstd': 0.0, 'bgstd_rob': 0.0, 'frac_gt_pi': 0.0, 'frac_wrap': 0.0, 'sup_ptp': 0.0, 'lf_bg_std': 0.0, 'bgstd_hp': 0.0, 'rel_ph': 0.0, 'rel_c': 0.0}
+red 2 {'bgstd': 0.0216, 'bgstd_rob': 0.0114, 'frac_gt_pi': 0.0, 'frac_wrap': 0.0, 'sup_ptp': 0.0009, 'lf_bg_std': 0.0024, 'bgstd_hp': 0.011, 'rel_ph': 1.0, 'rel_c': 0.0597}
+red 3 {'bgstd': 0.1986, 'bgstd_rob': 0.03, 'frac_gt_pi': 0.0158, 'frac_wrap': 0.0158, 'sup_ptp': 0.0023, 'lf_bg_std': 0.0295, 'bgstd_hp': 0.0419, 'rel_ph': 1.0078, 'rel_c': 0.0875}
+red 5 {'bgstd': 0.2333, 'bgstd_rob': 0.0583, 'frac_gt_pi': 0.0205, 'frac_wrap': 0.0205, 'sup_ptp': 0.007, 'lf_bg_std': 0.0348, 'bgstd_hp': 0.0765, 'rel_ph': 0.5486, 'rel_c': 0.1146}
+red 8 {'bgstd': 0.2552, 'bgstd_rob': 0.0873, 'frac_gt_pi': 0.0205, 'frac_wrap': 0.0205, 'sup_ptp': 0.0132, 'lf_bg_std': 0.0465, 'bgstd_hp': 0.0953, 'rel_ph': 0.2976, 'rel_c': 0.0812}
+red 12 {'bgstd': 0.2719, 'bgstd_rob': 0.1189, 'frac_gt_pi': 0.0208, 'frac_wrap': 0.0208, 'sup_ptp': 0.0235, 'lf_bg_std': 0.0637, 'bgstd_hp': 0.112, 'rel_ph': 0.3036, 'rel_c': 0.0736}
+red 20 {'bgstd': 0.3227, 'bgstd_rob': 0.1678, 'frac_gt_pi': 0.0217, 'frac_wrap': 0.0217, 'sup_ptp': 0.0338, 'lf_bg_std': 0.0983, 'bgstd_hp': 0.1387, 'rel_ph': 0.4008, 'rel_c': 0.1151}
+red 30 {'bgstd': 0.411, 'bgstd_rob': 0.2304, 'frac_gt_pi': 0.0225, 'frac_wrap': 0.0225, 'sup_ptp': 0.0417, 'lf_bg_std': 0.1473, 'bgstd_hp': 0.177, 'rel_ph': 0.4457, 'rel_c': 0.1531}
+red 40 {'bgstd': 3.0824, 'bgstd_rob': 3.1605, 'frac_gt_pi': 0.324, 'frac_wrap': 0.7427, 'sup_ptp': 12.7629, 'lf_bg_std': 2.7379, 'bgstd_hp': 0.2525, 'rel_ph': 0.9848, 'rel_c': 0.2404}
+red 60 {'bgstd': 2.2224, 'bgstd_rob': 2.2967, 'frac_gt_pi': 0.1922, 'frac_wrap': 0.6947, 'sup_ptp': 14.1092, 'lf_bg_std': 1.9173, 'bgstd_hp': 0.2536, 'rel_ph': 1.323, 'rel_c': 0.532}
+red 80 {'bgstd': 1.7422, 'bgstd_rob': 1.4588, 'frac_gt_pi': 0.1263, 'frac_wrap': 0.6922, 'sup_ptp': 16.2542, 'lf_bg_std': 1.4661, 'bgstd_hp': 0.1962, 'rel_ph': 0.8061, 'rel_c': 0.4328}
+red 120 {'bgstd': 1.6402, 'bgstd_rob': 1.5086, 'frac_gt_pi': 0.0869, 'frac_wrap': 0.6835, 'sup_ptp': 25.6268, 'lf_bg_std': 1.3901, 'bgstd_hp': 0.1823, 'rel_ph': 0.9833, 'rel_c': 0.3695}
+red 160 {'bgstd': 1.0911, 'bgstd_rob': 1.1846, 'frac_gt_pi': 0.0199, 'frac_wrap': 0.7013, 'sup_ptp': 28.3479, 'lf_bg_std': 0.9266, 'bgstd_hp': 0.1747, 'rel_ph': 1.0455, 'rel_c': 0.1416}
+red 240 {'bgstd': 1.0178, 'bgstd_rob': 1.1279, 'frac_gt_pi': 0.0192, 'frac_wrap': 0.7032, 'sup_ptp': 28.0811, 'lf_bg_std': 0.8566, 'bgstd_hp': 0.1795, 'rel_ph': 0.3939, 'rel_c': 0.2352}
+red 320 {'bgstd': 0.9718, 'bgstd_rob': 1.0902, 'frac_gt_pi': 0.0204, 'frac_wrap': 0.8218, 'sup_ptp': 27.9685, 'lf_bg_std': 0.8196, 'bgstd_hp': 0.183, 'rel_ph': 0.4617, 'rel_c': 0.1999}
+red 400 {'bgstd': 0.9381, 'bgstd_rob': 1.0317, 'frac_gt_pi': 0.02, 'frac_wrap': 0.7083, 'sup_ptp': 27.8379, 'lf_bg_std': 0.7679, 'bgstd_hp': 0.184, 'rel_ph': 0.396, 'rel_c': 0.1773}

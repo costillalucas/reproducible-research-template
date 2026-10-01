@@ -1,0 +1,4 @@
+listo /home/chanoscopio/Documents/LucasC/reproducible-research-template/results/fase_2026-10-01/sim_esferas/out/obj_ruido_40.npy 5 0.256
+listo /home/chanoscopio/Documents/LucasC/reproducible-research-template/results/fase_2026-10-01/sim_esferas/out/obj_limpio_40.npy 5 0.256
+listo /home/chanoscopio/Documents/LucasC/reproducible-research-template/results/fase_2026-10-01/sim_esferas/out/obj_ruido_400.npy 5 0.256
+listo /home/chanoscopio/Documents/LucasC/reproducible-research-template/results/fase_2026-10-01/sim_esferas/out/obj_limpio_400.npy 5 0.256
