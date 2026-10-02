@@ -1,0 +1,11 @@
+[g_nom_sin18 b_green real_A+init_z98.0_full] ep   0  trainR 0.9897  hoR 0.9951313622917078  ramp_ptp 0.00 dy -0.000mm  22s
+[g_nom_sin18 b_green real_A+init_z98.0_full] ep   1  trainR 0.9897  hoR 0.9951313622917078  ramp_ptp 0.00 dy -0.000mm  23s
+[g_nom_sin18 b_green real_A+init_z98.0_full] ep   2  trainR 0.5423  hoR 0.9954592139570141  ramp_ptp 0.00 dy +0.000mm  20s
+[g_nom_sin18 b_green real_A+init_z98.0_full] ep   3  trainR 0.5178  hoR 0.9957643195301111  ramp_ptp 0.02 dy +0.000mm  26s
+[g_nom_sin18 b_green real_A+init_z98.0_full] ep   5  trainR 0.4897  hoR 0.9954261856911999  ramp_ptp 0.08 dy +0.001mm  28s
+[g_nom_sin18 b_green real_A+init_z98.0_full] ep   8  trainR 0.4679  hoR 0.9946005113060794  ramp_ptp 0.06 dy +0.000mm  41s
+[g_nom_sin18 b_green real_A+init_z98.0_full] ep  12  trainR 0.4543  hoR 0.9941542574048046  ramp_ptp 0.02 dy -0.000mm  45s
+[g_nom_sin18 b_green real_A+init_z98.0_full] ep  20  trainR 0.4414  hoR 0.9940699655120232  ramp_ptp 0.05 dy -0.000mm  70s
+[g_nom_sin18 b_green real_A+init_z98.0_full] ep  30  trainR 0.4330  hoR 0.9940096227902  ramp_ptp 0.14 dy -0.001mm  79s
+[g_nom_sin18 b_green real_A+init_z98.0_full] ep  40  trainR 0.4278  hoR 0.9939324396187338  ramp_ptp 0.08 dy -0.000mm  89s
+('g_nom_sin18', 'b_green', 'real_A+init_z98.0_full', 'done 443s')

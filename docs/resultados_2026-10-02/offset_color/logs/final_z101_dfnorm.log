@@ -1,0 +1,26 @@
+vie 02 oct 2026 15:27:25 -03
+2 tareas
+[final_z101_dfnorm b_red real_A+init_z98.0_full] ep   0  trainR 0.9788  hoR None  ramp_ptp 0.01 dy -0.000mm  7s
+[final_z101_dfnorm b_green real_A+init_z98.0_full] ep   0  trainR 0.9864  hoR None  ramp_ptp 0.00 dy +0.000mm  8s
+[final_z101_dfnorm b_red real_A+init_z98.0_full] ep   1  trainR 0.9788  hoR None  ramp_ptp 0.01 dy -0.000mm  14s
+[final_z101_dfnorm b_green real_A+init_z98.0_full] ep   1  trainR 0.9864  hoR None  ramp_ptp 0.00 dy +0.000mm  14s
+[final_z101_dfnorm b_red real_A+init_z98.0_full] ep   2  trainR 0.4757  hoR None  ramp_ptp 0.08 dy +0.000mm  13s
+[final_z101_dfnorm b_green real_A+init_z98.0_full] ep   2  trainR 0.5499  hoR None  ramp_ptp 0.01 dy +0.000mm  13s
+[final_z101_dfnorm b_red real_A+init_z98.0_full] ep   3  trainR 0.4447  hoR None  ramp_ptp 0.07 dy -0.001mm  13s
+[final_z101_dfnorm b_green real_A+init_z98.0_full] ep   3  trainR 0.5259  hoR None  ramp_ptp 0.10 dy -0.000mm  13s
+[final_z101_dfnorm b_green real_A+init_z98.0_full] ep   5  trainR 0.5000  hoR None  ramp_ptp 0.06 dy +0.001mm  16s
+[final_z101_dfnorm b_red real_A+init_z98.0_full] ep   5  trainR 0.4118  hoR None  ramp_ptp 0.07 dy -0.000mm  19s
+[final_z101_dfnorm b_green real_A+init_z98.0_full] ep   8  trainR 0.4847  hoR None  ramp_ptp 0.05 dy -0.000mm  26s
+[final_z101_dfnorm b_red real_A+init_z98.0_full] ep   8  trainR 0.3869  hoR None  ramp_ptp 0.04 dy +0.000mm  25s
+[final_z101_dfnorm b_red real_A+init_z98.0_full] ep  12  trainR 0.3703  hoR None  ramp_ptp 0.08 dy +0.000mm  29s
+[final_z101_dfnorm b_green real_A+init_z98.0_full] ep  12  trainR 0.4738  hoR None  ramp_ptp 2.71 dy -0.041mm  30s
+[final_z101_dfnorm b_red real_A+init_z98.0_full] ep  20  trainR 0.3524  hoR None  ramp_ptp 0.06 dy -0.000mm  47s
+[final_z101_dfnorm b_green real_A+init_z98.0_full] ep  20  trainR 0.4623  hoR None  ramp_ptp 15.03 dy -0.243mm  52s
+[final_z101_dfnorm b_red real_A+init_z98.0_full] ep  30  trainR 0.3425  hoR None  ramp_ptp 0.04 dy +0.001mm  64s
+[final_z101_dfnorm b_green real_A+init_z98.0_full] ep  30  trainR 0.4541  hoR None  ramp_ptp 39.09 dy -0.595mm  67s
+[final_z101_dfnorm b_red real_A+init_z98.0_full] ep  40  trainR 0.3378  hoR None  ramp_ptp 0.04 dy +0.001mm  63s
+FIN final_z101_dfnorm b_red real_A+init_z98.0_full done 295s
+[final_z101_dfnorm b_green real_A+init_z98.0_full] ep  40  trainR 0.4489  hoR None  ramp_ptp 27.56 dy -0.421mm  61s
+FIN final_z101_dfnorm b_green real_A+init_z98.0_full done 299s
+TODO TERMINADO
+vie 02 oct 2026 15:32:48 -03

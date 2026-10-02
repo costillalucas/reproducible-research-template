@@ -1,0 +1,11 @@
+[nominal b_red real_A+init_z98.0_f0] ep   0  trainR 0.9821  hoR 0.9903251660383123  9s
+[nominal b_red real_A+init_z98.0_f0] ep   1  trainR 0.9821  hoR 0.9903251660383123  13s
+[nominal b_red real_A+init_z98.0_f0] ep   2  trainR 0.4787  hoR 0.5665784810616632  13s
+[nominal b_red real_A+init_z98.0_f0] ep   3  trainR 0.4502  hoR 0.5368780752299173  13s
+[nominal b_red real_A+init_z98.0_f0] ep   5  trainR 0.4184  hoR 0.5210713970988539  20s
+[nominal b_red real_A+init_z98.0_f0] ep   8  trainR 0.3933  hoR 0.5121895917401443  25s
+[nominal b_red real_A+init_z98.0_f0] ep  12  trainR 0.3782  hoR 0.5052474763708568  31s
+[nominal b_red real_A+init_z98.0_f0] ep  20  trainR 0.3652  hoR 0.49422074639054375  54s
+[nominal b_red real_A+init_z98.0_f0] ep  30  trainR 0.3585  hoR 0.48337601340439856  54s
+[nominal b_red real_A+init_z98.0_f0] ep  40  trainR 0.3520  hoR 0.472964924257311  65s
+('nominal', 'b_red', 'real_A+init_z98.0_f0', 'done 297s')

@@ -1,0 +1,96 @@
+
+## red nominal (NA_BF=0.0700): λ=0.63 µm, lrpx=1.2800 µm, campo ±256 µm, radio pupila 56.9 bins (1 bin = 1.953 mm^-1)
+BF en todo el campo: [(17, 15), (18, 15)]
+  A HORCAJADAS (17, 14): fracción BF=0.851, frontera a +169 µm del centro (+ = centro BF), err k max=2.99 bins
+  A HORCAJADAS (17, 16): fracción BF=0.851, frontera a +169 µm del centro (+ = centro BF), err k max=2.99 bins
+  A HORCAJADAS (18, 14): fracción BF=0.851, frontera a +169 µm del centro (+ = centro BF), err k max=2.99 bins
+  A HORCAJADAS (18, 16): fracción BF=0.851, frontera a +169 µm del centro (+ = centro BF), err k max=2.99 bins
+err k max (campo completo): rango 2.51-3.00 bins = 0.044-0.053 R_pupila (peor (17, 15))
+  teselas 1x1 (400 px): horcajadas/tesela = [4]; err k max (vs k del centro de la tesela) = 3.00 bins = 0.053 R_pup
+  teselas 2x2 (200 px): horcajadas/tesela = [2, 2, 2, 2]; err k max (vs k del centro de la tesela) = 1.50 bins = 0.026 R_pup
+  teselas 3x3 (133 px): horcajadas/tesela = [2, 2, 2, 2, 0, 2, 2, 2, 2]; err k max (vs k del centro de la tesela) = 0.99 bins = 0.017 R_pup
+  teselas 4x4 (100 px): horcajadas/tesela = [1, 1, 1, 1, 2, 0, 1, 2, 2, 1, 1, 2, 1, 1, 1, 1]; err k max (vs k del centro de la tesela) = 0.75 bins = 0.013 R_pup
+
+## red die (NA_BF=0.0700): λ=0.63 µm, lrpx=1.2800 µm, campo ±256 µm, radio pupila 56.9 bins (1 bin = 1.953 mm^-1)
+BF en todo el campo: [(17, 14), (17, 15), (17, 16), (18, 15)]
+err k max (campo completo): rango 2.49-3.00 bins = 0.044-0.053 R_pupila (peor (17, 15))
+  teselas 1x1 (400 px): horcajadas/tesela = [0]; err k max (vs k del centro de la tesela) = 3.00 bins = 0.053 R_pup
+  teselas 2x2 (200 px): horcajadas/tesela = [0, 0, 0, 0]; err k max (vs k del centro de la tesela) = 1.50 bins = 0.026 R_pup
+  teselas 3x3 (133 px): horcajadas/tesela = [0, 0, 0, 0, 0, 0, 0, 0, 0]; err k max (vs k del centro de la tesela) = 0.99 bins = 0.017 R_pup
+  teselas 4x4 (100 px): horcajadas/tesela = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; err k max (vs k del centro de la tesela) = 0.75 bins = 0.013 R_pup
+
+## red die_Rlibre (NA_BF=0.0720): λ=0.63 µm, lrpx=1.2800 µm, campo ±256 µm, radio pupila 56.9 bins (1 bin = 1.953 mm^-1)
+BF en todo el campo: [(17, 14), (17, 15), (17, 16), (18, 15)]
+  A HORCAJADAS (18, 14): fracción BF=0.140, frontera a -171 µm del centro (+ = centro BF), err k max=2.99 bins
+  A HORCAJADAS (18, 16): fracción BF=0.140, frontera a -171 µm del centro (+ = centro BF), err k max=2.99 bins
+err k max (campo completo): rango 2.49-3.00 bins = 0.044-0.053 R_pupila (peor (17, 15))
+  teselas 1x1 (400 px): horcajadas/tesela = [2]; err k max (vs k del centro de la tesela) = 3.00 bins = 0.053 R_pup
+  teselas 2x2 (200 px): horcajadas/tesela = [1, 1, 1, 1]; err k max (vs k del centro de la tesela) = 1.50 bins = 0.026 R_pup
+  teselas 3x3 (133 px): horcajadas/tesela = [0, 0, 0, 1, 0, 1, 1, 2, 1]; err k max (vs k del centro de la tesela) = 0.99 bins = 0.017 R_pup
+  teselas 4x4 (100 px): horcajadas/tesela = [0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0]; err k max (vs k del centro de la tesela) = 0.75 bins = 0.013 R_pup
+
+## green nominal (NA_BF=0.0700): λ=0.53 µm, lrpx=1.2800 µm, campo ±256 µm, radio pupila 67.6 bins (1 bin = 1.953 mm^-1)
+BF en todo el campo: [(17, 15), (18, 15)]
+  A HORCAJADAS (17, 14): fracción BF=0.851, frontera a +169 µm del centro (+ = centro BF), err k max=3.56 bins
+  A HORCAJADAS (17, 16): fracción BF=0.851, frontera a +169 µm del centro (+ = centro BF), err k max=3.56 bins
+  A HORCAJADAS (18, 14): fracción BF=0.851, frontera a +169 µm del centro (+ = centro BF), err k max=3.56 bins
+  A HORCAJADAS (18, 16): fracción BF=0.851, frontera a +169 µm del centro (+ = centro BF), err k max=3.56 bins
+err k max (campo completo): rango 2.98-3.57 bins = 0.044-0.053 R_pupila (peor (17, 15))
+  teselas 1x1 (400 px): horcajadas/tesela = [4]; err k max (vs k del centro de la tesela) = 3.57 bins = 0.053 R_pup
+  teselas 2x2 (200 px): horcajadas/tesela = [2, 2, 2, 2]; err k max (vs k del centro de la tesela) = 1.78 bins = 0.026 R_pup
+  teselas 3x3 (133 px): horcajadas/tesela = [2, 2, 2, 2, 0, 2, 2, 2, 2]; err k max (vs k del centro de la tesela) = 1.18 bins = 0.017 R_pup
+  teselas 4x4 (100 px): horcajadas/tesela = [1, 1, 1, 1, 2, 0, 1, 2, 2, 1, 1, 2, 1, 1, 1, 1]; err k max (vs k del centro de la tesela) = 0.89 bins = 0.013 R_pup
+
+## green die (NA_BF=0.0700): λ=0.53 µm, lrpx=1.2800 µm, campo ±256 µm, radio pupila 67.6 bins (1 bin = 1.953 mm^-1)
+BF en todo el campo: [(17, 14), (17, 15), (17, 16), (18, 15)]
+  A HORCAJADAS (18, 14): fracción BF=0.199, frontera a -136 µm del centro (+ = centro BF), err k max=3.56 bins
+  A HORCAJADAS (18, 16): fracción BF=0.199, frontera a -136 µm del centro (+ = centro BF), err k max=3.56 bins
+err k max (campo completo): rango 2.97-3.57 bins = 0.044-0.053 R_pupila (peor (17, 15))
+  teselas 1x1 (400 px): horcajadas/tesela = [2]; err k max (vs k del centro de la tesela) = 3.57 bins = 0.053 R_pup
+  teselas 2x2 (200 px): horcajadas/tesela = [1, 1, 1, 1]; err k max (vs k del centro de la tesela) = 1.78 bins = 0.026 R_pup
+  teselas 3x3 (133 px): horcajadas/tesela = [1, 0, 1, 1, 0, 1, 1, 2, 1]; err k max (vs k del centro de la tesela) = 1.18 bins = 0.017 R_pup
+  teselas 4x4 (100 px): horcajadas/tesela = [1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0]; err k max (vs k del centro de la tesela) = 0.89 bins = 0.013 R_pup
+
+## green die_Rlibre (NA_BF=0.0725): λ=0.53 µm, lrpx=1.2800 µm, campo ±256 µm, radio pupila 67.6 bins (1 bin = 1.953 mm^-1)
+BF en todo el campo: [(17, 14), (17, 15), (17, 16), (18, 15)]
+  A HORCAJADAS (18, 14): fracción BF=0.742, frontera a +109 µm del centro (+ = centro BF), err k max=3.56 bins
+  A HORCAJADAS (18, 16): fracción BF=0.742, frontera a +109 µm del centro (+ = centro BF), err k max=3.56 bins
+err k max (campo completo): rango 2.97-3.57 bins = 0.044-0.053 R_pupila (peor (17, 15))
+  teselas 1x1 (400 px): horcajadas/tesela = [2]; err k max (vs k del centro de la tesela) = 3.57 bins = 0.053 R_pup
+  teselas 2x2 (200 px): horcajadas/tesela = [2, 2, 1, 1]; err k max (vs k del centro de la tesela) = 1.78 bins = 0.026 R_pup
+  teselas 3x3 (133 px): horcajadas/tesela = [0, 2, 0, 1, 2, 1, 1, 0, 1]; err k max (vs k del centro de la tesela) = 1.18 bins = 0.017 R_pup
+  teselas 4x4 (100 px): horcajadas/tesela = [0, 2, 2, 0, 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1]; err k max (vs k del centro de la tesela) = 0.89 bins = 0.013 R_pup
+
+## blue nominal (NA_BF=0.0700): λ=0.47 µm, lrpx=1.2800 µm, campo ±256 µm, radio pupila 76.3 bins (1 bin = 1.953 mm^-1)
+BF en todo el campo: [(17, 15), (18, 15)]
+  A HORCAJADAS (17, 14): fracción BF=0.851, frontera a +169 µm del centro (+ = centro BF), err k max=4.01 bins
+  A HORCAJADAS (17, 16): fracción BF=0.851, frontera a +169 µm del centro (+ = centro BF), err k max=4.01 bins
+  A HORCAJADAS (18, 14): fracción BF=0.851, frontera a +169 µm del centro (+ = centro BF), err k max=4.01 bins
+  A HORCAJADAS (18, 16): fracción BF=0.851, frontera a +169 µm del centro (+ = centro BF), err k max=4.01 bins
+err k max (campo completo): rango 3.36-4.02 bins = 0.044-0.053 R_pupila (peor (17, 15))
+  teselas 1x1 (400 px): horcajadas/tesela = [4]; err k max (vs k del centro de la tesela) = 4.02 bins = 0.053 R_pup
+  teselas 2x2 (200 px): horcajadas/tesela = [2, 2, 2, 2]; err k max (vs k del centro de la tesela) = 2.01 bins = 0.026 R_pup
+  teselas 3x3 (133 px): horcajadas/tesela = [2, 2, 2, 2, 0, 2, 2, 2, 2]; err k max (vs k del centro de la tesela) = 1.33 bins = 0.017 R_pup
+  teselas 4x4 (100 px): horcajadas/tesela = [1, 1, 1, 1, 2, 0, 1, 2, 2, 1, 1, 2, 1, 1, 1, 1]; err k max (vs k del centro de la tesela) = 1.01 bins = 0.013 R_pup
+
+## blue die (NA_BF=0.0700): λ=0.47 µm, lrpx=1.2800 µm, campo ±256 µm, radio pupila 76.3 bins (1 bin = 1.953 mm^-1)
+BF en todo el campo: [(17, 15), (18, 15)]
+  A HORCAJADAS (17, 14): fracción BF=0.942, frontera a +234 µm del centro (+ = centro BF), err k max=4.01 bins
+  A HORCAJADAS (17, 16): fracción BF=0.942, frontera a +234 µm del centro (+ = centro BF), err k max=4.01 bins
+  A HORCAJADAS (18, 14): fracción BF=0.715, frontera a +100 µm del centro (+ = centro BF), err k max=4.01 bins
+  A HORCAJADAS (18, 16): fracción BF=0.715, frontera a +100 µm del centro (+ = centro BF), err k max=4.01 bins
+err k max (campo completo): rango 3.36-4.02 bins = 0.044-0.053 R_pupila (peor (17, 15))
+  teselas 1x1 (400 px): horcajadas/tesela = [4]; err k max (vs k del centro de la tesela) = 4.02 bins = 0.053 R_pup
+  teselas 2x2 (200 px): horcajadas/tesela = [2, 2, 2, 2]; err k max (vs k del centro de la tesela) = 2.01 bins = 0.026 R_pup
+  teselas 3x3 (133 px): horcajadas/tesela = [0, 2, 0, 2, 2, 2, 2, 0, 2]; err k max (vs k del centro de la tesela) = 1.33 bins = 0.017 R_pup
+  teselas 4x4 (100 px): horcajadas/tesela = [0, 2, 2, 0, 0, 1, 1, 0, 2, 1, 1, 2, 2, 0, 0, 2]; err k max (vs k del centro de la tesela) = 1.01 bins = 0.013 R_pup
+
+## blue die_Rlibre (NA_BF=0.0723): λ=0.47 µm, lrpx=1.2800 µm, campo ±256 µm, radio pupila 76.3 bins (1 bin = 1.953 mm^-1)
+BF en todo el campo: [(17, 14), (17, 15), (17, 16), (18, 15)]
+  A HORCAJADAS (18, 14): fracción BF=0.999, frontera a +331 µm del centro (+ = centro BF), err k max=4.01 bins
+  A HORCAJADAS (18, 16): fracción BF=0.999, frontera a +331 µm del centro (+ = centro BF), err k max=4.01 bins
+err k max (campo completo): rango 3.36-4.02 bins = 0.044-0.053 R_pupila (peor (17, 15))
+  teselas 1x1 (400 px): horcajadas/tesela = [2]; err k max (vs k del centro de la tesela) = 4.02 bins = 0.053 R_pup
+  teselas 2x2 (200 px): horcajadas/tesela = [1, 1, 0, 0]; err k max (vs k del centro de la tesela) = 2.01 bins = 0.026 R_pup
+  teselas 3x3 (133 px): horcajadas/tesela = [1, 0, 1, 0, 0, 0, 0, 0, 0]; err k max (vs k del centro de la tesela) = 1.33 bins = 0.017 R_pup
+  teselas 4x4 (100 px): horcajadas/tesela = [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; err k max (vs k del centro de la tesela) = 1.01 bins = 0.013 R_pup

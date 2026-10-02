@@ -1,0 +1,38 @@
+3 tareas
+[final_z102 b_green real_A+init_z98.0_full] geo: z=102.0 off=(0.0, 3.63) lrpx=1.3617 na=0.069 factor=5 hrpx=0.2723 lam=0.53
+[final_z102 b_red real_A+init_z98.0_full] geo: z=102.0 off=(0.0, 4.0600000000000005) lrpx=1.3617 na=0.069 factor=3 hrpx=0.4539 lam=0.63
+[final_z102 b_blue real_A+init_z98.0_full] geo: z=102.0 off=(0.0, 3.15) lrpx=1.3617 na=0.069 factor=5 hrpx=0.2723 lam=0.47
+[final_z102 b_red real_A+init_z98.0_full] ep   0  trainR 0.9836  hoR 0.9618577210645571  ramp_ptp 0.00 dy -0.000mm  9s
+[final_z102 b_green real_A+init_z98.0_full] ep   0  trainR 0.9892  hoR 0.9937613227198123  ramp_ptp 0.00 dy -0.000mm  18s
+[final_z102 b_blue real_A+init_z98.0_full] ep   0  trainR 0.9849  hoR None  ramp_ptp 0.00 dy -0.000mm  17s
+[final_z102 b_red real_A+init_z98.0_full] ep   1  trainR 0.9836  hoR 0.9618577210645571  ramp_ptp 0.00 dy -0.000mm  14s
+[final_z102 b_red real_A+init_z98.0_full] ep   2  trainR 0.4691  hoR 0.9517115825738076  ramp_ptp 0.00 dy +0.000mm  14s
+[final_z102 b_blue real_A+init_z98.0_full] ep   1  trainR 0.9849  hoR None  ramp_ptp 0.00 dy -0.000mm  21s
+[final_z102 b_green real_A+init_z98.0_full] ep   1  trainR 0.9892  hoR 0.9937613227198123  ramp_ptp 0.00 dy -0.000mm  23s
+[final_z102 b_red real_A+init_z98.0_full] ep   3  trainR 0.4422  hoR 0.9356164694912248  ramp_ptp 0.09 dy +0.001mm  15s
+[final_z102 b_blue real_A+init_z98.0_full] ep   2  trainR 0.5237  hoR None  ramp_ptp 0.00 dy +0.000mm  23s
+[final_z102 b_green real_A+init_z98.0_full] ep   2  trainR 0.5396  hoR 0.9941877907318675  ramp_ptp 0.00 dy +0.000mm  24s
+[final_z102 b_red real_A+init_z98.0_full] ep   5  trainR 0.4126  hoR 0.9147040551914858  ramp_ptp 0.10 dy -0.001mm  20s
+[final_z102 b_blue real_A+init_z98.0_full] ep   3  trainR 0.5010  hoR None  ramp_ptp 0.04 dy -0.000mm  23s
+[final_z102 b_green real_A+init_z98.0_full] ep   3  trainR 0.5141  hoR 0.9946785078881193  ramp_ptp 0.02 dy +0.000mm  25s
+[final_z102 b_red real_A+init_z98.0_full] ep   8  trainR 0.3886  hoR 0.9065032772471924  ramp_ptp 0.07 dy -0.001mm  27s
+[final_z102 b_blue real_A+init_z98.0_full] ep   5  trainR 0.4714  hoR None  ramp_ptp 0.08 dy -0.000mm  32s
+[final_z102 b_green real_A+init_z98.0_full] ep   5  trainR 0.4850  hoR 0.9944443396438467  ramp_ptp 0.08 dy -0.001mm  31s
+[final_z102 b_red real_A+init_z98.0_full] ep  12  trainR 0.3707  hoR 0.9041212328473105  ramp_ptp 0.06 dy -0.001mm  35s
+[final_z102 b_blue real_A+init_z98.0_full] ep   8  trainR 0.4489  hoR None  ramp_ptp 0.07 dy -0.000mm  38s
+[final_z102 b_green real_A+init_z98.0_full] ep   8  trainR 0.4631  hoR 0.9935206999236379  ramp_ptp 0.14 dy -0.001mm  38s
+[final_z102 b_red real_A+init_z98.0_full] ep  20  trainR 0.3491  hoR 0.8987701444699139  ramp_ptp 0.05 dy -0.001mm  75s
+[final_z102 b_blue real_A+init_z98.0_full] ep  12  trainR 0.4359  hoR None  ramp_ptp 0.01 dy +0.000mm  65s
+[final_z102 b_green real_A+init_z98.0_full] ep  12  trainR 0.4499  hoR 0.9927703641876828  ramp_ptp 0.11 dy -0.002mm  63s
+[final_z102 b_red real_A+init_z98.0_full] ep  30  trainR 0.3369  hoR 0.8942375697667522  ramp_ptp 0.05 dy -0.001mm  104s
+[final_z102 b_green real_A+init_z98.0_full] ep  20  trainR 0.4378  hoR 0.9922700375395002  ramp_ptp 0.07 dy -0.001mm  104s
+[final_z102 b_blue real_A+init_z98.0_full] ep  20  trainR 0.4252  hoR None  ramp_ptp 0.01 dy -0.000mm  106s
+[final_z102 b_red real_A+init_z98.0_full] ep  40  trainR 0.3310  hoR 0.8919911622750198  ramp_ptp 0.06 dy -0.000mm  111s
+FIN final_z102 b_red real_A+init_z98.0_full done 424s
+[final_z102 b_green real_A+init_z98.0_full] ep  30  trainR 0.4306  hoR 0.9920645881012093  ramp_ptp 0.06 dy -0.001mm  119s
+[final_z102 b_blue real_A+init_z98.0_full] ep  30  trainR 0.4183  hoR None  ramp_ptp 0.11 dy +0.001mm  120s
+[final_z102 b_green real_A+init_z98.0_full] ep  40  trainR 0.4263  hoR 0.9919508338010541  ramp_ptp 0.12 dy -0.002mm  104s
+FIN final_z102 b_green real_A+init_z98.0_full done 547s
+[final_z102 b_blue real_A+init_z98.0_full] ep  40  trainR 0.4144  hoR None  ramp_ptp 0.07 dy -0.000mm  106s
+FIN final_z102 b_blue real_A+init_z98.0_full done 552s
+TODO TERMINADO
