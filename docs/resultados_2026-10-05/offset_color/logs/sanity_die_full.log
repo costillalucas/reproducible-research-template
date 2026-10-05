@@ -1,0 +1,11 @@
+[die b_red real_A+init_z98.0_full] ep   0  trainR 0.9834  hoR None  ramp_ptp 0.00 dy -0.000mm  9s
+[die b_red real_A+init_z98.0_full] ep   1  trainR 0.9834  hoR None  ramp_ptp 0.00 dy -0.000mm  16s
+[die b_red real_A+init_z98.0_full] ep   2  trainR 0.4506  hoR None  ramp_ptp 0.00 dy -0.000mm  17s
+[die b_red real_A+init_z98.0_full] ep   3  trainR 0.4260  hoR None  ramp_ptp 0.05 dy -0.000mm  16s
+[die b_red real_A+init_z98.0_full] ep   5  trainR 0.3978  hoR None  ramp_ptp 0.06 dy -0.000mm  23s
+[die b_red real_A+init_z98.0_full] ep   8  trainR 0.3760  hoR None  ramp_ptp 0.08 dy -0.000mm  33s
+[die b_red real_A+init_z98.0_full] ep  12  trainR 0.3615  hoR None  ramp_ptp 0.09 dy +0.000mm  40s
+[die b_red real_A+init_z98.0_full] ep  20  trainR 0.3452  hoR None  ramp_ptp 0.11 dy +0.001mm  64s
+[die b_red real_A+init_z98.0_full] ep  30  trainR 0.3355  hoR None  ramp_ptp 0.12 dy +0.000mm  82s
+[die b_red real_A+init_z98.0_full] ep  40  trainR 0.3301  hoR None  ramp_ptp 0.11 dy +0.000mm  58s
+('die', 'b_red', 'real_A+init_z98.0_full', 'done 359s')

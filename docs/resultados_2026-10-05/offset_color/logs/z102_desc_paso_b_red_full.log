@@ -1,0 +1,12 @@
+[z102_desc_paso b_red real_A+init_z98.0_full] geo: z=108.51063829787233 off=(0.0, 4.0600000000000005) lrpx=1.3617 na=0.069 factor=3 hrpx=0.4539 lam=0.63
+[z102_desc_paso b_red real_A+init_z98.0_full] ep   0  trainR 0.9820  hoR 1.0  ramp_ptp 0.00 dy -0.000mm  26s
+[z102_desc_paso b_red real_A+init_z98.0_full] ep   1  trainR 0.9820  hoR 1.0  ramp_ptp 0.00 dy -0.000mm  31s
+[z102_desc_paso b_red real_A+init_z98.0_full] ep   2  trainR 0.4633  hoR 1.0  ramp_ptp 0.00 dy +0.000mm  33s
+[z102_desc_paso b_red real_A+init_z98.0_full] ep   3  trainR 0.4335  hoR 1.0  ramp_ptp 0.02 dy +0.000mm  30s
+[z102_desc_paso b_red real_A+init_z98.0_full] ep   5  trainR 0.4015  hoR 1.0  ramp_ptp 0.05 dy +0.000mm  48s
+[z102_desc_paso b_red real_A+init_z98.0_full] ep   8  trainR 0.3784  hoR 0.9998391124043766  ramp_ptp 0.05 dy -0.000mm  60s
+[z102_desc_paso b_red real_A+init_z98.0_full] ep  12  trainR 0.3635  hoR 0.9994307847274677  ramp_ptp 0.03 dy -0.001mm  57s
+[z102_desc_paso b_red real_A+init_z98.0_full] ep  20  trainR 0.3472  hoR 0.9990407289256323  ramp_ptp 0.02 dy -0.000mm  101s
+[z102_desc_paso b_red real_A+init_z98.0_full] ep  30  trainR 0.3363  hoR 0.9988166132955735  ramp_ptp 0.02 dy -0.000mm  133s
+[z102_desc_paso b_red real_A+init_z98.0_full] ep  40  trainR 0.3284  hoR 0.9986772057240073  ramp_ptp 0.03 dy -0.000mm  124s
+('z102_desc_paso', 'b_red', 'real_A+init_z98.0_full', 'done 643s')

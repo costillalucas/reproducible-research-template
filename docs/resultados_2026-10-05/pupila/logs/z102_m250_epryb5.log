@@ -1,0 +1,11 @@
+[z102_m250 epryb5] geo z=102.0 off=(0.0, 4.0600000000000005) lrpx=1.2800 na=0.069 factor=3 hrpx=0.4267 lam=0.63 pstart=5
+[z102_m250 epryb5] ep   0 R_rec 0.9826 R_ideal 0.9826 err None  0.1s
+[z102_m250 epryb5] ep   1 R_rec 0.9826 R_ideal 0.9826 err 0.060885422949657896  21.2s
+[z102_m250 epryb5] ep   2 R_rec 0.4603 R_ideal 0.4603 err 0.0552204129263243  40.8s
+[z102_m250 epryb5] ep   3 R_rec 0.4314 R_ideal 0.4314 err 0.03500789388902735  62.4s
+[z102_m250 epryb5] ep   5 R_rec 0.3994 R_ideal 0.3994 err 0.017886462845524292  93.1s
+[z102_m250 epryb5] ep   8 R_rec 0.3750 R_ideal 0.3760 err 0.013130555535799726  135.9s
+[z102_m250 epryb5] ep  12 R_rec 0.3590 R_ideal 0.3612 err 0.0119477720658027  191.3s
+[z102_m250 epryb5] ep  20 R_rec 0.3421 R_ideal 0.3462 err 0.011021575522836518  287.4s
+[z102_m250 epryb5] ep  30 R_rec 0.3311 R_ideal 0.3370 err 0.010503327969119899  405.5s
+[z102_m250 epryb5] ep  40 R_rec 0.3239 R_ideal 0.3312 err 0.010211088092162156  527.8s

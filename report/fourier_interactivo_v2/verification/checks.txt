@@ -1,0 +1,17 @@
+2026-10-02 — Verificación de V2 con recorridos guiados
+
+Generación numérica: PASS
+Gradiente por diferencias finitas, soporte de actualización, descenso local, reducción de pérdida, contraste angular y solapamiento. Modelo y resultados numéricos conservados.
+
+Chrome, HTML final: PASS
+14 pantallas; escritorio 1440 px, móvil 390 y 320 px.
+Simular foto para tres LEDs; comparación posterior de tres parejas.
+Corrección en dos pasos, habilitación y reversión.
+Barrido de 49 LEDs, cobertura de ventanas visitadas, sincronización con captura y ventana, pausa, reinicio, parada final y al salir de la pantalla.
+Tres muestras; comparación reconstruida/conocida en iteraciones 0, 15 y 30.
+Foco de teclado al cambiar LED, simular, reproducir y mover el deslizador.
+Botón Repetir en iteración 30; comparar con referencia conserva reproducción.
+Título visible al navegar en móvil; sin desbordamiento horizontal.
+Preferencia de movimiento reducido respetada. Sin excepciones JavaScript.
+
+Capturas nuevas: prediction, comparison, capture, coverage, correction, truth-comparison y variantes mobile en esta carpeta.
