@@ -30,7 +30,7 @@ def pair(a, b, keys):
 out = {"ep": EP, "full": {}, "pares": {}}
 per = {}
 for z in (102, 100):
-    for lr in (1.15, 1.20, 1.25, 1.30, 1.35, 1.40, 1.45):
+    for lr in (1.15, 1.20, 1.25, 1.29, 1.30, 1.35, 1.40, 1.45):
         for sfx in ("", "_x4"):
             v = f"z{z}_p{round(lr*100)}{sfx}"; r = row(v, FULL)
             if r is None: continue
@@ -66,9 +66,10 @@ if len(vs) >= 3:
                                  p2_5=float(np.percentile(bs, 2.5)), p97_5=float(np.percentile(bs, 97.5)), n_led=len(keys))
     print("parabola_comun", out["parabola_comun"])
 # held-out de folds (pares 1.25 vs 1.40; '_x4' agregado 20/10: sin (17,14),(17,16) en el entrenamiento de ambos)
-for sfx in ("", "_x4"):
+# 20/10: también 1.29 (micrómetro) vs 1.25
+for sfx, alt in (("", "140"), ("_x4", "140"), ("", "129")):
     ho = {}
-    for v in (f"z102_p125{sfx}", f"z102_p140{sfx}"):
+    for v in (f"z102_p125{sfx}", f"z102_p{alt}{sfx}"):
         fs = [row(v, f"real_A+init_z98.0_f{i}") for i in range(5)]
         if not all(fs): continue
         hp = [{k: x[0] for k, x in f["per_led"].items() if not x[3] and x[2] < 7 and k not in EXC} for f in fs]
@@ -77,7 +78,7 @@ for sfx in ("", "_x4"):
                                                 por_fold=[float(np.mean(list(h.values()))) for h in hp],
                                                 train_por_fold=[f["train_R"] for f in fs])
     if len(ho) == 2:
-        a, b = ho[f"z102_p125{sfx}"], ho[f"z102_p140{sfx}"]
+        a, b = ho[f"z102_p125{sfx}"], ho[f"z102_p{alt}{sfx}"]
         allk = {}
         for i in range(5):
             for k in a[i]:
@@ -85,9 +86,9 @@ for sfx in ("", "_x4"):
         d = np.array(list(allk.values()))
         df = [np.mean([b[i][k] - a[i][k] for k in a[i] if k in b[i]]) for i in range(5)]
         bs = [d[rng.integers(0, len(d), len(d))].mean() for _ in range(2000)]
-        out[f"heldout_pareado_140_menos_125{sfx}"] = dict(dR=float(d.mean()), se_led=float(d.std(ddof=1) / np.sqrt(len(d))), n_led=len(d),
+        out[f"heldout_pareado_{alt}_menos_125{sfx}"] = dict(dR=float(d.mean()), se_led=float(d.std(ddof=1) / np.sqrt(len(d))), n_led=len(d),
                                                      por_fold=[float(x) for x in df], se_fold=float(np.std(df, ddof=1) / np.sqrt(5)),
                                                      boot_p2_5=float(np.percentile(bs, 2.5)), boot_p97_5=float(np.percentile(bs, 97.5)),
                                                      dR_X4_excl=float(np.mean([v for (i, k), v in allk.items() if k not in X4])))
-        print("heldout" + sfx, {v: out["heldout"][v] for v in ho}, out[f"heldout_pareado_140_menos_125{sfx}"])
+        print("heldout" + sfx, {v: out["heldout"][v] for v in ho}, out[f"heldout_pareado_{alt}_menos_125{sfx}"])
 json.dump(out, open(os.path.join(HERE, "barrido_paso.json" if DS == "b_red" else f"barrido_paso_{DS}.json"), "w"), indent=1)

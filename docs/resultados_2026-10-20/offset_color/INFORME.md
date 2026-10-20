@@ -438,3 +438,33 @@ El verde va al revés: prefiere lrpx grande (parábola con mínimo ≳ 1.4, sin 
 5. Lo que queda abierto es la otra rama de la degeneración, que el pareo no toca: z ≈ 114 con el paso de 2.28×. Lucas
    la descartó por montaje. Con z ≈ 102, el aumento que piden los datos es **≈ 2.56× (2.5–2.65×)**, no el 2.28×
    nominal del tubo de 150 mm.
+
+## 20/10 — Calibración con micrómetro y lrpx 1.29
+
+**Micrómetro** (`2026-10-16-calibracion/fila18_col15_colorr/5ms/pixelsizecalibracion.tiff`, LED (18,15) rojo, 5 ms;
+`scripts/calibracion_micrometro.py`, salida `micrometro.json`):
+
+- **Escala:** líneas finas cada 0.01 mm en la banda oscura; rayas cada 0.05 mm (cortas/largas alternadas).
+  Rayas a 38.97 px = 5.03 líneas finas.
+- **Período fino:** 7.750 px (FFT 2D, regla inclinada 2.6°). Mitades 7.735 / 7.750 px (0.19 %).
+- **Resultado:** **1.290 µm/px en la muestra → aumento 2.48×** (pixel de 3.2 µm, confirmado), campo de 1.445 mm.
+  Descarta 2.28× (1.40 µm/px) por medición directa. El `LRPX = 1.28` original estaba bien. Las variantes 2.35×
+  (1.362) desde el 02/10 tenían un error de 5.6 %.
+
+**Reconstrucción a 1.29** (variante `z102_p129`, NA·lrpx = 0.069·1.25 → NA 0.0669, z 102, 40 épocas;
+`micrometro_20oct.sh`). Held-out pareado contra 1.25:
+
+| | 1.29 − 1.25 | 1.40 − 1.25 |
+|---|---|---|
+| rojo | +0.010 ± 0.006 (folds −.008, +.002, +.016, +.028, +.013) | +0.069 ± 0.012 |
+| verde | +0.014 ± 0.004 (folds +.010, +.019, +.017, +.024, .000) | +0.052 ± 0.003 |
+
+El held-out todavía prefiere un paso angular de LED ~3 % más chico que el que dan 1.29 µm/px, z 102 y pitch de 6 mm.
+En este modelo solo entran lrpx/z (paso de LED) y NA·lrpx (pupila), así que con lrpx medido equivaldría a z ≈ 105.
+El laboratorio confirma el pitch de la placa y el pixel del sensor, y considera z ≥ 105 implausible. Una placa
+inclinada no comprime el paso en promedio (factor cos θ: haría falta ~14°). **Residuo abierto**, chico frente al
+error de 2.28×.
+
+**Geometría de trabajo desde el 20/10:** lrpx 1.29 µm (M 2.48), NA 0.067, z 102 mm. En el código queda como preset
+`config.OBJECTIVES["2_5x_medido"]` + `config.WORKING_Z_DISTANCE_MM`. Los presets viejos no cambian, porque los fijan
+los tests y las simulaciones.

@@ -1,0 +1,25 @@
+{
+ "banda": [
+  399,
+  445,
+  154,
+  924
+ ],
+ "mitad_izq": {
+  "periodo_px": 7.734954771301886,
+  "inclinacion_grados": -2.5976491704836295
+ },
+ "mitad_der": {
+  "periodo_px": 7.7495741301162635,
+  "inclinacion_grados": -2.602562202499806
+ },
+ "periodo_rayas_px": 38.965370401136155,
+ "lineas_por_raya": 5.028066026197439,
+ "um_por_px": 1.2903934889967914,
+ "aumento": 2.4798637216372046,
+ "campo_um": 1445.2407076764064,
+ "dif_mitades_rel": 0.0018864725427381126,
+ "imagen": "/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-16-calibracion/fila18_col15_colorr/5ms/pixelsizecalibracion.tiff",
+ "division_um": 10.0,
+ "sensor_um": 3.2
+}

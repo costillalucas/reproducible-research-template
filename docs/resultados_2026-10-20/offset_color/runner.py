@@ -79,12 +79,12 @@ VARIANTS = {
     "z102_na059": {**DIE, "_z": 102.0, "_mag": 2.35, "_naobj": 0.059, "_factor": {"red": 3, "green": 5, "blue": 5},
                    "_excl": {"red": [(18, 14), (18, 16)], "green": [(18, 14), (18, 16)], "blue": []}},
     # barrido de PASO solo (05/10, tarde): radio de pupila en píxeles fijo en el mejor (NA·lrpx = 0.069·1.25), z fijo;
-    # lrpx 1.15..1.45 (1.15/1.20 agregados 19/10: NA > 0.069) -> NA = 0.069·1.25/lrpx. Ojo: con z fijo, NA < 0.066 pasa (17,14),(17,16) a horcajadas/DF en el
+    # lrpx 1.15..1.45 (1.15/1.20 agregados 19/10: NA > 0.069; 1.29 agregado 20/10 = micrómetro, 7.750 px por 10 µm) -> NA = 0.069·1.25/lrpx. Ojo: con z fijo, NA < 0.066 pasa (17,14),(17,16) a horcajadas/DF en el
     # modelo (mapa en INFORME). '_x4' = además sin (17,14),(17,16) (conjunto de LEDs común a todos los puntos).
     **{f"z{z:.0f}_p{round(lr*100):d}{sfx}": {**DIE, "_z": z, "_mag": 3.2 / lr, "_naobj": 0.069 * 1.25 / lr,
         "_factor": {"red": 3, "green": 5, "blue": 5},
         "_excl": {"red": [(18, 14), (18, 16)] + ex, "green": [(18, 14), (18, 16)], "blue": []}}
-       for z in (102.0, 100.0) for lr in (1.15, 1.20, 1.25, 1.30, 1.35, 1.40, 1.45)
+       for z in (102.0, 100.0) for lr in (1.15, 1.20, 1.25, 1.29, 1.30, 1.35, 1.40, 1.45)
        for sfx, ex in (("", []), ("_x4", [(17, 14), (17, 16)]))},
     "final_z102": {**DIE, "_z": 102.0, "_mag": 2.35, "_naobj": 0.069, "_factor": {"red": 3, "green": 5, "blue": 5},
                    "_excl": {"red": [(18, 14), (18, 16)], "green": [(18, 14), (18, 16)], "blue": []}},

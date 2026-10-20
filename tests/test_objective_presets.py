@@ -55,3 +55,10 @@ def test_cli_defaults_and_choices_accept_new_and_old_names(module_name, expected
     assert args.objective == expected_default
     for name in ("2x_na010", "2_5x_na007", "current", "future"):
         assert module.parse_args(base + ["--objective", name]).objective == name
+
+
+def test_measured_preset_matches_the_micrometer():
+    # 2026-10-20: stage micrometer, 7.750 px per 10 um -> 1.290 um/px at the sample
+    setup = config.default_setup(channel="red", grid_size=9, objective="2_5x_medido")
+    assert setup.lr_pixel_size_um == pytest.approx(10 / 7.750, rel=2e-3)
+    assert config.WORKING_Z_DISTANCE_MM == 102.0

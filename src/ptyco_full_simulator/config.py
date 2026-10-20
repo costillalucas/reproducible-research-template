@@ -98,11 +98,26 @@ class ObjectiveConfig:
 
 _OBJ_2X_NA010 = ObjectiveConfig(na=0.10, magnification=2.0, name="2x_na010")
 _OBJ_2_5X_NA007 = ObjectiveConfig(na=0.07, magnification=2.5, name="2_5x_na007")
+#: Same 2.5x/0.07 objective with its MEASURED imaging path (2026-10-20): stage
+#: micrometer (capture 2026-10-16, 0.01 mm lines = 7.750 px) -> 1.290 um/px at
+#: the sample with the 3.2 um sensor pixel -> magnification 2.48 (not the 2.28
+#: a 150 mm tube lens on a 164.5 mm-design objective would predict). NA 0.067
+#: = the pitch-only sweep's best pupil radius (NA*lrpx = 0.069*1.25) at 1.29 um.
+#: Use with WORKING_Z_DISTANCE_MM for the September-October captures.
+_OBJ_2_5X_MEDIDO = ObjectiveConfig(na=0.067, magnification=2.48, name="2_5x_medido")
 
 #: mm, array-to-sample distance of the real lab setup (confirmed by the
 #: user 2026-09-23; LEDArrayConfig's own default, 70 mm, is the simulator's
 #: nominal geometry and stays pinned for synthetic reproducibility).
 REAL_CAPTURE_Z_DISTANCE_MM = 76.0
+
+#: mm, working array-to-sample distance for the 2026-09-28b onwards captures
+#: (hand-measured 98 +- 2 mm; 102 is the reconstruction-fitted value used
+#: with "2_5x_medido"). Held-out still prefers a ~3 % smaller LED angular
+#: pitch than 1.29 um/px + 102 mm + 6 mm pitch give (LED pitch and sensor
+#: pixel confirmed by the lab) -- an open residual, see
+#: docs/resultados_2026-10-20/README.md.
+WORKING_Z_DISTANCE_MM = 102.0
 
 #: Camera dark/bias level (counts) subtracted from real captures before
 #: exposure normalization (`io_utils.normalize_exposure`). Measured on the
@@ -130,6 +145,7 @@ DEFAULT_OBJECTIVE = "2x_na010"
 OBJECTIVES = {
     "2x_na010": _OBJ_2X_NA010,
     "2_5x_na007": _OBJ_2_5X_NA007,
+    "2_5x_medido": _OBJ_2_5X_MEDIDO,
     "current": _OBJ_2_5X_NA007,  # deprecated alias
     "future": _OBJ_2X_NA010,  # deprecated alias
 }
