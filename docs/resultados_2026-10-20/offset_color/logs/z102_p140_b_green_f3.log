@@ -1,0 +1,12 @@
+[z102_p140 b_green real_A+init_z98.0_f3] geo: z=102.0 off=(0.0, 3.63) lrpx=1.4000 na=0.06160714285714287 factor=5 hrpx=0.2800 lam=0.53
+[z102_p140 b_green real_A+init_z98.0_f3] ep   0  trainR 0.9924  hoR 0.9952568931534792  16s
+[z102_p140 b_green real_A+init_z98.0_f3] ep   1  trainR 0.9924  hoR 0.9952568931534792  21s
+[z102_p140 b_green real_A+init_z98.0_f3] ep   2  trainR 0.5348  hoR 0.6664309775282526  20s
+[z102_p140 b_green real_A+init_z98.0_f3] ep   3  trainR 0.5097  hoR 0.6472790075958841  20s
+[z102_p140 b_green real_A+init_z98.0_f3] ep   5  trainR 0.4823  hoR 0.6459733583706716  28s
+[z102_p140 b_green real_A+init_z98.0_f3] ep   8  trainR 0.4597  hoR 0.6548791390700796  32s
+[z102_p140 b_green real_A+init_z98.0_f3] ep  12  trainR 0.4445  hoR 0.6644615174373601  40s
+[z102_p140 b_green real_A+init_z98.0_f3] ep  20  trainR 0.4295  hoR 0.6758955048715302  64s
+[z102_p140 b_green real_A+init_z98.0_f3] ep  30  trainR 0.4203  hoR 0.6821638455850259  61s
+[z102_p140 b_green real_A+init_z98.0_f3] ep  40  trainR 0.4151  hoR 0.6846749422378345  41s
+('z102_p140', 'b_green', 'real_A+init_z98.0_f3', 'done 342s')
