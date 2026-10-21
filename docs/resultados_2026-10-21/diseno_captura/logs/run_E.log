@@ -1,0 +1,25 @@
+108 tareas
+hoy__limpio__ideal__T0 full skip
+hoy__limpio__ideal__T0 half0 skip
+hoy__limpio__ideal__T0 half1 skip
+hoy__limpio__ideal__T0 fold0 skip
+hoy__U__ideal__T0 full skip
+hoy__U__ideal__T0 half0 skip
+hoy__U__ideal__T0 half1 skip
+hoy__U__ideal__T0 fold0 skip
+hoy__L1__ideal__T0 full skip
+hoy__L1__ideal__T0 half0 skip
+hoy__L1__ideal__T0 half1 skip
+hoy__L1__ideal__T0 fold0 skip
+hoy__limpio__err__T0 full skip
+hoy__limpio__err__T0 half0 skip
+hoy__limpio__err__T0 half1 skip
+hoy__limpio__err__T0 fold0 skip
+hoy__L1__err__T0 full skip
+hoy__L1__err__T0 half0 skip
+hoy__L1__err__T0 half1 skip
+hoy__L1__err__T0 fold0 skip
+b1s__L1__ideal__T0 half0 254s nLED=213
+b1s__L1__ideal__T0 full 380s nLED=421
+b1s__L1__ideal__T0 half1 219s nLED=208
+b1s__L1__ideal__T0 fold0 274s nLED=338

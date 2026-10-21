@@ -1,0 +1,40 @@
+83 tareas
+hoy__limpio__ideal__T0 full skip
+hoy__limpio__ideal__T0 half0 skip
+hoy__limpio__ideal__T0 half1 skip
+hoy__limpio__ideal__T0 fold0 skip
+hoy__U__ideal__T0 full skip
+hoy__U__ideal__T0 half0 skip
+hoy__U__ideal__T0 half1 skip
+hoy__U__ideal__T0 fold0 skip
+hoy__L1__ideal__T0 full skip
+hoy__L1__ideal__T0 half0 skip
+hoy__L1__ideal__T0 half1 skip
+hoy__L1__ideal__T0 fold0 skip
+hoy__limpio__err__T0 full skip
+hoy__limpio__err__T0 half0 skip
+hoy__limpio__err__T0 half1 skip
+hoy__limpio__err__T0 fold0 skip
+hoy__L1__err__T0 full skip
+hoy__L1__err__T0 half0 skip
+hoy__L1__err__T0 half1 skip
+hoy__L1__err__T0 fold0 skip
+b1s__L1__ideal__T0 full skip
+b1s__L1__ideal__T0 half0 skip
+b1s__L1__ideal__T0 half1 skip
+b1s__L1__ideal__T0 fold0 skip
+b1s__L1__err__T0 half0 233s nLED=213
+b1s__L1__err__T0 full 342s nLED=421
+b1s__L1__err__T0 half1 205s nLED=208
+b1s__L1__err__T0 fold0 258s nLED=338
+z148n__L1__err__T0 full 449s nLED=410
+z148n__L1__err__T0 half0 388s nLED=205
+z148n__L1__err__T0 half1 210s nLED=205
+z148n__L1__err__T0 fold0 272s nLED=329
+z148r__L1__err__T0 full 411s nLED=408
+z148r__L1__err__T0 half0 331s nLED=206
+z148r__L1__err__T0 half1 171s nLED=202
+hoy__L1__h__T0 full 111s nLED=223
+hoy__L1__h__T0 half0 87s nLED=112
+hoy__L1__h__T0 half1 80s nLED=111
+z148r__L1__err__T0 fold0 369s nLED=327

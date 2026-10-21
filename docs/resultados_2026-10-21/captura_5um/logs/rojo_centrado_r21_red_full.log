@@ -1,0 +1,16 @@
+[rojo_centrado r21_red real_A+init_z98.0_full] geo: z=102.0 off=(0.0, 0.08499999999999996) lrpx=1.2900 na=0.06686046511627908 factor=3 hrpx=0.4300 lam=0.63
+[rojo_centrado r21_red real_A+init_z98.0_full] ep   0  trainR 0.9849  hoR None  ramp_ptp 0.00 dy -0.000mm  11s
+[rojo_centrado r21_red real_A+init_z98.0_full] ep   1  trainR 0.9849  hoR None  ramp_ptp 0.00 dy -0.000mm  17s
+[rojo_centrado r21_red real_A+init_z98.0_full] ep   2  trainR 0.7294  hoR None  ramp_ptp 0.00 dy -0.000mm  20s
+[rojo_centrado r21_red real_A+init_z98.0_full] ep   3  trainR 0.6847  hoR None  ramp_ptp 0.00 dy -0.000mm  16s
+[rojo_centrado r21_red real_A+init_z98.0_full] ep   5  trainR 0.6412  hoR None  ramp_ptp 0.00 dy -0.000mm  26s
+[rojo_centrado r21_red real_A+init_z98.0_full] ep   8  trainR 0.6079  hoR None  ramp_ptp 0.00 dy -0.000mm  32s
+[rojo_centrado r21_red real_A+init_z98.0_full] ep  12  trainR 0.5868  hoR None  ramp_ptp 0.00 dy -0.000mm  46s
+[rojo_centrado r21_red real_A+init_z98.0_full] ep  20  trainR 0.5686  hoR None  ramp_ptp 0.00 dy -0.000mm  79s
+[rojo_centrado r21_red real_A+init_z98.0_full] ep  30  trainR 0.5587  hoR None  ramp_ptp 0.00 dy -0.000mm  70s
+[rojo_centrado r21_red real_A+init_z98.0_full] ep  40  trainR 0.5531  hoR None  ramp_ptp 0.00 dy -0.000mm  81s
+[rojo_centrado r21_red real_A+init_z98.0_full] ep  60  trainR 0.5467  hoR None  ramp_ptp 0.00 dy -0.000mm  145s
+[rojo_centrado r21_red real_A+init_z98.0_full] ep  80  trainR 0.5430  hoR None  ramp_ptp 0.00 dy -0.000mm  149s
+[rojo_centrado r21_red real_A+init_z98.0_full] ep 120  trainR 0.5391  hoR None  ramp_ptp 0.00 dy -0.000mm  265s
+[rojo_centrado r21_red real_A+init_z98.0_full] ep 160  trainR 0.5366  hoR None  ramp_ptp 0.00 dy -0.000mm  286s
+('rojo_centrado', 'r21_red', 'real_A+init_z98.0_full', 'done 1243s')

@@ -6,3 +6,6 @@ __pycache__/
 venv/
 results/
 oryx-build-commands.txt
+
+# salidas de scripts/precaptura.py corrido desde la raíz
+precaptura_*

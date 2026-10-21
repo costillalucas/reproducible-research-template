@@ -1,0 +1,19 @@
+2026-10-21.500 11 [('fila10_col19', '257ms', np.float64(15.5), np.float64(14.6)), ('fila10_col8', '257ms', np.float64(5.3), np.float64(8.7)), ('fila11_col20', '257ms', np.float64(14.6), np.float64(13.6)), ('fila14_col20', '257ms', np.float64(29.6), np.float64(27.9)), ('fila15_col15', '128ms', np.float64(7.3), np.float64(100.8)), ('fila16_col20', '257ms', np.float64(39.8), np.float64(37.9)), ('fila18_col18', '257ms', np.float64(105.4), np.float64(98.8)), ('fila20_col22', '257ms', np.float64(18.8), np.float64(17.7)), ('fila23_col22', '257ms', np.float64(12.5), np.float64(11.7)), ('fila24_col22', '257ms', np.float64(10.7), np.float64(10.1)), ('fila24_col8', '257ms', np.float64(10.3), np.float64(9.8))]
+2026-10-21 91 [('fila10_col11', '257ms', np.float64(3.7), np.float64(3.4)), ('fila10_col15', '257ms', np.float64(5.1), np.float64(4.6)), ('fila10_col22', '257ms', np.float64(2.6), np.float64(3.0)), ('fila10_col8', '257ms', np.float64(2.0), np.float64(2.8)), ('fila10_col9', '257ms', np.float64(3.1), np.float64(2.8)), ('fila11_col10', '257ms', np.float64(4.2), np.float64(3.9)), ('fila11_col14', '257ms', np.float64(6.7), np.float64(7.1)), ('fila11_col20', '257ms', np.float64(3.7), np.float64(3.3)), ('fila11_col21', '257ms', np.float64(4.1), np.float64(3.3)), ('fila11_col22', '257ms', np.float64(3.4), np.float64(2.8)), ('fila11_col8', '257ms', np.float64(3.3), np.float64(2.9)), ('fila12_col10', '257ms', np.float64(4.5), np.float64(5.0))]
+2026-10-21-sinmuestra 104 [('fila10_col11', '257ms', np.float64(1.7), np.float64(1.9)), ('fila10_col15', '257ms', np.float64(2.6), np.float64(2.4)), ('fila10_col17', '257ms', np.float64(3.0), np.float64(2.8)), ('fila10_col18', '257ms', np.float64(2.6), np.float64(2.8)), ('fila10_col19', '257ms', np.float64(2.6), np.float64(2.4)), ('fila10_col21', '257ms', np.float64(2.3), np.float64(2.0)), ('fila10_col22', '257ms', np.float64(1.9), np.float64(1.8)), ('fila10_col8', '257ms', np.float64(1.7), np.float64(2.0)), ('fila10_col9', '257ms', np.float64(2.1), np.float64(1.5)), ('fila11_col10', '257ms', np.float64(2.2), np.float64(2.0)), ('fila11_col11', '257ms', np.float64(2.1), np.float64(2.3)), ('fila11_col12', '257ms', np.float64(2.0), np.float64(2.4))]
+/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-21.500
+(17, 15) 8 mean 734.9 var(f1-f2)/exp 1.00 MAD/exp 0.84 top1% var/exp 1.04 corr f1,f2 0.993
+(16, 16) 128 mean 208.1 var(f1-f2)/exp 0.93 MAD/exp 0.98 top1% var/exp 0.91 corr f1,f2 0.999
+(15, 15) 128 mean 53.7 var(f1-f2)/exp 305.43 MAD/exp 32.39 top1% var/exp 305.88 corr f1,f2 0.917
+(14, 15) 257 mean 110.3 var(f1-f2)/exp 1.31 MAD/exp 0.40 top1% var/exp 1.72 corr f1,f2 0.997
+(17, 11) 257 mean 63.2 var(f1-f2)/exp 0.93 MAD/exp 0.56 top1% var/exp 1.21 corr f1,f2 0.996
+(13, 13) 257 mean 56.4 var(f1-f2)/exp 0.97 MAD/exp 0.60 top1% var/exp 1.34 corr f1,f2 0.994
+(11, 15) 257 mean 28.5 var(f1-f2)/exp 0.76 MAD/exp 0.82 top1% var/exp 1.28 corr f1,f2 0.984
+/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-21
+(17, 15) 5 mean 575.8 var(f1-f2)/exp 1.46 MAD/exp 1.29 top1% var/exp 1.34 corr f1,f2 0.934
+(16, 16) 128 mean 102.1 var(f1-f2)/exp 0.98 MAD/exp 0.54 top1% var/exp 1.21 corr f1,f2 0.999
+(15, 15) 128 mean 11.9 var(f1-f2)/exp 84.73 MAD/exp 1.12 top1% var/exp 702.88 corr f1,f2 0.518
+(14, 15) 257 mean 22.5 var(f1-f2)/exp 1.25 MAD/exp 1.00 top1% var/exp 6.45 corr f1,f2 0.992
+(17, 11) 257 mean 13.3 var(f1-f2)/exp 1.11 MAD/exp 1.10 top1% var/exp 7.52 corr f1,f2 0.986
+(13, 13) 257 mean 11.7 var(f1-f2)/exp 0.76 MAD/exp 1.13 top1% var/exp 3.10 corr f1,f2 0.965
+(11, 15) 257 mean 6.9 var(f1-f2)/exp 0.63 MAD/exp 1.19 top1% var/exp 1.64 corr f1,f2 0.903

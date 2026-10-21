@@ -195,6 +195,50 @@ wildly wrong digit would pass silently. This is the same rule
 **One gate**, `scripts/check_provenance.py`, that cross-checks all of the
 above and exits nonzero the moment anything doesn't resolve.
 
+## Chequeos en el microscopio antes de capturar (`scripts/precaptura.py`)
+
+Herramienta rápida (< 30 s, numpy + PIL + matplotlib) para correr en la PC del microscopio antes de una captura
+15x15 y justo después. Imprime OK / CORREGIR + qué hacer y guarda una figura PNG en el directorio actual.
+
+Atajo sin rutas: `./chequeo.sh` (o `./chequeo.sh <carpeta>`) toma la carpeta más reciente de
+`~/Documents/AleYLu/imagenes_tomadas`, encuentra los darks (`<fecha>-dark`) y el flat (`<fecha>-sinmuestra`) del
+día, corre los tres chequeos y cierra con un resumen de qué corregir. Salida en `~/Documents/AleYLu/chequeos/<carpeta>/`.
+
+```bash
+# 1) eje óptico sobre el LED objetivo: LED (17,15) + cruz + diagonales, sin muestra (o muestra rala)
+python3 scripts/precaptura.py centro <carpeta> [--led 17,15] [--offset 4000,1942] [--dark <oscuros>]
+# 2) exposiciones: fotos de prueba de algunos LEDs por anillo -> t BF, t DF por anillo (tope 257 ms), N frames (SNR>=3)
+python3 scripts/precaptura.py exposicion <carpeta> --dark <oscuros>        # escribe también un CSV 15x15
+# 3) post-captura: completitud, frames, oscuros por exposición, saturación, señal/SNR por anillo
+python3 scripts/precaptura.py qc <carpeta> --flat <flat> --dark <oscuros>
+```
+
+Detalles y supuestos (px/paso 3538 y radio BF 1.168 pasos a z 102 mm, 2.5x, rojo) en el docstring del script.
+
+## Reconstruir una captura (`./reconstruir.sh`)
+
+Mismo estilo que `./chequeo.sh`: sin argumentos toma la carpeta de muestra más reciente de
+`~/Documents/AleYLu/imagenes_tomadas`; busca solos los darks (`<carpeta>-dark`, si no `<fecha>-dark`) y el flat
+(`<carpeta>-sinmuestra`, si no `<fecha>-sinmuestra`) y el ROI de la toma (`<carpeta>/captura.json` vía
+`scripts/leer_offset.py`, o `--offset-roi X,Y`; si sale del proyecto de la cámara avisa fuerte, porque ese es el ROI ACTUAL y
+puede no ser el de la toma, p. ej. las `2026-10-20-*` fueron con 4032,3040). Resta oscuros por exposición, divide por el flat, enmascara polvo y
+saturados, promedia frames (descarta y avisa si un frame salió casi a oscuras), reconstruye y deja todo en
+`~/Documents/AleYLu/reconstrucciones/<carpeta>_<HHMM>/`: `reconstruccion.png` (crudo vs amplitud vs fase, recorte entero y
+zoom), `resumen.txt` (parámetros, tiempos y métricas explicadas), `objeto_complejo.npy` y `registro.txt`.
+
+```bash
+./reconstruir.sh                                   # la más reciente, recorte de 400 px sobre el eje, 160 épocas (~12-14 min)
+./reconstruir.sh 2026-10-21.500 --validar          # + 2 mitades de LEDs en paralelo: R held-out (C1) en palabras
+./reconstruir.sh 2026-10-21.500 --recorte 140,560  # esquina sup. izq. del recorte en px del ROI (fila,columna)
+./reconstruir.sh 2026-10-21.500 --recorte auto     # recorte sugerido que evita manchas oscuras, saturados y polvo
+./reconstruir.sh 2026-10-21.500 --epocas 40        # prueba rápida (~3-4 min)
+```
+
+Geometría fija (calibrada solo en rojo): z 102 mm, 1.29 µm/px, NA 0.0669, 15x15 LEDs (filas 10-24, columnas 8-22), eje
+sobre el LED (17,15) en el centro del ROI calibrado de 1120 px (OffsetX 4000 / OffsetY 1942). El offset del LED se calcula
+solo a partir de la posición del recorte EN EL SENSOR (offset del ROI + recorte; 0.001696 mm por px de distancia al eje, sistema
+no telecéntrico: 1 paso de LED ≈ 3538 px). Si cambian z o el objetivo, esta calibración deja de valer. Detalles en el docstring de `scripts/reconstruir.py`.
+
 ## Directory layout
 
 ```

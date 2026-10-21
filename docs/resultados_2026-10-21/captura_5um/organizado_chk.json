@@ -1,0 +1,86 @@
+{
+ "fila15_col15/128ms": {
+  "dtype": "uint16",
+  "max_vs_f1": 1670.0,
+  "max_vs_f2": 1671.0,
+  "max_vs_media": 0.5,
+  "media_menos_org": 0.08994379783163266
+ },
+ "fila10_col22/257ms": {
+  "dtype": "uint16",
+  "max_vs_f1": 12.0,
+  "max_vs_f2": 12.0,
+  "max_vs_media": 0.5,
+  "media_menos_org": 0.014815848214285714
+ },
+ "fila12_col12/257ms": {
+  "dtype": "uint16",
+  "max_vs_f1": 34.0,
+  "max_vs_f2": 34.0,
+  "max_vs_media": 0.5,
+  "media_menos_org": 0.017754304846938775
+ },
+ "fila13_col17/257ms": {
+  "dtype": "uint16",
+  "max_vs_f1": 127.0,
+  "max_vs_f2": 127.0,
+  "max_vs_media": 0.5,
+  "media_menos_org": 0.02026626275510204
+ },
+ "fila14_col22/257ms": {
+  "dtype": "uint16",
+  "max_vs_f1": 33.0,
+  "max_vs_f2": 33.0,
+  "max_vs_media": 0.5,
+  "media_menos_org": 0.01568160076530612
+ },
+ "fila16_col13/257ms": {
+  "dtype": "uint16",
+  "max_vs_f1": 229.0,
+  "max_vs_f2": 229.0,
+  "max_vs_media": 0.5,
+  "media_menos_org": 0.02713249362244898
+ },
+ "fila18_col11/257ms": {
+  "dtype": "uint16",
+  "max_vs_f1": 142.0,
+  "max_vs_f2": 142.0,
+  "max_vs_media": 0.5,
+  "media_menos_org": 0.020323660714285714
+ },
+ "fila19_col20/257ms": {
+  "dtype": "uint16",
+  "max_vs_f1": 61.0,
+  "max_vs_f2": 60.0,
+  "max_vs_media": 0.5,
+  "media_menos_org": 0.01829719387755102
+ },
+ "fila21_col10/257ms": {
+  "dtype": "uint16",
+  "max_vs_f1": 28.0,
+  "max_vs_f2": 29.0,
+  "max_vs_media": 0.5,
+  "media_menos_org": 0.017050382653061226
+ },
+ "fila22_col15/257ms": {
+  "dtype": "uint16",
+  "max_vs_f1": 33.0,
+  "max_vs_f2": 33.0,
+  "max_vs_media": 0.5,
+  "media_menos_org": 0.018429129464285713
+ },
+ "fila23_col20/257ms": {
+  "dtype": "uint16",
+  "max_vs_f1": 16.0,
+  "max_vs_f2": 16.0,
+  "max_vs_media": 0.5,
+  "media_menos_org": 0.01599609375
+ },
+ "fila16_col15/5ms": {
+  "dtype": "uint16",
+  "max_vs_f1": 49.0,
+  "max_vs_f2": 48.0,
+  "max_vs_media": 0.5,
+  "media_menos_org": 0.06984693877551021
+ }
+}

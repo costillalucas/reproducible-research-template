@@ -1,0 +1,16 @@
+[rojo_centrado r21_red real_A+init_z98.0_f4] geo: z=102.0 off=(0.0, 0.08499999999999996) lrpx=1.2900 na=0.06686046511627908 factor=3 hrpx=0.4300 lam=0.63
+[rojo_centrado r21_red real_A+init_z98.0_f4] ep   0  trainR 0.9835  hoR 0.984770563535173  6s
+[rojo_centrado r21_red real_A+init_z98.0_f4] ep   1  trainR 0.9835  hoR 0.984770563535173  9s
+[rojo_centrado r21_red real_A+init_z98.0_f4] ep   2  trainR 0.7357  hoR 0.8355852301524387  9s
+[rojo_centrado r21_red real_A+init_z98.0_f4] ep   3  trainR 0.6885  hoR 0.7959280146351138  9s
+[rojo_centrado r21_red real_A+init_z98.0_f4] ep   5  trainR 0.6416  hoR 0.765874912393497  13s
+[rojo_centrado r21_red real_A+init_z98.0_f4] ep   8  trainR 0.6053  hoR 0.7476662485826446  18s
+[rojo_centrado r21_red real_A+init_z98.0_f4] ep  12  trainR 0.5825  hoR 0.7387748317178143  20s
+[rojo_centrado r21_red real_A+init_z98.0_f4] ep  20  trainR 0.5629  hoR 0.7317252535318456  35s
+[rojo_centrado r21_red real_A+init_z98.0_f4] ep  30  trainR 0.5525  hoR 0.7283422157311242  42s
+[rojo_centrado r21_red real_A+init_z98.0_f4] ep  40  trainR 0.5466  hoR 0.7255042966235193  43s
+[rojo_centrado r21_red real_A+init_z98.0_f4] ep  60  trainR 0.5392  hoR 0.7199023019555698  79s
+[rojo_centrado r21_red real_A+init_z98.0_f4] ep  80  trainR 0.5348  hoR 0.7152117733002604  80s
+[rojo_centrado r21_red real_A+init_z98.0_f4] ep 120  trainR 0.5296  hoR 0.7093599698598594  154s
+[rojo_centrado r21_red real_A+init_z98.0_f4] ep 160  trainR 0.5268  hoR 0.7063139411554958  122s
+('rojo_centrado', 'r21_red', 'real_A+init_z98.0_f4', 'done 641s')

@@ -1,0 +1,11 @@
+[rojo_final m2_red real_A+init_z98.0_f2] geo: z=102.0 off=(0.0, 4.0600000000000005) lrpx=1.2900 na=0.06686046511627908 factor=3 hrpx=0.4300 lam=0.63
+[rojo_final m2_red real_A+init_z98.0_f2] ep   0  trainR 0.9853  hoR 0.9841837391077068  12s
+[rojo_final m2_red real_A+init_z98.0_f2] ep   1  trainR 0.9853  hoR 0.9841837391077068  17s
+[rojo_final m2_red real_A+init_z98.0_f2] ep   2  trainR 0.6892  hoR 0.8100615998162629  16s
+[rojo_final m2_red real_A+init_z98.0_f2] ep   3  trainR 0.6392  hoR 0.7753533360033128  16s
+[rojo_final m2_red real_A+init_z98.0_f2] ep   5  trainR 0.5807  hoR 0.7485374524768658  26s
+[rojo_final m2_red real_A+init_z98.0_f2] ep   8  trainR 0.5303  hoR 0.7302320389198707  28s
+[rojo_final m2_red real_A+init_z98.0_f2] ep  12  trainR 0.4984  hoR 0.7184651761676024  40s
+[rojo_final m2_red real_A+init_z98.0_f2] ep  20  trainR 0.4699  hoR 0.7045245553830605  57s
+[rojo_final m2_red real_A+init_z98.0_f2] ep  30  trainR 0.4526  hoR 0.6931278775050596  87s
+[rojo_final m2_red real_A+init_z98.0_f2] ep  40  trainR 0.4425  hoR 0.6850894534427645  78s
