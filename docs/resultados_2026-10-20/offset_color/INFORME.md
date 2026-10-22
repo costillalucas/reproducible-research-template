@@ -468,3 +468,28 @@ error de 2.28×.
 **Geometría de trabajo desde el 20/10:** lrpx 1.29 µm (M 2.48), NA 0.067, z 102 mm. En el código queda como preset
 `config.OBJECTIVES["2_5x_medido"]` + `config.WORKING_Z_DISTANCE_MM`. Los presets viejos no cambian, porque los fijan
 los tests y las simulaciones.
+
+## 20/10 — Volumen de fase con la geometría medida (z102_p129)
+
+Azul full con `z102_p129` (R_train 0.404, igual que base 0.406). `vol_p129.py` → `vol_p129.json`: máscara fija
+segmentada en base, época 40, s = 1.29/1.28.
+
+| color | d_vol/d base | d_vol/d p129 (corr. s) | V_p129/V_base (p25–p75) |
+|---|---|---|---|
+| rojo | 0.93 | 0.86 | 0.92 (0.81–1.02) |
+| verde | 0.69 | 0.54 | 0.57 (0.29–0.83) |
+| azul | 0.65 | 0.64 | 0.98 (0.92–1.02) |
+
+Cocientes entre colores (misma partícula, d ≥ 5 µm). Lo esperado con la dispersión supuesta es 1.23 / 1.42. Sin
+dispersión, solo por λ, sería 1.19 / 1.34.
+
+| | base | final_z102 (1.362) | **z102_p129** |
+|---|---|---|---|
+| V_G/V_R | 0.81 | 0.55 | **0.66** (N 18) |
+| V_B/V_R | 1.04 | 1.09 | **1.08** (N 23) |
+
+**Veredicto:** la geometría medida no recupera el déficit de verde y azul. Los cocientes quedan lejos de lo esperado
+y no dependen de la dispersión supuesta, porque ni siquiera alcanzan el valor sin dispersión. El verde es inestable
+(p25–p75 de 0.29 a 0.83). El déficit no es geométrico, lo que confirma lo del 02/10 ahora con el aumento medido. La
+cadena G+B sobre datos reales no tiene sentido hasta resolver por qué verde y azul pierden volumen de fase: foco,
+muestra gruesa o luz fuera del modelo.
