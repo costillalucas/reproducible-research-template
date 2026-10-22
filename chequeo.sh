@@ -77,10 +77,15 @@ python3 "$PRE" centro "$CARPETA" --offset "$OFFSET" ${DARK:+--dark "$DARK"} --pn
 echo; echo "---------- 2. EXPOSICIÓN ----------"
 if [[ -n "$DARK" ]]; then
     python3 "$PRE" exposicion "$CARPETA" --dark "$DARK" --png "$SALIDA/exposicion.png"
-    if [[ -f "$SALIDA/exposicion.csv" ]]; then
+    # solo la toma de prueba define el plan: con la grilla completa no se pisa, porque el flat tiene que
+    # tomarse con las mismas exposiciones que la muestra (pasó el 22/10)
+    if [[ -f "$SALIDA/exposicion.csv" && $NLED -lt 225 ]]; then
         cp "$SALIDA/exposicion.csv" "$SALIDA_BASE/plan_actual.csv"
         echo "  Plan de tiempos y frames guardado en $SALIDA_BASE/plan_actual.csv"
         echo "  (lo usa iluminacion_con_toma_de_imagene.py con USAR_PLAN = True)"
+    elif [[ -f "$SALIDA/exposicion.csv" ]]; then
+        echo "  Grilla completa: plan_actual.csv NO se actualiza (el flat usa el mismo plan que la muestra)."
+        echo "  La sugerencia de arriba queda en $SALIDA/exposicion.csv por si se quiere para otra toma."
     fi
 else
     echo "  [CORREGIR] No hay carpeta de darks para $FECHA: tomá darks (luz apagada) y volvé a correr."

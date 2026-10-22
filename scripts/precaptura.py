@@ -29,7 +29,7 @@ Subcomandos
    Fotos de prueba de algunos LEDs por anillo (anillo = round(distancia radial al LED del eje), igual que
    results/captura_2026-10-21/qc.py). Por LED: señal sobre oscuro en cuentas/ms (mediana y percentil 99.9) y
    fracción saturada. Recomienda: exposición de campo claro (BF) con p99.9 crudo ~ 80 % del rango (3276 cuentas);
-   exposición de campo oscuro (DF) por anillo, tope 257 ms, con p99.9 crudo < 3500; y número de frames N por anillo
+   exposición de campo oscuro (DF) por anillo, tope T_MAX = 1025 ms, con p99.9 crudo < 3500; y número de frames N por anillo
    para mediana de SNR >= 3. Modelo de ruido por frame: var = g*S + var_oscuro [cuentas^2]; g y var_oscuro se
    ajustan con las diferencias entre frames de los propios datos (si hay >= 2 frames), si no se usan los valores
    por defecto medidos el 21/10 (g 0.297, var 7.1; ver nota en DEFAULT_GAIN). Escribe además un CSV
@@ -71,7 +71,7 @@ NIVEL_OSCURO = 188.0         # cuentas, oscuro medio 21/10 (si no se da --dark)
 DEFAULT_GAIN, DEFAULT_VAR0 = 0.297, 7.1
 BF_OBJ = 0.80 * RANGO        # p99.9 crudo objetivo en BF
 DF_MAX = 3500.0              # p99.9 crudo máximo en DF
-T_MAX = 257.0                # ms, máximo del programa de captura
+T_MAX = 1025.0               # ms, máximo del programa de captura (line time 1000 + frame 1150 ms, desde el 22/10; antes 257)
 SNR_OBJ = 3.0
 
 RX_LED = re.compile(r'^fila(\d+)_col(\d+)_color([rgb])$')

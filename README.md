@@ -207,7 +207,7 @@ día, corre los tres chequeos y cierra con un resumen de qué corregir. Salida e
 ```bash
 # 1) eje óptico sobre el LED objetivo: LED (17,15) + cruz + diagonales, sin muestra (o muestra rala)
 python3 scripts/precaptura.py centro <carpeta> [--led 17,15] [--offset 4000,1942] [--dark <oscuros>]
-# 2) exposiciones: fotos de prueba de algunos LEDs por anillo -> t BF, t DF por anillo (tope 257 ms), N frames (SNR>=3)
+# 2) exposiciones: fotos de prueba de algunos LEDs por anillo -> t BF, t DF por anillo (tope 1025 ms), N frames (SNR>=3)
 python3 scripts/precaptura.py exposicion <carpeta> --dark <oscuros>        # escribe también un CSV 15x15
 # 3) post-captura: completitud, frames, oscuros por exposición, saturación, señal/SNR por anillo
 python3 scripts/precaptura.py qc <carpeta> --flat <flat> --dark <oscuros>
