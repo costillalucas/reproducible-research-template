@@ -1,0 +1,66 @@
+[
+ {
+  "parche_azul_fila_col": [
+   300,
+   450
+  ],
+  "ncc_max_en_rojo_b": 0.152,
+  "en_fila_col": [
+   730,
+   754
+  ],
+  "ncc_mismo_lugar": 0.015
+ },
+ {
+  "parche_azul_fila_col": [
+   700,
+   100
+  ],
+  "ncc_max_en_rojo_b": 0.168,
+  "en_fila_col": [
+   261,
+   447
+  ],
+  "ncc_mismo_lugar": -0.006
+ },
+ {
+  "parche_azul_fila_col": [
+   50,
+   50
+  ],
+  "ncc_max_en_rojo_b": 0.21,
+  "en_fila_col": [
+   185,
+   97
+  ],
+  "ncc_mismo_lugar": 0.007
+ },
+ {
+  "parche_azul_fila_col": [
+   750,
+   650
+  ],
+  "ncc_max_en_rojo_b": 0.227,
+  "en_fila_col": [
+   317,
+   113
+  ],
+  "ncc_mismo_lugar": -0.015
+ },
+ {
+  "parche_azul_fila_col": [
+   100,
+   700
+  ],
+  "ncc_max_en_rojo_b": 0.187,
+  "en_fila_col": [
+   478,
+   670
+  ],
+  "ncc_mismo_lugar": -0.004
+ },
+ {
+  "control": "mismo parche del arco en 2026-10-29-blue-prueba-1151 (otra toma azul)",
+  "ncc_max": 0.999
+ }
+]

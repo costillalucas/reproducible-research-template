@@ -1,0 +1,77 @@
+
+---------- 1. LEYENDO LA CAPTURA ----------
+  muestra: /home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-30-red-b  (225 LEDs, imágenes 1120x1120)
+  flat:    /home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-30-red-b-sinmuestra
+  oscuros: muestra /home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-30-red-b-dark | flat /home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-30-red-b-sinmuestra-dark
+  ROI de la cámara: OffsetX 4000, OffsetY 874  (origen: --offset-roi (dado a mano))
+
+---------- 2. RECORTE ----------
+  filas 290:690, columnas 415:815  (400 px = 516 µm), elegido a mano (--recorte)
+  offset del LED por la posición del recorte en el sensor: y +1.930 mm, x -0.093 mm (+0.322 / -0.016 pasos de LED)
+  [AVISO] el recorte cae lejos del eje óptico (> 1/4 de paso de LED): la reconstrucción puede degradarse.
+  zonas muy oscuras (muestra/flat < 0.5) dentro del recorte: 0.2 %
+
+---------- 3. PREPROCESADO (oscuro, flat, máscara, promedio de frames) ----------
+  oscuros (cuentas medias): 16 ms 190.8, 129 ms 191.2, 646 ms 192.1, 1025 ms 192.6
+  polvo/manchas del sensor enmascarados: 400 px (0.25 % del recorte)
+  45/225 LEDs leídos (2 s)
+  90/225 LEDs leídos (2 s)
+  135/225 LEDs leídos (4 s)
+  180/225 LEDs leídos (5 s)
+  225/225 LEDs leídos (6 s)
+  exposiciones usadas en la muestra: 16 ms (5 LEDs), 129 ms (4 LEDs), 646 ms (12 LEDs), 1025 ms (204 LEDs)
+  frames por LED: 2 frames (221 LEDs), 3 frames (4 LEDs)
+  ningún frame descartado (no hubo frames a oscuras)
+  [AVISO] 1 LEDs con píxeles saturados en el recorte (se enmascaran): (16, 16) 7px
+  preprocesado listo en 30 s
+
+---------- 4. RECONSTRUCCIÓN ----------
+  [PARCHE] NA_OBJ=0.0669  NULO_DF=1
+  [PARCHE] NULO_DF: fxy permutadas entre 221 LEDs DF (seed 0), fijos 0, min |f|/(NA/lam) DF = 1.049
+  geometría: z 102 mm, píxel 1.290 µm, NA 0.0669, λ 0.63 µm, factor 3 -> píxel reconstruido 0.430 µm
+  LEDs de campo claro (BF): [(17, 15), (16, 15), (17, 14), (17, 16)]
+  reconstrucción lista en 15.0 min
+
+---------- 5. MÉTRICAS Y FIGURA ----------
+/home/chanoscopio/.local/lib/python3.10/site-packages/matplotlib/projections/__init__.py:63: UserWarning: Unable to import Axes3D. This may be due to multiple versions of Matplotlib being installed (e.g. as a system package and as a pip package). As a result, the 3D projection is not available.
+  warnings.warn("Unable to import Axes3D. This may be due to multiple versions of "
+RECONSTRUCCIÓN FPM de 2026-10-30-red-b   (03/11/2026 12:18)
+==============================================================================
+muestra:            /home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-30-red-b
+flat:               /home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-30-red-b-sinmuestra
+oscuros muestra:    /home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-30-red-b-dark
+oscuros flat:       /home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-30-red-b-sinmuestra-dark
+color:              red
+recorte:            filas 290:690, columnas 415:815  (400 px = 516 µm), elegido a mano (--recorte)
+ROI cámara:         OffsetX 4000, OffsetY 874  (origen: --offset-roi (dado a mano))
+offset LED:         y +1.930 mm, x -0.093 mm  (0.001696 mm por px entre el centro del recorte en el sensor y el eje calibrado, ROI 4000,1942 + 560 px)
+geometría:          z 102 mm, píxel cámara en la muestra 1.290 µm, NA 0.0669, factor 3, píxel reconstruido 0.4300 µm
+LEDs BF:            [(17, 15), (16, 15), (17, 14), (17, 16)]
+exposiciones:       16 ms x5, 129 ms x4, 646 ms x12, 1025 ms x204
+frames descartados: 0
+saturados:          1 LEDs con píxeles saturados en el recorte (enmascarados)
+polvo enmascarado:  400 px (0.25 %)
+tiempo:             total 15.8 min (preprocesado 0.6, reconstrucción 15.0), 3 núcleo(s)
+
+MÉTRICAS
+------------------------------------------------------------------------------
+R de ajuste (todos los LEDs que usó):  0.647
+    R = error de la predicción del modelo / variación de la imagen medida. 0 = perfecta, 1 = no explica nada.
+C3 artefacto de grilla (lattice):      9.3e-02   (ALTO; pasa si <= 0.01)
+C1 R held-out (validación por mitades): 0.922   (mitad A 0.923, mitad B 0.921; 145 LEDs de anillo < 7 no vistos)
+    sin FPM (solo la imagen BF agrandada): 0.995;  piso de ruido: 0.129
+    -> C1 NO PASA (pide R <= 0.895). Con R = 0.92 el modelo explica ~15 % de la variación de las imágenes que no vio.
+    (los INFORME miden C1 con 5 folds y sin los LEDs BF; con 2 mitades el número es parecido pero no idéntico:
+
+ARCHIVOS
+------------------------------------------------------------------------------
+reconstruccion.png   arriba: el recorte entero; abajo: zoom del centro (recuadro amarillo). Columnas:
+                     1) imagen cruda del LED central dividida por el flat (resolución del objetivo solo),
+                     2) amplitud reconstruida, 3) fase reconstruida relativa (sin la fase de baja frecuencia).
+                     Si la reconstrucción funciona, 2 y 3 muestran más detalle que 1 en el mismo lugar.
+objeto_complejo.npy  objeto complejo 1200x1200, píxel 0.4300 µm (np.load; np.abs = amplitud, np.angle = fase)
+objeto_mitadA/B.npy  reconstrucciones con cada mitad de los LEDs (para comparar entre sí)
+datos/prep.npz       imágenes preprocesadas (S muestra, F flat en cuentas/ms, máscara SAT)
+registro.txt         todo lo que se imprimió en pantalla
+
+SALIDA: /home/chanoscopio/Documents/AleYLu/reconstrucciones/plan_2026-11-03/red-b_arco_nulo_df

@@ -30,7 +30,11 @@ Subcomandos
    results/captura_2026-10-21/qc.py). Por LED: señal sobre oscuro en cuentas/ms (mediana y percentil 99.9) y
    fracción saturada. Recomienda: exposición de campo claro (BF) con p99.9 crudo ~ 80 % del rango (3276 cuentas);
    exposición de campo oscuro (DF) por anillo, tope T_MAX = 1025 ms, con p99.9 crudo < 3500; y número de frames N por anillo
-   para mediana de SNR >= 3. Modelo de ruido por frame: var = g*S + var_oscuro [cuentas^2]; g y var_oscuro se
+   para SNR de PICO >= 3 con tope N_MAX = 4. Señal de pico = p99.9 de (muestra - oscuro, píxel a píxel) bineado 4x4: mide las
+   partículas, no el fondo (la mediana, usada antes, vale ~0 en DF ralo y daba N absurdos, p. ej. 9 000 000). Ruido del
+   bloque 4x4 = sqrt((g*S + var_oscuro)/16). Como diagnóstico (no como criterio) se informa la SNR de ENERGÍA del DF:
+   rms de los bloques 4x4 sin el fondo (mediana) y sin la varianza del propio ruido, sobre el ruido del bloque.
+   Modelo de ruido por frame: var = g*S + var_oscuro [cuentas^2]; g y var_oscuro se
    ajustan con las diferencias entre frames de los propios datos (si hay >= 2 frames), si no se usan los valores
    por defecto medidos el 21/10 (g 0.297, var 7.1; ver nota en DEFAULT_GAIN). Escribe además un CSV
    (Fila, Columna, Tiempo_ms, N_frames) para la grilla 15x15 junto a la figura.
@@ -38,7 +42,7 @@ Subcomandos
 
 3) qc <carpeta> [--flat <carpeta_flat>] [--dark <carpeta_oscuro>] [--led 17,15]
    Post-captura: completitud de la grilla 15x15, frames por LED, exposiciones, oscuros para cada exposición usada,
-   saturación, y tabla de señal y SNR por anillo.
+   saturación, y tabla de señal y SNR por anillo (SNR de pico, misma métrica que 'exposicion'; energía como diagnóstico).
    Ejemplo:  python3 scripts/precaptura.py qc .../2026-10-21 --flat .../2026-10-21-sinmuestra --dark .../2026-10-21-dark
 
 Opciones comunes: --color r|g|b (si la carpeta tiene más de un color), --png <ruta.png>.
@@ -73,6 +77,9 @@ BF_OBJ = 0.80 * RANGO        # p99.9 crudo objetivo en BF
 DF_MAX = 3500.0              # p99.9 crudo máximo en DF
 T_MAX = 1025.0               # ms, máximo del programa de captura (line time 1000 + frame 1150 ms, desde el 22/10; antes 257)
 SNR_OBJ = 3.0
+N_MAX = 4                    # tope de frames por LED (Lucas 03/11): más frames rinden solo sqrt(N); 4x exposición el 23/10
+                             # bajó el error del solver ~9 % -> el límite no es el ruido
+BIN = 4                      # bineado de la señal de pico y de energía
 
 RX_LED = re.compile(r'^fila(\d+)_col(\d+)_color([rgb])$')
 RX_T = re.compile(r'^(\d+(?:\.\d+)?)ms$')
@@ -484,9 +491,23 @@ def stats_led(ts, osc, todas=False):
             q1, q3 = np.percentile(S[::2, ::2], [25, 75])
             sel = (S >= q1) & (S <= q3)
             vmed = float(np.var(dif[sel]) / 2)         # var por frame de los píxeles de nivel ~ mediana (SNR medido)
+        # pico: oscuro restado píxel a píxel ANTES del percentil (un píxel caliente se resta solo), bineado BINxBIN
+        S4 = binear(S, BIN)
+        # el p99.9 de una imagen de PURO ruido ya vale ~3.09 sigma (gaussiana): sin restarlo, un DF vacío daría SNR ~3 y
+        # "1 frame alcanza". Se resta ese piso, con la sigma del bloque en el promedio de frames de esta prueba.
+        v_pix = v if v is not None else DEFAULT_GAIN * max(med, 0.0) + DEFAULT_VAR0
+        sig4 = math.sqrt(v_pix / BIN ** 2 / len(fs))
+        pico = float(np.percentile(S4, 99.9)) - 3.09 * sig4
+        # energía: rms de los bloques sin el fondo (mediana -> quita deriva del oscuro), menos la varianza del ruido del
+        # promedio de frames en el bloque (medida con la diferencia de 2 frames si existe)
+        c4 = S4 - np.median(S4)
+        e2 = float(np.mean(c4 ** 2))
+        if v is not None:
+            e2 -= v / BIN ** 2 / len(fs)
         r = dict(t=t, nfr=len(fs), med=med, media=float(S.mean()), p999=float(np.percentile(sub, 99.9)),
-                 sat=ns / m.size, var1=v, var1_med=vmed, dark=dm)
+                 sat=ns / m.size, var1=v, var1_med=vmed, dark=dm, pico=pico, rms=math.sqrt(max(e2, 0.0)))
         r['cms_med'] = r['med'] / te; r['cms_p999'] = (r['p999'] - dm) / te
+        r['cms_pico'] = pico / te; r['cms_rms'] = r['rms'] / te
         out.append(r)
         if not todas and ns < 1e-4 * m.size:
             break
@@ -583,27 +604,39 @@ def cmd_exposicion(args):
     for k in sel:
         if sel[k]['clase'] != 'BF':
             por.setdefault(sel[k]['ring'], []).append(k)
-    print('\n  anillo  nLED  t_rec[ms]  limita    med[c/ms]  SNR/frame@t_rec  N(SNR>=3)  SNR/frame medido@t_prueba')
+    print(f'\n  anillo  nLED  t_rec[ms]  limita    pico[c/ms]  SNR_pico/frame@t_rec  N(SNR>=3, tope {N_MAX})  '
+          f'SNR_energía/frame@t_rec   (pico = p99.9 de bloques {BIN}x{BIN} sobre oscuro; energía = diagnóstico)')
     for q, ks in sorted(por.items()):
         kl = max(ks, key=lambda k: sel[k]['cms_p999'])
         rp = max(sel[kl]['cms_p999'], 1e-3)
         tr = min(T_MAX, (DF_MAX - dm) / rp - T0_MS)
         tr = max(1, int(math.floor(tr))) if tr < T_MAX else int(T_MAX)
-        cm = float(np.median([sel[k]['cms_med'] for k in ks]))
-        S = cm * (tr + T0_MS); snr = S / math.sqrt(max(g * S, 0) + v0)
-        N = int(math.ceil((SNR_OBJ / max(snr, 1e-3)) ** 2))
-        emp = [sel[k]['snr1_emp'] for k in ks if sel[k]['snr1_emp'] is not None]
-        tpr = sorted({tstr(sel[k]['t']) for k in ks})
-        rec[q] = dict(t=tr, N=N, snr1=snr, limita=kl)
-        print(f'  {q:5d}  {len(ks):4d}  {tr:9d}  {str(kl):9s} {cm:9.3f}  {snr:15.2f}  {N:9d}   '
-              + (f'{np.median(emp):.2f} @ {"/".join(tpr)} ms' if emp else '-'))
+        te = tr + T0_MS
+        cp = float(np.median([sel[k]['cms_pico'] for k in ks]))      # mediana entre LEDs del anillo (no entre píxeles)
+        cr = float(np.median([sel[k]['cms_rms'] for k in ks]))
+        cf = float(np.median([max(sel[k]['cms_med'], 0.0) for k in ks]))   # fondo, solo para el ruido de la energía
+        S = cp * te
+        snr = S / math.sqrt((g * S + v0) / BIN ** 2) if S > 0 else 0.0
+        n_ideal = int(math.ceil((SNR_OBJ / snr) ** 2)) if snr >= 1 else None   # pico < 1 sigma: no hay señal que promediar
+        N = N_MAX if n_ideal is None else max(1, min(n_ideal, N_MAX))
+        snr_e = cr * te / math.sqrt((g * cf * te + v0) / BIN ** 2)
+        rec[q] = dict(t=tr, N=N, n_ideal=n_ideal, snr1=snr, snr_e=snr_e, limita=kl)
+        print(f'  {q:5d}  {len(ks):4d}  {tr:9d}  {str(kl):9s} {cp:10.3f}  {snr:20.2f}  '
+              f'{N:4d}' + (f' (ideal {n_ideal})' if n_ideal and n_ideal > N_MAX else '').ljust(18)
+              + f'  {snr_e:10.2f}')
     print()
     for q, r in sorted((q, r) for q, r in rec.items() if q != 'BF'):
-        if r['N'] <= 1:
-            veredicto(True, f'anillo {q}: {r["t"]} ms, 1 frame alcanza (SNR/frame {r["snr1"]:.1f}).')
+        if r['n_ideal'] is None:
+            veredicto(False, f'anillo {q}: el pico (p99.9 bineado) no supera 1 sigma del ruido -> métrica no aplicable '
+                             f'(¿LED apagado, muestra sin partículas en este campo, oscuro equivocado?). Se usa N = {N_MAX}.')
+        elif r['n_ideal'] <= 1:
+            veredicto(True, f'anillo {q}: {r["t"]} ms, 1 frame alcanza (SNR de pico/frame {r["snr1"]:.1f}).')
+        elif r['n_ideal'] <= N_MAX:
+            veredicto(True, f'anillo {q}: {r["t"]} ms, SNR de pico/frame {r["snr1"]:.2f} -> promediar N = {r["N"]} frames.')
         else:
-            veredicto(False, f'anillo {q}: {r["t"]} ms con SNR/frame {r["snr1"]:.2f} < 3 -> promediar N = {r["N"]} frames '
-                             + ('(muy caro: considerar agrupar LEDs / aceptar menos SNR en este anillo)' if r['N'] > 30 else ''))
+            veredicto(False, f'anillo {q}: {r["t"]} ms, SNR de pico/frame {r["snr1"]:.2f}; harían falta {r["n_ideal"]} frames '
+                             f'para SNR 3, se usa el tope N = {N_MAX} (SNR final ~{r["snr1"] * math.sqrt(N_MAX):.1f}). '
+                             f'Más frames rinden solo sqrt(N); el límite de la reconstrucción hoy es el modelo, no el ruido.')
     # CSV 15x15
     csv = os.path.splitext(ruta_png(args, 'exposicion', args.carpeta))[0] + '.csv'
     grilla = {}
@@ -706,7 +739,9 @@ def cmd_qc(args):
         if not st:
             continue
         r = st[0]; r['ring'] = anillo(k, eje)
-        r['snr1'] = r['med'] / math.sqrt(r['var1_med']) if r['var1_med'] else r['med'] / math.sqrt(g * max(r['med'], 0) + v0)
+        # SNR de PICO por frame (misma métrica que 'exposicion'): p99.9 bineado BINxBIN sobre oscuro, sin piso de ruido
+        r['snr1'] = max(r['pico'], 0.0) / math.sqrt((g * max(r['pico'], 0.0) + v0) / BIN ** 2)
+        r['snr_e'] = r['rms'] / math.sqrt((g * max(r['med'], 0.0) + v0) / BIN ** 2)     # energía: solo diagnóstico
         per[k] = r
     satk = sorted(k for k, r in per.items() if r['sat'] > 0)
     veredicto(not satk, f'saturación: ' + ('ningún LED con píxeles en 4095' if not satk else
@@ -722,29 +757,36 @@ def cmd_qc(args):
                     if np.asarray(Image.open(f)).max() >= RANGO:
                         fsat.append(k); break
         veredicto(not fsat, 'flat: ' + ('sin saturación' if not fsat else f'{len(fsat)} LEDs saturados {fsat[:6]}'))
-    print('\n  anillo  nLED  t[ms]          med[c/ms]   med[cuentas]  p99.9 crudo max  SNR/frame med  frames  N p/SNR>=3')
+    print(f'\n  anillo  nLED  t[ms]          pico[c/ms]  pico[cuentas]  p99.9 crudo max  SNR_pico/frame  frames  N p/SNR>=3 (tope {N_MAX})'
+          f'  SNR_energía/frame')
     rings = {}
     for k, r in per.items():
         rings.setdefault(r['ring'], []).append(r)
     malos = []
     for q, v in sorted(rings.items()):
         snr = float(np.median([x['snr1'] for x in v])); nf = int(np.median([x['nfr'] for x in v]))
-        Nn = int(math.ceil((SNR_OBJ / max(snr, 1e-3)) ** 2))
+        snr_e = float(np.median([x['snr_e'] for x in v]))
+        n_ideal = int(math.ceil((SNR_OBJ / snr) ** 2)) if snr >= 1 else None     # pico < 1 sigma: sin señal
+        Nn = N_MAX if n_ideal is None else max(1, min(n_ideal, N_MAX))
         if snr * math.sqrt(nf) < SNR_OBJ:
-            malos.append((q, snr * math.sqrt(nf), Nn))
-        print(f'  {q:5d}  {len(v):4d}  {"/".join(tstr(t) for t in sorted({x["t"] for x in v})):13s} {np.median([x["cms_med"] for x in v]):10.3f}'
-              f'  {np.median([x["med"] for x in v]):12.1f}  {max(x["p999"] for x in v):15.0f}  {snr:13.2f}  {nf:6d}  {Nn:9d}')
-    veredicto(not malos, 'SNR por anillo (promedio de los frames tomados): ' + ('>= 3 en todos' if not malos else
-              '; '.join(f'anillo {q}: {s:.2f} (harían falta ~{n} frames)' for q, s, n in malos)))
+            malos.append((q, snr * math.sqrt(nf), n_ideal))
+        ntxt = f'{Nn}' + (f' (ideal {n_ideal})' if n_ideal and n_ideal > N_MAX else (' (sin señal)' if n_ideal is None else ''))
+        print(f'  {q:5d}  {len(v):4d}  {"/".join(tstr(t) for t in sorted({x["t"] for x in v})):13s} {np.median([x["cms_pico"] for x in v]):10.3f}'
+              f'  {np.median([x["pico"] for x in v]):13.1f}  {max(x["p999"] for x in v):15.0f}  {snr:14.2f}  {nf:6d}  {ntxt:22s}  {snr_e:10.2f}')
+    veredicto(not malos, 'SNR de pico por anillo (promedio de los frames tomados): ' + ('>= 3 en todos' if not malos else
+              '; '.join(f'anillo {q}: {s:.2f} (' + ('pico < 1 sigma del ruido: sin señal, métrica no aplicable' if n is None else
+                        f'harían falta ~{n} frames' + (f', tope {N_MAX}: el límite es el modelo, no el ruido' if n > N_MAX else ''))
+                        + ')' for q, s, n in malos)))
     # figura
     fig, ax = plt.subplots(1, 4, figsize=(20, 4.8))
     mats = [np.full((15, 15), np.nan) for _ in range(4)]
     for k, r in per.items():
         i, j = k[0] - eje[0] + 7, k[1] - eje[1] + 7
-        mats[0][i, j] = r['t']; mats[1][i, j] = np.log10(max(r['cms_med'], 1e-3))
+        mats[0][i, j] = r['t']; mats[1][i, j] = np.log10(max(r['cms_pico'], 1e-3))
         mats[2][i, j] = r['snr1'] * math.sqrt(r['nfr']); mats[3][i, j] = 100 * r['sat']
     ext = (eje[1] - 7.5, eje[1] + 7.5, eje[0] + 7.5, eje[0] - 7.5)
-    tit = ['exposición [ms]', 'log10 cuentas/ms sobre oscuro (mediana)', 'SNR mediana (frames promediados)', '% píxeles saturados']
+    tit = ['exposición [ms]', f'log10 cuentas/ms sobre oscuro (pico p99.9, {BIN}x{BIN})', 'SNR de pico (frames promediados)',
+           '% píxeles saturados']
     cms = ['viridis', 'magma', 'RdYlGn', 'Reds']
     for a, Mx, tt, cm in zip(ax, mats, tit, cms):
         kw = dict(vmin=0, vmax=6) if cm == 'RdYlGn' else (dict(vmin=0, vmax=max(1e-3, np.nanmax(Mx))) if cm == 'Reds' else {})

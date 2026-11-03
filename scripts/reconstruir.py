@@ -356,6 +356,8 @@ def main():
     ap.add_argument("--salida", default=None)
     ap.add_argument("--nucleos", type=int, default=3)
     ap.add_argument("--offset-roi", default=None, help="OffsetX,OffsetY del ROI de la cámara en esa toma (si no: scripts/leer_offset.py)")
+    ap.add_argument("--anillo-max", type=int, default=None,
+                    help="usar solo los LEDs con anillo = round(distancia al LED (17,15)) <= N (misma convención que precaptura)")
     ap.add_argument("--no-descartar", action="store_true", help="no descartar frames a oscuras (solo para comparar)")
     a = ap.parse_args()
     interactivo = sys.stdin.isatty()
@@ -468,6 +470,9 @@ def main():
     DUST = binary_dilation(f0c / gaussian_filter(f0c, 15) < 0.8, iterations=4)
     msg(f"  polvo/manchas del sensor enmascarados: {DUST.sum()} px ({100 * DUST.mean():.2f} % del recorte)")
     keys = sorted(SM)
+    if a.anillo_max is not None:
+        keys = [k for k in keys if round(np.hypot(k[0] - CENTRO_LED[0], k[1] - CENTRO_LED[1])) <= a.anillo_max]
+        msg(f"  --anillo-max {a.anillo_max}: se usan {len(keys)} de {len(SM)} LEDs")
     S, Fl, V, SAT, TT, TF, NF, descartes, sat_leds = [], [], [], [], [], [], [], [], []
     for i, k in enumerate(keys):
         t = elegir_t(SM[k], rec)
