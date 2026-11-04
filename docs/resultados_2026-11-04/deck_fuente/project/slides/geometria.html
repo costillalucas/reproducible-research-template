@@ -1,0 +1,33 @@
+<section id="geometria" data-transition="fade" style="background:#F6F4EF;color:#1E2A38;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<h2 style="font-family:'EB Garamond', Georgia, serif;font-size:72px;font-weight:500;line-height:1.1">El solver solo ve dónde cae cada LED respecto del borde de la pupila</h2>
+<div style="display:flex;gap:64px;align-items:center;flex:1">
+<svg aria-label="Espacio de Fourier: grilla de LEDs del primer anillo a un paso de distancia y tres círculos de pupila con radios 1,14 (solver), 1,16 (espectro) y 1,24 pasos (borde ajustado); las diagonales quedan a 1,41 pasos" width="640" height="640" viewBox="0 0 640 640" xmlns="http://www.w3.org/2000/svg">
+<rect x="0" y="0" width="640" height="640" rx="16" fill="#FFFFFF"/>
+<line x1="320" y1="20" x2="320" y2="620" stroke="#E3E0D8" stroke-width="2"/>
+<line x1="20" y1="320" x2="620" y2="320" stroke="#E3E0D8" stroke-width="2"/>
+<circle cx="320" cy="320" r="250" fill="none" stroke="#9AA3AD" stroke-width="5" stroke-dasharray="14 10"/>
+<circle cx="320" cy="320" r="256" fill="none" stroke="#2F6DB0" stroke-width="5"/>
+<circle cx="320" cy="320" r="273" fill="none" stroke="#B5651D" stroke-width="5"/>
+<circle cx="320" cy="320" r="13" fill="#1E2A38"/>
+<circle cx="540" cy="320" r="13" fill="#1E2A38"/>
+<circle cx="100" cy="320" r="13" fill="#1E2A38"/>
+<circle cx="320" cy="100" r="13" fill="#1E2A38"/>
+<circle cx="320" cy="540" r="13" fill="#1E2A38"/>
+<circle cx="540" cy="540" r="13" fill="none" stroke="#1E2A38" stroke-width="4"/>
+<circle cx="100" cy="100" r="13" fill="none" stroke="#1E2A38" stroke-width="4"/>
+<circle cx="540" cy="100" r="13" fill="none" stroke="#1E2A38" stroke-width="4"/>
+<circle cx="100" cy="540" r="13" fill="none" stroke="#1E2A38" stroke-width="4"/>
+</svg>
+<div style="flex:1;display:flex;flex-direction:column;gap:28px">
+<p style="font-size:30px;color:#4A5563;line-height:1.4">Radio de la pupila en pasos de LED = <b>NA · z / 6 mm</b>. No depende de λ.</p>
+<div style="display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;gap:20px;align-items:center"><div style="width:48px;height:8px;background:#9AA3AD"></div><p style="font-size:30px"><b>1,14</b> solver (z 102, NA 0,0669)</p></div>
+<div style="display:flex;gap:20px;align-items:center"><div style="width:48px;height:8px;background:#2F6DB0"></div><p style="font-size:30px"><b>1,16</b> espectro de la captura (radio / paso)</p></div>
+<div style="display:flex;gap:20px;align-items:center"><div style="width:48px;height:8px;background:#B5651D"></div><p style="font-size:30px"><b>1,24</b> borde BF/DF ajustado (blando)</p></div>
+</div>
+<p style="font-size:30px;color:#4A5563;line-height:1.4">Puntos llenos: campo claro. Anillos: diagonales, a 1,41 pasos. La diferencia 1,16 contra 1,24 no la arregla ningún z.</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#6B7280">Paso espectral (filas) 50,43 bins; radio de pupila 58,6 ± 1,1 bins; píxel 1,29 µm · 7</p>
+<aside>El paso espectral mide z por λ; el radio espectral mide NA sobre λ; el borde mide NA por z. Multiplicando las dos primeras se predice la tercera sin z ni λ: 6,97 mm contra 7,44 mm medidos en el borde. El borde blando sesga el ajuste hacia arriba.</aside>
+</section>

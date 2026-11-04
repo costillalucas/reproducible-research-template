@@ -1,0 +1,32 @@
+
+---------- 1. LEYENDO LA CAPTURA ----------
+  muestra: /home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-11-03-red  (225 LEDs, imágenes 1120x1120)
+  flat:    /home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-11-03-red-sinmuestra
+  oscuros: muestra /home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-11-03-red-dark | flat /home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-11-03-red-sinmuestra-dark
+  ROI de la cámara: OffsetX 3968, OffsetY 1966  (origen: captura.json)
+
+---------- 2. RECORTE ----------
+  filas 360:760, columnas 80:480  (400 px = 516 µm), elegido a mano (--recorte)
+  offset del LED por la posición del recorte en el sensor: y -0.041 mm, x +0.529 mm (-0.007 / +0.088 pasos de LED)
+  zonas muy oscuras (muestra/flat < 0.5) dentro del recorte: 1.3 %
+
+---------- 3. PREPROCESADO (oscuro, flat, máscara, promedio de frames) ----------
+  oscuros (cuentas medias): 17 ms 188.5, 112 ms 188.4, 318 ms 188.7, 1025 ms 189.0
+  polvo/manchas del sensor enmascarados: 368 px (0.23 % del recorte)
+  45/225 LEDs leídos (2 s)
+  90/225 LEDs leídos (3 s)
+  135/225 LEDs leídos (4 s)
+  180/225 LEDs leídos (4 s)
+  225/225 LEDs leídos (5 s)
+  exposiciones usadas en la muestra: 17 ms (5 LEDs), 112 ms (4 LEDs), 318 ms (12 LEDs), 1025 ms (204 LEDs)
+  frames por LED: 2 frames (225 LEDs)
+  ningún frame descartado (no hubo frames a oscuras)
+  [AVISO] 1 LEDs con píxeles saturados en el recorte (se enmascaran): (17, 15) 1px
+  preprocesado listo en 23 s
+
+---------- 4. RECONSTRUCCIÓN ----------
+  [PARCHE] NA_OBJ=0.0669  NULO_DF=0
+  geometría: z 102 mm, píxel 1.290 µm, NA 0.0669, λ 0.63 µm, factor 3 -> píxel reconstruido 0.430 µm
+  LEDs de campo claro (BF): [(17, 15), (16, 15), (17, 14), (17, 16), (18, 15)]
+  160 épocas, 3 reconstrucción(es) en 3 núcleo(s) (la completa + 2 mitades para validar)
+  [------------------------------] época 1/160 (  1 %)  error 0.0331  lleva  0.1 min, faltan ~17.7 min   [------------------------------] época 2/160 (  1 %)  error 0.0309  lleva  0.2 min, faltan ~17.5 min   [------------------------------] época 3/160 (  2 %)  error 0.0226  lleva  0.3 min, faltan ~17.3 min   [------------------------------] época 4/160 (  2 %)  error 0.0168  lleva  0.4 min, faltan ~17.0 min   [------------------------------] época 5/160 (  3 %)  error 0.0146  lleva  0.6 min, faltan ~17.2 min   [#-----------------------------] época 6/160 (  4 %)  error 0.0139  lleva  0.7 min, faltan ~17.2 min   [#-----------------------------] época 7/160 (  4 %)  error 0.0137  lleva  0.8 min, faltan ~17.5 min 

@@ -1,0 +1,29 @@
+{
+ "objeto_mitadA~objeto_mitadB": {
+  "N_pares": 24,
+  "N_a": 43,
+  "N_b": 58,
+  "pearson_V": 0.9094793889923107,
+  "mediana_cociente_V": 0.6101024867982404,
+  "pearson_pico": 0.42620353952856865,
+  "mediana_cociente_pico": 0.5089196293871827
+ },
+ "objeto_complejo~objeto_mitadA": {
+  "N_pares": 27,
+  "N_a": 62,
+  "N_b": 43,
+  "pearson_V": 0.908470634315191,
+  "mediana_cociente_V": 1.39759354554839,
+  "pearson_pico": 0.3846293971540185,
+  "mediana_cociente_pico": 1.8022641757917053
+ },
+ "objeto_complejo~objeto_mitadB": {
+  "N_pares": 53,
+  "N_a": 62,
+  "N_b": 58,
+  "pearson_V": 0.9867112249987761,
+  "mediana_cociente_V": 0.797187879742934,
+  "pearson_pico": 0.960008511892713,
+  "mediana_cociente_pico": 0.9080224368712415
+ }
+}

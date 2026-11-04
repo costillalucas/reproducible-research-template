@@ -1,0 +1,4 @@
+inicio 15:22
+A_filas exit 0 15:41
+A_prom exit 0 15:57
+FIN

@@ -1,0 +1,15 @@
+<section id="validacion" data-transition="fade" style="background:#F6F4EF;color:#1E2A38;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<h2 style="font-family:'EB Garamond', Georgia, serif;font-size:72px;font-weight:500;line-height:1.1">Las mitades coinciden en la banda de superresolución; el nulo no</h2>
+<div style="display:flex;gap:48px;align-items:center;flex:1">
+<img src="/_blob/c5e0d507c45b7194d84a3d2ad115ac29" alt="FRC entre mitades: la curva real queda sobre 1/7 en toda la banda 0,212–0,45 por micrón y cruza en 0,47; el nulo cae a 0,01 al salir del campo claro" style="width:1000px;height:563px;object-fit:contain;background:#FFFFFF;border-radius:12px">
+<table style="flex:1;font-size:30px;color:#1E2A38">
+<tr><th style="width:46%;text-align:left">Métrica</th><th style="width:27%;text-align:right">Real</th><th style="width:27%;text-align:right">Nulo</th></tr>
+<tr><td>C1 mitades</td><td style="text-align:right">0,592</td><td style="text-align:right">0,882</td></tr>
+<tr><td>C2</td><td style="text-align:right">0,185</td><td style="text-align:right">0,008</td></tr>
+<tr><td>C3 grilla</td><td style="text-align:right">3e-3</td><td style="text-align:right">7e-2</td></tr>
+<tr><td>Cruce 1/7</td><td style="text-align:right">2,35 µm</td><td style="text-align:right">—</td></tr>
+</table>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#6B7280">C1 menor es mejor (sin FPM ≈ 0,97). Nulo = vectores k de los LEDs de campo oscuro permutados · 4</p>
+<aside>El nulo comparte todo el preprocesado y da C2 casi cero, así que el acuerdo no viene del flat ni de los oscuros. Es robusto a la ventana (0,224 con Hann) y a la NA del borde de banda (0,172 con 0,074). El cruce de 2,35 µm usa el mismo estimador que en octubre (NA efectiva 0,27).</aside>
+</section>
