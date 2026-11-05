@@ -1,0 +1,41 @@
+RECONSTRUCCIÓN FPM de 2026-11-03-red   (05/11/2026 14:50)
+==============================================================================
+muestra:            /home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-11-03-red
+flat:               /home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-11-03-red-sinmuestra
+oscuros muestra:    /home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-11-03-red-dark
+oscuros flat:       /home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-11-03-red-sinmuestra-dark
+color:              red
+recorte:            filas 460:660, columnas 180:380  (200 px = 258 µm), elegido a mano (--recorte)
+ROI cámara:         OffsetX 3968, OffsetY 1966  (origen: captura.json)
+offset LED:         y -0.041 mm, x +0.529 mm  (0.001696 mm por px entre el centro del recorte en el sensor y el eje calibrado, ROI 4000,1942 + 560 px)
+geometría:          z 99.5 mm, píxel cámara en la muestra 1.290 µm, NA 0.0700, factor 3, píxel reconstruido 0.4300 µm
+LEDs BF:            [(17, 15), (16, 15), (17, 14), (17, 16), (18, 15)]
+exposiciones:       17 ms x5, 112 ms x4, 318 ms x12, 1025 ms x204
+frames descartados: 0
+saturados:          0 LEDs con píxeles saturados en el recorte (enmascarados)
+polvo enmascarado:  0 px (0.00 %)
+épocas:             400   (solver A+init, paso 0.3 con rampa)
+guardado:           cada 20 épocas en snapshots/ (metricas_*.csv, amplitud_*.png, objeto_*.npy)
+tiempo:             total 10.1 min (preprocesado 0.1, reconstrucción 9.9), 3 núcleo(s)
+
+MÉTRICAS
+------------------------------------------------------------------------------
+R de ajuste (todos los LEDs que usó):  0.375
+    R = error de la predicción del modelo / variación de la imagen medida. 0 = perfecta, 1 = no explica nada.
+C3 artefacto de grilla (lattice):      2.1e-03   (OK; pasa si <= 0.01)
+C1 R held-out (validación por mitades): 0.551   (mitad A 0.572, mitad B 0.530; 145 LEDs de anillo < 7 no vistos)
+    sin FPM (solo la imagen BF agrandada): 0.970;  piso de ruido: 0.085
+    -> C1 PASA (pide R <= 0.870). Con R = 0.55 el modelo explica ~70 % de la variación de las imágenes que no vio.
+    (los INFORME miden C1 con 5 folds y sin los LEDs BF; con 2 mitades el número es parecido pero no idéntico:
+     en 2026-10-21.500 a 40 épocas, mitades 0.878 contra 5 folds 0.892. Comparar siempre mitades con mitades.)
+
+ARCHIVOS
+------------------------------------------------------------------------------
+reconstruccion.png   arriba: el recorte entero; abajo: zoom del centro (recuadro amarillo). Columnas:
+                     1) imagen cruda del LED central dividida por el flat (resolución del objetivo solo),
+                     2) amplitud reconstruida, 3) fase reconstruida relativa (sin la fase de baja frecuencia).
+                     Si la reconstrucción funciona, 2 y 3 muestran más detalle que 1 en el mismo lugar.
+objeto_complejo.npy  objeto complejo 600x600, píxel 0.4300 µm (np.load; np.abs = amplitud, np.angle = fase)
+objeto_mitadA/B.npy  reconstrucciones con cada mitad de los LEDs (para comparar entre sí)
+datos/prep.npz       imágenes preprocesadas (S muestra, F flat en cuentas/ms, máscara SAT)
+registro.txt         todo lo que se imprimió en pantalla

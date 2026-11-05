@@ -1,0 +1,25 @@
+/home/chanoscopio/.local/lib/python3.10/site-packages/matplotlib/projections/__init__.py:63: UserWarning: Unable to import Axes3D. This may be due to multiple versions of Matplotlib being installed (e.g. as a system package and as a pip package). As a result, the 3D projection is not available.
+  warnings.warn("Unable to import Axes3D. This may be due to multiple versions of "
+23 trabajos
+A_w0.000 s2: 169.5 s nsub 2850 | esp_nt 6.755/6.772 esp_pw 6.762/6.829 | borde a 6.980 w 0 b 7.053 | verdad 6.965
+/home/chanoscopio/Documents/LucasC/reproducible-research-template/scripts/precaptura.py:241: RuntimeWarning: divide by zero encountered in divide
+  out.append(sigm((R - d) / w))
+A_w0.000 s1: 178.2 s nsub 2850 | esp_nt 6.849/6.662 esp_pw 6.874/6.808 | borde a 6.980 w 0 b 6.980 | verdad 6.965
+A_w0.002 s0: 233.3 s nsub 11350 | esp_nt 6.795/6.812 esp_pw 6.765/6.757 | borde a 6.906 w 41 b 6.891 | verdad 6.965
+A_w0.002 s1: 232.0 s nsub 11350 | esp_nt 6.727/6.703 esp_pw 6.774/6.749 | borde a 6.903 w 41 b 6.937 | verdad 6.965
+A_w0.002 s2: 232.3 s nsub 11350 | esp_nt 6.706/6.706 esp_pw 6.659/6.774 | borde a 6.906 w 41 b 6.931 | verdad 6.965
+A_w0.004 s0: 347.8 s nsub 23150 | esp_nt 6.719/6.752 esp_pw 6.701/6.717 | borde a 6.820 w 82 b 6.789 | verdad 6.965
+A_w0.004 s1: 355.3 s nsub 23150 | esp_nt 6.660/6.668 esp_pw 6.713/6.697 | borde a 6.823 w 82 b 6.801 | verdad 6.965
+A_w0.004 s2: 356.2 s nsub 23150 | esp_nt 6.655/6.655 esp_pw 6.657/6.665 | borde a 6.828 w 82 b 6.789 | verdad 6.965
+A_w0.008 s0: 475.6 s nsub 38325 | esp_nt 6.630/6.646 esp_pw 6.629/6.637 | borde a 6.623 w 156 b 6.545 | verdad 6.965
+A_w0.008 s1: 499.4 s nsub 38325 | esp_nt 6.630/6.583 esp_pw 6.638/6.606 | borde a 6.618 w 156 b 6.535 | verdad 6.965
+A_w0.008 s2: 503.8 s nsub 38325 | esp_nt 6.582/6.590 esp_pw 6.619/6.604 | borde a 6.628 w 157 b 6.539 | verdad 6.965
+B_w0.000 s0: 239.1 s nsub 2000 | esp_nt 6.536/6.596 esp_pw 6.338/6.338 | borde a 7.423 w 0 b 7.523 | verdad 7.403
+B_w0.000 s1: 229.0 s nsub 2000 | esp_nt 6.639/6.453 esp_pw 6.752/6.628 | borde a 7.423 w 0 b 7.456 | verdad 7.403
+B_w0.000 s2: 223.3 s nsub 2000 | esp_nt 6.400/6.576 esp_pw 6.421/6.421 | borde a 7.423 w 0 b 7.371 | verdad 7.403
+B_w0.002 s0: 289.9 s nsub 10750 | esp_nt 6.526/6.585 esp_pw 6.495/6.615 | borde a 7.351 w 41 b 7.392 | verdad 7.403
+B_w0.002 s2: 227.0 s nsub 10750 | esp_nt 6.395/6.632 esp_pw 6.546/6.667 | borde a 7.344 w 40 b 7.331 | verdad 7.403
+B_w0.002 s1: 236.1 s nsub 10750 | esp_nt 6.481/6.601 esp_pw 6.798/6.603 | borde a 7.343 w 41 b 7.310 | verdad 7.403
+B_w0.004 s0: 265.2 s nsub 23525 | esp_nt 6.478/6.536 esp_pw 6.584/6.644 | borde a 7.267 w 80 b 7.278 | verdad 7.403
+B_w0.004 s2: 242.1 s nsub 23525 | esp_nt 6.547/6.488 esp_pw 6.503/6.684 | borde a 7.263 w 78 b 7.282 | verdad 7.403
+B_w0.004 s1: 244.9 s nsub 23525 | esp_nt 6.793/6.568 esp_pw 6.885/6.580 | borde a 7.263 w 77 b 7.282 | verdad 7.403
