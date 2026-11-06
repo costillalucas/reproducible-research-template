@@ -1,0 +1,6 @@
+dz     +0 k (0, 0): dif rel máx 8.96e-07; contraste 0.080
+dz     +0 k (14, -9): dif rel máx 8.62e-07; contraste 0.085
+dz    +50 k (0, 0): dif rel máx 8.00e-07; contraste 0.060
+dz    +50 k (14, -9): dif rel máx 8.80e-07; contraste 0.081
+dz   -100 k (0, 0): dif rel máx 8.50e-07; contraste 0.103
+dz   -100 k (14, -9): dif rel máx 1.00e-06; contraste 0.099

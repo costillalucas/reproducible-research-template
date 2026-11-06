@@ -1,0 +1,431 @@
+{
+ "meta": {
+  "nombre": "2026-11-03-red-p1608",
+  "fecha": "2026-11-06 13:30",
+  "comando": "analizar_zonas.py /home/chanoscopio/Documents/AleYLu/reconstrucciones/plan_2026-11-06/archivo/enlaces/2026-11-03-red-p1608 --flat /home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-11-03-red-sinmuestra --dark /home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-11-03-red-prueba-1608-dark --dark-flat /home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-11-03-red-sinmuestra-dark --procs 1 --out /home/chanoscopio/Documents/AleYLu/reconstrucciones/plan_2026-11-06/archivo/runs --nombre 2026-11-03-red-p1608",
+  "color": "r",
+  "flat": "/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-11-03-red-sinmuestra",
+  "dark": "/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-11-03-red-prueba-1608-dark",
+  "dark_flat": "/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-11-03-red-sinmuestra-dark",
+  "codigo": "/home/chanoscopio/Documents/AleYLu/reconstrucciones/plan_2026-11-06/zonas/codigo",
+  "seg": 162.7
+ },
+ "zonas": [
+  {
+   "etiqueta": "2026-11-03-red-p1608",
+   "captura": "/home/chanoscopio/Documents/AleYLu/reconstrucciones/plan_2026-11-06/archivo/enlaces/2026-11-03-red-p1608",
+   "flat": "/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-11-03-red-sinmuestra",
+   "dark": "/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-11-03-red-prueba-1608-dark",
+   "dark_flat": "/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-11-03-red-sinmuestra-dark",
+   "roi": [
+    3968,
+    1966
+   ],
+   "espectral": {
+    "A": {
+     "recorte": [
+      360,
+      80,
+      400
+     ],
+     "info": {
+      "(17, 15)": {
+       "t": 8.0,
+       "tf": 17.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.11516726248750452,
+       "oscuro_frac": 0.01283125
+      },
+      "(16, 15)": {
+       "t": 8.0,
+       "tf": 17.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.0927074817725403,
+       "oscuro_frac": 0.0050875
+      },
+      "(17, 14)": {
+       "t": 8.0,
+       "tf": 17.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.09226813667438029,
+       "oscuro_frac": 0.0065375
+      },
+      "(17, 16)": {
+       "t": 8.0,
+       "tf": 17.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.11354414757666291,
+       "oscuro_frac": 0.0049375
+      },
+      "(18, 15)": {
+       "t": 8.0,
+       "tf": 17.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.08941037022433866,
+       "oscuro_frac": 0.00678125
+      }
+     },
+     "descartes": [],
+     "leds": [
+      {
+       "led": [
+        17,
+        15
+       ],
+       "c0": 0.875,
+       "c1": 1.2521942110177404,
+       "rb": 55.04222857142858
+      },
+      {
+       "led": [
+        16,
+        15
+       ],
+       "c0": -51.92927170868347,
+       "c1": 3.6228057889822596,
+       "rb": 59.32782857142858
+      },
+      {
+       "led": [
+        17,
+        14
+       ],
+       "c0": -1.0,
+       "c1": -46.93146591970121,
+       "rb": 59.027828571428586
+      },
+      {
+       "led": [
+        17,
+        16
+       ],
+       "c0": -2.375,
+       "c1": 54.427077497665735,
+       "rb": 59.57577142857144
+      },
+      {
+       "led": [
+        18,
+        15
+       ],
+       "c0": 48.92927170868347,
+       "c1": 4.87280578898226,
+       "rb": 59.177828571428584
+      }
+     ],
+     "rb": 58.43029714285715,
+     "rb_sd": 1.9047657135485745,
+     "rb_sd_rel": 0.032598939363453566,
+     "s_row": 50.42927170868347,
+     "s_col": 50.67927170868347,
+     "NAz_fila": 6.951950146779055,
+     "NAz_col": 6.917656292939064,
+     "NAz_por_led": [
+      6.532650165185654,
+      7.041283741160664,
+      7.005678441367753,
+      7.070710673694274,
+      7.023481091264208
+     ]
+    },
+    "B": {
+     "recorte": [
+      360,
+      480,
+      400
+     ],
+     "info": {
+      "(17, 15)": {
+       "t": 8.0,
+       "tf": 17.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.13160007552135916,
+       "oscuro_frac": 0.016525
+      },
+      "(16, 15)": {
+       "t": 8.0,
+       "tf": 17.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.11150264904406171,
+       "oscuro_frac": 0.0081625
+      },
+      "(17, 14)": {
+       "t": 8.0,
+       "tf": 17.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.11043456381880691,
+       "oscuro_frac": 0.00824375
+      },
+      "(17, 16)": {
+       "t": 8.0,
+       "tf": 17.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.11838966186854642,
+       "oscuro_frac": 0.0084625
+      },
+      "(18, 15)": {
+       "t": 8.0,
+       "tf": 17.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.10823441585739092,
+       "oscuro_frac": 0.009225
+      }
+     },
+     "descartes": [],
+     "leds": [
+      {
+       "led": [
+        17,
+        15
+       ],
+       "c0": -1.25,
+       "c1": 0.8728057889822596,
+       "rb": 56.73811428571429
+      },
+      {
+       "led": [
+        16,
+        15
+       ],
+       "c0": -51.80427170868347,
+       "c1": -2.5021942110177404,
+       "rb": 58.47988571428573
+      },
+      {
+       "led": [
+        17,
+        14
+       ],
+       "c0": -0.625,
+       "c1": -51.05646591970121,
+       "rb": 58.62988571428573
+      },
+      {
+       "led": [
+        17,
+        16
+       ],
+       "c0": -0.375,
+       "c1": 46.927077497665735,
+       "rb": 60.1237142857143
+      },
+      {
+       "led": [
+        18,
+        15
+       ],
+       "c0": 48.92927170868347,
+       "c1": 0.3728057889822596,
+       "rb": 59.177828571428584
+      }
+     ],
+     "rb": 58.62988571428573,
+     "rb_sd": 1.2382512177936094,
+     "rb_sd_rel": 0.021119795863628943,
+     "s_row": 50.36677170868347,
+     "s_col": 48.99177170868347,
+     "NAz_fila": 6.984353023862077,
+     "NAz_col": 7.180375438909955,
+     "NAz_por_led": [
+      6.852529717233798,
+      7.06289166925094,
+      7.081007876857153,
+      7.261424600377776,
+      7.147185520566097
+     ]
+    }
+   },
+   "contraste": {
+    "A": {
+     "rms_hp": 0.11044555011300619,
+     "oscuro": 0.01283125
+    },
+    "B": {
+     "rms_hp": 0.12531305674274146,
+     "oscuro": 0.01651875
+    }
+   },
+   "borde": {
+    "t_central": 8.0,
+    "s_fijo": {
+     "eje": [
+      0.07616122453925453,
+      -0.029325816864242297
+     ],
+     "R_px": 4363.76818930101,
+     "R_pasos": 1.2333997143304156,
+     "w_px": 222.0527465432576,
+     "s": 3538.0,
+     "NAz": 7.400398285982494,
+     "NAz_sin": 7.380014170819629
+    },
+    "s_libre": {
+     "eje": [
+      0.061853813293222405,
+      -0.027457711024878467
+     ],
+     "R_px": 3584.194398042403,
+     "s": 2869.152379753165,
+     "w_px": 179.9466885661129,
+     "R_pasos": 1.2492171636944405,
+     "NAz": 7.495302982166643
+    },
+    "loo_NAz": {
+     "(-1, -1)": 7.416641409630162,
+     "(-1, 0)": 7.3241215919597025,
+     "(-1, 1)": 7.40548171310331,
+     "(0, -1)": 7.463731259084688,
+     "(0, 1)": 7.398535427414412,
+     "(1, -1)": 7.250026523756493,
+     "(1, 0)": 7.407037887841132,
+     "(1, 1)": 7.412662494460703
+    },
+    "b_eje": [
+     0.02433850236827972,
+     -0.011936532828765256
+    ],
+    "score_a": {
+     "err_f": 0.03753317003470097,
+     "clases_ok": 4,
+     "n": 8,
+     "err_reg": 0.08458558238025456,
+     "err_esq_diag": 0.12056681864899231
+    }
+   },
+   "seg": 162.7
+  }
+ ],
+ "resumen": {
+  "espectral_A_fila": {
+   "n": 1,
+   "media": 6.951950146779055,
+   "sd": null,
+   "sd_rel": null,
+   "min": 6.951950146779055,
+   "max": 6.951950146779055
+  },
+  "espectral_A_col": {
+   "n": 1,
+   "media": 6.917656292939064,
+   "sd": null,
+   "sd_rel": null,
+   "min": 6.917656292939064,
+   "max": 6.917656292939064
+  },
+  "espectral_B_fila": {
+   "n": 1,
+   "media": 6.984353023862077,
+   "sd": null,
+   "sd_rel": null,
+   "min": 6.984353023862077,
+   "max": 6.984353023862077
+  },
+  "espectral_B_col": {
+   "n": 1,
+   "media": 7.180375438909955,
+   "sd": null,
+   "sd_rel": null,
+   "min": 7.180375438909955,
+   "max": 7.180375438909955
+  },
+  "espectral_A_sd_rel": {
+   "n": 1,
+   "media": 0.032598939363453566,
+   "sd": null,
+   "sd_rel": null,
+   "min": 0.032598939363453566,
+   "max": 0.032598939363453566
+  },
+  "espectral_B_sd_rel": {
+   "n": 1,
+   "media": 0.021119795863628943,
+   "sd": null,
+   "sd_rel": null,
+   "min": 0.021119795863628943,
+   "max": 0.021119795863628943
+  },
+  "borde_sfijo_NAz": {
+   "n": 1,
+   "media": 7.400398285982494,
+   "sd": null,
+   "sd_rel": null,
+   "min": 7.400398285982494,
+   "max": 7.400398285982494
+  },
+  "borde_sfijo_R_pasos": {
+   "n": 1,
+   "media": 1.2333997143304156,
+   "sd": null,
+   "sd_rel": null,
+   "min": 1.2333997143304156,
+   "max": 1.2333997143304156
+  },
+  "borde_sfijo_w_px": {
+   "n": 1,
+   "media": 222.0527465432576,
+   "sd": null,
+   "sd_rel": null,
+   "min": 222.0527465432576,
+   "max": 222.0527465432576
+  },
+  "borde_slibre_NAz": {
+   "n": 1,
+   "media": 7.495302982166643,
+   "sd": null,
+   "sd_rel": null,
+   "min": 7.495302982166643,
+   "max": 7.495302982166643
+  },
+  "borde_slibre_s": {
+   "n": 1,
+   "media": 2869.152379753165,
+   "sd": null,
+   "sd_rel": null,
+   "min": 2869.152379753165,
+   "max": 2869.152379753165
+  },
+  "eje_a_fila": {
+   "n": 1,
+   "media": 0.07616122453925453,
+   "sd": null,
+   "sd_rel": null,
+   "min": 0.07616122453925453,
+   "max": 0.07616122453925453
+  },
+  "eje_a_col": {
+   "n": 1,
+   "media": -0.029325816864242297,
+   "sd": null,
+   "sd_rel": null,
+   "min": -0.029325816864242297,
+   "max": -0.029325816864242297
+  },
+  "contraste_A": {
+   "n": 1,
+   "media": 0.11044555011300619,
+   "sd": null,
+   "sd_rel": null,
+   "min": 0.11044555011300619,
+   "max": 0.11044555011300619
+  },
+  "contraste_B": {
+   "n": 1,
+   "media": 0.12531305674274146,
+   "sd": null,
+   "sd_rel": null,
+   "min": 0.12531305674274146,
+   "max": 0.12531305674274146
+  }
+ },
+ "repeticion": null
+}

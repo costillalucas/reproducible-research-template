@@ -1,0 +1,431 @@
+{
+ "meta": {
+  "nombre": "2026-10-30-red-c-flatp1331",
+  "fecha": "2026-11-06 13:29",
+  "comando": "analizar_zonas.py /home/chanoscopio/Documents/AleYLu/reconstrucciones/plan_2026-11-06/archivo/enlaces/2026-10-30-red-c-flatp1331 --flat /home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-30-red-c-sinmuestra-prueba-1331 --dark /home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-30-red-c-sinmuestra-prueba-1331-dark --dark-flat /home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-30-red-c-sinmuestra-prueba-1331-dark --procs 1 --out /home/chanoscopio/Documents/AleYLu/reconstrucciones/plan_2026-11-06/archivo/runs --nombre 2026-10-30-red-c-flatp1331",
+  "color": "r",
+  "flat": "/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-30-red-c-sinmuestra-prueba-1331",
+  "dark": "/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-30-red-c-sinmuestra-prueba-1331-dark",
+  "dark_flat": "/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-30-red-c-sinmuestra-prueba-1331-dark",
+  "codigo": "/home/chanoscopio/Documents/AleYLu/reconstrucciones/plan_2026-11-06/zonas/codigo",
+  "seg": 158.5
+ },
+ "zonas": [
+  {
+   "etiqueta": "2026-10-30-red-c-flatp1331",
+   "captura": "/home/chanoscopio/Documents/AleYLu/reconstrucciones/plan_2026-11-06/archivo/enlaces/2026-10-30-red-c-flatp1331",
+   "flat": "/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-30-red-c-sinmuestra-prueba-1331",
+   "dark": "/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-30-red-c-sinmuestra-prueba-1331-dark",
+   "dark_flat": "/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-30-red-c-sinmuestra-prueba-1331-dark",
+   "roi": [
+    3968,
+    1966
+   ],
+   "espectral": {
+    "A": {
+     "recorte": [
+      360,
+      80,
+      400
+     ],
+     "info": {
+      "(17, 15)": {
+       "t": 8.0,
+       "tf": 8.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.04538460008806693,
+       "oscuro_frac": 0.00103125
+      },
+      "(16, 15)": {
+       "t": 8.0,
+       "tf": 8.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.0441484695756885,
+       "oscuro_frac": 0.00069375
+      },
+      "(17, 14)": {
+       "t": 8.0,
+       "tf": 8.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.04516014528398426,
+       "oscuro_frac": 0.0010875
+      },
+      "(17, 16)": {
+       "t": 8.0,
+       "tf": 8.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.043128850610335535,
+       "oscuro_frac": 0.00058125
+      },
+      "(18, 15)": {
+       "t": 8.0,
+       "tf": 8.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.04442748031149327,
+       "oscuro_frac": 0.0008
+      }
+     },
+     "descartes": [],
+     "leds": [
+      {
+       "led": [
+        17,
+        15
+       ],
+       "c0": 1.5,
+       "c1": 0.24780578898225958,
+       "rb": 47.618971428571435
+      },
+      {
+       "led": [
+        16,
+        15
+       ],
+       "c0": -43.80427170868347,
+       "c1": 21.99780578898226,
+       "rb": 48.16691428571429
+      },
+      {
+       "led": [
+        17,
+        14
+       ],
+       "c0": 21.0,
+       "c1": -43.68146591970121,
+       "rb": 47.618971428571435
+      },
+      {
+       "led": [
+        17,
+        16
+       ],
+       "c0": 21.0,
+       "c1": 43.677077497665735,
+       "rb": 47.618971428571435
+      },
+      {
+       "led": [
+        18,
+        15
+       ],
+       "c0": 43.80427170868347,
+       "c1": 21.99780578898226,
+       "rb": 48.16691428571429
+      }
+     ],
+     "rb": 47.838148571428576,
+     "rb_sd": 0.30012066308097357,
+     "rb_sd_rel": 0.006273668025275987,
+     "s_row": 43.80427170868347,
+     "s_col": 43.67927170868347,
+     "NAz_fila": 6.552531984493028,
+     "NAz_col": 6.571283819540193,
+     "NAz_por_led": [
+      6.531830271399585,
+      6.60699085622346,
+      6.531830271399585,
+      6.531830271399585,
+      6.60699085622346
+     ]
+    },
+    "B": {
+     "recorte": [
+      360,
+      480,
+      400
+     ],
+     "info": {
+      "(17, 15)": {
+       "t": 8.0,
+       "tf": 8.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.07737974303366052,
+       "oscuro_frac": 0.00484375
+      },
+      "(16, 15)": {
+       "t": 8.0,
+       "tf": 8.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.07118489439003751,
+       "oscuro_frac": 0.003125
+      },
+      "(17, 14)": {
+       "t": 8.0,
+       "tf": 8.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.07042679054877166,
+       "oscuro_frac": 0.00306875
+      },
+      "(17, 16)": {
+       "t": 8.0,
+       "tf": 8.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.07392146578443869,
+       "oscuro_frac": 0.00416875
+      },
+      "(18, 15)": {
+       "t": 8.0,
+       "tf": 8.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.07483996915281842,
+       "oscuro_frac": 0.00429375
+      }
+     },
+     "descartes": [],
+     "leds": [
+      {
+       "led": [
+        17,
+        15
+       ],
+       "c0": 1.5,
+       "c1": 0.24780578898225958,
+       "rb": 47.618971428571435
+      },
+      {
+       "led": [
+        16,
+        15
+       ],
+       "c0": -43.80427170868347,
+       "c1": 21.99780578898226,
+       "rb": 48.16691428571429
+      },
+      {
+       "led": [
+        17,
+        14
+       ],
+       "c0": -21.0,
+       "c1": -43.68146591970121,
+       "rb": 47.618971428571435
+      },
+      {
+       "led": [
+        17,
+        16
+       ],
+       "c0": 21.0,
+       "c1": 43.677077497665735,
+       "rb": 47.618971428571435
+      },
+      {
+       "led": [
+        18,
+        15
+       ],
+       "c0": 43.80427170868347,
+       "c1": 21.99780578898226,
+       "rb": 48.16691428571429
+      }
+     ],
+     "rb": 47.838148571428576,
+     "rb_sd": 0.30012066308097357,
+     "rb_sd_rel": 0.006273668025275987,
+     "s_row": 43.80427170868347,
+     "s_col": 43.67927170868347,
+     "NAz_fila": 6.552531984493028,
+     "NAz_col": 6.571283819540193,
+     "NAz_por_led": [
+      6.531830271399585,
+      6.60699085622346,
+      6.531830271399585,
+      6.531830271399585,
+      6.60699085622346
+     ]
+    }
+   },
+   "contraste": {
+    "A": {
+     "rms_hp": 0.04556049162709685,
+     "oscuro": 0.0010375
+    },
+    "B": {
+     "rms_hp": 0.07641140897714599,
+     "oscuro": 0.00484375
+    }
+   },
+   "borde": {
+    "t_central": 8.0,
+    "s_fijo": {
+     "eje": [
+      0.11711727061619669,
+      -0.003887267323410498
+     ],
+     "R_px": 4233.204678723445,
+     "R_pasos": 1.1964965174458577,
+     "w_px": 217.4345147273516,
+     "s": 3538.0,
+     "NAz": 7.178979104675147,
+     "NAz_sin": 7.160365934949517
+    },
+    "s_libre": {
+     "eje": [
+      0.12705581767478136,
+      -0.004007971120989644
+     ],
+     "R_px": 2518.5063268281006,
+     "s": 2164.1668782172433,
+     "w_px": 160.83085828907377,
+     "R_pasos": 1.1637301874348749,
+     "NAz": 6.982381124609249
+    },
+    "loo_NAz": {
+     "(-1, -1)": 7.186973860624444,
+     "(-1, 0)": 7.228227691179858,
+     "(-1, 1)": 7.182618529521689,
+     "(0, -1)": 7.206698255917167,
+     "(0, 1)": 7.217486527474364,
+     "(1, -1)": 6.949602536862779,
+     "(1, 0)": 7.208277158978166,
+     "(1, 1)": 7.061359617728872
+    },
+    "b_eje": [
+     0.026581780357366004,
+     -0.0007006766976399826
+    ],
+    "score_a": {
+     "err_f": 0.04786691161461523,
+     "clases_ok": 6,
+     "n": 8,
+     "err_reg": 0.08282212050592302,
+     "err_esq_diag": 0.08828245054448947
+    }
+   },
+   "seg": 158.5
+  }
+ ],
+ "resumen": {
+  "espectral_A_fila": {
+   "n": 1,
+   "media": 6.552531984493028,
+   "sd": null,
+   "sd_rel": null,
+   "min": 6.552531984493028,
+   "max": 6.552531984493028
+  },
+  "espectral_A_col": {
+   "n": 1,
+   "media": 6.571283819540193,
+   "sd": null,
+   "sd_rel": null,
+   "min": 6.571283819540193,
+   "max": 6.571283819540193
+  },
+  "espectral_B_fila": {
+   "n": 1,
+   "media": 6.552531984493028,
+   "sd": null,
+   "sd_rel": null,
+   "min": 6.552531984493028,
+   "max": 6.552531984493028
+  },
+  "espectral_B_col": {
+   "n": 1,
+   "media": 6.571283819540193,
+   "sd": null,
+   "sd_rel": null,
+   "min": 6.571283819540193,
+   "max": 6.571283819540193
+  },
+  "espectral_A_sd_rel": {
+   "n": 1,
+   "media": 0.006273668025275987,
+   "sd": null,
+   "sd_rel": null,
+   "min": 0.006273668025275987,
+   "max": 0.006273668025275987
+  },
+  "espectral_B_sd_rel": {
+   "n": 1,
+   "media": 0.006273668025275987,
+   "sd": null,
+   "sd_rel": null,
+   "min": 0.006273668025275987,
+   "max": 0.006273668025275987
+  },
+  "borde_sfijo_NAz": {
+   "n": 1,
+   "media": 7.178979104675147,
+   "sd": null,
+   "sd_rel": null,
+   "min": 7.178979104675147,
+   "max": 7.178979104675147
+  },
+  "borde_sfijo_R_pasos": {
+   "n": 1,
+   "media": 1.1964965174458577,
+   "sd": null,
+   "sd_rel": null,
+   "min": 1.1964965174458577,
+   "max": 1.1964965174458577
+  },
+  "borde_sfijo_w_px": {
+   "n": 1,
+   "media": 217.4345147273516,
+   "sd": null,
+   "sd_rel": null,
+   "min": 217.4345147273516,
+   "max": 217.4345147273516
+  },
+  "borde_slibre_NAz": {
+   "n": 1,
+   "media": 6.982381124609249,
+   "sd": null,
+   "sd_rel": null,
+   "min": 6.982381124609249,
+   "max": 6.982381124609249
+  },
+  "borde_slibre_s": {
+   "n": 1,
+   "media": 2164.1668782172433,
+   "sd": null,
+   "sd_rel": null,
+   "min": 2164.1668782172433,
+   "max": 2164.1668782172433
+  },
+  "eje_a_fila": {
+   "n": 1,
+   "media": 0.11711727061619669,
+   "sd": null,
+   "sd_rel": null,
+   "min": 0.11711727061619669,
+   "max": 0.11711727061619669
+  },
+  "eje_a_col": {
+   "n": 1,
+   "media": -0.003887267323410498,
+   "sd": null,
+   "sd_rel": null,
+   "min": -0.003887267323410498,
+   "max": -0.003887267323410498
+  },
+  "contraste_A": {
+   "n": 1,
+   "media": 0.04556049162709685,
+   "sd": null,
+   "sd_rel": null,
+   "min": 0.04556049162709685,
+   "max": 0.04556049162709685
+  },
+  "contraste_B": {
+   "n": 1,
+   "media": 0.07641140897714599,
+   "sd": null,
+   "sd_rel": null,
+   "min": 0.07641140897714599,
+   "max": 0.07641140897714599
+  }
+ },
+ "repeticion": null
+}

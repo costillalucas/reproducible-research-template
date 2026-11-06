@@ -1,0 +1,45 @@
+/home/chanoscopio/.local/lib/python3.10/site-packages/matplotlib/projections/__init__.py:63: UserWarning: Unable to import Axes3D. This may be due to multiple versions of Matplotlib being installed (e.g. as a system package and as a pip package). As a result, the 3D projection is not available.
+  warnings.warn("Unable to import Axes3D. This may be due to multiple versions of "
+1 capturas: ['2026-10-30-red']  ROI(s): [(4000, 874)]
+/home/chanoscopio/Documents/AleYLu/reconstrucciones/plan_2026-11-06/zonas/codigo/espectral_zonas.py:83: RuntimeWarning: divide by zero encountered in divide
+  imgs[k] = s / f * f.mean()
+/home/chanoscopio/Documents/AleYLu/reconstrucciones/plan_2026-11-06/zonas/codigo/espectral_zonas.py:53: RuntimeWarning: invalid value encountered in subtract
+  I = imgs[k].astype(float); I = (I - I.mean()) * win
+/home/chanoscopio/Documents/AleYLu/reconstrucciones/plan_2026-11-06/zonas/codigo/espectral_zonas.py:53: RuntimeWarning: invalid value encountered in multiply
+  I = imgs[k].astype(float); I = (I - I.mean()) * win
+/home/chanoscopio/.local/lib/python3.10/site-packages/numpy/fft/_pocketfft.py:94: RuntimeWarning: invalid value encountered in fft
+  return ufunc(a, fct, axes=[(axis,), (), (axis,)], out=out)
+concurrent.futures.process._RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/concurrent/futures/process.py", line 246, in _process_worker
+    r = call_item.fn(*call_item.args, **call_item.kwargs)
+  File "/usr/lib/python3.10/concurrent/futures/process.py", line 205, in _process_chunk
+    return [fn(*args) for args in chunk]
+  File "/usr/lib/python3.10/concurrent/futures/process.py", line 205, in <listcomp>
+    return [fn(*args) for args in chunk]
+  File "/home/chanoscopio/Documents/AleYLu/reconstrucciones/plan_2026-11-06/zonas_3x3/analizar_zonas.py", line 107, in zona
+    r = E.espectral(imgs, 'etapa1_radio')
+  File "/home/chanoscopio/Documents/AleYLu/reconstrucciones/plan_2026-11-06/zonas/codigo/espectral_zonas.py", line 57, in espectral
+    c0, c1, rb = grid(L, n0, n1, r1, half=round(0.45 * rb0), step=1.0)
+TypeError: cannot unpack non-iterable NoneType object
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/chanoscopio/Documents/AleYLu/reconstrucciones/plan_2026-11-06/zonas_3x3/analizar_zonas.py", line 274, in <module>
+    main()
+  File "/home/chanoscopio/Documents/AleYLu/reconstrucciones/plan_2026-11-06/zonas_3x3/analizar_zonas.py", line 255, in main
+    zonas = list(ex.map(zona, trabajos))
+  File "/usr/lib/python3.10/concurrent/futures/process.py", line 575, in _chain_from_iterable_of_lists
+    for element in iterable:
+  File "/usr/lib/python3.10/concurrent/futures/_base.py", line 621, in result_iterator
+    yield _result_or_cancel(fs.pop())
+  File "/usr/lib/python3.10/concurrent/futures/_base.py", line 319, in _result_or_cancel
+    return fut.result(timeout)
+  File "/usr/lib/python3.10/concurrent/futures/_base.py", line 458, in result
+    return self.__get_result()
+  File "/usr/lib/python3.10/concurrent/futures/_base.py", line 403, in __get_result
+    raise self._exception
+TypeError: cannot unpack non-iterable NoneType object

@@ -1,0 +1,38 @@
+# Zonas 3x3 -- 2026-10-22-p1751
+
+Flat `/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-22-sinmuestra`, oscuros `/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-22-prueba-1751-dark` / `/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-22-sinmuestra-dark`, color `r`. NA·z en mm. Espectral = etapa 1 radio libre (`espectral_zonas.py`); borde = (a) de `centrado.py` (NA·z = R_pasos·6). Recorte A = 360:760, 80:480; B = 360:760, 480:880.
+
+## Espectral
+
+| zona | ROI | rec | NA·z filas | NA·z cols | sd radio (5 LEDs) | NA·z por LED (17,15) (16,15) (17,14) (17,16) (18,15) | paso filas/cols (bins) | contraste rms_hp |
+|---|---|---|---|---|---|---|---|---|
+| 2026-10-22-p1751 | [4000, 1942] | A | 6.983 | 7.061 | 2.8 % | 6.68 7.07 7.13 7.10 7.13 | 50.87/50.30 | 0.182 |
+| 2026-10-22-p1751 | [4000, 1942] | B | 7.051 | 7.130 | 1.5 % | 6.91 7.11 7.14 7.19 7.09 | 50.68/50.12 | 0.201 |
+
+## Borde (a)
+
+| zona | eje (a) (pasos) | s fijo: R px | R pasos | w px | NA·z | s libre: s | R px | R/s pasos | NA·z | LOO NA·z min–max |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 2026-10-22-p1751 | (+0.087, -0.001) | 4182 | 1.1822 | 223 | 7.093 | 2426 | 2851 | 1.1754 | 7.053 | 6.94–7.19 |
+
+## Resumen entre zonas
+
+| métrica | n | media | sd | sd rel | min | max |
+|---|---|---|---|---|---|---|
+| espectral_A_fila | 1 | 6.9826 | — | — | 6.9826 | 6.9826 |
+| espectral_A_col | 1 | 7.0607 | — | — | 7.0607 | 7.0607 |
+| espectral_B_fila | 1 | 7.0510 | — | — | 7.0510 | 7.0510 |
+| espectral_B_col | 1 | 7.1301 | — | — | 7.1301 | 7.1301 |
+| espectral_A_sd_rel | 1 | 0.0277 | — | — | 0.0277 | 0.0277 |
+| espectral_B_sd_rel | 1 | 0.0149 | — | — | 0.0149 | 0.0149 |
+| borde_sfijo_NAz | 1 | 7.0929 | — | — | 7.0929 | 7.0929 |
+| borde_sfijo_R_pasos | 1 | 1.1822 | — | — | 1.1822 | 1.1822 |
+| borde_sfijo_w_px | 1 | 223.1894 | — | — | 223.1894 | 223.1894 |
+| borde_slibre_NAz | 1 | 7.0525 | — | — | 7.0525 | 7.0525 |
+| borde_slibre_s | 1 | 2425.7399 | — | — | 2425.7399 | 2425.7399 |
+| eje_a_fila | 1 | 0.0868 | — | — | 0.0868 | 0.0868 |
+| eje_a_col | 1 | -0.0011 | — | — | -0.0011 | -0.0011 |
+| contraste_A | 1 | 0.1824 | — | — | 0.1824 | 0.1824 |
+| contraste_B | 1 | 0.2012 | — | — | 0.2012 | 0.2012 |
+
+Generado 2026-11-06 13:15 por `analizar_zonas.py /home/chanoscopio/Documents/AleYLu/reconstrucciones/plan_2026-11-06/archivo/enlaces/2026-10-22-p1751 --flat /home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-22-sinmuestra --dark /home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-22-prueba-1751-dark --dark-flat /home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-22-sinmuestra-dark --procs 1 --out /home/chanoscopio/Documents/AleYLu/reconstrucciones/plan_2026-11-06/archivo/runs --nombre 2026-10-22-p1751`.

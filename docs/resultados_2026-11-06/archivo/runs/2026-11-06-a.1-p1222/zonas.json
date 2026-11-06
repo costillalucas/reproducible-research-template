@@ -1,0 +1,431 @@
+{
+ "meta": {
+  "nombre": "2026-11-06-a.1-p1222",
+  "fecha": "2026-11-06 13:30",
+  "comando": "analizar_zonas.py /home/chanoscopio/Documents/AleYLu/reconstrucciones/plan_2026-11-06/archivo/enlaces/2026-11-06-a.1-p1222 --flat /home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-11-06-sinmuestra --dark /home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-11-06-a.1-prueba-1222-dark --dark-flat /home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-11-06-sinmuestra-dark --procs 1 --out /home/chanoscopio/Documents/AleYLu/reconstrucciones/plan_2026-11-06/archivo/runs --nombre 2026-11-06-a.1-p1222",
+  "color": "r",
+  "flat": "/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-11-06-sinmuestra",
+  "dark": "/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-11-06-a.1-prueba-1222-dark",
+  "dark_flat": "/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-11-06-sinmuestra-dark",
+  "codigo": "/home/chanoscopio/Documents/AleYLu/reconstrucciones/plan_2026-11-06/zonas/codigo",
+  "seg": 158.5
+ },
+ "zonas": [
+  {
+   "etiqueta": "2026-11-06-a.1-p1222",
+   "captura": "/home/chanoscopio/Documents/AleYLu/reconstrucciones/plan_2026-11-06/archivo/enlaces/2026-11-06-a.1-p1222",
+   "flat": "/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-11-06-sinmuestra",
+   "dark": "/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-11-06-a.1-prueba-1222-dark",
+   "dark_flat": "/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-11-06-sinmuestra-dark",
+   "roi": [
+    3968,
+    1966
+   ],
+   "espectral": {
+    "A": {
+     "recorte": [
+      360,
+      80,
+      400
+     ],
+     "info": {
+      "(17, 15)": {
+       "t": 8.0,
+       "tf": 18.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.08019906705467293,
+       "oscuro_frac": 0.003625
+      },
+      "(16, 15)": {
+       "t": 8.0,
+       "tf": 18.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.06734084458626782,
+       "oscuro_frac": 0.0020875
+      },
+      "(17, 14)": {
+       "t": 8.0,
+       "tf": 18.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.06712473805908367,
+       "oscuro_frac": 0.00301875
+      },
+      "(17, 16)": {
+       "t": 8.0,
+       "tf": 18.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.08682175245105399,
+       "oscuro_frac": 0.001875
+      },
+      "(18, 15)": {
+       "t": 8.0,
+       "tf": 18.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.067860470041513,
+       "oscuro_frac": 0.00268125
+      }
+     },
+     "descartes": [],
+     "leds": [
+      {
+       "led": [
+        17,
+        15
+       ],
+       "c0": 0.375,
+       "c1": 1.5021942110177404,
+       "rb": 62.615485714285725
+      },
+      {
+       "led": [
+        16,
+        15
+       ],
+       "c0": -50.67927170868347,
+       "c1": 3.7478057889822596,
+       "rb": 59.32782857142858
+      },
+      {
+       "led": [
+        17,
+        14
+       ],
+       "c0": -0.625,
+       "c1": -45.30646591970121,
+       "rb": 59.177828571428584
+      },
+      {
+       "led": [
+        17,
+        16
+       ],
+       "c0": -1.875,
+       "c1": 54.177077497665735,
+       "rb": 59.027828571428586
+      },
+      {
+       "led": [
+        18,
+        15
+       ],
+       "c0": 48.30427170868347,
+       "c1": 4.87280578898226,
+       "rb": 59.425771428571444
+      }
+     ],
+     "rb": 59.91494857142859,
+     "rb_sd": 1.5171711192417359,
+     "rb_sd_rel": 0.025322079971962515,
+     "s_row": 49.49177170868347,
+     "s_col": 49.74177170868347,
+     "NAz_fila": 7.263625427365698,
+     "NAz_col": 7.227118759137706,
+     "NAz_por_led": [
+      7.571893562352909,
+      7.174327534217092,
+      7.156188506444705,
+      7.138049478672319,
+      7.186171455589234
+     ]
+    },
+    "B": {
+     "recorte": [
+      360,
+      480,
+      400
+     ],
+     "info": {
+      "(17, 15)": {
+       "t": 8.0,
+       "tf": 18.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.07218291106069823,
+       "oscuro_frac": 0.00284375
+      },
+      "(16, 15)": {
+       "t": 8.0,
+       "tf": 18.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.06516024858078574,
+       "oscuro_frac": 0.00206875
+      },
+      "(17, 14)": {
+       "t": 8.0,
+       "tf": 18.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.062352525534022527,
+       "oscuro_frac": 0.00178125
+      },
+      "(17, 16)": {
+       "t": 8.0,
+       "tf": 18.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.06901536465716308,
+       "oscuro_frac": 0.0022875
+      },
+      "(18, 15)": {
+       "t": 8.0,
+       "tf": 18.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.06244529024079025,
+       "oscuro_frac": 0.00200625
+      }
+     },
+     "descartes": [],
+     "leds": [
+      {
+       "led": [
+        17,
+        15
+       ],
+       "c0": -0.375,
+       "c1": 1.5021942110177404,
+       "rb": 58.23194285714287
+      },
+      {
+       "led": [
+        16,
+        15
+       ],
+       "c0": -51.17927170868347,
+       "c1": -1.6271942110177404,
+       "rb": 58.47988571428573
+      },
+      {
+       "led": [
+        17,
+        14
+       ],
+       "c0": -0.625,
+       "c1": -51.55646591970121,
+       "rb": 58.47988571428573
+      },
+      {
+       "led": [
+        17,
+        16
+       ],
+       "c0": -2.0,
+       "c1": 49.302077497665735,
+       "rb": 59.027828571428586
+      },
+      {
+       "led": [
+        18,
+        15
+       ],
+       "c0": 47.92927170868347,
+       "c1": -0.8771942110177404,
+       "rb": 59.177828571428584
+      }
+     ],
+     "rb": 58.6794742857143,
+     "rb_sd": 0.4030084607406793,
+     "rb_sd_rel": 0.006867963042381806,
+     "s_row": 49.55427170868347,
+     "s_col": 50.42927170868347,
+     "NAz_fila": 7.104873779278867,
+     "NAz_col": 6.981596873897771,
+     "NAz_por_led": [
+      6.9889832906675835,
+      7.018741330681172,
+      7.018741330681172,
+      7.084505296039616,
+      7.102508258712044
+     ]
+    }
+   },
+   "contraste": {
+    "A": {
+     "rms_hp": 0.07849503482203261,
+     "oscuro": 0.003625
+    },
+    "B": {
+     "rms_hp": 0.06981745823327201,
+     "oscuro": 0.00284375
+    }
+   },
+   "borde": {
+    "t_central": 8.0,
+    "s_fijo": {
+     "eje": [
+      0.08505175467622354,
+      -0.026909339597614594
+     ],
+     "R_px": 4341.175337041223,
+     "R_pasos": 1.2270139448957669,
+     "w_px": 214.99275968053212,
+     "s": 3538.0,
+     "NAz": 7.362083669374601,
+     "NAz_sin": 7.342013670654264
+    },
+    "s_libre": {
+     "eje": [
+      0.0748687835885997,
+      -0.027459668237110282
+     ],
+     "R_px": 3628.9079996081864,
+     "s": 2933.723435590064,
+     "w_px": 179.62764359397866,
+     "R_pasos": 1.2369632241350994,
+     "NAz": 7.421779344810597
+    },
+    "loo_NAz": {
+     "(-1, -1)": 7.385112910755866,
+     "(-1, 0)": 7.301728017526653,
+     "(-1, 1)": 7.369394569502258,
+     "(0, -1)": 7.432064352344871,
+     "(0, 1)": 7.354042392841413,
+     "(1, -1)": 7.123218963069474,
+     "(1, 0)": 7.367925133390251,
+     "(1, 1)": 7.36330275458532
+    },
+    "b_eje": [
+     0.017535571041957132,
+     -0.015209637102508727
+    ],
+    "score_a": {
+     "err_f": 0.029393753827311693,
+     "clases_ok": 5,
+     "n": 8,
+     "err_reg": 0.07939811685753195,
+     "err_esq_diag": 0.11415494953705176
+    }
+   },
+   "seg": 158.5
+  }
+ ],
+ "resumen": {
+  "espectral_A_fila": {
+   "n": 1,
+   "media": 7.263625427365698,
+   "sd": null,
+   "sd_rel": null,
+   "min": 7.263625427365698,
+   "max": 7.263625427365698
+  },
+  "espectral_A_col": {
+   "n": 1,
+   "media": 7.227118759137706,
+   "sd": null,
+   "sd_rel": null,
+   "min": 7.227118759137706,
+   "max": 7.227118759137706
+  },
+  "espectral_B_fila": {
+   "n": 1,
+   "media": 7.104873779278867,
+   "sd": null,
+   "sd_rel": null,
+   "min": 7.104873779278867,
+   "max": 7.104873779278867
+  },
+  "espectral_B_col": {
+   "n": 1,
+   "media": 6.981596873897771,
+   "sd": null,
+   "sd_rel": null,
+   "min": 6.981596873897771,
+   "max": 6.981596873897771
+  },
+  "espectral_A_sd_rel": {
+   "n": 1,
+   "media": 0.025322079971962515,
+   "sd": null,
+   "sd_rel": null,
+   "min": 0.025322079971962515,
+   "max": 0.025322079971962515
+  },
+  "espectral_B_sd_rel": {
+   "n": 1,
+   "media": 0.006867963042381806,
+   "sd": null,
+   "sd_rel": null,
+   "min": 0.006867963042381806,
+   "max": 0.006867963042381806
+  },
+  "borde_sfijo_NAz": {
+   "n": 1,
+   "media": 7.362083669374601,
+   "sd": null,
+   "sd_rel": null,
+   "min": 7.362083669374601,
+   "max": 7.362083669374601
+  },
+  "borde_sfijo_R_pasos": {
+   "n": 1,
+   "media": 1.2270139448957669,
+   "sd": null,
+   "sd_rel": null,
+   "min": 1.2270139448957669,
+   "max": 1.2270139448957669
+  },
+  "borde_sfijo_w_px": {
+   "n": 1,
+   "media": 214.99275968053212,
+   "sd": null,
+   "sd_rel": null,
+   "min": 214.99275968053212,
+   "max": 214.99275968053212
+  },
+  "borde_slibre_NAz": {
+   "n": 1,
+   "media": 7.421779344810597,
+   "sd": null,
+   "sd_rel": null,
+   "min": 7.421779344810597,
+   "max": 7.421779344810597
+  },
+  "borde_slibre_s": {
+   "n": 1,
+   "media": 2933.723435590064,
+   "sd": null,
+   "sd_rel": null,
+   "min": 2933.723435590064,
+   "max": 2933.723435590064
+  },
+  "eje_a_fila": {
+   "n": 1,
+   "media": 0.08505175467622354,
+   "sd": null,
+   "sd_rel": null,
+   "min": 0.08505175467622354,
+   "max": 0.08505175467622354
+  },
+  "eje_a_col": {
+   "n": 1,
+   "media": -0.026909339597614594,
+   "sd": null,
+   "sd_rel": null,
+   "min": -0.026909339597614594,
+   "max": -0.026909339597614594
+  },
+  "contraste_A": {
+   "n": 1,
+   "media": 0.07849503482203261,
+   "sd": null,
+   "sd_rel": null,
+   "min": 0.07849503482203261,
+   "max": 0.07849503482203261
+  },
+  "contraste_B": {
+   "n": 1,
+   "media": 0.06981745823327201,
+   "sd": null,
+   "sd_rel": null,
+   "min": 0.06981745823327201,
+   "max": 0.06981745823327201
+  }
+ },
+ "repeticion": null
+}

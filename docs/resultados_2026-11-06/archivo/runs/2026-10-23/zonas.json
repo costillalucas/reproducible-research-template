@@ -1,0 +1,431 @@
+{
+ "meta": {
+  "nombre": "2026-10-23",
+  "fecha": "2026-11-06 13:21",
+  "comando": "analizar_zonas.py /home/chanoscopio/Documents/AleYLu/reconstrucciones/plan_2026-11-06/archivo/enlaces/2026-10-23 --flat /home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-23-sinmuestra --dark /home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-23-dark --dark-flat /home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-23-sinmuestra-dark --procs 1 --out /home/chanoscopio/Documents/AleYLu/reconstrucciones/plan_2026-11-06/archivo/runs --nombre 2026-10-23",
+  "color": "r",
+  "flat": "/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-23-sinmuestra",
+  "dark": "/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-23-dark",
+  "dark_flat": "/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-23-sinmuestra-dark",
+  "codigo": "/home/chanoscopio/Documents/AleYLu/reconstrucciones/plan_2026-11-06/zonas/codigo",
+  "seg": 348.8
+ },
+ "zonas": [
+  {
+   "etiqueta": "2026-10-23",
+   "captura": "/home/chanoscopio/Documents/AleYLu/reconstrucciones/plan_2026-11-06/archivo/enlaces/2026-10-23",
+   "flat": "/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-23-sinmuestra",
+   "dark": "/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-23-dark",
+   "dark_flat": "/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-23-sinmuestra-dark",
+   "roi": [
+    4000,
+    1942
+   ],
+   "espectral": {
+    "A": {
+     "recorte": [
+      360,
+      80,
+      400
+     ],
+     "info": {
+      "(17, 15)": {
+       "t": 17.0,
+       "tf": 17.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.12153488500489644,
+       "oscuro_frac": 0.00691875
+      },
+      "(16, 15)": {
+       "t": 17.0,
+       "tf": 17.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.10517482749642305,
+       "oscuro_frac": 0.0058625
+      },
+      "(17, 14)": {
+       "t": 17.0,
+       "tf": 17.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.09572522320678697,
+       "oscuro_frac": 0.00358125
+      },
+      "(17, 16)": {
+       "t": 17.0,
+       "tf": 17.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.1040765963055459,
+       "oscuro_frac": 0.00276875
+      },
+      "(18, 15)": {
+       "t": 17.0,
+       "tf": 17.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.10132006996889298,
+       "oscuro_frac": 0.00436875
+      }
+     },
+     "descartes": [],
+     "leds": [
+      {
+       "led": [
+        17,
+        15
+       ],
+       "c0": 0.875,
+       "c1": 1.2521942110177404,
+       "rb": 62.615485714285725
+      },
+      {
+       "led": [
+        16,
+        15
+       ],
+       "c0": -51.05427170868347,
+       "c1": 2.8728057889822596,
+       "rb": 59.72577142857144
+      },
+      {
+       "led": [
+        17,
+        14
+       ],
+       "c0": 0.375,
+       "c1": -46.68146591970121,
+       "rb": 59.87577142857144
+      },
+      {
+       "led": [
+        17,
+        16
+       ],
+       "c0": 0.0,
+       "c1": 51.927077497665735,
+       "rb": 61.219600000000014
+      },
+      {
+       "led": [
+        18,
+        15
+       ],
+       "c0": 41.55427170868347,
+       "c1": 5.12280578898226,
+       "rb": 67.24697142857143
+      }
+     ],
+     "rb": 62.13672000000001,
+     "rb_sd": 3.086646919535423,
+     "rb_sd_rel": 0.04967508615735466,
+     "s_row": 46.30427170868347,
+     "s_col": 49.30427170868347,
+     "NAz_fila": 8.05153188339824,
+     "NAz_col": 7.561623102412421,
+     "NAz_por_led": [
+      7.858982071208316,
+      7.4962888411985755,
+      7.515115610602877,
+      7.683781948157536,
+      8.4402881614895
+     ]
+    },
+    "B": {
+     "recorte": [
+      360,
+      480,
+      400
+     ],
+     "info": {
+      "(17, 15)": {
+       "t": 17.0,
+       "tf": 17.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.11102056669986364,
+       "oscuro_frac": 0.00568125
+      },
+      "(16, 15)": {
+       "t": 17.0,
+       "tf": 17.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.10053087901529323,
+       "oscuro_frac": 0.00396875
+      },
+      "(17, 14)": {
+       "t": 17.0,
+       "tf": 17.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.0945760644857028,
+       "oscuro_frac": 0.00188125
+      },
+      "(17, 16)": {
+       "t": 17.0,
+       "tf": 17.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.0861710248728088,
+       "oscuro_frac": 0.00174375
+      },
+      "(18, 15)": {
+       "t": 17.0,
+       "tf": 17.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.0941158003822659,
+       "oscuro_frac": 0.0028375
+      }
+     },
+     "descartes": [],
+     "leds": [
+      {
+       "led": [
+        17,
+        15
+       ],
+       "c0": -1.375,
+       "c1": 0.8771942110177404,
+       "rb": 58.68194285714287
+      },
+      {
+       "led": [
+        16,
+        15
+       ],
+       "c0": -50.30427170868347,
+       "c1": -2.8771942110177404,
+       "rb": 59.87577142857144
+      },
+      {
+       "led": [
+        17,
+        14
+       ],
+       "c0": 0.625,
+       "c1": -51.55646591970121,
+       "rb": 59.87577142857144
+      },
+      {
+       "led": [
+        17,
+        16
+       ],
+       "c0": -0.75,
+       "c1": 48.177077497665735,
+       "rb": 59.72577142857144
+      },
+      {
+       "led": [
+        18,
+        15
+       ],
+       "c0": 49.42927170868347,
+       "c1": -1.2521942110177404,
+       "rb": 60.02577142857144
+      }
+     ],
+     "rb": 59.63700571428573,
+     "rb_sd": 0.5443301678134651,
+     "rb_sd_rel": 0.009127389299544824,
+     "s_row": 49.86677170868347,
+     "s_col": 49.86677170868347,
+     "NAz_fila": 7.175560438844402,
+     "NAz_col": 7.175560438844402,
+     "NAz_por_led": [
+      7.060646700767804,
+      7.20428887336355,
+      7.20428887336355,
+      7.186240783038841,
+      7.22233696368826
+     ]
+    }
+   },
+   "contraste": {
+    "A": {
+     "rms_hp": 0.12006452205116538,
+     "oscuro": 0.006925
+    },
+    "B": {
+     "rms_hp": 0.10954235148044425,
+     "oscuro": 0.00568125
+    }
+   },
+   "borde": {
+    "t_central": 17.0,
+    "s_fijo": {
+     "eje": [
+      0.0911031739261889,
+      -0.005569118709329023
+     ],
+     "R_px": 4232.240330817227,
+     "R_pasos": 1.1962239487894932,
+     "w_px": 225.89488121506687,
+     "s": 3538.0,
+     "NAz": 7.17734369273696,
+     "NAz_sin": 7.158743207742643
+    },
+    "s_libre": {
+     "eje": [
+      0.10989037892899574,
+      -0.0037139693198217413
+     ],
+     "R_px": 2767.161128546216,
+     "s": 2374.476894870057,
+     "w_px": 174.905018844954,
+     "R_pasos": 1.165377155079729,
+     "NAz": 6.992262930478374
+    },
+    "loo_NAz": {
+     "(-1, -1)": 7.204018876040313,
+     "(-1, 0)": 7.238547287714784,
+     "(-1, 1)": 7.197367252536138,
+     "(0, -1)": 7.157219598550821,
+     "(0, 1)": 7.230306720385754,
+     "(1, -1)": 6.935877790702438,
+     "(1, 0)": 7.1924290893188605,
+     "(1, 1)": 7.046690161184523
+    },
+    "b_eje": [
+     0.006306566565207929,
+     0.0016950492426429375
+    ],
+    "score_a": {
+     "err_f": 0.03143498673198611,
+     "clases_ok": 6,
+     "n": 8,
+     "err_reg": 0.07142589984240283,
+     "err_esq_diag": 0.08065665996571926
+    }
+   },
+   "seg": 348.7
+  }
+ ],
+ "resumen": {
+  "espectral_A_fila": {
+   "n": 1,
+   "media": 8.05153188339824,
+   "sd": null,
+   "sd_rel": null,
+   "min": 8.05153188339824,
+   "max": 8.05153188339824
+  },
+  "espectral_A_col": {
+   "n": 1,
+   "media": 7.561623102412421,
+   "sd": null,
+   "sd_rel": null,
+   "min": 7.561623102412421,
+   "max": 7.561623102412421
+  },
+  "espectral_B_fila": {
+   "n": 1,
+   "media": 7.175560438844402,
+   "sd": null,
+   "sd_rel": null,
+   "min": 7.175560438844402,
+   "max": 7.175560438844402
+  },
+  "espectral_B_col": {
+   "n": 1,
+   "media": 7.175560438844402,
+   "sd": null,
+   "sd_rel": null,
+   "min": 7.175560438844402,
+   "max": 7.175560438844402
+  },
+  "espectral_A_sd_rel": {
+   "n": 1,
+   "media": 0.04967508615735466,
+   "sd": null,
+   "sd_rel": null,
+   "min": 0.04967508615735466,
+   "max": 0.04967508615735466
+  },
+  "espectral_B_sd_rel": {
+   "n": 1,
+   "media": 0.009127389299544824,
+   "sd": null,
+   "sd_rel": null,
+   "min": 0.009127389299544824,
+   "max": 0.009127389299544824
+  },
+  "borde_sfijo_NAz": {
+   "n": 1,
+   "media": 7.17734369273696,
+   "sd": null,
+   "sd_rel": null,
+   "min": 7.17734369273696,
+   "max": 7.17734369273696
+  },
+  "borde_sfijo_R_pasos": {
+   "n": 1,
+   "media": 1.1962239487894932,
+   "sd": null,
+   "sd_rel": null,
+   "min": 1.1962239487894932,
+   "max": 1.1962239487894932
+  },
+  "borde_sfijo_w_px": {
+   "n": 1,
+   "media": 225.89488121506687,
+   "sd": null,
+   "sd_rel": null,
+   "min": 225.89488121506687,
+   "max": 225.89488121506687
+  },
+  "borde_slibre_NAz": {
+   "n": 1,
+   "media": 6.992262930478374,
+   "sd": null,
+   "sd_rel": null,
+   "min": 6.992262930478374,
+   "max": 6.992262930478374
+  },
+  "borde_slibre_s": {
+   "n": 1,
+   "media": 2374.476894870057,
+   "sd": null,
+   "sd_rel": null,
+   "min": 2374.476894870057,
+   "max": 2374.476894870057
+  },
+  "eje_a_fila": {
+   "n": 1,
+   "media": 0.0911031739261889,
+   "sd": null,
+   "sd_rel": null,
+   "min": 0.0911031739261889,
+   "max": 0.0911031739261889
+  },
+  "eje_a_col": {
+   "n": 1,
+   "media": -0.005569118709329023,
+   "sd": null,
+   "sd_rel": null,
+   "min": -0.005569118709329023,
+   "max": -0.005569118709329023
+  },
+  "contraste_A": {
+   "n": 1,
+   "media": 0.12006452205116538,
+   "sd": null,
+   "sd_rel": null,
+   "min": 0.12006452205116538,
+   "max": 0.12006452205116538
+  },
+  "contraste_B": {
+   "n": 1,
+   "media": 0.10954235148044425,
+   "sd": null,
+   "sd_rel": null,
+   "min": 0.10954235148044425,
+   "max": 0.10954235148044425
+  }
+ },
+ "repeticion": null
+}

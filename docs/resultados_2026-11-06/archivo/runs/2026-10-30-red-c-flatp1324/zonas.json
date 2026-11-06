@@ -1,0 +1,431 @@
+{
+ "meta": {
+  "nombre": "2026-10-30-red-c-flatp1324",
+  "fecha": "2026-11-06 13:28",
+  "comando": "analizar_zonas.py /home/chanoscopio/Documents/AleYLu/reconstrucciones/plan_2026-11-06/archivo/enlaces/2026-10-30-red-c-flatp1324 --flat /home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-30-red-c-sinmuestra-prueba-1324 --dark /home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-30-red-c-sinmuestra-prueba-1324-dark --dark-flat /home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-30-red-c-sinmuestra-prueba-1324-dark --procs 1 --out /home/chanoscopio/Documents/AleYLu/reconstrucciones/plan_2026-11-06/archivo/runs --nombre 2026-10-30-red-c-flatp1324",
+  "color": "r",
+  "flat": "/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-30-red-c-sinmuestra-prueba-1324",
+  "dark": "/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-30-red-c-sinmuestra-prueba-1324-dark",
+  "dark_flat": "/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-30-red-c-sinmuestra-prueba-1324-dark",
+  "codigo": "/home/chanoscopio/Documents/AleYLu/reconstrucciones/plan_2026-11-06/zonas/codigo",
+  "seg": 164.1
+ },
+ "zonas": [
+  {
+   "etiqueta": "2026-10-30-red-c-flatp1324",
+   "captura": "/home/chanoscopio/Documents/AleYLu/reconstrucciones/plan_2026-11-06/archivo/enlaces/2026-10-30-red-c-flatp1324",
+   "flat": "/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-30-red-c-sinmuestra-prueba-1324",
+   "dark": "/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-30-red-c-sinmuestra-prueba-1324-dark",
+   "dark_flat": "/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-30-red-c-sinmuestra-prueba-1324-dark",
+   "roi": [
+    3968,
+    1966
+   ],
+   "espectral": {
+    "A": {
+     "recorte": [
+      360,
+      80,
+      400
+     ],
+     "info": {
+      "(17, 15)": {
+       "t": 8.0,
+       "tf": 8.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.016840240871803306,
+       "oscuro_frac": 0.0
+      },
+      "(16, 15)": {
+       "t": 8.0,
+       "tf": 8.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.018668269914212665,
+       "oscuro_frac": 0.0
+      },
+      "(17, 14)": {
+       "t": 8.0,
+       "tf": 8.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.016849572905454337,
+       "oscuro_frac": 0.0
+      },
+      "(17, 16)": {
+       "t": 8.0,
+       "tf": 8.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.017603593865177167,
+       "oscuro_frac": 0.0
+      },
+      "(18, 15)": {
+       "t": 8.0,
+       "tf": 8.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.016580640876881148,
+       "oscuro_frac": 0.0
+      }
+     },
+     "descartes": [],
+     "leds": [
+      {
+       "led": [
+        17,
+        15
+       ],
+       "c0": 1.5,
+       "c1": 0.24780578898225958,
+       "rb": 47.618971428571435
+      },
+      {
+       "led": [
+        16,
+        15
+       ],
+       "c0": -43.80427170868347,
+       "c1": 21.99780578898226,
+       "rb": 48.16691428571429
+      },
+      {
+       "led": [
+        17,
+        14
+       ],
+       "c0": 11.5,
+       "c1": -61.30646591970121,
+       "rb": 53.098400000000005
+      },
+      {
+       "led": [
+        17,
+        16
+       ],
+       "c0": -21.0,
+       "c1": 43.677077497665735,
+       "rb": 47.618971428571435
+      },
+      {
+       "led": [
+        18,
+        15
+       ],
+       "c0": 20.054271708683473,
+       "c1": 2.8728057889822596,
+       "rb": 50.11074285714287
+      }
+     ],
+     "rb": 49.32280000000001,
+     "rb_sd": 2.3461747959308625,
+     "rb_sd_rel": 0.047567753573010095,
+     "s_row": 31.929271708683473,
+     "s_col": 52.49177170868347,
+     "NAz_fila": 9.26851081039588,
+     "NAz_col": 5.63777503343528,
+     "NAz_por_led": [
+      6.7687822136690645,
+      6.846669361464748,
+      7.5476536916259,
+      6.7687822136690645,
+      7.122974201027349
+     ]
+    },
+    "B": {
+     "recorte": [
+      360,
+      480,
+      400
+     ],
+     "info": {
+      "(17, 15)": {
+       "t": 8.0,
+       "tf": 8.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.03324934731017323,
+       "oscuro_frac": 0.00065625
+      },
+      "(16, 15)": {
+       "t": 8.0,
+       "tf": 8.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.03713244313902321,
+       "oscuro_frac": 0.00095625
+      },
+      "(17, 14)": {
+       "t": 8.0,
+       "tf": 8.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.0345418830989288,
+       "oscuro_frac": 0.00066875
+      },
+      "(17, 16)": {
+       "t": 8.0,
+       "tf": 8.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.032842239533967296,
+       "oscuro_frac": 0.00063125
+      },
+      "(18, 15)": {
+       "t": 8.0,
+       "tf": 8.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.033873542256612064,
+       "oscuro_frac": 0.00064375
+      }
+     },
+     "descartes": [],
+     "leds": [
+      {
+       "led": [
+        17,
+        15
+       ],
+       "c0": -1.5,
+       "c1": 0.24780578898225958,
+       "rb": 47.618971428571435
+      },
+      {
+       "led": [
+        16,
+        15
+       ],
+       "c0": -43.80427170868347,
+       "c1": 21.99780578898226,
+       "rb": 48.16691428571429
+      },
+      {
+       "led": [
+        17,
+        14
+       ],
+       "c0": 11.5,
+       "c1": -61.30646591970121,
+       "rb": 53.098400000000005
+      },
+      {
+       "led": [
+        17,
+        16
+       ],
+       "c0": 21.0,
+       "c1": 43.677077497665735,
+       "rb": 47.618971428571435
+      },
+      {
+       "led": [
+        18,
+        15
+       ],
+       "c0": 43.80427170868347,
+       "c1": 21.99780578898226,
+       "rb": 48.16691428571429
+      }
+     ],
+     "rb": 48.93403428571429,
+     "rb_sd": 2.344017311561064,
+     "rb_sd_rel": 0.0479015749626303,
+     "s_row": 43.80427170868347,
+     "s_col": 52.49177170868347,
+     "NAz_fila": 6.702638675672436,
+     "NAz_col": 5.59333770145381,
+     "NAz_por_led": [
+      5.934072022732769,
+      6.002354311935614,
+      6.616894914761211,
+      5.934072022732769,
+      6.002354311935614
+     ]
+    }
+   },
+   "contraste": {
+    "A": {
+     "rms_hp": 0.01684725224382241,
+     "oscuro": 0.0
+    },
+    "B": {
+     "rms_hp": 0.03271184034482502,
+     "oscuro": 0.00065625
+    }
+   },
+   "borde": {
+    "t_central": 8.0,
+    "s_fijo": {
+     "eje": [
+      0.12861261678782668,
+      -0.01525452915164242
+     ],
+     "R_px": 4259.183480046425,
+     "R_pasos": 1.2038393103579494,
+     "w_px": 208.8161763723376,
+     "s": 3538.0,
+     "NAz": 7.223035862147697,
+     "NAz_sin": 7.204078809884766
+    },
+    "s_libre": {
+     "eje": [
+      0.13291710447142852,
+      -0.019903340318262446
+     ],
+     "R_px": 2405.6289573988734,
+     "s": 2043.4539765808765,
+     "w_px": 145.69739317187367,
+     "R_pasos": 1.1772366713264524,
+     "NAz": 7.063420027958714
+    },
+    "loo_NAz": {
+     "(-1, -1)": 7.223783074061663,
+     "(-1, 0)": 7.31029694072192,
+     "(-1, 1)": 7.211028316567852,
+     "(0, -1)": 7.260068326717801,
+     "(0, 1)": 7.260882118907947,
+     "(1, -1)": 6.955507920668044,
+     "(1, 0)": 7.255049079260912,
+     "(1, 1)": 7.074258998539462
+    },
+    "b_eje": [
+     0.12861261678782668,
+     -0.007347391861774035
+    ],
+    "score_a": {
+     "err_f": 0.0587875076546234,
+     "clases_ok": 5,
+     "n": 8,
+     "err_reg": 0.08910701276743982,
+     "err_esq_diag": 0.09771628970840777
+    }
+   },
+   "seg": 164.1
+  }
+ ],
+ "resumen": {
+  "espectral_A_fila": {
+   "n": 1,
+   "media": 9.26851081039588,
+   "sd": null,
+   "sd_rel": null,
+   "min": 9.26851081039588,
+   "max": 9.26851081039588
+  },
+  "espectral_A_col": {
+   "n": 1,
+   "media": 5.63777503343528,
+   "sd": null,
+   "sd_rel": null,
+   "min": 5.63777503343528,
+   "max": 5.63777503343528
+  },
+  "espectral_B_fila": {
+   "n": 1,
+   "media": 6.702638675672436,
+   "sd": null,
+   "sd_rel": null,
+   "min": 6.702638675672436,
+   "max": 6.702638675672436
+  },
+  "espectral_B_col": {
+   "n": 1,
+   "media": 5.59333770145381,
+   "sd": null,
+   "sd_rel": null,
+   "min": 5.59333770145381,
+   "max": 5.59333770145381
+  },
+  "espectral_A_sd_rel": {
+   "n": 1,
+   "media": 0.047567753573010095,
+   "sd": null,
+   "sd_rel": null,
+   "min": 0.047567753573010095,
+   "max": 0.047567753573010095
+  },
+  "espectral_B_sd_rel": {
+   "n": 1,
+   "media": 0.0479015749626303,
+   "sd": null,
+   "sd_rel": null,
+   "min": 0.0479015749626303,
+   "max": 0.0479015749626303
+  },
+  "borde_sfijo_NAz": {
+   "n": 1,
+   "media": 7.223035862147697,
+   "sd": null,
+   "sd_rel": null,
+   "min": 7.223035862147697,
+   "max": 7.223035862147697
+  },
+  "borde_sfijo_R_pasos": {
+   "n": 1,
+   "media": 1.2038393103579494,
+   "sd": null,
+   "sd_rel": null,
+   "min": 1.2038393103579494,
+   "max": 1.2038393103579494
+  },
+  "borde_sfijo_w_px": {
+   "n": 1,
+   "media": 208.8161763723376,
+   "sd": null,
+   "sd_rel": null,
+   "min": 208.8161763723376,
+   "max": 208.8161763723376
+  },
+  "borde_slibre_NAz": {
+   "n": 1,
+   "media": 7.063420027958714,
+   "sd": null,
+   "sd_rel": null,
+   "min": 7.063420027958714,
+   "max": 7.063420027958714
+  },
+  "borde_slibre_s": {
+   "n": 1,
+   "media": 2043.4539765808765,
+   "sd": null,
+   "sd_rel": null,
+   "min": 2043.4539765808765,
+   "max": 2043.4539765808765
+  },
+  "eje_a_fila": {
+   "n": 1,
+   "media": 0.12861261678782668,
+   "sd": null,
+   "sd_rel": null,
+   "min": 0.12861261678782668,
+   "max": 0.12861261678782668
+  },
+  "eje_a_col": {
+   "n": 1,
+   "media": -0.01525452915164242,
+   "sd": null,
+   "sd_rel": null,
+   "min": -0.01525452915164242,
+   "max": -0.01525452915164242
+  },
+  "contraste_A": {
+   "n": 1,
+   "media": 0.01684725224382241,
+   "sd": null,
+   "sd_rel": null,
+   "min": 0.01684725224382241,
+   "max": 0.01684725224382241
+  },
+  "contraste_B": {
+   "n": 1,
+   "media": 0.03271184034482502,
+   "sd": null,
+   "sd_rel": null,
+   "min": 0.03271184034482502,
+   "max": 0.03271184034482502
+  }
+ },
+ "repeticion": null
+}

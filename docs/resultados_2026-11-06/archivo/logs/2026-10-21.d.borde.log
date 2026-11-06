@@ -1,0 +1,4 @@
+/home/chanoscopio/.local/lib/python3.10/site-packages/matplotlib/projections/__init__.py:63: UserWarning: Unable to import Axes3D. This may be due to multiple versions of Matplotlib being installed (e.g. as a system package and as a pip package). As a result, the 3D projection is not available.
+  warnings.warn("Unable to import Axes3D. This may be due to multiple versions of "
+2026-10-21.d: 53.5 s  a=[0.08576662328735098, 0.0011800817201923187] b=[0.012996588315174813, 0.013955303870957524] a:5/8,0.033 b:8/8,0.007 loo:7/8,0.043 a_cruz:3/4,0.010 b_cruz:3/4,0.009
+2026-10-21.d 7.098053829050967 [0.08576662328735098, 0.0011800817201923187] 222.6515740116269 7.056150961390549

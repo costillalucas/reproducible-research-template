@@ -1,0 +1,46 @@
+/home/chanoscopio/.local/lib/python3.10/site-packages/matplotlib/projections/__init__.py:63: UserWarning: Unable to import Axes3D. This may be due to multiple versions of Matplotlib being installed (e.g. as a system package and as a pip package). As a result, the 3D projection is not available.
+  warnings.warn("Unable to import Axes3D. This may be due to multiple versions of "
+1 capturas: ['2026-11-06-a.1-p1222']  ROI(s): [(3968, 1966)]
+2026-11-06-a.1-p1222: 23.4 s  a=[0.08505175467622354, -0.026909339597614594] b=[0.017535571041957132, -0.015209637102508727] a:5/8,0.029 b:3/8,0.029 loo:6/8,0.023 a_cruz:4/4,0.002 b_cruz:3/4,0.017
+  2026-11-06-a.1-p1222: listo en 158.5 s
+# Zonas 3x3 -- 2026-11-06-a.1-p1222
+
+Flat `/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-11-06-sinmuestra`, oscuros `/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-11-06-a.1-prueba-1222-dark` / `/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-11-06-sinmuestra-dark`, color `r`. NA·z en mm. Espectral = etapa 1 radio libre (`espectral_zonas.py`); borde = (a) de `centrado.py` (NA·z = R_pasos·6). Recorte A = 360:760, 80:480; B = 360:760, 480:880.
+
+## Espectral
+
+| zona | ROI | rec | NA·z filas | NA·z cols | sd radio (5 LEDs) | NA·z por LED (17,15) (16,15) (17,14) (17,16) (18,15) | paso filas/cols (bins) | contraste rms_hp |
+|---|---|---|---|---|---|---|---|---|
+| 2026-11-06-a.1-p1222 | [3968, 1966] | A | 7.264 | 7.227 | 2.5 % | 7.57 7.17 7.16 7.14 7.19 | 49.49/49.74 | 0.078 |
+| 2026-11-06-a.1-p1222 | [3968, 1966] | B | 7.105 | 6.982 | 0.7 % | 6.99 7.02 7.02 7.08 7.10 | 49.55/50.43 | 0.070 |
+
+## Borde (a)
+
+| zona | eje (a) (pasos) | s fijo: R px | R pasos | w px | NA·z | s libre: s | R px | R/s pasos | NA·z | LOO NA·z min–max |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 2026-11-06-a.1-p1222 | (+0.085, -0.027) | 4341 | 1.2270 | 215 | 7.362 | 2934 | 3629 | 1.2370 | 7.422 | 7.12–7.43 |
+
+## Resumen entre zonas
+
+| métrica | n | media | sd | sd rel | min | max |
+|---|---|---|---|---|---|---|
+| espectral_A_fila | 1 | 7.2636 | — | — | 7.2636 | 7.2636 |
+| espectral_A_col | 1 | 7.2271 | — | — | 7.2271 | 7.2271 |
+| espectral_B_fila | 1 | 7.1049 | — | — | 7.1049 | 7.1049 |
+| espectral_B_col | 1 | 6.9816 | — | — | 6.9816 | 6.9816 |
+| espectral_A_sd_rel | 1 | 0.0253 | — | — | 0.0253 | 0.0253 |
+| espectral_B_sd_rel | 1 | 0.0069 | — | — | 0.0069 | 0.0069 |
+| borde_sfijo_NAz | 1 | 7.3621 | — | — | 7.3621 | 7.3621 |
+| borde_sfijo_R_pasos | 1 | 1.2270 | — | — | 1.2270 | 1.2270 |
+| borde_sfijo_w_px | 1 | 214.9928 | — | — | 214.9928 | 214.9928 |
+| borde_slibre_NAz | 1 | 7.4218 | — | — | 7.4218 | 7.4218 |
+| borde_slibre_s | 1 | 2933.7234 | — | — | 2933.7234 | 2933.7234 |
+| eje_a_fila | 1 | 0.0851 | — | — | 0.0851 | 0.0851 |
+| eje_a_col | 1 | -0.0269 | — | — | -0.0269 | -0.0269 |
+| contraste_A | 1 | 0.0785 | — | — | 0.0785 | 0.0785 |
+| contraste_B | 1 | 0.0698 | — | — | 0.0698 | 0.0698 |
+
+Generado 2026-11-06 13:30 por `analizar_zonas.py /home/chanoscopio/Documents/AleYLu/reconstrucciones/plan_2026-11-06/archivo/enlaces/2026-11-06-a.1-p1222 --flat /home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-11-06-sinmuestra --dark /home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-11-06-a.1-prueba-1222-dark --dark-flat /home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-11-06-sinmuestra-dark --procs 1 --out /home/chanoscopio/Documents/AleYLu/reconstrucciones/plan_2026-11-06/archivo/runs --nombre 2026-11-06-a.1-p1222`.
+
+
+Salida: /home/chanoscopio/Documents/AleYLu/reconstrucciones/plan_2026-11-06/archivo/runs/2026-11-06-a.1-p1222/zonas.json, zonas.md  (158.5 s)

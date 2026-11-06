@@ -1,0 +1,35 @@
+/home/chanoscopio/.local/lib/python3.10/site-packages/matplotlib/projections/__init__.py:63: UserWarning: Unable to import Axes3D. This may be due to multiple versions of Matplotlib being installed (e.g. as a system package and as a pip package). As a result, the 3D projection is not available.
+  warnings.warn("Unable to import Axes3D. This may be due to multiple versions of "
+17 trabajos
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/multiprocessing/pool.py", line 125, in worker
+    result = (True, func(*args, **kwds))
+  File "/home/chanoscopio/Documents/AleYLu/reconstrucciones/plan_2026-11-06/sim_eje_foco/codigo/sim_eje_foco.py", line 321, in trabajo
+    r['borde'] = borde(F)
+  File "/home/chanoscopio/Documents/AleYLu/reconstrucciones/plan_2026-11-06/sim_eje_foco/codigo/sim_eje_foco.py", line 293, in borde
+    pb, Ab = CE.ajustar([Q[d] for d in VEC], [M[d] for d in VEC], VEC, Y, X, p0=pa, libres=(2, 3), eje_fijo=eje_b)
+  File "/home/chanoscopio/Documents/LucasC/reproducible-research-template/docs/resultados_2026-11-04/plan_2026-11-04/centrado/centrado.py", line 81, in ajustar
+    p, _ = fit.ajustar(best[1], libres)
+  File "/home/chanoscopio/Documents/LucasC/reproducible-research-template/scripts/precaptura.py", line 288, in ajustar
+    p, cov = self.lm(p, libres)
+  File "/home/chanoscopio/Documents/LucasC/reproducible-research-template/scripts/precaptura.py", line 271, in lm
+    rn = self.resid(p + dp, libres, p_full); cn = rn @ rn
+  File "/home/chanoscopio/Documents/LucasC/reproducible-research-template/scripts/precaptura.py", line 253, in resid
+    for T, q, wt, sg in zip(self.perfiles(pf), self.Q, self.W, self.sig):
+  File "/home/chanoscopio/Documents/LucasC/reproducible-research-template/scripts/precaptura.py", line 237, in perfiles
+    w = math.exp(lw)
+OverflowError: math range error
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/chanoscopio/Documents/AleYLu/reconstrucciones/plan_2026-11-06/sim_eje_foco/codigo/sim_eje_foco.py", line 373, in <module>
+    main()
+  File "/home/chanoscopio/Documents/AleYLu/reconstrucciones/plan_2026-11-06/sim_eje_foco/codigo/sim_eje_foco.py", line 368, in main
+    for _ in pool.imap_unordered(trabajo, jobs):
+  File "/usr/lib/python3.10/multiprocessing/pool.py", line 873, in next
+    raise value
+OverflowError: math range error

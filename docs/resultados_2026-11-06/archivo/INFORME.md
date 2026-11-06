@@ -1,0 +1,175 @@
+# Archivo de capturas rojas: NA·z por borde (a) y espectral (06/11)
+
+Todo corrido con `zonas_3x3/analizar_zonas.py` **sin cambios** (una corrida por captura, `--procs 1`, salida en
+`runs/<nombre>/zonas.{json,md}`), salvo las 6 capturas donde el espectral se cae (ver abajo), que se corrieron con
+`borde_solo.py` (importa `analizar_zonas.py` y repite textualmente su bloque de borde → mismos números de borde).
+Las 7 zonas del 06/11 se toman de `zonas_3x3/resultados/2026-11-06/` (no se recorrieron).
+Agregado: `juntar.py` → `tabla.md`, `tabla.json`, `correlaciones.md`, `fig_archivo.png`. Lista de corridas: `jobs.txt`
+(nombre | captura | flat | oscuro | oscuro del flat).
+
+## Cómo se armó
+
+- Solo rojo (`colorr`). Azul y verde: ninguna captura del archivo tiene el 3x3 en rojo; las pruebas azul/verde
+  (23/10, 27/10, 29/10) **no se corrieron** (el script usa color `r` para el chequeo y el espectral está escrito para rojo).
+- Las carpetas `-prueba-HHMM` y las `sinmuestra-prueba` el script las saltea por nombre → se pasaron por symlink
+  sin "prueba"/"sinmuestra" en el nombre (`enlaces/`). Cada prueba con su propio `-dark`; flat = `-sinmuestra` del mismo día.
+- Capturas sin `captura.json` (21/10 y anteriores): `centrado.py` necesita el ROI solo como metadato → carpeta sombra en
+  `enlaces/` con symlinks a los LEDs + un `captura.json` sintético con ROI = (−1,−1). No afecta ningún número.
+  Fecha = mtime de la carpeta. ROI: 21/10 (4000,1942) según memoria (centrado del 21/10), .500/.c/.d sin dato (`?*`);
+  anteriores al 21/10 marcados `(4032,3040)?*` = ROI viejo según la nota de visionpoint, **no verificado**.
+- `2026-10-30-red-dark` está vacía → 30/10 red usa `2026-10-30-red-b-dark` (mismo día, mismo ROI). 30/10 red no tiene
+  sinmuestra propio → flat de red-b.
+- `2026-10-30-red-c-sinmuestra-prueba-1322/1324/1331` (sin muestra) se corrieron como "flat-prueba": borde sobre el
+  flat mismo; espectral n/a (flat = la propia captura).
+- 21/10: el sinmuestra no tiene oscuro propio → se usó el oscuro de la captura para los dos.
+- t BF = exposición que eligió `centrado.py` para el LED central (no siempre la más baja de captura.json).
+- **Espectral se cae** (grid() devuelve None → TypeError) en 30/10 red, red-b, red-b-p1254/p1255 (ROI 4000,874) y en
+  16/10-a. No se investigó por qué. Ahí solo hay borde.
+- **Viejas (antes del 21/10)**: ROI no centrado, eje (a) fila +0.25…+0.38; según memoria el rig era el mismo
+  (2.5x, z≈102) pero sin json no está verificado. Van en la tabla y la figura (cruces rojas) pero **fuera** de las
+  correlaciones. 28/09 y 24–25/09 no tienen las carpetas `fila*_col*` (otro formato); 28/09_red_desenfocado tiene solo 5
+  LEDs (del 3x3 solo el (17,15)) → no se pudieron correr.
+
+## Tabla
+
+NA·z en mm. Eje (a) en pasos de LED respecto de (17,15). Espectral = NA·z filas/cols (sd relativa del radio entre 5 LEDs).
+
+| captura | fecha/hora | tipo | ROI (x,y) | t BF (ms) | eje (a) fila, col (pasos) | w (px) | NA·z borde s fijo | NA·z borde s libre (s) | espectral A filas/cols (sd) | espectral B filas/cols (sd) |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 2026-10-02-viejo | 2026-10-02 14:41 (mtime) | viejo | (4032,3040)?* | 16 | +0.247, -0.003 | 99 | 7.024 | 7.006 (3303) | 9.36/7.33 (7 %) | 10.84/7.10 (7 %) |
+| 2026-10-09-muestra | 2026-10-09 13:15 (mtime) | viejo | (4032,3040)?* | 5 | +0.384, +0.037 | 88 | 7.042 | 6.999 (4043) | 12.23/6.99 (8 %) | 11.38/7.46 (3 %) |
+| 2026-10-16-a | 2026-10-16 12:08 (mtime) | viejo | (4032,3040)?* | 5 | +0.352, +0.022 | 80 | 7.026 | 7.001 (3880) | n/a (espectral falla) | n/a (espectral falla) |
+| 2026-10-16-muestra2 | 2026-10-16 13:03 (mtime) | viejo | (4032,3040)?* | 5 | +0.355, +0.012 | 82 | 7.020 | 6.998 (3857) | 9.86/7.36 (7 %) | 8.17/7.21 (1 %) |
+| 2026-10-20-muestra | 2026-10-20 16:07 (mtime) | viejo | (4032,3040)?* | 5 | +0.294, -0.002 | 91 | 7.056 | 7.048 (3440) | 9.18/7.49 (7 %) | 12.95/7.03 (4 %) |
+| 2026-10-21 | 2026-10-21 12:09 (mtime) | captura | (4000,1942)* | 8 | +0.107, -0.019 | 199 | 7.178 | 7.028 (2156) | 7.53/6.71 (8 %) | 10.87/8.82 (9 %) |
+| 2026-10-21.500 | 2026-10-21 14:15 (mtime) | captura | ?* | 8 | +0.074, +0.014 | 236 | 7.088 | 7.057 (2639) | 7.06/7.12 (0 %) | 7.04/7.13 (1 %) |
+| 2026-10-21.c | 2026-10-21 15:49 (mtime) | captura | ?* | 8 | +0.086, +0.001 | 224 | 7.096 | 7.056 (2407) | 6.97/7.05 (3 %) | 7.10/7.15 (1 %) |
+| 2026-10-21.d | 2026-10-21 15:55 (mtime) | captura | ?* | 19 | +0.086, +0.001 | 223 | 7.098 | 7.056 (2425) | 7.01/7.08 (2 %) | 7.12/7.22 (1 %) |
+| 2026-10-22-p1745 | 2026-10-22 17:45 | prueba | (4000,1942) | 8 | +0.088, -0.001 | 223 | 7.091 | 7.050 (2421) | 7.02/7.05 (3 %) | 7.09/7.21 (1 %) |
+| 2026-10-22-p1747 | 2026-10-22 17:47 | prueba | (4000,1942) | 8 | +0.087, -0.001 | 223 | 7.091 | 7.052 (2424) | 6.98/7.08 (3 %) | 7.06/7.13 (2 %) |
+| 2026-10-22-p1751 | 2026-10-22 17:51 | prueba | (4000,1942) | 8 | +0.087, -0.001 | 223 | 7.093 | 7.053 (2426) | 6.98/7.06 (3 %) | 7.05/7.13 (1 %) |
+| 2026-10-22-p1758 | 2026-10-22 17:58 | prueba | (4000,1942) | 8 | +0.088, +0.000 | 223 | 7.075 | 7.058 (2447) | 7.01/7.06 (2 %) | 7.07/7.15 (1 %) |
+| 2026-10-22-p1803 | 2026-10-22 18:03 | prueba | (4000,1942) | 8 | +0.088, +0.000 | 223 | 7.076 | 7.060 (2448) | 7.01/7.06 (2 %) | 7.08/7.14 (1 %) |
+| 2026-10-22 | 2026-10-22 18:15 | captura | (4000,1942) | 19 | +0.088, +0.001 | 221 | 7.078 | 7.061 (2462) | 7.01/7.03 (2 %) | 7.06/7.13 (1 %) |
+| 2026-10-23-p1326 | 2026-10-23 13:26 | prueba | (4000,1942) | 8 | +0.093, -0.006 | 226 | 7.183 | 6.990 (2296) | 8.04/7.57 (5 %) | 7.17/7.20 (1 %) |
+| 2026-10-23 | 2026-10-23 13:28 | captura | (4000,1942) | 17 | +0.091, -0.006 | 226 | 7.177 | 6.992 (2374) | 8.05/7.56 (5 %) | 7.18/7.18 (1 %) |
+| 2026-10-23-rojo-p1842 | 2026-10-23 18:42 | prueba | (4000,1942) | 8 | +0.093, -0.004 | 234 | 7.101 | 7.004 (2508) | 7.12/7.10 (2 %) | 7.07/7.07 (1 %) |
+| 2026-10-30-red | 2026-10-30 12:30 | captura | (4000,874) | 16 | -0.307, +0.013 | 99 | 7.083 | 7.072 (3703) | n/a (espectral falla) | n/a (espectral falla) |
+| 2026-10-30-red-b-p1254 | 2026-10-30 12:54 | prueba | (4000,874) | 8 | -0.309, +0.014 | 99 | 7.084 | 7.075 (3677) | n/a (espectral falla) | n/a (espectral falla) |
+| 2026-10-30-red-b-p1255 | 2026-10-30 12:55 | prueba | (4000,874) | 8 | -0.309, +0.014 | 99 | 7.084 | 7.075 (3677) | n/a (espectral falla) | n/a (espectral falla) |
+| 2026-10-30-red-b | 2026-10-30 12:57 | captura | (4000,874) | 16 | -0.308, +0.014 | 98 | 7.087 | 7.078 (3670) | n/a (espectral falla) | n/a (espectral falla) |
+| 2026-10-30-red-c-flatp1322 | 2026-10-30 13:22 | flat-prueba | (3968,1966) | 8 | +0.129, -0.015 | 209 | 7.223 | 7.063 (2043) | n/a (sin flat) | n/a (sin flat) |
+| 2026-10-30-red-c-flatp1324 | 2026-10-30 13:24 | flat-prueba | (3968,1966) | 8 | +0.129, -0.015 | 209 | 7.223 | 7.063 (2043) | n/a (sin flat) | n/a (sin flat) |
+| 2026-10-30-red-c-flatp1331 | 2026-10-30 13:31 | flat-prueba | (3968,1966) | 8 | +0.117, -0.004 | 217 | 7.179 | 6.982 (2164) | n/a (sin flat) | n/a (sin flat) |
+| 2026-10-30-red-c-p1333 | 2026-10-30 13:33 | prueba | (3968,1966) | 8 | +0.117, -0.004 | 217 | 7.181 | 6.984 (2167) | 7.26/7.22 (2 %) | 7.13/7.04 (1 %) |
+| 2026-10-30-red-c | 2026-10-30 13:36 | captura | (3968,1966) | 18 | +0.117, -0.005 | 218 | 7.159 | 6.976 (2278) | 7.27/7.23 (1 %) | 7.51/7.18 (3 %) |
+| 2026-11-03-red-p1608 | 2026-11-03 16:08 | prueba | (3968,1966) | 8 | +0.076, -0.029 | 222 | 7.400 | 7.495 (2869) | 6.95/6.92 (3 %) | 6.98/7.18 (2 %) |
+| 2026-11-03-red | 2026-11-03 16:27 | captura | (3968,1966) | 17 | +0.073, -0.028 | 222 | 7.401 | 7.490 (2950) | 7.01/6.94 (2 %) | 6.91/7.06 (0 %) |
+| 2026-11-06-a.1-p1222 | 2026-11-06 12:22 | prueba | (3968,1966) | 8 | +0.085, -0.027 | 215 | 7.362 | 7.422 (2934) | 7.26/7.23 (3 %) | 7.10/6.98 (1 %) |
+| 2026-11-06-a.1 | 2026-11-06 12:30 | captura | (3968,1966) | 18 | +0.081, -0.025 | 216 | 7.352 | 7.403 (3045) | 7.26/7.23 (2 %) | 7.10/7.07 (1 %) |
+| 2026-11-06-a.2 | 2026-11-06 12:32 | captura | (3968,1966) | 18 | +0.081, -0.025 | 216 | 7.352 | 7.403 (3044) | 7.27/7.24 (2 %) | 7.12/7.07 (1 %) |
+| 2026-11-06-b | 2026-11-06 12:32 | captura | (3968,1966) | 18 | +0.075, -0.022 | 225 | 7.341 | 7.363 (3096) | 8.04/7.27 (5 %) | 7.36/7.61 (4 %) |
+| 2026-11-06-c | 2026-11-06 12:34 | captura | (3968,1966) | 18 | +0.079, -0.022 | 220 | 7.342 | 7.371 (3067) | 7.21/7.22 (1 %) | 7.07/7.07 (1 %) |
+| 2026-11-06-d | 2026-11-06 12:35 | captura | (3968,1966) | 18 | +0.078, -0.023 | 221 | 7.360 | 7.412 (3050) | 7.15/7.05 (3 %) | 7.10/6.93 (1 %) |
+| 2026-11-06-e | 2026-11-06 12:35 | captura | (3968,1966) | 18 | +0.076, -0.023 | 223 | 7.350 | 7.400 (3089) | 7.10/7.09 (3 %) | 6.88/6.75 (2 %) |
+| 2026-11-06-f | 2026-11-06 12:36 | captura | (3968,1966) | 18 | +0.076, -0.022 | 221 | 7.374 | 7.436 (3039) | 7.21/7.23 (3 %) | 7.17/7.16 (1 %) |
+
+Notas: `*` ROI sin captura.json; `?` ROI no conocido.
+
+## Correlaciones y agrupados
+
+Pearson r de NA·z borde (s fijo y s libre) contra cada variable; "pendiente" = ajuste lineal de NA·z s fijo.
+Las 7 zonas del 06/11 pesan 7 veces en las primeras tablas; por eso también va una versión con un punto por (día, ROI).
+
+### Rojo ≥ 21/10, con muestra (capturas + pruebas) (n=29)
+- eje fila: r(s fijo) = +0.33, r(s libre) = +0.16, pendiente s fijo = +0.2999 mm/unidad
+- |eje|: r(s fijo) = -0.40, r(s libre) = -0.28, pendiente s fijo = -0.6506 mm/unidad
+- eje col: r(s fijo) = -0.92, r(s libre) = -0.81, pendiente s fijo = -8.073 mm/unidad
+- w: r(s fijo) = +0.32, r(s libre) = +0.19, pendiente s fijo = +0.0009417 mm/unidad
+- t BF: r(s fijo) = +0.45, r(s libre) = +0.43, pendiente s fijo = +0.01137 mm/unidad
+- ROI y: sin dato en alguna captura
+- día (desde 21/10): r(s fijo) = +0.84, r(s libre) = +0.84, pendiente s fijo = +0.01617 mm/unidad
+
+### Rojo ≥ 21/10, incluye pruebas sin muestra (n=32)
+- eje fila: r(s fijo) = +0.33, r(s libre) = +0.11, pendiente s fijo = +0.2927 mm/unidad
+- |eje|: r(s fijo) = -0.40, r(s libre) = -0.28, pendiente s fijo = -0.6465 mm/unidad
+- eje col: r(s fijo) = -0.92, r(s libre) = -0.77, pendiente s fijo = -7.979 mm/unidad
+- w: r(s fijo) = +0.32, r(s libre) = +0.17, pendiente s fijo = +0.0009374 mm/unidad
+- t BF: r(s fijo) = +0.42, r(s libre) = +0.46, pendiente s fijo = +0.01029 mm/unidad
+- ROI y: sin dato en alguna captura
+- día (desde 21/10): r(s fijo) = +0.84, r(s libre) = +0.80, pendiente s fijo = +0.01613 mm/unidad
+
+### Rojo ≥ 21/10 con muestra y ROI de captura.json (sin 21/10) (n=25)
+- eje fila: r(s fijo) = +0.39, r(s libre) = +0.21, pendiente s fijo = +0.3461 mm/unidad
+- |eje|: r(s fijo) = -0.47, r(s libre) = -0.34, pendiente s fijo = -0.7495 mm/unidad
+- eje col: r(s fijo) = -0.94, r(s libre) = -0.85, pendiente s fijo = -8.446 mm/unidad
+- w: r(s fijo) = +0.40, r(s libre) = +0.23, pendiente s fijo = +0.001131 mm/unidad
+- t BF: r(s fijo) = +0.47, r(s libre) = +0.43, pendiente s fijo = +0.01252 mm/unidad
+- ROI y: r(s fijo) = +0.45, r(s libre) = +0.29, pendiente s fijo = +0.0001461 mm/unidad
+- día (desde 21/10): r(s fijo) = +0.85, r(s libre) = +0.84, pendiente s fijo = +0.01764 mm/unidad
+
+### Por día (con muestra, s fijo)
+
+| día | n | NA·z media | sd | eje fila media |
+|---|---|---|---|---|
+| 2026-10-21 | 4 | 7.115 | 0.042 | +0.088 |
+| 2026-10-22 | 6 | 7.084 | 0.009 | +0.087 |
+| 2026-10-23 | 3 | 7.154 | 0.046 | +0.092 |
+| 2026-10-30 | 6 | 7.113 | 0.045 | -0.166 |
+| 2026-11-03 | 2 | 7.400 | 0.000 | +0.074 |
+| 2026-11-06 | 8 | 7.354 | 0.011 | +0.079 |
+
+### Por (día, ROI) con muestra
+
+| día | ROI | n | NA·z s fijo | NA·z s libre | eje fila | eje col | w | t BF usado por borde (ms) |
+|---|---|---|---|---|---|---|---|---|
+| 2026-10-21 | (4000,1942)* | 1 | 7.178 | 7.028 | +0.107 | -0.019 | 199 | 8.0 |
+| 2026-10-21 | ?* | 3 | 7.094 | 7.057 | +0.082 | +0.005 | 227 | 11.7 |
+| 2026-10-22 | (4000,1942) | 6 | 7.084 | 7.056 | +0.087 | -0.000 | 223 | 9.8 |
+| 2026-10-23 | (4000,1942) | 3 | 7.154 | 6.996 | +0.092 | -0.005 | 229 | 11.0 |
+| 2026-10-30 | (3968,1966) | 2 | 7.170 | 6.980 | +0.117 | -0.004 | 217 | 13.0 |
+| 2026-10-30 | (4000,874) | 4 | 7.085 | 7.075 | -0.308 | +0.014 | 99 | 12.0 |
+| 2026-11-03 | (3968,1966) | 2 | 7.400 | 7.492 | +0.074 | -0.029 | 222 | 12.5 |
+| 2026-11-06 | (3968,1966) | 8 | 7.354 | 7.401 | +0.079 | -0.024 | 220 | 16.8 |
+
+### Correlaciones con un punto por (día, ROI) (n=8)
+- eje fila: r(s fijo) = +0.30, r(s libre) = +0.05, pendiente s fijo = +0.2624 mm/unidad
+- |eje|: r(s fijo) = -0.40, r(s libre) = -0.23, pendiente s fijo = -0.6243 mm/unidad
+- eje col: r(s fijo) = -0.90, r(s libre) = -0.71, pendiente s fijo = -7.457 mm/unidad
+- w: r(s fijo) = +0.32, r(s libre) = +0.14, pendiente s fijo = +0.0009074 mm/unidad
+- t BF: r(s fijo) = +0.55, r(s libre) = +0.59, pendiente s fijo = +0.02663 mm/unidad
+- ROI y: sin dato en alguna captura
+- día (desde 21/10): r(s fijo) = +0.75, r(s libre) = +0.76, pendiente s fijo = +0.01453 mm/unidad
+
+
+## Comparaciones pedidas
+
+1. **Mismo día, con/sin reenfoque**: 28/09 (desenfocado vs enfocado) no se puede: ninguna de las dos tiene el 3x3.
+   Dentro de un día (sin saber si hubo reenfoque):
+   - 21/10: 12:09 → 7.178 (w 199) vs 14:15–15:55 (.500/.c/.d) → 7.088/7.096/7.098 (w 223–236). Diferencia −0.08.
+   - 23/10: 13:26/13:28 → 7.183/7.177 vs 18:42 → 7.101. Diferencia −0.08, mismo ROI.
+   - 22/10: 17:45–18:15 (6 tomas, 8 y 19 ms) → 7.075–7.093 (sd 0.009).
+   - 06/11: prueba 12:22 → 7.362 vs 7 zonas 12:30–12:36 → 7.341–7.374.
+2. **Mismo día, distinto ROI (30/10)**: ROI (4000,874) red/red-b/pruebas → 7.083–7.087, eje −0.31, w 98–99;
+   ROI (3968,1966) red-c y prueba → 7.159/7.181, eje +0.117, w 217–218. Diferencia +0.08 a +0.10 (red-c − red-b).
+   Flat-pruebas red-c: 13:22/13:24 → 7.223 (eje +0.129) y 13:31 → 7.179 (eje +0.117; mismo eje que la prueba de 13:33 con muestra, 7.181).
+3. **Correlaciones** (con muestra, ≥ 21/10, n = 29; un punto por (día, ROI), n = 8):
+   - eje fila: r = +0.33 / +0.30. Con |eje fila| ≈ 0.07–0.12 el NA·z va de 7.08 a 7.40; con |eje| ≈ 0.31 (30/10
+     ROI 874) 7.08–7.09; las viejas (eje +0.25…+0.38) 7.02–7.06.
+   - eje col: r = −0.92 / −0.90 (pendiente ≈ −8 mm/paso). El grupo 7.35–7.40 (03/11 y 06/11) tiene eje col
+     −0.022…−0.029; el resto −0.019…+0.014. La correlación la arma básicamente ese grupo.
+   - w: r = +0.32 / +0.32. w ≈ 80–99 px en todas las capturas con |eje fila| > 0.25 (30/10 ROI 874 y viejas); 199–236 en el resto.
+   - t BF: r = +0.45 / +0.55. Dentro de un día no se ve efecto: 22/10 8 ms vs 19 ms → 7.09 vs 7.08; 21/10 .c (8 ms)
+     vs .d (19 ms) → 7.096 vs 7.098; 23/10 prueba 8 ms vs captura 17 ms → 7.183 vs 7.177.
+   - ROI y (solo con captura.json, n = 25): r = +0.45.
+   - día: r = +0.84 / +0.75 (por día: 21/10 7.12, 22/10 7.08, 23/10 7.15, 30/10 7.11, 03/11 7.40, 06/11 7.35).
+4. **s libre**: el paso ajustado va de 2043 a 4043 px/paso (nominal 3538). El NA·z s libre se mueve en el mismo
+   sentido que s fijo pero con menos rango en las viejas/ROI 874 (7.00–7.08) y más en 03/11 (7.49).
+5. **Espectral** (donde anda, recorte A filas/cols): 6.92–7.27 en todas las capturas ≥ 21/10, sin el salto de
+   03/11–06/11 que tiene el borde (03/11: espectral 7.01/6.94 vs borde 7.40; 22/10: 7.01/7.03 vs borde 7.08).
+   Sd > 4 % (21/10 12:09, 23/10 13:2x, 06/11-b, viejas) = ajuste dudoso; ahí las filas dan 8–12.
+
+## Figura
+
+`fig_archivo.png`: NA·z borde s fijo vs eje fila, vs eje col, y s libre vs eje fila. Círculos = capturas,
+cuadrados = pruebas, triángulos = flat-pruebas, cruces = viejas (antes del 21/10).

@@ -1,0 +1,20 @@
+/home/chanoscopio/.local/lib/python3.10/site-packages/matplotlib/projections/__init__.py:63: UserWarning: Unable to import Axes3D. This may be due to multiple versions of Matplotlib being installed (e.g. as a system package and as a pip package). As a result, the 3D projection is not available.
+  warnings.warn("Unable to import Axes3D. This may be due to multiple versions of "
+15 trabajos
+V_e+0.040_d+000 s0: 217.3 s nsub 1275 | esp_nt 7.390/7.272 | borde a 7.370 w 0 b 7.369 | verdad 7.350
+V_e+0.000_d+000 s0: 221.4 s nsub 1000 | esp_nt 7.390/7.309 | borde a 7.363 w 0 b 7.273 | verdad 7.350
+V_e+0.117_d+000 s0: 226.6 s nsub 2800 | esp_nt 7.322/7.304 | borde a 7.370 w 0 b 7.353 | verdad 7.350
+V_e+0.080_d+000 s0: 228.5 s nsub 2150 | esp_nt 7.355/7.327 | borde a 7.370 w 0 b 7.380 | verdad 7.350
+A_e+0.000_d+000 s0: 226.1 s nsub 2050 | esp_nt 7.112/6.947 | borde a 6.986 w 0 b 6.909 | verdad 6.970
+V_e-0.310_d+000 s0: 253.7 s nsub 4575 | esp_nt 9.796/7.575 | borde a 7.370 w 0 b 7.370 | verdad 7.350
+A_e-0.310_d+000 s0: 259.7 s nsub 5125 | esp_nt 11.193/7.386 | borde a 6.987 w 0 b 6.987 | verdad 6.970
+V_e+0.080_d-100 s0: 313.2 s nsub 2150 | esp_nt 7.547/7.595 | borde a 7.370 w 0 b 7.417 | verdad 7.350
+/home/chanoscopio/Documents/LucasC/reproducible-research-template/scripts/precaptura.py:241: RuntimeWarning: divide by zero encountered in divide
+  out.append(sigm((R - d) / w))
+V_e+0.080_d+100 s0: 301.3 s nsub 2150 | esp_nt 7.494/7.522 | borde a 7.370 w 0 b 7.370 | verdad 7.350
+V_e+0.080_d+050 s0: 294.7 s nsub 2150 | esp_nt 7.518/7.499 | borde a 7.370 w 0 b 7.370 | verdad 7.350
+V_e+0.080_d-050 s0: 310.4 s nsub 2150 | esp_nt 7.477/7.486 | borde a 7.370 w 0 b 7.379 | verdad 7.350
+V_e+0.117_d-100 s0: 324.3 s nsub 2800 | esp_nt 7.549/7.549 | borde a 7.370 w 0 b 7.346 | verdad 7.350
+V_e+0.117_d+100 s0: 271.6 s nsub 2800 | esp_nt 7.507/7.507 | borde a 7.370 w 0 b 7.370 | verdad 7.350
+V_e+0.080_d+025 s0: 246.6 s nsub 2150 | esp_nt 7.506/7.488 | borde a 7.370 w 0 b 7.370 | verdad 7.350
+V_e+0.080_d-025 s0: 253.2 s nsub 2150 | esp_nt 7.349/7.331 | borde a 7.370 w 0 b 7.370 | verdad 7.350

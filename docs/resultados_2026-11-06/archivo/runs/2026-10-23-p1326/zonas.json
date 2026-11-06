@@ -1,0 +1,431 @@
+{
+ "meta": {
+  "nombre": "2026-10-23-p1326",
+  "fecha": "2026-11-06 13:21",
+  "comando": "analizar_zonas.py /home/chanoscopio/Documents/AleYLu/reconstrucciones/plan_2026-11-06/archivo/enlaces/2026-10-23-p1326 --flat /home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-23-sinmuestra --dark /home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-23-prueba-1326-dark --dark-flat /home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-23-sinmuestra-dark --procs 1 --out /home/chanoscopio/Documents/AleYLu/reconstrucciones/plan_2026-11-06/archivo/runs --nombre 2026-10-23-p1326",
+  "color": "r",
+  "flat": "/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-23-sinmuestra",
+  "dark": "/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-23-prueba-1326-dark",
+  "dark_flat": "/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-23-sinmuestra-dark",
+  "codigo": "/home/chanoscopio/Documents/AleYLu/reconstrucciones/plan_2026-11-06/zonas/codigo",
+  "seg": 346.4
+ },
+ "zonas": [
+  {
+   "etiqueta": "2026-10-23-p1326",
+   "captura": "/home/chanoscopio/Documents/AleYLu/reconstrucciones/plan_2026-11-06/archivo/enlaces/2026-10-23-p1326",
+   "flat": "/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-23-sinmuestra",
+   "dark": "/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-23-prueba-1326-dark",
+   "dark_flat": "/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-10-23-sinmuestra-dark",
+   "roi": [
+    4000,
+    1942
+   ],
+   "espectral": {
+    "A": {
+     "recorte": [
+      360,
+      80,
+      400
+     ],
+     "info": {
+      "(17, 15)": {
+       "t": 8.0,
+       "tf": 17.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.12963615612773605,
+       "oscuro_frac": 0.00758125
+      },
+      "(16, 15)": {
+       "t": 8.0,
+       "tf": 17.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.1103780130977166,
+       "oscuro_frac": 0.0062375
+      },
+      "(17, 14)": {
+       "t": 8.0,
+       "tf": 17.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.10129356699462233,
+       "oscuro_frac": 0.0037375
+      },
+      "(17, 16)": {
+       "t": 8.0,
+       "tf": 17.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.11155282491132239,
+       "oscuro_frac": 0.00281875
+      },
+      "(18, 15)": {
+       "t": 8.0,
+       "tf": 17.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.1088468991810642,
+       "oscuro_frac": 0.00479375
+      }
+     },
+     "descartes": [],
+     "leds": [
+      {
+       "led": [
+        17,
+        15
+       ],
+       "c0": 0.875,
+       "c1": 1.2521942110177404,
+       "rb": 62.765485714285724
+      },
+      {
+       "led": [
+        16,
+        15
+       ],
+       "c0": -51.17927170868347,
+       "c1": 2.7478057889822596,
+       "rb": 59.72577142857144
+      },
+      {
+       "led": [
+        17,
+        14
+       ],
+       "c0": 0.375,
+       "c1": -46.55646591970121,
+       "rb": 59.57577142857144
+      },
+      {
+       "led": [
+        17,
+        16
+       ],
+       "c0": 0.0,
+       "c1": 51.677077497665735,
+       "rb": 60.91960000000001
+      },
+      {
+       "led": [
+        18,
+        15
+       ],
+       "c0": 41.30427170868347,
+       "c1": 4.49780578898226,
+       "rb": 66.84902857142858
+      }
+     ],
+     "rb": 61.96713142857144,
+     "rb_sd": 3.01288518997986,
+     "rb_sd_rel": 0.048620698110784205,
+     "s_row": 46.24177170868347,
+     "s_col": 49.11677170868347,
+     "NAz_fila": 8.040409673611402,
+     "NAz_col": 7.569772516333698,
+     "NAz_por_led": [
+      7.898461968686663,
+      7.515941744264608,
+      7.497065617013779,
+      7.666174144464356,
+      8.412338466057633
+     ]
+    },
+    "B": {
+     "recorte": [
+      360,
+      480,
+      400
+     ],
+     "info": {
+      "(17, 15)": {
+       "t": 8.0,
+       "tf": 17.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.11820820075617271,
+       "oscuro_frac": 0.00623125
+      },
+      "(16, 15)": {
+       "t": 8.0,
+       "tf": 17.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.10575552064826652,
+       "oscuro_frac": 0.0046375
+      },
+      "(17, 14)": {
+       "t": 8.0,
+       "tf": 17.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.09954676622886657,
+       "oscuro_frac": 0.00204375
+      },
+      "(17, 16)": {
+       "t": 8.0,
+       "tf": 17.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.09093178493584206,
+       "oscuro_frac": 0.002025
+      },
+      "(18, 15)": {
+       "t": 8.0,
+       "tf": 17.0,
+       "frames": 2,
+       "sat_px": 0,
+       "contraste_rms": 0.10162515360613918,
+       "oscuro_frac": 0.00321875
+      }
+     },
+     "descartes": [],
+     "leds": [
+      {
+       "led": [
+        17,
+        15
+       ],
+       "c0": -1.375,
+       "c1": 0.8771942110177404,
+       "rb": 58.13400000000001
+      },
+      {
+       "led": [
+        16,
+        15
+       ],
+       "c0": -50.05427170868347,
+       "c1": -2.6271942110177404,
+       "rb": 59.72577142857144
+      },
+      {
+       "led": [
+        17,
+        14
+       ],
+       "c0": 0.375,
+       "c1": -51.05646591970121,
+       "rb": 59.72577142857144
+      },
+      {
+       "led": [
+        17,
+        16
+       ],
+       "c0": -0.625,
+       "c1": 47.927077497665735,
+       "rb": 59.47782857142858
+      },
+      {
+       "led": [
+        18,
+        15
+       ],
+       "c0": 49.30427170868347,
+       "c1": -1.2521942110177404,
+       "rb": 59.87577142857144
+      }
+     ],
+     "rb": 59.38782857142858,
+     "rb_sd": 0.7153120067067087,
+     "rb_sd_rel": 0.012044757720790696,
+     "s_row": 49.67927170868347,
+     "s_col": 49.49177170868347,
+     "NAz_fila": 7.172548211214796,
+     "NAz_col": 7.199721471398707,
+     "NAz_por_led": [
+      7.034392055996399,
+      7.22700127421818,
+      7.22700127421818,
+      7.196999429090942,
+      7.245151733646388
+     ]
+    }
+   },
+   "contraste": {
+    "A": {
+     "rms_hp": 0.12812078458412574,
+     "oscuro": 0.00758125
+    },
+    "B": {
+     "rms_hp": 0.11657911650450703,
+     "oscuro": 0.006225
+    }
+   },
+   "borde": {
+    "t_central": 8.0,
+    "s_fijo": {
+     "eje": [
+      0.09264562412044022,
+      -0.006409987971510915
+     ],
+     "R_px": 4235.442168911191,
+     "R_pasos": 1.1971289341184825,
+     "w_px": 226.15678792834373,
+     "s": 3538.0,
+     "NAz": 7.182773604710896,
+     "NAz_sin": 7.164130981614005
+    },
+    "s_libre": {
+     "eje": [
+      0.11146129128465414,
+      -0.00572166888264207
+     ],
+     "R_px": 2675.2512598549156,
+     "s": 2296.3177789862916,
+     "w_px": 170.23254159576845,
+     "R_pasos": 1.1650178752854947,
+     "NAz": 6.990107251712969
+    },
+    "loo_NAz": {
+     "(-1, -1)": 7.209594082695272,
+     "(-1, 0)": 7.251917095564805,
+     "(-1, 1)": 7.20179434760235,
+     "(0, -1)": 7.171039259552991,
+     "(0, 1)": 7.228767383199257,
+     "(1, -1)": 6.919997702023956,
+     "(1, 0)": 7.201907345534639,
+     "(1, 1)": 7.042849081664475
+    },
+    "b_eje": [
+     0.006264102694151673,
+     0.0005966299949613317
+    ],
+    "score_a": {
+     "err_f": 0.03235354153908962,
+     "clases_ok": 6,
+     "n": 8,
+     "err_reg": 0.07298308935217462,
+     "err_esq_diag": 0.08267597378066852
+    }
+   },
+   "seg": 346.4
+  }
+ ],
+ "resumen": {
+  "espectral_A_fila": {
+   "n": 1,
+   "media": 8.040409673611402,
+   "sd": null,
+   "sd_rel": null,
+   "min": 8.040409673611402,
+   "max": 8.040409673611402
+  },
+  "espectral_A_col": {
+   "n": 1,
+   "media": 7.569772516333698,
+   "sd": null,
+   "sd_rel": null,
+   "min": 7.569772516333698,
+   "max": 7.569772516333698
+  },
+  "espectral_B_fila": {
+   "n": 1,
+   "media": 7.172548211214796,
+   "sd": null,
+   "sd_rel": null,
+   "min": 7.172548211214796,
+   "max": 7.172548211214796
+  },
+  "espectral_B_col": {
+   "n": 1,
+   "media": 7.199721471398707,
+   "sd": null,
+   "sd_rel": null,
+   "min": 7.199721471398707,
+   "max": 7.199721471398707
+  },
+  "espectral_A_sd_rel": {
+   "n": 1,
+   "media": 0.048620698110784205,
+   "sd": null,
+   "sd_rel": null,
+   "min": 0.048620698110784205,
+   "max": 0.048620698110784205
+  },
+  "espectral_B_sd_rel": {
+   "n": 1,
+   "media": 0.012044757720790696,
+   "sd": null,
+   "sd_rel": null,
+   "min": 0.012044757720790696,
+   "max": 0.012044757720790696
+  },
+  "borde_sfijo_NAz": {
+   "n": 1,
+   "media": 7.182773604710896,
+   "sd": null,
+   "sd_rel": null,
+   "min": 7.182773604710896,
+   "max": 7.182773604710896
+  },
+  "borde_sfijo_R_pasos": {
+   "n": 1,
+   "media": 1.1971289341184825,
+   "sd": null,
+   "sd_rel": null,
+   "min": 1.1971289341184825,
+   "max": 1.1971289341184825
+  },
+  "borde_sfijo_w_px": {
+   "n": 1,
+   "media": 226.15678792834373,
+   "sd": null,
+   "sd_rel": null,
+   "min": 226.15678792834373,
+   "max": 226.15678792834373
+  },
+  "borde_slibre_NAz": {
+   "n": 1,
+   "media": 6.990107251712969,
+   "sd": null,
+   "sd_rel": null,
+   "min": 6.990107251712969,
+   "max": 6.990107251712969
+  },
+  "borde_slibre_s": {
+   "n": 1,
+   "media": 2296.3177789862916,
+   "sd": null,
+   "sd_rel": null,
+   "min": 2296.3177789862916,
+   "max": 2296.3177789862916
+  },
+  "eje_a_fila": {
+   "n": 1,
+   "media": 0.09264562412044022,
+   "sd": null,
+   "sd_rel": null,
+   "min": 0.09264562412044022,
+   "max": 0.09264562412044022
+  },
+  "eje_a_col": {
+   "n": 1,
+   "media": -0.006409987971510915,
+   "sd": null,
+   "sd_rel": null,
+   "min": -0.006409987971510915,
+   "max": -0.006409987971510915
+  },
+  "contraste_A": {
+   "n": 1,
+   "media": 0.12812078458412574,
+   "sd": null,
+   "sd_rel": null,
+   "min": 0.12812078458412574,
+   "max": 0.12812078458412574
+  },
+  "contraste_B": {
+   "n": 1,
+   "media": 0.11657911650450703,
+   "sd": null,
+   "sd_rel": null,
+   "min": 0.11657911650450703,
+   "max": 0.11657911650450703
+  }
+ },
+ "repeticion": null
+}
