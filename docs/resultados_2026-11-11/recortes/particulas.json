@@ -1,0 +1,322 @@
+{
+ "criterio": "Selección de partículas aisladas sobre la imagen BF cruda (LED (17,15) / flat, ROI entero, 18 ms; = codigo/explorar_bf.py).\nLas perlas en BF se ven como un lóbulo claro + uno oscuro (no un mínimo simple), así que el detector usa la ENERGÍA local del\ncontraste: h = q - mediana31(q), e = sqrt(gauss2.5(h^2)); candidato = máximo local 11x11 de e con e > 0.06 (~2x el piso de e).\nAislada si: (1) ningún candidato con e > 0.10 a menos de 20 px (25.8 µm); (2) ninguna mancha grande (|gauss1(h)| > 0.15,\nárea > 60 px) a menos de 20 px; (3) 0.12 < e < 0.45 (perla clara, no grumo); (4) a >= 20 px del borde de su recorte de 200 px.\nCentro refinado = centroide de e^2 en una ventana de 9x9 (redondeado al píxel; el recorte de 20 px se centra en ese píxel).\nRegiones de 200 px (esquina fila,col en el ROI): A 440,380; B 770,460; C 520,180 (A y B lanzadas con un detector anterior\nque confundía los dos lóbulos de una perla con dos partículas; C = mejor región extra con este detector; ver INFORME).",
+ "regiones": {
+  "A": [
+   440,
+   380,
+   200
+  ],
+  "B": [
+   770,
+   460,
+   200
+  ],
+  "C": [
+   520,
+   180,
+   200
+  ]
+ },
+ "particulas": [
+  {
+   "id": "A01",
+   "region": "A",
+   "fila_roi": 471,
+   "col_roi": 486,
+   "fila_rec": 31,
+   "col_rec": 106,
+   "energia": 0.203,
+   "vecino_px": 36.3,
+   "vecino_um": 46.9,
+   "mancha_grande_px": 39.3
+  },
+  {
+   "id": "A02",
+   "region": "A",
+   "fila_roi": 489,
+   "col_roi": 443,
+   "fila_rec": 49,
+   "col_rec": 63,
+   "energia": 0.195,
+   "vecino_px": 33.1,
+   "vecino_um": 42.6,
+   "mancha_grande_px": 28.1
+  },
+  {
+   "id": "A03",
+   "region": "A",
+   "fila_roi": 509,
+   "col_roi": 401,
+   "fila_rec": 69,
+   "col_rec": 21,
+   "energia": 0.266,
+   "vecino_px": 28.6,
+   "vecino_um": 36.9,
+   "mancha_grande_px": 64.4
+  },
+  {
+   "id": "A04",
+   "region": "A",
+   "fila_roi": 514,
+   "col_roi": 523,
+   "fila_rec": 74,
+   "col_rec": 143,
+   "energia": 0.143,
+   "vecino_px": 26.8,
+   "vecino_um": 34.6,
+   "mancha_grande_px": 91.8
+  },
+  {
+   "id": "A05",
+   "region": "A",
+   "fila_roi": 534,
+   "col_roi": 432,
+   "fila_rec": 94,
+   "col_rec": 52,
+   "energia": 0.284,
+   "vecino_px": 39.8,
+   "vecino_um": 51.4,
+   "mancha_grande_px": 74.1
+  },
+  {
+   "id": "A06",
+   "region": "A",
+   "fila_roi": 547,
+   "col_roi": 513,
+   "fila_rec": 107,
+   "col_rec": 133,
+   "energia": 0.269,
+   "vecino_px": 25.7,
+   "vecino_um": 33.2,
+   "mancha_grande_px": 94.4
+  },
+  {
+   "id": "A07",
+   "region": "A",
+   "fila_roi": 553,
+   "col_roi": 488,
+   "fila_rec": 113,
+   "col_rec": 108,
+   "energia": 0.281,
+   "vecino_px": 23.3,
+   "vecino_um": 30.1,
+   "mancha_grande_px": 100.3
+  },
+  {
+   "id": "A08",
+   "region": "A",
+   "fila_roi": 569,
+   "col_roi": 471,
+   "fila_rec": 129,
+   "col_rec": 91,
+   "energia": 0.272,
+   "vecino_px": 23.3,
+   "vecino_um": 30.1,
+   "mancha_grande_px": 110.4
+  },
+  {
+   "id": "A09",
+   "region": "A",
+   "fila_roi": 603,
+   "col_roi": 402,
+   "fila_rec": 163,
+   "col_rec": 22,
+   "energia": 0.261,
+   "vecino_px": 53.7,
+   "vecino_um": 69.2,
+   "mancha_grande_px": 121.5
+  },
+  {
+   "id": "B01",
+   "region": "B",
+   "fila_roi": 848,
+   "col_roi": 526,
+   "fila_rec": 78,
+   "col_rec": 66,
+   "energia": 0.17,
+   "vecino_px": 42.6,
+   "vecino_um": 54.9,
+   "mancha_grande_px": 132.0
+  },
+  {
+   "id": "B02",
+   "region": "B",
+   "fila_roi": 849,
+   "col_roi": 609,
+   "fila_rec": 79,
+   "col_rec": 149,
+   "energia": 0.156,
+   "vecino_px": 23.2,
+   "vecino_um": 29.9,
+   "mancha_grande_px": 93.0
+  },
+  {
+   "id": "B03",
+   "region": "B",
+   "fila_roi": 873,
+   "col_roi": 628,
+   "fila_rec": 103,
+   "col_rec": 168,
+   "energia": 0.276,
+   "vecino_px": 30.6,
+   "vecino_um": 39.5,
+   "mancha_grande_px": 77.5
+  },
+  {
+   "id": "B04",
+   "region": "B",
+   "fila_roi": 903,
+   "col_roi": 532,
+   "fila_rec": 133,
+   "col_rec": 72,
+   "energia": 0.179,
+   "vecino_px": 25.2,
+   "vecino_um": 32.6,
+   "mancha_grande_px": 107.0
+  },
+  {
+   "id": "B05",
+   "region": "B",
+   "fila_roi": 917,
+   "col_roi": 553,
+   "fila_rec": 147,
+   "col_rec": 93,
+   "energia": 0.134,
+   "vecino_px": 22.8,
+   "vecino_um": 29.4,
+   "mancha_grande_px": 82.0
+  },
+  {
+   "id": "C01",
+   "region": "C",
+   "fila_roi": 549,
+   "col_roi": 261,
+   "fila_rec": 29,
+   "col_rec": 81,
+   "energia": 0.203,
+   "vecino_px": 20.1,
+   "vecino_um": 26.0,
+   "mancha_grande_px": 130.3
+  },
+  {
+   "id": "C02",
+   "region": "C",
+   "fila_roi": 565,
+   "col_roi": 308,
+   "fila_rec": 45,
+   "col_rec": 128,
+   "energia": 0.182,
+   "vecino_px": 46.1,
+   "vecino_um": 59.5,
+   "mancha_grande_px": 119.6
+  },
+  {
+   "id": "C03",
+   "region": "C",
+   "fila_roi": 584,
+   "col_roi": 266,
+   "fila_rec": 64,
+   "col_rec": 86,
+   "energia": 0.231,
+   "vecino_px": 35.4,
+   "vecino_um": 45.6,
+   "mancha_grande_px": 152.5
+  },
+  {
+   "id": "C04",
+   "region": "C",
+   "fila_roi": 614,
+   "col_roi": 313,
+   "fila_rec": 94,
+   "col_rec": 133,
+   "energia": 0.132,
+   "vecino_px": 23.6,
+   "vecino_um": 30.4,
+   "mancha_grande_px": 150.3
+  },
+  {
+   "id": "C05",
+   "region": "C",
+   "fila_roi": 628,
+   "col_roi": 294,
+   "fila_rec": 108,
+   "col_rec": 114,
+   "energia": 0.25,
+   "vecino_px": 23.6,
+   "vecino_um": 30.4,
+   "mancha_grande_px": 127.4
+  },
+  {
+   "id": "C06",
+   "region": "C",
+   "fila_roi": 633,
+   "col_roi": 344,
+   "fila_rec": 113,
+   "col_rec": 164,
+   "energia": 0.13,
+   "vecino_px": 22.2,
+   "vecino_um": 28.6,
+   "mancha_grande_px": 143.4
+  },
+  {
+   "id": "C07",
+   "region": "C",
+   "fila_roi": 637,
+   "col_roi": 219,
+   "fila_rec": 117,
+   "col_rec": 39,
+   "energia": 0.264,
+   "vecino_px": 30.5,
+   "vecino_um": 39.4,
+   "mancha_grande_px": 90.2
+  },
+  {
+   "id": "C08",
+   "region": "C",
+   "fila_roi": 646,
+   "col_roi": 326,
+   "fila_rec": 126,
+   "col_rec": 146,
+   "energia": 0.342,
+   "vecino_px": 22.2,
+   "vecino_um": 28.6,
+   "mancha_grande_px": 138.0
+  },
+  {
+   "id": "C09",
+   "region": "C",
+   "fila_roi": 660,
+   "col_roi": 244,
+   "fila_rec": 140,
+   "col_rec": 64,
+   "energia": 0.274,
+   "vecino_px": 23.2,
+   "vecino_um": 29.9,
+   "mancha_grande_px": 73.8
+  },
+  {
+   "id": "C10",
+   "region": "C",
+   "fila_roi": 692,
+   "col_roi": 292,
+   "fila_rec": 172,
+   "col_rec": 112,
+   "energia": 0.26,
+   "vecino_px": 38.3,
+   "vecino_um": 49.4,
+   "mancha_grande_px": 85.0
+  },
+  {
+   "id": "C11",
+   "region": "C",
+   "fila_roi": 695,
+   "col_roi": 340,
+   "fila_rec": 175,
+   "col_rec": 160,
+   "energia": 0.229,
+   "vecino_px": 27.0,
+   "vecino_um": 34.9,
+   "mancha_grande_px": 126.8
+  }
+ ]
+}

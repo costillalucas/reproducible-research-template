@@ -1,0 +1,171 @@
+brazo  métrica         mediana [p25, p75] n
+LR     amp_fwhm_g         7.46 [  7.32,   7.85] 17
+LR     amp_fwhm_r         6.73 [  6.51,   7.04] 18
+LR     amp_borde          3.90 [  3.79,   3.99] 18
+r400   fase_fwhm_g        3.19 [  2.85,   3.53] 14
+r400   fase_fwhm_r        3.81 [  3.66,   4.16] 14
+r400   fase_borde         1.82 [  1.55,   1.91] 14
+r400   fase_pico          1.39 [  1.30,   1.51] 14
+r400   fase_vol          18.09 [ 16.46,  22.18] 14
+r400   fase_vol35        18.25 [ 16.43,  21.97] 14
+r400   fase_fondo_rms     0.07 [  0.05,   0.08] 14
+r400   marco_std_fase     0.06 [  0.05,   0.07] 18
+r400   amp_fwhm_g         1.80 [  1.49,   2.31] 17
+r400   amp_fwhm_r         2.97 [  2.47,   3.74] 18
+r400   amp_borde          1.42 [  0.71,   2.49] 18
+r400   amp_p0             0.22 [  0.13,   0.29] 18
+r400   desplaz            0.00 [  0.00,   0.00] 18
+b400   fase_fwhm_g        6.96 [  6.69,   7.07] 14
+b400   fase_fwhm_r        6.58 [  6.48,   6.76] 14
+b400   fase_borde         4.32 [  4.18,   4.42] 14
+b400   fase_pico          0.59 [  0.50,   0.62] 14
+b400   fase_vol          24.26 [ 20.70,  25.95] 14
+b400   fase_vol35        16.97 [ 14.28,  17.94] 14
+b400   fase_fondo_rms     0.04 [  0.03,   0.04] 14
+b400   marco_std_fase     0.03 [  0.03,   0.05] 18
+b400   amp_fwhm_g        12.21 [ 10.94,  14.68] 15
+b400   amp_fwhm_r         8.54 [  8.10,   9.02] 18
+b400   amp_borde          4.07 [  3.91,   4.18] 18
+b400   amp_p0             0.28 [  0.26,   0.37] 18
+b400   desplaz            0.26 [  0.11,   0.35] 18
+r200   fase_fwhm_g        3.70 [  3.47,   3.93] 2
+r200   fase_fwhm_r        4.44 [  4.13,   4.74] 2
+r200   fase_borde         2.16 [  2.15,   2.16] 2
+r200   fase_pico          1.53 [  1.29,   1.78] 2
+r200   fase_vol          28.33 [ 21.80,  34.87] 2
+r200   fase_vol35        29.39 [ 22.48,  36.30] 2
+r200   fase_fondo_rms     0.09 [  0.09,   0.09] 2
+r200   marco_std_fase     0.07 [  0.06,   0.07] 3
+r200   amp_fwhm_g         2.57 [  2.17,   2.98] 2
+r200   amp_fwhm_r         3.66 [  2.56,   5.28] 3
+r200   amp_borde          2.90 [  2.69,   4.14] 3
+r200   amp_p0             0.14 [  0.14,   0.31] 3
+r200   desplaz            0.06 [  0.05,   0.06] 3
+r20    fase_fwhm_g        3.91 [  3.52,   4.58] 13
+r20    fase_fwhm_r        4.07 [  3.32,   4.44] 14
+r20    fase_borde         2.79 [  2.46,   3.17] 14
+r20    fase_pico          1.89 [  1.84,   2.15] 14
+r20    fase_vol          43.70 [ 40.94,  49.98] 14
+r20    fase_vol35        36.79 [ 34.42,  43.77] 14
+r20    fase_fondo_rms     0.35 [  0.33,   0.51] 14
+r20    marco_std_fase     0.59 [  0.58,   0.63] 18
+r20    amp_fwhm_g         3.67 [  1.91,   4.09] 15
+r20    amp_fwhm_r         2.93 [  1.92,   5.46] 18
+r20    amp_borde          5.81 [  4.94,   6.58] 13
+r20    amp_p0             0.59 [  0.48,   0.79] 18
+r20    desplaz            1.48 [  1.43,   1.77] 18
+r20sc  fase_fwhm_g        2.98 [  2.76,   3.21] 14
+r20sc  fase_fwhm_r        3.49 [  3.28,   3.68] 14
+r20sc  fase_borde         1.81 [  1.65,   1.94] 14
+r20sc  fase_pico          1.64 [  1.56,   1.70] 14
+r20sc  fase_vol          21.70 [ 20.42,  23.96] 14
+r20sc  fase_vol35        21.88 [ 19.33,  23.58] 14
+r20sc  fase_fondo_rms     0.07 [  0.06,   0.08] 14
+r20sc  marco_std_fase     0.07 [  0.06,   0.08] 18
+r20sc  amp_fwhm_g         3.40 [  2.94,   5.00] 17
+r20sc  amp_fwhm_r         3.53 [  2.59,   4.79] 18
+r20sc  amp_borde          2.01 [  1.11,   2.47] 18
+r20sc  amp_p0             0.33 [  0.22,   0.37] 18
+r20sc  desplaz            0.69 [  0.49,   0.80] 18
+r40    fase_fwhm_g        3.28 [  2.86,   3.59] 14
+r40    fase_fwhm_r        3.84 [  3.62,   4.08] 14
+r40    fase_borde         1.82 [  1.64,   1.98] 14
+r40    fase_pico          1.37 [  1.30,   1.46] 14
+r40    fase_vol          18.31 [ 16.71,  21.28] 14
+r40    fase_vol35        17.39 [ 16.65,  21.84] 14
+r40    fase_fondo_rms     0.07 [  0.05,   0.08] 14
+r40    marco_std_fase     0.06 [  0.06,   0.07] 18
+r40    amp_fwhm_g         2.15 [  1.73,   2.70] 18
+r40    amp_fwhm_r         3.05 [  1.91,   3.57] 18
+r40    amp_borde          0.94 [  0.53,   1.63] 18
+r40    amp_p0             0.20 [  0.14,   0.38] 18
+r40    desplaz            0.10 [  0.08,   0.15] 18
+r80    fase_fwhm_g        3.36 [  3.11,   3.71] 8
+r80    fase_fwhm_r        4.04 [  3.63,   4.62] 8
+r80    fase_borde         1.97 [  1.51,   2.52] 8
+r80    fase_pico          1.30 [  1.12,   1.43] 8
+r80    fase_vol          16.76 [ 14.84,  21.69] 8
+r80    fase_vol35        18.44 [ 14.71,  22.08] 8
+r80    fase_fondo_rms     0.08 [  0.07,   0.09] 8
+r80    marco_std_fase     0.09 [  0.07,   0.10] 12
+r80    amp_fwhm_g         1.96 [  1.56,   3.64] 12
+r80    amp_fwhm_r         4.08 [  2.11,   5.02] 12
+r80    amp_borde          2.07 [  0.81,   2.40] 12
+r80    amp_p0             0.30 [  0.13,   0.38] 12
+r80    desplaz            0.09 [  0.04,   0.14] 12
+n400   fase_fwhm_g        3.54 [  2.88,   3.70] 14
+n400   fase_fwhm_r        1.65 [  0.91,   2.34] 14
+n400   fase_borde         1.63 [  0.71,   1.83] 14
+n400   fase_pico          0.34 [  0.29,   0.42] 14
+n400   fase_vol           7.19 [  6.27,   7.80] 14
+n400   fase_vol35         6.09 [  5.68,   6.61] 14
+n400   fase_fondo_rms     0.10 [  0.09,   0.13] 14
+n400   marco_std_fase     0.09 [  0.08,   0.10] 18
+n400   amp_fwhm_g         3.18 [  2.03,   4.03] 18
+n400   amp_fwhm_r         1.23 [  0.86,   2.06] 18
+n400   amp_borde          0.80 [  0.66,   1.25] 18
+n400   amp_p0             0.40 [  0.35,   0.55] 18
+n400   desplaz            0.28 [  0.17,   0.40] 18
+n20    fase_fwhm_g        6.84 [  5.18,  11.14] 7
+n20    fase_fwhm_r        1.56 [  1.12,   2.64] 14
+n20    fase_borde         2.28 [  0.54,   2.89] 14
+n20    fase_pico          1.09 [  0.86,   1.31] 14
+n20    fase_vol          27.17 [ 23.11,  33.76] 14
+n20    fase_vol35        22.33 [ 18.71,  26.64] 14
+n20    fase_fondo_rms     0.34 [  0.31,   0.54] 14
+n20    marco_std_fase     0.59 [  0.55,   0.63] 18
+n20    amp_fwhm_g         7.91 [  6.81,  11.02] 13
+n20    amp_fwhm_r         5.74 [  1.50,   8.24] 18
+n20    amp_borde          6.33 [  6.08,   6.72] 18
+n20    amp_p0             1.01 [  0.75,   1.04] 18
+n20    desplaz            1.74 [  1.68,   1.99] 18
+pareado b400-r400 fase_fwhm_g    +3.80 [+3.23, +3.96] n 14, menor en 0
+pareado b400-r400 fase_borde     +2.53 [+2.44, +2.68] n 14, menor en 0
+pareado b400-r400 fase_vol       +4.42 [+3.23, +5.25] n 14, menor en 1
+pareado b400-r400 fase_vol35     -2.83 [-4.74, -1.71] n 14, menor en 12
+pareado b400-r400 amp_fwhm_g    +10.36 [+9.02, +12.81] n 15, menor en 0
+pareado b400-r400 amp_borde      +2.51 [+1.48, +3.41] n 18, menor en 1
+pareado r200-r400 fase_fwhm_g    -0.10 [-0.12, -0.08] n 2, menor en 2
+pareado r200-r400 fase_borde     +0.19 [+0.14, +0.24] n 2, menor en 0
+pareado r200-r400 fase_vol       +0.08 [-0.20, +0.37] n 2, menor en 1
+pareado r200-r400 fase_vol35     -0.26 [-0.38, -0.13] n 2, menor en 2
+pareado r200-r400 amp_fwhm_g     +0.02 [-0.03, +0.07] n 2, menor en 1
+pareado r200-r400 amp_borde      +0.30 [+0.18, +0.35] n 3, menor en 0
+pareado r20-r400 fase_fwhm_g    +0.53 [+0.44, +1.20] n 13, menor en 1
+pareado r20-r400 fase_borde     +1.08 [+0.76, +1.28] n 14, menor en 1
+pareado r20-r400 fase_vol      +21.84 [+17.76, +28.41] n 14, menor en 0
+pareado r20-r400 fase_vol35    +16.49 [+13.55, +22.48] n 14, menor en 0
+pareado r20-r400 amp_fwhm_g     +1.60 [-0.39, +1.96] n 14, menor en 6
+pareado r20-r400 amp_borde      +4.26 [+1.18, +5.85] n 13, menor en 3
+pareado r20sc-r400 fase_fwhm_g    -0.21 [-0.32, -0.07] n 14, menor en 12
+pareado r20sc-r400 fase_borde     +0.19 [-0.11, +0.40] n 14, menor en 4
+pareado r20sc-r400 fase_vol       +3.12 [+1.27, +5.22] n 14, menor en 2
+pareado r20sc-r400 fase_vol35     +2.69 [+1.20, +3.63] n 14, menor en 3
+pareado r20sc-r400 amp_fwhm_g     +1.71 [+0.55, +2.68] n 16, menor en 1
+pareado r20sc-r400 amp_borde      +0.21 [-0.92, +1.27] n 18, menor en 7
+pareado r40-r400 fase_fwhm_g    +0.04 [-0.04, +0.07] n 14, menor en 6
+pareado r40-r400 fase_borde     +0.13 [+0.02, +0.25] n 14, menor en 3
+pareado r40-r400 fase_vol       +0.38 [-0.60, +0.91] n 14, menor en 5
+pareado r40-r400 fase_vol35     +0.04 [-0.29, +0.58] n 14, menor en 7
+pareado r40-r400 amp_fwhm_g     +0.08 [-0.03, +0.47] n 17, menor en 6
+pareado r40-r400 amp_borde      -0.33 [-0.60, -0.01] n 18, menor en 13
+pareado r80-r400 fase_fwhm_g    -0.06 [-0.19, -0.01] n 8, menor en 7
+pareado r80-r400 fase_borde     +0.10 [+0.00, +0.58] n 8, menor en 1
+pareado r80-r400 fase_vol       -0.37 [-2.20, -0.09] n 8, menor en 6
+pareado r80-r400 fase_vol35     -0.72 [-2.59, -0.25] n 8, menor en 7
+pareado r80-r400 amp_fwhm_g     +0.04 [-0.08, +0.24] n 11, menor en 4
+pareado r80-r400 amp_borde      -0.03 [-0.43, +0.58] n 12, menor en 7
+pareado n400-r400 fase_fwhm_g    +0.28 [-0.70, +0.82] n 14, menor en 5
+pareado n400-r400 fase_borde     -0.16 [-0.84, +0.10] n 14, menor en 9
+pareado n400-r400 fase_vol      -11.20 [-14.33, -9.77] n 14, menor en 14
+pareado n400-r400 fase_vol35    -11.89 [-15.72, -10.93] n 14, menor en 14
+pareado n400-r400 amp_fwhm_g     +1.24 [+0.43, +2.72] n 17, menor en 4
+pareado n400-r400 amp_borde      -0.73 [-1.36, +0.29] n 18, menor en 13
+pareado n20-r400 fase_fwhm_g    +3.26 [+1.18, +7.81] n 7, menor en 0
+pareado n20-r400 fase_borde     +0.62 [-1.02, +1.03] n 14, menor en 5
+pareado n20-r400 fase_vol       +5.25 [+0.80, +15.48] n 14, menor en 3
+pareado n20-r400 fase_vol35     -0.09 [-3.70, +9.29] n 14, menor en 7
+pareado n20-r400 amp_fwhm_g     +6.16 [+4.50, +9.86] n 13, menor en 0
+pareado n20-r400 amp_borde      +4.64 [+3.73, +5.56] n 18, menor en 1
+pareado LR-r400 amp_fwhm_g     +5.75 [+5.47, +6.18] n 16, menor en 0
+pareado LR-r400 amp_borde      +2.50 [+1.28, +3.14] n 18, menor en 1

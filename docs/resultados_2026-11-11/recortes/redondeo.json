@@ -1,0 +1,81 @@
+{
+ "20": {
+  "L_um": 25.8,
+  "dk": 0.03875968992248062,
+  "pupila_bins": 3.010696920583468,
+  "paso_led_bins": 2.517192022962311,
+  "err_med_bins": 0.38303618496728925,
+  "err_max_bins": 0.6906605647141583,
+  "err_med_pct_paso": 15.216804338848979,
+  "err_max_pct_paso": 27.43773849646032,
+  "err_max_pct_radio_pupila": 22.940222245296923,
+  "pupila_px": 29,
+  "pupila_area_cont": 28.47632555897775,
+  "leds_cambian": [
+   [
+    [
+     16,
+     14
+    ],
+    "DF->BF",
+    1.152
+   ]
+  ]
+ },
+ "40": {
+  "L_um": 51.6,
+  "dk": 0.01937984496124031,
+  "pupila_bins": 6.021393841166936,
+  "paso_led_bins": 5.034384045924622,
+  "err_med_bins": 0.3741803988606786,
+  "err_max_bins": 0.6730481049939551,
+  "err_med_pct_paso": 7.432496119631177,
+  "err_max_pct_paso": 13.36902586005121,
+  "err_max_pct_radio_pupila": 11.17761307012463,
+  "pupila_px": 113,
+  "pupila_area_cont": 113.905302235911,
+  "leds_cambian": []
+ },
+ "80": {
+  "L_um": 103.2,
+  "dk": 0.009689922480620155,
+  "pupila_bins": 12.042787682333872,
+  "paso_led_bins": 10.068768091849243,
+  "err_med_bins": 0.37788082121336103,
+  "err_max_bins": 0.6890790952908579,
+  "err_med_pct_paso": 3.752999550354714,
+  "err_max_pct_paso": 6.843727941739699,
+  "err_max_pct_radio_pupila": 5.721923473762641,
+  "pupila_px": 457,
+  "pupila_area_cont": 455.621208943644,
+  "leds_cambian": []
+ },
+ "200": {
+  "L_um": 258.0,
+  "dk": 0.003875968992248062,
+  "pupila_bins": 30.10696920583468,
+  "paso_led_bins": 25.171920229623108,
+  "err_med_bins": 0.4179478597659312,
+  "err_max_bins": 0.6636695068142476,
+  "err_med_pct_paso": 1.6603733682346449,
+  "err_max_pct_paso": 2.6365469966539163,
+  "err_max_pct_radio_pupila": 2.2043716930684263,
+  "pupila_px": 2861,
+  "pupila_area_cont": 2847.632555897775,
+  "leds_cambian": []
+ },
+ "400": {
+  "L_um": 516.0,
+  "dk": 0.001937984496124031,
+  "pupila_bins": 60.21393841166936,
+  "paso_led_bins": 50.343840459246216,
+  "err_med_bins": 0.41633713441487846,
+  "err_max_bins": 0.6653348197432605,
+  "err_med_pct_paso": 0.8269872354134504,
+  "err_max_pct_paso": 1.3215813765377213,
+  "err_max_pct_radio_pupila": 1.1049515067333973,
+  "pupila_px": 11417,
+  "pupila_area_cont": 11390.5302235911,
+  "leds_cambian": []
+ }
+}
