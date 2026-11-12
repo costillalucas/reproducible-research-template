@@ -1,0 +1,26 @@
+C:\Users\fdmco\Documents\reproducible-research-template\docs\resultados_2026-11-12\sim_z_1bf\..\sim_z\sim_z.py:12: UserWarning: A NumPy version >=1.22.4 and <2.3.0 is required for this version of SciPy (detected version 2.5.2)
+  from scipy import fft as sfft
+e1 55.0 base 0 0 0.202 2.261 3.4
+e1 55.0 base 0 1 0.2 2.224 5.8
+e1 55.0 base 1 0 0.262 2.011 8.4
+e1 55.0 base 1 1 0.26 1.991 10.8
+e1 65.0 base 0 0 0.18 2.089 13.5
+e1 65.0 base 0 1 0.181 2.081 16.0
+e1 65.0 base 1 0 0.242 2.019 18.7
+e1 65.0 base 1 1 0.24 1.964 21.2
+e1 73.0 base 0 0 0.183 2.123 23.9
+e1 73.0 base 0 1 0.185 2.178 26.3
+e1 73.0 base 1 0 0.241 2.018 29.2
+e1 73.0 base 1 1 0.239 1.933 31.6
+e3 103.0 1bf_artificial 0 0 0.192 2.34 34.3
+e3 103.0 1bf_artificial 1 0 0.237 2.023 36.9
+e3 146.0 1bf_artificial 0 0 0.164 1.867 39.4
+e3 146.0 1bf_artificial 1 0 0.223 1.735 42.0
+e3 216.0 1bf_artificial 0 0 0.157 1.78 44.5
+e3 216.0 1bf_artificial 1 0 0.22 1.746 46.9
+e2 73.0 bf_x3 0 0 0.194 2.219 49.6
+e2 73.0 bf_x3 1 0 0.252 2.106 52.3
+e2 73.0 paso_0.1 0 0 0.171 1.986 55.1
+e2 73.0 paso_0.1 1 0 0.235 1.984 57.9
+e2 73.0 60_epocas 0 0 0.233 2.547 65.9
+e2 73.0 60_epocas 1 0 0.304 2.488 73.2
