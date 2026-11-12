@@ -1,0 +1,41 @@
+base {'err': 0.03668803069103639, 'e_BF': 0.042879583213675784, 'frc_BF': 0.9990946686852802, 'e_bajo': 0.039948094331336156, 'frc_bajo': 0.9992804784744279, 'e_medio': 0.3041440417701071, 'frc_medio': 0.9584617830000517, 'e_alto': 0.7343519138218809, 'frc_alto': 0.7487462943450995, 'e_fuera': 1.1233532779890538, 'frc_fuera': 0.13233302022510443, 'ph_esf': 0.1184403244255934} 31.858781814575195
+loo/add listo 556.6669487953186
+curva medido_LOO 625.1771054267883
+curva fisher 644.7790684700012
+curva anillo_dentro_fuera 663.4671647548676
+curva anillo_fuera_dentro 681.7164599895477
+curva azar0 702.7296929359436
+curva azar1 717.6823403835297
+{
+ "geo": {
+  "spearman_err": 0.126890756302521,
+  "spearman_alto": 0.07450980392156864,
+  "spearman_bajo": 0.3140056022408964,
+  "pearson_err": -0.05599360355904494
+ },
+ "fisher": {
+  "spearman_err": 0.8434173669467788,
+  "spearman_alto": 0.7022408963585435,
+  "spearman_bajo": 0.13249299719887955,
+  "pearson_err": 0.7115948609955097
+ },
+ "fisher_excl": {
+  "spearman_err": -0.004761904761904762,
+  "spearman_alto": 0.004481792717086834,
+  "spearman_bajo": 0.06554621848739496,
+  "pearson_err": -0.21242652077726693
+ },
+ "grad": {
+  "spearman_err": 0.4092436974789916,
+  "spearman_alto": 0.3280112044817927,
+  "spearman_bajo": -0.31176470588235294,
+  "pearson_err": 0.6650543912960893
+ },
+ "overlap": {
+  "spearman_err": -0.7400560224089636,
+  "spearman_alto": -0.5857142857142857,
+  "spearman_bajo": -0.09075630252100841,
+  "pearson_err": -0.5985965687074141
+ }
+}
+total 728.880288362503
