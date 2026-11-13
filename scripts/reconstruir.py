@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""reconstruir.py -- reconstrucción FPM de una captura 15x15 del microscopio, de punta a punta, sin tocar código.
+"""reconstruir.py -- reconstrucción FPM de una captura N x N (15x15, 21x21...; N de captura.json) del microscopio, de punta a punta, sin tocar código.
 
 Lo llama ./reconstruir.sh (que encuentra solo la carpeta, los darks y el flat). Se puede usar directo:
 
@@ -68,7 +68,7 @@ FACTOR = {"red": 3, "green": 5, "blue": 5}
 COLOR = {"r": "red", "g": "green", "b": "blue"}
 CENTRO_LED = (17, 15)
 ROI_CAL = (4000, 1942, 1120)      # ROI calibrado (OffsetX, OffsetY, lado): eje sobre el LED (17,15) en su centro (visionpoint 21/10)
-FILAS, COLS = range(10, 25), range(8, 23)
+# grilla de LEDs: N_LADO x N_LADO centrada en CENTRO_LED, con N_LADO leído de captura.json (scripts/grilla.py; 15 si falta)
 RX_LED = re.compile(r"^fila(\d+)_col(\d+)_color([rgb])$")
 RX_T = re.compile(r"^(\d+(?:\.\d+)?)ms$")
 DESCARTAR = True                  # --no-descartar lo apaga (solo para comparar con los INFORME, que promediaban todo)
@@ -339,7 +339,7 @@ def figura(path, raw_bf, obj, hrpx, titulo):
 
 # ---------------------------------------------------------------------------------------------------- main
 def main():
-    ap = argparse.ArgumentParser(description="Reconstrucción FPM de una captura 15x15 (ver docstring).")
+    ap = argparse.ArgumentParser(description="Reconstrucción FPM de una captura N x N (ver docstring).")
     ap.add_argument("carpeta")
     ap.add_argument("--flat", required=True)
     ap.add_argument("--dark", required=True, help="oscuros de la muestra")
@@ -392,11 +392,15 @@ def main():
 
     msg("\n---------- 1. LEYENDO LA CAPTURA ----------")
     SM, FL = indexar(carpeta, a.color), indexar(a.flat, a.color)
-    esperado = {(r, c) for r in FILAS for c in COLS}
+    sys.path.insert(0, os.path.join(REPO, "scripts"))
+    from grilla import lado as lado_grilla, leds as leds_grilla
+    n_lado = lado_grilla(carpeta)
+    esperado = set(leds_grilla(CENTRO_LED, n_lado))
     if set(SM) != esperado:
         falt = sorted(esperado - set(SM)); extra = sorted(set(SM) - esperado)
-        raise SystemExit(f"ERROR: la carpeta tiene {len(SM)} LEDs de color '{a.color}'; hacen falta los 225 de filas 10-24, "
-                         f"columnas 8-22.\n  faltan {falt[:8]}{'...' if len(falt) > 8 else ''}  sobran {extra[:8]}")
+        fs, cs = sorted({k[0] for k in esperado}), sorted({k[1] for k in esperado})
+        raise SystemExit(f"ERROR: la carpeta tiene {len(SM)} LEDs de color '{a.color}'; hacen falta los {len(esperado)} "
+                         f"({n_lado}x{n_lado}) de filas {fs[0]}-{fs[-1]}, columnas {cs[0]}-{cs[-1]}.\n  faltan {falt[:8]}{'...' if len(falt) > 8 else ''}  sobran {extra[:8]}")
     falt_f = sorted(esperado - set(FL))
     if falt_f:
         raise SystemExit(f"ERROR: al flat ({a.flat}) le faltan {len(falt_f)} LEDs, p. ej. {falt_f[:5]}.")
@@ -412,7 +416,7 @@ def main():
     roi_ok = roi_src.startswith("captura.json") or roi_src.startswith("--offset-roi")
     shp = tifffile.imread(SM[CENTRO_LED][max(SM[CENTRO_LED])][0]).shape
     H, W = shp
-    msg(f"  muestra: {carpeta}  (225 LEDs, imágenes {H}x{W})")
+    msg(f"  muestra: {carpeta}  ({len(esperado)} LEDs, {n_lado}x{n_lado}, imágenes {H}x{W})")
     msg(f"  flat:    {a.flat}")
     msg(f"  oscuros: muestra {a.dark}" + (f" | flat {a.dark_flat}" if a.dark_flat and a.dark_flat != a.dark else ""))
     msg(f"  ROI de la cámara: OffsetX {roi_x}, OffsetY {roi_y}  (origen: {roi_src})")
@@ -484,7 +488,7 @@ def main():
         if sat.any():
             sat_leds.append((k, int(sat.sum())))
         if (i + 1) % 45 == 0:
-            msg(f"  {i + 1}/225 LEDs leídos ({time.time() - tp:.0f} s)")
+            msg(f"  {i + 1}/{len(keys)} LEDs leídos ({time.time() - tp:.0f} s)")
     # LEDs con un solo frame: varianza = mediana de los de la misma exposición
     for i, v in enumerate(V):
         if v is None:

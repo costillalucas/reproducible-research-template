@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""precaptura.py -- chequeos rápidos en el microscopio ANTES (y justo después) de una captura FPM 15x15.
+"""precaptura.py -- chequeos rápidos en el microscopio ANTES (y justo después) de una captura FPM N x N (N_LADO del script de captura, 15 por defecto).
 
 Solo numpy + PIL + matplotlib. Cada subcomando imprime un veredicto corto por chequeo (OK / CORREGIR + qué hacer)
 y guarda UNA figura PNG de resumen (por defecto en el directorio actual, ver --png).
@@ -29,7 +29,7 @@ Subcomandos
    Fotos de prueba de algunos LEDs por anillo (anillo = round(distancia radial al LED del eje), igual que
    results/captura_2026-10-21/qc.py). Por LED: señal sobre oscuro en cuentas/ms (mediana y percentil 99.9) y
    fracción saturada. Recomienda: exposición de campo claro (BF) con p99.9 crudo ~ 80 % del rango (3276 cuentas);
-   exposición de campo oscuro (DF) por anillo, tope T_MAX = 1025 ms, con p99.9 crudo < 3500; y número de frames N por anillo
+   exposición de campo oscuro (DF) por anillo, tope T_MAX = T_MAX_MS del script de captura (captura.json; 1025 ms por defecto), con p99.9 crudo < 3500; y número de frames N por anillo
    para SNR de PICO >= 3 con tope N_MAX = 4. Señal de pico = p99.9 de (muestra - oscuro, píxel a píxel) bineado 4x4: mide las
    partículas, no el fondo (la mediana, usada antes, vale ~0 en DF ralo y daba N absurdos, p. ej. 9 000 000). Ruido del
    bloque 4x4 = sqrt((g*S + var_oscuro)/16). Como diagnóstico (no como criterio) se informa la SNR de ENERGÍA del DF:
@@ -37,11 +37,11 @@ Subcomandos
    Modelo de ruido por frame: var = g*S + var_oscuro [cuentas^2]; g y var_oscuro se
    ajustan con las diferencias entre frames de los propios datos (si hay >= 2 frames), si no se usan los valores
    por defecto medidos el 21/10 (g 0.297, var 7.1; ver nota en DEFAULT_GAIN). Escribe además un CSV
-   (Fila, Columna, Tiempo_ms, N_frames) para la grilla 15x15 junto a la figura.
+   (Fila, Columna, Tiempo_ms, N_frames) para la grilla N x N (n_lado de captura.json) junto a la figura.
    Ejemplo:  python3 scripts/precaptura.py exposicion .../2026-10-21 --dark .../2026-10-21-dark
 
 3) qc <carpeta> [--flat <carpeta_flat>] [--dark <carpeta_oscuro>] [--led 17,15]
-   Post-captura: completitud de la grilla 15x15, frames por LED, exposiciones, oscuros para cada exposición usada,
+   Post-captura: completitud de la grilla N x N, frames por LED, exposiciones, oscuros para cada exposición usada,
    saturación, y tabla de señal y SNR por anillo (SNR de pico, misma métrica que 'exposicion'; energía como diagnóstico).
    Ejemplo:  python3 scripts/precaptura.py qc .../2026-10-21 --flat .../2026-10-21-sinmuestra --dark .../2026-10-21-dark
 
@@ -58,6 +58,7 @@ import time
 
 import numpy as np
 from PIL import Image
+from grilla import lado as lado_grilla, t_max as t_max_captura
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt  # noqa: E402
@@ -75,7 +76,8 @@ NIVEL_OSCURO = 188.0         # cuentas, oscuro medio 21/10 (si no se da --dark)
 DEFAULT_GAIN, DEFAULT_VAR0 = 0.297, 7.1
 BF_OBJ = 0.80 * RANGO        # p99.9 crudo objetivo en BF
 DF_MAX = 3500.0              # p99.9 crudo máximo en DF
-T_MAX = 1025.0               # ms, máximo del programa de captura (line time 1000 + frame 1150 ms, desde el 22/10; antes 257)
+T_MAX = 1025.0               # ms, máximo del programa de captura por defecto; exposicion lo reemplaza por t_max_ms de captura.json
+                             # (T_MAX_MS del script de captura; 1025 = line time 1000 + frame 1150 ms, desde el 22/10; antes 257)
 SNR_OBJ = 3.0
 N_MAX = 4                    # tope de frames por LED (Lucas 03/11): más frames rinden solo sqrt(N); 4x exposición el 23/10
                              # bajó el error del solver ~9 % -> el límite no es el ruido
@@ -545,7 +547,9 @@ def elegir_muestra(keys, eje, maxn):
 
 
 def cmd_exposicion(args):
+    global T_MAX
     t_ini = time.time()
+    T_MAX = t_max_captura(args.carpeta)   # el tope que puso el script de captura en esta prueba (T_MAX_MS)
     eje = par_int(args.led)
     idx = indexar(args.carpeta, args.color)
     if not args.dark:
@@ -637,13 +641,14 @@ def cmd_exposicion(args):
             veredicto(False, f'anillo {q}: {r["t"]} ms, SNR de pico/frame {r["snr1"]:.2f}; harían falta {r["n_ideal"]} frames '
                              f'para SNR 3, se usa el tope N = {N_MAX} (SNR final ~{r["snr1"] * math.sqrt(N_MAX):.1f}). '
                              f'Más frames rinden solo sqrt(N); el límite de la reconstrucción hoy es el modelo, no el ruido.')
-    # CSV 15x15
+    # CSV de la grilla N x N (N = n_lado de captura.json de la prueba; 15 si es una toma vieja)
+    n_lado = lado_grilla(args.carpeta); h = n_lado // 2
     csv = os.path.splitext(ruta_png(args, 'exposicion', args.carpeta))[0] + '.csv'
     grilla = {}
     with open(csv, 'w') as f:
         f.write('Fila,Columna,Tiempo_ms,N_frames,anillo\n')
-        for rr in range(eje[0] - 7, eje[0] + 8):
-            for cc in range(eje[1] - 7, eje[1] + 8):
+        for rr in range(eje[0] - h, eje[0] + h + 1):
+            for cc in range(eje[1] - h, eje[1] + h + 1):
                 q = anillo((rr, cc), eje)
                 if math.hypot(rr - eje[0], cc - eje[1]) < RADIO_PX / PASO_PX and 'BF' in rec:
                     r = rec['BF']
@@ -652,11 +657,11 @@ def cmd_exposicion(args):
                 if r:
                     f.write(f'{rr},{cc},{r["t"]},{r["N"]},{q}\n')
                     grilla[(rr, cc)] = r
-    # la misma tabla como grilla 15x15 en la terminal: tiempo [ms] / frames por LED
+    # la misma tabla como grilla N x N en la terminal: tiempo [ms] / frames por LED
     print('\n  plan para la próxima toma, por LED: tiempo [ms] / frames a promediar')
-    cs = range(eje[1] - 7, eje[1] + 8)
+    cs = range(eje[1] - h, eje[1] + h + 1)
     print('  fila\\col ' + ' '.join(f'{cc:>6}' for cc in cs))
-    for rr in range(eje[0] - 7, eje[0] + 8):
+    for rr in range(eje[0] - h, eje[0] + h + 1):
         print(f'  {rr:>8} ' + ' '.join(f'{grilla[(rr, cc)]["t"]:>4}/{grilla[(rr, cc)]["N"]}' if (rr, cc) in grilla
                                        else '     -' for cc in cs))
     print()
@@ -684,7 +689,7 @@ def cmd_exposicion(args):
     ax[2].set_title(f'recomendado: BF {rec["BF"]["t"] if "BF" in rec else "-"} ms; DF por anillo (tope {T_MAX:g} ms)')
     fig.suptitle(f'precaptura exposicion  {args.carpeta}', fontsize=10)
     fig.tight_layout(); png = ruta_png(args, 'exposicion', args.carpeta); fig.savefig(png, dpi=90); plt.close(fig)
-    print(f'  figura: {png}\n  tabla 15x15: {csv}   ({time.time() - t_ini:.1f} s)')
+    print(f'  figura: {png}\n  tabla {n_lado}x{n_lado}: {csv}   ({time.time() - t_ini:.1f} s)')
     return 0
 
 
@@ -693,10 +698,11 @@ def cmd_qc(args):
     t_ini = time.time()
     eje = par_int(args.led)
     idx = indexar(args.carpeta, args.color)
-    grilla = {(r, c) for r in range(eje[0] - 7, eje[0] + 8) for c in range(eje[1] - 7, eje[1] + 8)}
-    print(f'== precaptura qc: {args.carpeta}\n   grilla esperada 15x15: filas {eje[0] - 7}-{eje[0] + 7}, columnas {eje[1] - 7}-{eje[1] + 7}')
+    n_lado = lado_grilla(args.carpeta); h = n_lado // 2
+    grilla = {(r, c) for r in range(eje[0] - h, eje[0] + h + 1) for c in range(eje[1] - h, eje[1] + h + 1)}
+    print(f'== precaptura qc: {args.carpeta}\n   grilla esperada {n_lado}x{n_lado}: filas {eje[0] - h}-{eje[0] + h}, columnas {eje[1] - h}-{eje[1] + h}')
     falt = sorted(grilla - {k for k in idx if any(idx[k].values())}); extra = sorted(set(idx) - grilla)
-    veredicto(not falt, f'{len(grilla) - len(falt)}/225 LEDs con imágenes' + (f'; FALTAN {falt[:12]}{"..." if len(falt) > 12 else ""}: recapturarlos' if falt else ''))
+    veredicto(not falt, f'{len(grilla) - len(falt)}/{len(grilla)} LEDs con imágenes' + (f'; FALTAN {falt[:12]}{"..." if len(falt) > 12 else ""}: recapturarlos' if falt else ''))
     if extra:
         print(f'             ({len(extra)} LEDs fuera de la grilla: {extra[:6]}{"..." if len(extra) > 6 else ""})')
     nfr = {}; tus = {}; multi = []
@@ -729,7 +735,7 @@ def cmd_qc(args):
         fl = indexar(args.flat, args.color)
         ff = sorted(grilla - {k for k in fl if any(fl[k].values())})
         dif = sorted(k for k in grilla & set(fl) & set(idx) if {t for t, f in fl[k].items() if f} != {t for t, f in idx[k].items() if f})
-        veredicto(not ff and not dif, f'flat: {225 - len(ff)}/225 LEDs' + (f'; faltan {ff[:8]}' if ff else '')
+        veredicto(not ff and not dif, f'flat: {len(grilla) - len(ff)}/{len(grilla)} LEDs' + (f'; faltan {ff[:8]}' if ff else '')
                   + (f'; exposición distinta a la muestra en {len(dif)} LEDs (p. ej. {dif[:5]}): normalizar por t' if dif else ''))
     # señal, saturación, SNR
     g, v0 = DEFAULT_GAIN, DEFAULT_VAR0
@@ -779,12 +785,14 @@ def cmd_qc(args):
                         + ')' for q, s, n in malos)))
     # figura
     fig, ax = plt.subplots(1, 4, figsize=(20, 4.8))
-    mats = [np.full((15, 15), np.nan) for _ in range(4)]
+    mats = [np.full((n_lado, n_lado), np.nan) for _ in range(4)]
     for k, r in per.items():
-        i, j = k[0] - eje[0] + 7, k[1] - eje[1] + 7
+        if k not in grilla:
+            continue
+        i, j = k[0] - eje[0] + h, k[1] - eje[1] + h
         mats[0][i, j] = r['t']; mats[1][i, j] = np.log10(max(r['cms_pico'], 1e-3))
         mats[2][i, j] = r['snr1'] * math.sqrt(r['nfr']); mats[3][i, j] = 100 * r['sat']
-    ext = (eje[1] - 7.5, eje[1] + 7.5, eje[0] + 7.5, eje[0] - 7.5)
+    ext = (eje[1] - h - .5, eje[1] + h + .5, eje[0] + h + .5, eje[0] - h - .5)
     tit = ['exposición [ms]', f'log10 cuentas/ms sobre oscuro (pico p99.9, {BIN}x{BIN})', 'SNR de pico (frames promediados)',
            '% píxeles saturados']
     cms = ['viridis', 'magma', 'RdYlGn', 'Reds']
@@ -801,7 +809,7 @@ def cmd_qc(args):
 
 
 def main(argv=None):
-    ap = argparse.ArgumentParser(description='Chequeos rápidos antes/después de una captura FPM 15x15 (ver docstring).')
+    ap = argparse.ArgumentParser(description='Chequeos rápidos antes/después de una captura FPM N x N (ver docstring).')
     sp = ap.add_subparsers(dest='cmd', required=True)
     for nombre, f in (('centro', cmd_centro), ('exposicion', cmd_exposicion), ('qc', cmd_qc)):
         p = sp.add_parser(nombre); p.set_defaults(func=f)

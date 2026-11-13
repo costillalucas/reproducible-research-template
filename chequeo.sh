@@ -7,8 +7,9 @@
 #   OFFSET_MANUAL=4000,1942 ./chequeo.sh   forzar el offset del ROI (si no, lo lee de captura.json o del proyecto)
 #
 # Busca solo los darks y el flat: primero los propios (<carpeta>-dark, <carpeta>-sinmuestra), si no los del día.
-# Si la carpeta tiene menos de 225 LEDs la toma como "de prueba": corre centrado y exposición.
-# Si tiene la grilla completa corre además el control final (qc).
+# Si la carpeta es una toma de prueba (captura.json: modo_prueba; en tomas viejas, menos LEDs que la grilla N x N)
+# corre centrado y exposición. Si es la grilla completa corre además el control final (qc).
+# N = n_lado de captura.json (lo fija N_LADO en el script de captura; 15 en tomas viejas).
 # Las figuras, el CSV y el registro quedan en ~/Documents/AleYLu/chequeos/<carpeta>/.
 
 set -u
@@ -50,6 +51,9 @@ for c in "$CARPETA-sinmuestra" "$IMAGENES/$FECHA-sinmuestra" "$IMAGENES"/"$FECHA
     [[ -d "$c" && "$c" != "$CARPETA" ]] && { FLAT="$c"; break; }
 done
 NLED=$(ls -d "$CARPETA"/fila*_col* 2>/dev/null | wc -l)
+read -r NLADO MODO_PRUEBA < <(python3 "$REPO/scripts/grilla.py" "$CARPETA")
+NGRILLA=$((NLADO * NLADO))
+if [[ "$MODO_PRUEBA" == 1 || ( "$MODO_PRUEBA" == "?" && $NLED -lt $NGRILLA ) ]]; then ES_PRUEBA=1; else ES_PRUEBA=0; fi
 
 # 3) offset del ROI: el que guardó la captura (captura.json); si no hay, el del proyecto de la cámara
 if [[ -n "${OFFSET_MANUAL:-}" ]]; then
@@ -64,7 +68,7 @@ LOG="$SALIDA/chequeo_$(date +%H%M).txt"
 
 {
 echo "=================================================================="
-echo " Chequeo de: $NOMBRE   ($NLED LEDs)   $(date '+%d/%m %H:%M')"
+echo " Chequeo de: $NOMBRE   ($NLED LEDs; grilla ${NLADO}x${NLADO} = $NGRILLA)   $(date '+%d/%m %H:%M')"
 echo " darks: ${DARK:-NO ENCONTRADOS}"
 echo " flat:  ${FLAT:-no encontrado}"
 echo " ROI:   OffsetX,OffsetY = $OFFSET  (de: $ORIGEN_OFFSET)"
@@ -79,7 +83,7 @@ if [[ -n "$DARK" ]]; then
     python3 "$PRE" exposicion "$CARPETA" --dark "$DARK" --png "$SALIDA/exposicion.png"
     # solo la toma de prueba define el plan: con la grilla completa no se pisa, porque el flat tiene que
     # tomarse con las mismas exposiciones que la muestra (pasó el 22/10)
-    if [[ -f "$SALIDA/exposicion.csv" && $NLED -lt 225 ]]; then
+    if [[ -f "$SALIDA/exposicion.csv" && $ES_PRUEBA -eq 1 ]]; then
         cp "$SALIDA/exposicion.csv" "$SALIDA_BASE/plan_actual.csv"
         echo "  Plan de tiempos y frames guardado en $SALIDA_BASE/plan_actual.csv"
         echo "  (lo usa iluminacion_con_toma_de_imagene.py con USAR_PLAN = True)"
@@ -91,12 +95,12 @@ else
     echo "  [CORREGIR] No hay carpeta de darks para $FECHA: tomá darks (luz apagada) y volvé a correr."
 fi
 
-if [[ $NLED -ge 225 ]]; then
+if [[ $ES_PRUEBA -eq 0 ]]; then
     echo; echo "---------- 3. CONTROL FINAL (qc) ----------"
     python3 "$PRE" qc "$CARPETA" ${FLAT:+--flat "$FLAT"} ${DARK:+--dark "$DARK"} --png "$SALIDA/qc.png"
     [[ -z "$FLAT" ]] && echo "  [CORREGIR] No hay flat ($FECHA-sinmuestra): tomarlo al final, sin muestra."
 else
-    echo; echo "  (toma de prueba: $NLED LEDs, el control final se corre con la grilla completa de 225)"
+    echo; echo "  (toma de prueba: $NLED LEDs, el control final se corre con la grilla completa de $NGRILLA)"
 fi
 } 2>&1 | tee "$LOG"
 
