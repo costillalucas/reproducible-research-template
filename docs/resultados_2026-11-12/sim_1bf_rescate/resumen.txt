@@ -1,0 +1,109 @@
+﻿caso | var: costo x1e3 / ph_esf / theta_dc
+(73.0, 0, 0)
+   base                 3.415  2.12  +0.93  s_bf 0.998
+   ini_verdad           1.161  0.05  -0.00  s_bf 1.000
+   barrido              2.990  2.40  +1.19  s_bf 0.998 th_sel 6.02
+   barrido+refina       1.932  2.52  +1.31  s_bf 0.999
+   barrido+refina_x2    1.528  2.58  +1.36  s_bf 1.000 th_sel 0.00
+   ini_th0_0.00         3.415  2.12  +0.93  s_bf 0.998
+   ini_th0_1.57         2.209  0.30  -0.02  s_bf 1.000
+   ini_th0_3.14         9.778  1.25  -1.39  s_bf 1.001
+   ini_th0_4.71         2.991  2.52  +1.49  s_bf 1.000
+   signo_ok             2.007  0.56  +0.42  s_bf 0.998
+   signo_ok+libre10     1.729  0.44  +0.36  s_bf 0.998
+   signo_mal            1.580  2.39  +1.10  s_bf 0.998
+   signo_mal+libre10    1.349  2.46  +1.16  s_bf 0.999
+   ganancia_bf          2.144  1.85  +0.86  s_bf 0.987 gan 1.013
+   -> multi-inicio elige ini_th0_1.57 ph 0.30
+   barrido base: argmin costo theta=6.02, argmin ph theta=1.05
+   barrido verdad: minimos locales theta=[0.0, 4.97] costos x1e3=[1.161, 1.292]
+(73.0, 0, 1)
+   base                 3.331  2.18  +0.95  s_bf 0.998
+   ini_verdad           1.158  0.05  -0.00  s_bf 1.000
+   barrido              2.916  2.44  +1.21  s_bf 0.998 th_sel 6.02
+   barrido+refina       1.892  2.54  +1.31  s_bf 0.999
+   barrido+refina_x2    1.539  2.60  +1.35  s_bf 1.000 th_sel 0.00
+   ini_th0_0.00         3.331  2.18  +0.95  s_bf 0.998
+   ini_th0_1.57         2.041  0.28  -0.02  s_bf 1.000
+   ini_th0_3.14         9.563  1.24  -1.37  s_bf 1.001
+   ini_th0_4.71         3.083  2.52  +1.51  s_bf 1.000
+   signo_ok             1.981  0.55  +0.42  s_bf 0.998
+   signo_ok+libre10     1.702  0.44  +0.35  s_bf 0.998
+   signo_mal            1.577  2.39  +1.10  s_bf 0.998
+   signo_mal+libre10    1.342  2.46  +1.16  s_bf 0.999
+   ganancia_bf          2.156  1.81  +0.85  s_bf 0.987 gan 1.013
+   -> multi-inicio elige ini_th0_1.57 ph 0.28
+   barrido base: argmin costo theta=6.02, argmin ph theta=1.05
+   barrido verdad: minimos locales theta=[0.0, 4.97] costos x1e3=[1.158, 1.282]
+(73.0, 1, 0)
+   base                 5.301  2.02  +0.89  s_bf 0.996
+   ini_verdad           1.785  0.06  -0.00  s_bf 1.000
+   barrido              4.663  2.39  +1.16  s_bf 0.996 th_sel 6.02
+   barrido+refina       2.853  2.51  +1.27  s_bf 0.999
+   barrido+refina_x2    2.195  2.59  +1.34  s_bf 0.999 th_sel 0.00
+   ini_th0_0.00         5.301  2.02  +0.89  s_bf 0.996
+   ini_th0_1.57         3.669  0.33  -0.08  s_bf 1.000
+   ini_th0_3.14         18.469  1.43  -1.66  s_bf 1.001
+   ini_th0_4.71         4.806  2.61  +1.59  s_bf 1.001
+   signo_ok             3.478  0.62  +0.42  s_bf 0.995
+   signo_ok+libre10     2.693  0.47  +0.36  s_bf 0.997
+   signo_mal            2.561  2.42  +1.14  s_bf 0.996
+   signo_mal+libre10    2.113  2.46  +1.18  s_bf 0.998
+   ganancia_bf          3.789  1.69  +0.82  s_bf 0.977 gan 1.022
+   -> multi-inicio elige ini_th0_1.57 ph 0.33
+   barrido base: argmin costo theta=6.02, argmin ph theta=0.79
+   barrido verdad: minimos locales theta=[0.0, 4.97] costos x1e3=[1.785, 2.138]
+(73.0, 1, 1)
+   base                 5.508  1.93  +0.87  s_bf 0.996
+   ini_verdad           1.777  0.06  -0.00  s_bf 1.000
+   barrido              4.881  2.32  +1.14  s_bf 0.996 th_sel 6.02
+   barrido+refina       3.163  2.45  +1.25  s_bf 0.999
+   barrido+refina_x2    2.510  2.53  +1.32  s_bf 0.999 th_sel 0.00
+   ini_th0_0.00         5.508  1.93  +0.87  s_bf 0.996
+   ini_th0_1.57         4.013  0.36  -0.09  s_bf 1.000
+   ini_th0_3.14         18.517  1.45  -1.69  s_bf 1.001
+   ini_th0_4.71         4.738  2.59  +1.57  s_bf 1.001
+   signo_ok             3.478  0.61  +0.41  s_bf 0.995
+   signo_ok+libre10     2.699  0.47  +0.36  s_bf 0.997
+   signo_mal            2.571  2.41  +1.14  s_bf 0.997
+   signo_mal+libre10    2.113  2.46  +1.18  s_bf 0.998
+   ganancia_bf          3.793  1.71  +0.83  s_bf 0.977 gan 1.022
+   -> multi-inicio elige ini_th0_1.57 ph 0.36
+   barrido base: argmin costo theta=6.02, argmin ph theta=0.79
+   barrido verdad: minimos locales theta=[0.0, 4.97] costos x1e3=[1.777, 2.133]
+(103.0, 0, 0)
+   base                 2.794  2.34  +1.04  s_bf 0.998
+   ini_verdad           1.903  0.06  -0.00  s_bf 1.000
+   barrido              2.546  2.58  +1.31  s_bf 0.998 th_sel 6.02
+   barrido+refina       1.938  2.63  +1.33  s_bf 1.000
+   barrido+refina_x2    1.892  2.63  +1.35  s_bf 1.000 th_sel 0.00
+   ini_th0_0.00         2.794  2.34  +1.04  s_bf 0.998
+   ini_th0_1.57         2.143  0.19  -0.05  s_bf 1.000
+   ini_th0_3.14         10.248  1.13  -1.17  s_bf 1.000
+   ini_th0_4.71         3.208  2.65  +1.59  s_bf 1.000
+   signo_ok             2.841  0.59  +0.42  s_bf 0.997
+   signo_ok+libre10     2.443  0.45  +0.35  s_bf 0.998
+   signo_mal            2.287  2.39  +1.12  s_bf 0.998
+   signo_mal+libre10    2.056  2.45  +1.17  s_bf 0.999
+   ganancia_bf          2.829  1.68  +0.83  s_bf 0.987 gan 1.012
+   -> multi-inicio elige ini_th0_1.57 ph 0.19
+   barrido base: argmin costo theta=6.02, argmin ph theta=1.05
+   barrido verdad: minimos locales theta=[0.0, 4.97] costos x1e3=[1.903, 2.004]
+(103.0, 1, 0)
+   base                 4.631  2.02  +0.93  s_bf 0.996
+   ini_verdad           2.799  0.05  -0.00  s_bf 1.000
+   barrido              3.952  2.47  +1.19  s_bf 0.996 th_sel 6.02
+   barrido+refina       2.921  2.55  +1.29  s_bf 0.999
+   barrido+refina_x2    2.795  2.60  +1.34  s_bf 0.999 th_sel 0.00
+   ini_th0_0.00         4.631  2.02  +0.93  s_bf 0.996
+   ini_th0_1.57         3.254  0.23  -0.12  s_bf 1.001
+   ini_th0_3.14         21.611  1.34  -1.66  s_bf 1.001
+   ini_th0_4.71         4.081  2.73  +1.65  s_bf 1.001
+   signo_ok             5.139  0.65  +0.42  s_bf 0.994
+   signo_ok+libre10     3.709  0.47  +0.36  s_bf 0.996
+   signo_mal            3.441  2.42  +1.17  s_bf 0.996
+   signo_mal+libre10    3.033  2.46  +1.22  s_bf 0.998
+   ganancia_bf          4.684  1.63  +0.83  s_bf 0.977 gan 1.022
+   -> multi-inicio elige ini_th0_1.57 ph 0.23
+   barrido base: argmin costo theta=6.02, argmin ph theta=0.79
+   barrido verdad: minimos locales theta=[0.0, 4.97] costos x1e3=[2.799, 3.018]
