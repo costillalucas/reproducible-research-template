@@ -1,0 +1,103 @@
+{
+  "v": 5,
+  "attachments": {},
+  "cover": "cover",
+  "createdOnFiles": {
+    "at": "2026-11-16T15:00:00Z",
+    "v": 1
+  },
+  "designSystems": [],
+  "faces": {
+    "ibm-plex-mono": {
+      "family": "IBM Plex Mono",
+      "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&display=swap"
+    },
+    "ibm-plex-sans": {
+      "family": "IBM Plex Sans",
+      "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600&display=swap"
+    },
+    "source-serif-4": {
+      "family": "Source Serif 4",
+      "href": "https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400..700;1,400..700&display=swap"
+    }
+  },
+  "format": {
+    "shared": [
+      "project/deck.css"
+    ],
+    "v": 1
+  },
+  "lists": "css",
+  "order": [
+    "cover",
+    "porque",
+    "mapa",
+    "m0s",
+    "m0",
+    "m2",
+    "q1",
+    "geom",
+    "bfdf",
+    "m5",
+    "m5b",
+    "demo",
+    "q3",
+    "m6",
+    "m6b",
+    "q4",
+    "frc",
+    "equipo",
+    "linea",
+    "bordes",
+    "pupila",
+    "c2",
+    "m10",
+    "desc1",
+    "desc2",
+    "descartes",
+    "abiertas",
+    "siguiente",
+    "cierre",
+    "anexo",
+    "m4",
+    "puente",
+    "q2",
+    "recortes",
+    "biblio"
+  ],
+  "sections": {
+    "s1": {
+      "description": "Portada, motivación y mapa de la charla",
+      "start": "cover"
+    },
+    "s2": {
+      "description": "Minicurso 1: la cámara pierde la fase y la apertura fija la resolución",
+      "start": "m0s"
+    },
+    "s3": {
+      "description": "Minicurso 2: iluminación oblicua, espacio de Fourier y solapamiento",
+      "start": "geom"
+    },
+    "s4": {
+      "description": "Minicurso 3: modelo directo y recuperación de fase",
+      "start": "m6"
+    },
+    "s5": {
+      "description": "Minicurso 4: cómo se demuestra que el detalle es real",
+      "start": "q4"
+    },
+    "s6": {
+      "description": "Nuestro equipo: resultados de julio a noviembre",
+      "start": "equipo"
+    },
+    "s7": {
+      "description": "Lo que sigue: de cada duda, un experimento; la próxima toma y el cierre",
+      "start": "abiertas"
+    },
+    "s8": {
+      "description": "Anexo: de la geometría del montaje al espacio de Fourier, con datos reales, y el redondeo en k del solver",
+      "start": "anexo"
+    }
+  },
+  "title": "Pticografía de Fourier: minicurso y estado del proyecto"
+}

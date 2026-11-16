@@ -1,0 +1,37 @@
+<section id="m5" data-transition="fade" style="background:#F6F4EE;color:#1B2333;font-family:'IBM Plex Sans', Arial, sans-serif;padding:112px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:24px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#A9471A">Minicurso · 2 · Iluminación y Fourier</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:64px;font-weight:600;line-height:1.1;color:#1B2333">Iluminación oblicua: la apertura sintética</h2>
+</div>
+<div style="display:flex;gap:72px;align-items:center;justify-content:center">
+<svg aria-label="Mosaico en el espacio de frecuencias, a escala: la pupila del eje y las del anillo 1 se superponen cerca del centro; las del anillo 7 tocan el borde de un círculo mucho mayor, la NA sintética" width="640" height="640" viewBox="0 0 460 460">
+<circle cx="230" cy="230" r="220" fill="none" stroke="#A9471A" stroke-width="3" stroke-dasharray="10 8"/>
+<circle cx="414" cy="230" r="36" fill="#A9471A" fill-opacity="0.15" stroke="#A9471A" stroke-width="2.5"/>
+<circle cx="46" cy="230" r="36" fill="#A9471A" fill-opacity="0.15" stroke="#A9471A" stroke-width="2.5"/>
+<circle cx="230" cy="46" r="36" fill="#A9471A" fill-opacity="0.15" stroke="#A9471A" stroke-width="2.5"/>
+<circle cx="230" cy="414" r="36" fill="#A9471A" fill-opacity="0.15" stroke="#A9471A" stroke-width="2.5"/>
+<circle cx="258" cy="258" r="36" fill="none" stroke="#6B7280" stroke-width="2" stroke-dasharray="5 5"/>
+<circle cx="202" cy="202" r="36" fill="none" stroke="#6B7280" stroke-width="2" stroke-dasharray="5 5"/>
+<circle cx="258" cy="202" r="36" fill="none" stroke="#6B7280" stroke-width="2" stroke-dasharray="5 5"/>
+<circle cx="202" cy="258" r="36" fill="none" stroke="#6B7280" stroke-width="2" stroke-dasharray="5 5"/>
+<circle cx="259" cy="230" r="36" fill="none" stroke="#2F6690" stroke-width="2.5"/>
+<circle cx="201" cy="230" r="36" fill="none" stroke="#2F6690" stroke-width="2.5"/>
+<circle cx="230" cy="201" r="36" fill="none" stroke="#2F6690" stroke-width="2.5"/>
+<circle cx="230" cy="259" r="36" fill="none" stroke="#2F6690" stroke-width="2.5"/>
+<circle cx="230" cy="230" r="36" fill="#2F6690" fill-opacity="0.35" stroke="#1F4E79" stroke-width="3"/>
+<circle cx="230" cy="230" r="4" fill="#1B2333"/>
+</svg>
+<div style="display:flex;flex-direction:column;gap:28px;width:760px">
+<div style="display:flex;gap:20px;align-items:center"><x-shape kind="ellipse" style="width:40px;height:40px;background:#9DB4C9;border:3px solid #1F4E79"></x-shape><p style="font-size:30px">pupila del objetivo · NA 0,07</p></div>
+<div style="display:flex;gap:20px;align-items:center"><x-shape kind="ellipse" style="width:40px;height:40px;background:#F6F4EE;border:3px solid #2F6690"></x-shape><p style="font-size:30px">vecinos en cruz: <b>campo claro</b></p></div>
+<div style="display:flex;gap:20px;align-items:center"><x-shape kind="ellipse" style="width:40px;height:40px;background:#F6F4EE;border:3px dashed #6B7280"></x-shape><p style="font-size:30px">vecinos en diagonal: <b>campo oscuro</b></p></div>
+<div style="display:flex;gap:20px;align-items:center"><x-shape kind="ellipse" style="width:40px;height:40px;background:#EBD3C5;border:3px solid #A9471A"></x-shape><p style="font-size:30px">LED a 7 pasos · NA de iluminación 0,38</p></div>
+<div style="background:#16202E;border-radius:16px;padding:28px 36px;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;color:#E8925E;font-weight:600">círculo punteado</p>
+<p style="font-family:'Source Serif 4', Georgia, serif;font-size:40px;font-weight:600;line-height:1.2;color:#F3EFE6">NA sintética ≈ 0,07 + 0,38 ≈ 0,45</p>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#6B7280">Minicurso FPM · a escala: matriz de paso 6 mm a z = 102 mm, hasta el anillo 7 (15 × 15 LEDs)</p>
+<aside>(1,5 min) Una onda plana inclinada multiplica el campo de la muestra por una rampa de fase; en Fourier, eso corre el espectro. Como la pupila queda fija, cada LED deja pasar un círculo de radio NA/λ en otro lugar del espectro. En campo claro, el orden cero entra en la pupila y la foto tiene fondo brillante; en campo oscuro queda afuera y solo llega luz dispersada, por eso esas fotos son tenues. FPM pega todas las porciones en un solo espectro, y el solapamiento entre vecinos (40–60 % o más) es lo que fija la fase. La regla: NA sintética = NA del objetivo + NA de iluminación máxima. Con 15 × 15 LEDs (anillo 7) da ~0,45; con la grilla de 21 × 21 del slide 4 llega a ~0,58 sobre los ejes. En una matriz plana, los LEDs exteriores quedan más juntos en k que los centrales, porque sin θ crece cada vez más despacio. El diagrama está a escala (geometría de octubre, z = 102 mm, NA 0,074 en el original): muestra cuánto más grande es la NA sintética que la pupila del objetivo.</aside>
+</section>
