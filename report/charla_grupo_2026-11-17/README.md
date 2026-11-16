@@ -3,6 +3,7 @@
 Charla de 40 minutos para todo el grupo (público mixto): unos 25 minutos de minicurso de FPM con tres preguntas al público y unos 13 minutos de resultados de nuestro equipo. Al final hay un anexo con las cuentas de geometría a Fourier y el redondeo en k.
 
 - **Presentación (Slides, privada hasta compartirla):** https://claude.ai/artifact/H3y6cow9rFre3RpnhLkdTG
+- **Versión en inglés (Slides, privada):** https://claude.ai/artifact/H13qVEWZm3r8hQLytSgWxB — texto y notas traducidos; las imágenes todavía tienen rótulos en español.
 - **Demos interactivas (públicas):**
   - v2 "Ver, comparar, reconstruir": https://rawcdn.githack.com/costillalucas/reproducible-research-template/a4cdc6186c6efaa88031a97813e71960d90ad800/report/fourier_interactivo_v2/index.html
   - v1 "Una imagen, muchos ángulos": https://rawcdn.githack.com/costillalucas/reproducible-research-template/a4cdc6186c6efaa88031a97813e71960d90ad800/report/fourier_interactivo/index.html
@@ -12,6 +13,7 @@ Charla de 40 minutos para todo el grupo (público mixto): unos 25 minutos de min
 | Carpeta | Qué tiene |
 |---|---|
 | `deck/project/` | Respaldo del deck tal como quedó publicado: `deck.json` (orden y secciones), `deck.css` y un HTML por slide, con las notas del orador en `<aside>`. Las imágenes se referencian como `/_blob/<id>`, es decir, como recursos del artifact; las mismas figuras están en `figuras/`. |
+| `deck_en/project/` | Respaldo del deck en inglés (mismo orden y estructura). `deck_en/blobmap.txt` mapea los ids de imagen del deck en español a los del deck en inglés. |
 | `figuras/` | Las figuras usadas en la charla (PNG y el GIF del barrido realzado). |
 | `scripts/` | Los scripts de matplotlib/numpy que generan cada figura. Leen datos de `AleYLu/` y de `docs/`/`results/` de este repo, con rutas absolutas de la PC del laboratorio. |
 | `capturas_demo/` | Capturas de las demos v1 y v2 y el script de Chrome headless que las generó. |

@@ -1,0 +1,37 @@
+<section id="m5" data-transition="fade" style="background:#F6F4EE;color:#1B2333;font-family:'IBM Plex Sans', Arial, sans-serif;padding:112px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:24px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#A9471A">Mini-course · 2 · Illumination and Fourier</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:64px;font-weight:600;line-height:1.1;color:#1B2333">Oblique illumination: the synthetic aperture</h2>
+</div>
+<div style="display:flex;gap:72px;align-items:center;justify-content:center">
+<svg aria-label="Tiling in frequency space, to scale: the on-axis pupil and those of ring 1 overlap near the center; those of ring 7 touch the edge of a much larger circle, the synthetic NA" width="640" height="640" viewBox="0 0 460 460">
+<circle cx="230" cy="230" r="220" fill="none" stroke="#A9471A" stroke-width="3" stroke-dasharray="10 8"/>
+<circle cx="414" cy="230" r="36" fill="#A9471A" fill-opacity="0.15" stroke="#A9471A" stroke-width="2.5"/>
+<circle cx="46" cy="230" r="36" fill="#A9471A" fill-opacity="0.15" stroke="#A9471A" stroke-width="2.5"/>
+<circle cx="230" cy="46" r="36" fill="#A9471A" fill-opacity="0.15" stroke="#A9471A" stroke-width="2.5"/>
+<circle cx="230" cy="414" r="36" fill="#A9471A" fill-opacity="0.15" stroke="#A9471A" stroke-width="2.5"/>
+<circle cx="258" cy="258" r="36" fill="none" stroke="#6B7280" stroke-width="2" stroke-dasharray="5 5"/>
+<circle cx="202" cy="202" r="36" fill="none" stroke="#6B7280" stroke-width="2" stroke-dasharray="5 5"/>
+<circle cx="258" cy="202" r="36" fill="none" stroke="#6B7280" stroke-width="2" stroke-dasharray="5 5"/>
+<circle cx="202" cy="258" r="36" fill="none" stroke="#6B7280" stroke-width="2" stroke-dasharray="5 5"/>
+<circle cx="259" cy="230" r="36" fill="none" stroke="#2F6690" stroke-width="2.5"/>
+<circle cx="201" cy="230" r="36" fill="none" stroke="#2F6690" stroke-width="2.5"/>
+<circle cx="230" cy="201" r="36" fill="none" stroke="#2F6690" stroke-width="2.5"/>
+<circle cx="230" cy="259" r="36" fill="none" stroke="#2F6690" stroke-width="2.5"/>
+<circle cx="230" cy="230" r="36" fill="#2F6690" fill-opacity="0.35" stroke="#1F4E79" stroke-width="3"/>
+<circle cx="230" cy="230" r="4" fill="#1B2333"/>
+</svg>
+<div style="display:flex;flex-direction:column;gap:28px;width:760px">
+<div style="display:flex;gap:20px;align-items:center"><x-shape kind="ellipse" style="width:40px;height:40px;background:#9DB4C9;border:3px solid #1F4E79"></x-shape><p style="font-size:30px">objective pupil · NA 0.07</p></div>
+<div style="display:flex;gap:20px;align-items:center"><x-shape kind="ellipse" style="width:40px;height:40px;background:#F6F4EE;border:3px solid #2F6690"></x-shape><p style="font-size:30px">cross neighbors: <b>bright field</b></p></div>
+<div style="display:flex;gap:20px;align-items:center"><x-shape kind="ellipse" style="width:40px;height:40px;background:#F6F4EE;border:3px dashed #6B7280"></x-shape><p style="font-size:30px">diagonal neighbors: <b>dark field</b></p></div>
+<div style="display:flex;gap:20px;align-items:center"><x-shape kind="ellipse" style="width:40px;height:40px;background:#EBD3C5;border:3px solid #A9471A"></x-shape><p style="font-size:30px">LED at 7 steps · illumination NA 0.38</p></div>
+<div style="background:#16202E;border-radius:16px;padding:28px 36px;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:26px;color:#E8925E;font-weight:600">dotted circle</p>
+<p style="font-family:'Source Serif 4', Georgia, serif;font-size:40px;font-weight:600;line-height:1.2;color:#F3EFE6">synthetic NA ≈ 0.07 + 0.38 ≈ 0.45</p>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#6B7280">FPM Mini-course · to scale: 6 mm pitch array at z = 102 mm, up to ring 7 (15 × 15 LEDs)</p>
+<aside>(1.5 min) A tilted plane wave multiplies the sample field by a phase ramp; in Fourier space, that shifts the spectrum. Since the pupil stays fixed, each LED lets through a circle of radius NA/λ at a different place in the spectrum. In bright field, the zero order enters the pupil and the picture has a bright background; in dark field it falls outside and only scattered light arrives, which is why those pictures are dim. FPM stitches all the pieces into a single spectrum, and the overlap between neighbors (40–60 % or more) is what fixes the phase. The rule: synthetic NA = objective NA + maximum illumination NA. With 15 × 15 LEDs (ring 7) it gives ~0.45; with the 21 × 21 grid of slide 4 it reaches ~0.58 along the axes. On a flat array, the outer LEDs are closer together in k than the central ones, because sin θ grows more and more slowly. The diagram is to scale (October geometry, z = 102 mm, NA 0.074 in the original): it shows how much larger the synthetic NA is than the pupil of the objective.</aside>
+</section>

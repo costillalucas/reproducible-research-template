@@ -1,0 +1,44 @@
+<section id="equipo" data-transition="fade" style="background:#F6F4EE;color:#1B2333;padding:112px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:24px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#A9471A">Our setup</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:64px;font-weight:600;line-height:1.1;color:#1B2333">A low-cost microscope and criteria fixed in advance</h2>
+</div>
+<div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:24px">
+<div style="background:#ECE8DE;border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:12px">
+<x-icon name="Search" style="width:56px;height:56px;color:#2F6690"></x-icon>
+<p style="font-family:'Source Serif 4', Georgia, serif;font-size:48px;font-weight:600;line-height:1">2.5× · 0.07</p>
+<p style="font-size:26px;color:#3E4756">objective (limit ≈ 5.5 µm)</p>
+</div>
+<div style="background:#ECE8DE;border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:12px">
+<x-icon name="Lightbulb" style="width:56px;height:56px;color:#2F6690"></x-icon>
+<p style="font-family:'Source Serif 4', Georgia, serif;font-size:48px;font-weight:600;line-height:1">21 × 21</p>
+<p style="font-size:26px;color:#3E4756">R/G/B LEDs, 6 mm pitch, at ~100 mm</p>
+</div>
+<div style="background:#ECE8DE;border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:12px">
+<x-icon name="Chart" style="width:56px;height:56px;color:#2F6690"></x-icon>
+<p style="font-family:'Source Serif 4', Georgia, serif;font-size:48px;font-weight:600;line-height:1">1.29 µm</p>
+<p style="font-size:26px;color:#3E4756">per pixel at the sample (micrometer)</p>
+</div>
+<div style="background:#ECE8DE;border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:12px">
+<x-icon name="Activity" style="width:56px;height:56px;color:#2F6690"></x-icon>
+<p style="font-family:'Source Serif 4', Georgia, serif;font-size:48px;font-weight:600;line-height:1">5 µm</p>
+<p style="font-size:26px;color:#3E4756">spheres in DMSO, the main sample</p>
+</div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:24px">
+<div style="background:#16202E;border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:10px">
+<p style="font-size:36px;font-weight:600;color:#E8925E">C1 · prediction</p>
+<p style="font-size:28px;line-height:1.35;color:#F3EFE6">Does it predict photos of LEDs it did not use?</p>
+</div>
+<div style="background:#16202E;border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:10px">
+<p style="font-size:36px;font-weight:600;color:#E8925E">C2 · two halves</p>
+<p style="font-size:28px;line-height:1.35;color:#F3EFE6">Do they agree beyond the objective? (FRC ≥ 1/7)</p>
+</div>
+<div style="background:#16202E;border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:10px">
+<p style="font-size:36px;font-weight:600;color:#E8925E">Null</p>
+<p style="font-size:28px;line-height:1.35;color:#F3EFE6">Does the gain vanish without dark field?</p>
+</div>
+</div>
+<p class="foot">Our setup · C1, C2 and the null are tests 2, 3 and 4 of question 3</p>
+<aside>(1 min) On to the data. Everything that follows uses this setup: a 2.5× objective with NA 0.07 (limit of about 5.5 µm), a 21 × 21 array of red, green and blue LEDs with 6 mm pitch at about 100 mm from the sample, a Mono12 camera with 1.29 µm per pixel at the sample measured with a micrometer, and 5 µm spheres in DMSO as the main sample. The criteria were written down before looking at the real data, so as not to tune the threshold to the result. C1 is the prediction of held-out LEDs (lower is better); C2 is the FRC between halves (checkerboard), averaged over the band that the objective alone does not see, with threshold 1/7; the null control shuffles the dark field. The current measured geometry is z 99.5 mm and NA ≈ 0.070–0.072.</aside>
+</section>

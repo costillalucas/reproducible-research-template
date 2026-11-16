@@ -1,0 +1,103 @@
+{
+  "v": 5,
+  "attachments": {},
+  "cover": "cover",
+  "createdOnFiles": {
+    "at": "2026-11-16T15:00:00Z",
+    "v": 1
+  },
+  "designSystems": [],
+  "faces": {
+    "ibm-plex-mono": {
+      "family": "IBM Plex Mono",
+      "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&display=swap"
+    },
+    "ibm-plex-sans": {
+      "family": "IBM Plex Sans",
+      "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600&display=swap"
+    },
+    "source-serif-4": {
+      "family": "Source Serif 4",
+      "href": "https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400..700;1,400..700&display=swap"
+    }
+  },
+  "format": {
+    "shared": [
+      "project/deck.css"
+    ],
+    "v": 1
+  },
+  "lists": "css",
+  "order": [
+    "cover",
+    "porque",
+    "mapa",
+    "m0s",
+    "m0",
+    "m2",
+    "q1",
+    "geom",
+    "bfdf",
+    "m5",
+    "m5b",
+    "demo",
+    "q3",
+    "m6",
+    "m6b",
+    "q4",
+    "frc",
+    "equipo",
+    "linea",
+    "bordes",
+    "pupila",
+    "c2",
+    "m10",
+    "desc1",
+    "desc2",
+    "descartes",
+    "abiertas",
+    "siguiente",
+    "cierre",
+    "anexo",
+    "m4",
+    "puente",
+    "q2",
+    "recortes",
+    "biblio"
+  ],
+  "sections": {
+    "s1": {
+      "description": "Cover, motivation and map of the talk",
+      "start": "cover"
+    },
+    "s2": {
+      "description": "Mini-course 1: the camera loses the phase and the aperture sets the resolution",
+      "start": "m0s"
+    },
+    "s3": {
+      "description": "Mini-course 2: oblique illumination, Fourier space and overlap",
+      "start": "geom"
+    },
+    "s4": {
+      "description": "Mini-course 3: forward model and phase retrieval",
+      "start": "m6"
+    },
+    "s5": {
+      "description": "Mini-course 4: how to show that the detail is real",
+      "start": "q4"
+    },
+    "s6": {
+      "description": "Our setup: results from July to November",
+      "start": "equipo"
+    },
+    "s7": {
+      "description": "What's next: from each doubt, an experiment; the next capture and the close",
+      "start": "abiertas"
+    },
+    "s8": {
+      "description": "Appendix: from the setup geometry to Fourier space, with real data, and the solver's rounding in k",
+      "start": "anexo"
+    }
+  },
+  "title": "Fourier ptychography: mini-course and project status"
+}
