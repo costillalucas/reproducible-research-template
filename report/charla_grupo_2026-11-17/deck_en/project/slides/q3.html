@@ -1,12 +1,29 @@
 <section id="q3" data-transition="fade" style="background:#16202E;color:#F3EFE6;padding:112px 128px 160px;display:flex;flex-direction:column;gap:28px">
 <div style="display:flex;flex-direction:column;gap:16px">
 <p class="q-eyebrow">Audience question · 2 of 3</p>
-<p class="q-text">If the windows of neighbouring LEDs did not overlap, could we still reconstruct? What do we gain and what do we lose by moving the array farther away?</p>
+<p class="q-text" style="font-size:44px">Overlap between neighbouring windows</p>
 </div>
-<div style="display:flex;gap:20px;justify-content:center">
-<img class="fragment" src="/_blob/193a4791c089c726288e8fccd2f41312" alt="No overlap: two separate windows, each with its own free phase; nothing ties them together and the solution is not unique; rule of thumb, 40 to 60 percent overlap or more" style="width:714px;height:500px;object-fit:contain;border-radius:12px">
-<img class="fragment" src="/_blob/a4b92791f786994b8af4f2663f20892a" alt="Moving the LED array away, to scale: at z 99.5 mm two neighbouring windows share 47 percent and the maximum illumination NA is 0.52; at z 143 mm they share 62 percent and the maximum NA drops to 0.39; we gain overlap and lose synthetic NA" style="width:929px;height:500px;object-fit:contain;border-radius:12px">
+<div style="display:flex;gap:32px">
+<div style="width:816px;display:flex;flex-direction:column;gap:14px">
+<p class="q-sub">1 · If the windows of neighbouring LEDs did not overlap, could we still reconstruct?</p>
+<div class="opts-grid">
+<div class="opt opt-wrap"><p><span class="opt-letter">A </span>Yes: more LEDs simply cover more spectrum</p></div>
+<div class="opt opt-wrap"><p><span class="opt-letter">B </span>Yes, if the windows touch edge to edge</p></div>
+<div class="opt opt-wrap"><p><span class="opt-letter">C </span>No: each window keeps its own free phase</p><div class="opt-ok opt-wrap fragment" data-fragment-index="1"><p><span class="opt-letter">C </span>No: each window keeps its own free phase</p></div></div>
+<div class="opt opt-wrap"><p><span class="opt-letter">D </span>Yes, with longer exposures</p></div>
 </div>
-<p class="foot-dark">FPM Mini-course · answer in two clicks · discs to scale (NA 0.07, λ 0.63 µm, pitch 6 mm) · sampling criteria: Sun et al. 2016, Opt. Express</p>
-<aside>(2 min) The shared region appears in both photos, and the field has to explain both at once: that ties the phase of one window to that of its neighbour. If they share nothing, each piece of the spectrum can be rotated in phase without any photo changing. Second click: with LEDs of pitch p at height z, the separation between centres in sin θ is ≈ p/z. With our geometry (area shared between two neighbouring pupils) the overlap rises from 47 % at z = 99.5 mm to 62 % at z = 143 mm, but the outermost LED sits at a smaller angle: the maximum illumination NA drops from 0.52 to 0.39 and the synthetic NA from ~0.59 to ~0.46. This is exactly the decision we made for the next capture (z ≈ 143 mm). Extra point to discuss at the end: the halves we use for validation (checkerboard) have less overlap than the full grid.</aside>
+<img class="fragment" data-fragment-index="1" src="/_blob/193a4791c089c726288e8fccd2f41312" alt="No overlap: two separate windows, each with its own free phase; nothing ties them together and the solution is not unique; rule of thumb, 40 to 60 percent overlap or more" style="width:571px;height:400px;object-fit:contain;border-radius:12px;align-self:center;margin-top:6px">
+</div>
+<div style="width:816px;display:flex;flex-direction:column;gap:14px">
+<p class="q-sub">2 · What do we gain and what do we lose by moving the LED array farther away?</p>
+<div class="opts-grid">
+<div class="opt opt-wrap"><p><span class="opt-letter">A </span>Gain synthetic NA, lose overlap</p></div>
+<div class="opt opt-wrap"><p><span class="opt-letter">B </span>Gain overlap, lose synthetic NA</p><div class="opt-ok opt-wrap fragment" data-fragment-index="2"><p><span class="opt-letter">B </span>Gain overlap, lose synthetic NA</p></div></div>
+<div class="opt opt-wrap"><p><span class="opt-letter">C </span>Gain both overlap and synthetic NA</p></div>
+<div class="opt opt-wrap"><p><span class="opt-letter">D </span>Nothing changes: same LEDs, same angles</p></div>
+</div>
+<img class="fragment" data-fragment-index="2" src="/_blob/a4b92791f786994b8af4f2663f20892a" alt="Moving the LED array away, to scale: at z 99.5 mm two neighbouring windows share 47 percent and the maximum illumination NA is 0.52; at z 143 mm they share 62 percent and the maximum NA drops to 0.39; we gain overlap and lose synthetic NA" style="width:743px;height:400px;object-fit:contain;border-radius:12px;align-self:center;margin-top:6px">
+</div>
+</div>
+<aside>(2 min) Show of hands for A–D on each question, then one click per question. Question 1, correct C. The shared region appears in both photos, and the field has to explain both at once: that ties the phase of one window to that of its neighbour. If they share nothing, each piece of the spectrum can be rotated in phase without any photo changing, so the solution is not unique. Distractors: A (more coverage does not fix the free phases), B (touching edge to edge still shares nothing), D (more signal does not create a constraint). Rule of thumb: 40–60 % overlap or more. Question 2, correct B. With LEDs of pitch p at height z, the separation between window centres in sin θ is ≈ p/z: farther away, closer windows. With our geometry the overlap rises from 47 % at z = 99.5 mm to 62 % at z = 143 mm, but the outermost LED sits at a smaller angle: the maximum illumination NA drops from 0.52 to 0.39 and the synthetic NA from ~0.59 to ~0.46. A is the reverse; C is impossible (the same LEDs cannot reach larger angles from farther away); D forgets that the angles depend on z (and the light per LED also drops as 1/z²). This is exactly the decision we made for the next capture (z ≈ 143 mm). Extra point: the halves we use for validation (checkerboard) have less overlap than the full grid.</aside>
 </section>

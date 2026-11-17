@@ -62,7 +62,7 @@ for xc, s in zip(X0, [T("la muestra", "the sample"), T("su espectro y la pupila"
         color=T1, fontweight="bold")
 
 rot = [(T("pasa", "passes"), None, T1),
-       (T("en el límite", "at the limit"), T("pasa medio pico:\nbaja el contraste", "half a peak gets through:\ncontrast drops"), NAR),
+       (T("en el límite", "at the limit"), T("pasa medio pico:\nbaja el contraste", "half a peak passes:\ncontrast drops"), NAR),
        (T("se pierde", "lost"), None, T2)]
 ext = [-FOVX / 2, FOVX / 2, -FOVY / 2, FOVY / 2]
 sel = (np.abs(X) <= FOVX / 2) & (np.abs(Y) <= FOVY / 2)
@@ -118,10 +118,8 @@ for i, p in enumerate(PERIODOS):
     a.set_yticks([])
     if i == 2:
         a.set_xticks([-0.2, -0.1, 0, 0.1, 0.2])
-        a.set_xticklabels([T("−0,2", "−0.2"), "", "0", "", T("0,2", "0.2")], fontsize=px(30), color=T2)
+        a.set_xticklabels([T("−0,2", "−0.2"), "", "0", "", T("0,2 µm⁻¹", "0.2 µm⁻¹")], fontsize=px(30), color=T2)
         a.tick_params(axis="x", length=8, width=1.5, color=T2, pad=4)
-        a.text(KX, -KY - 0.012, "µm⁻¹", ha="right", va="top", fontsize=px(30),
-               color=T2, clip_on=False)
     else:
         a.set_xticks([])
     for sp in a.spines.values():
@@ -138,9 +136,9 @@ for i, p in enumerate(PERIODOS):
             color=colr, fontweight="bold")
 
 txt(W / 2, 995, T("la pupila del objetivo (radio NA/λ) decide qué detalles llegan: "
-      "período mínimo ≈ λ/NA ≈ 9 µm (coherente)",
+      "período mínimo ≈ λ/NA (coherente)",
       "the objective pupil (radius NA/λ) decides which details get through: "
-      "minimum period ≈ λ/NA ≈ 9 µm (coherent)"),
+      "minimum period ≈ λ/NA (coherent)"),
     ha="center", va="center", fontsize=px(36), color=T1)
 
 out = salida("resolucion.png", os.path.dirname(os.path.abspath(__file__)))

@@ -3,7 +3,7 @@
 Charla de 40 minutos para todo el grupo (público mixto): unos 25 minutos de minicurso de FPM con tres preguntas al público y unos 13 minutos de resultados de nuestro equipo. Al final hay un anexo con las cuentas de geometría a Fourier y el redondeo en k.
 
 - **Presentación (Slides, privada hasta compartirla):** https://claude.ai/artifact/H3y6cow9rFre3RpnhLkdTG
-- **Versión en inglés (Slides, privada):** https://claude.ai/artifact/H13qVEWZm3r8hQLytSgWxB — texto, notas e imágenes traducidos, salvo `descartes_exp`, `descartes_alg` y `fft_real` (pendientes de correr en el lab) (las imágenes chicas restantes son capturas o reconstrucciones reales sin texto).
+- **Versión en inglés (Slides, privada):** https://claude.ai/artifact/H13qVEWZm3r8hQLytSgWxB — texto, notas e imágenes traducidos (las imágenes chicas restantes son capturas o reconstrucciones reales sin texto).
 - **Demos interactivas (públicas):**
   - v2 "Ver, comparar, reconstruir": https://rawcdn.githack.com/costillalucas/reproducible-research-template/a4cdc6186c6efaa88031a97813e71960d90ad800/report/fourier_interactivo_v2/index.html
   - v1 "Una imagen, muchos ángulos": https://rawcdn.githack.com/costillalucas/reproducible-research-template/a4cdc6186c6efaa88031a97813e71960d90ad800/report/fourier_interactivo/index.html
@@ -35,12 +35,12 @@ Charla de 40 minutos para todo el grupo (público mixto): unos 25 minutos de min
 - Corrección hecha durante la preparación: el sobreajuste en verde (entrenamiento baja, validación sube) viene del barrido de magnificación del 19–20/10, no de EPRY. EPRY en rojo da 0,529 contra 0,517 del mejor método sin EPRY (dentro del mismo método mejora de 0,554 a 0,529), y en verde empeora.
 - La escala de la regla milimetrada (`AleYLu/regla_milimetrada.tif`) se volvió a medir sobre la imagen cruda: 77,6 px por cada 100 µm, o sea 1,289 µm/px.
 
-## Figuras en inglés (pendiente de correr)
+## Figuras en inglés
 
 Los scripts de `scripts/` son bilingües (`scripts/idioma.py`): con `FIG_LANG=en` traducen todos los rótulos, usan punto decimal y escriben en `figuras_en/` con el mismo nombre; sin la variable salen en español, igual que antes. `bash scripts/correr_en.sh` las regenera (`lab` o `local` para elegir grupo).
 
 - **Se pueden correr en cualquier PC (simulación):** `puente`, `cono_reciclado`, `montaje`, `porque`, `algoritmo`, `resolucion`, `ventanas`, `validacion`, `valid_cartas`, `descartes`, `figs_q`, `figs_z`, `q3_figs`, `barrido_realzado`, `bfdf`. Ya se generaron en `figuras_en/` (20 PNG y el GIF).
-- **Hay que correrlos en la PC del lab (leen `AleYLu/`, nunca se corrieron con datos reales en inglés, solo con datos simulados):** `exposicion`, `fft_real`, `descartes_figs` (`descartes_exp.png`, `descartes_alg.png`). Si algún texto no entra, revisar el layout ahí.
+- **Se corren en la PC del lab (leen `AleYLu/`):** `exposicion`, `fft_real`, `descartes_figs` (`descartes_exp.png`, `descartes_alg.png`). Corridos el 17/11 con `python3` (`correr_en.sh` llama a `python`, que no existe en esa PC); `descartes_exp`, `descartes_alg` y `fft_real` ya están en el deck en inglés (slides desc1, desc2, m4). `exposicion.png` no se usa (su slide se borró).
 - **Figuras que no tenían script y ahora sí** (reconstruidas a partir de la imagen original; ninguna lee `AleYLu/`):
   - `valid_1..4.png` → `valid_cartas.py`: las cuatro tarjetas de `validacion.png`, recortadas y renumeradas en el orden de la pregunta 3 (objeto conocido, predecir lo no visto, dos mitades, control nulo). Importa `validacion.py`, que ahora arma la figura en `dibujar()`; su salida no cambió.
   - `cono_reciclado.png` → `cono_reciclado.py`: recorta `puente.png` (pasos 1 y 3, renumerado como paso 2, con una flecha nueva). Usa el `puente.png` del idioma en curso (`figuras_en/` en inglés; en español, el que está junto al script o el de `figuras/`) y, si falta, corre `puente.py`: después de cambiar `puente.py` hay que regenerar primero ese PNG.

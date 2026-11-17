@@ -8,3 +8,14 @@ section { counter-increment: page; font-family: 'IBM Plex Sans', Arial, sans-ser
 .q-card .q-body { font-size: 30px; line-height: 1.4; color: #F3EFE6; }
 .foot { position: absolute; left: 128px; bottom: 64px; width: 1664px; font-size: 24px; color: #6B7280; }
 .foot-dark { position: absolute; left: 128px; bottom: 64px; width: 1664px; font-size: 24px; color: #B8C2CF; }
+.opts { display: flex; gap: 10px; }
+.opt { position: relative; flex: 1; background: #22303F; border: 2px solid #3A4A5C; border-radius: 10px; padding: 10px 12px; }
+.opt p { font-size: 24px; font-weight: 600; color: #F3EFE6; white-space: nowrap; }
+.opt .opt-letter { color: #B8C2CF; font-weight: 400; }
+.opt-ok { position: absolute; left: 0px; top: 0px; width: 100%; height: 100%; box-sizing: border-box; background: #E8925E; border-radius: 8px; padding: 10px 12px; }
+.opt-ok p { color: #16202E; }
+.opt-ok .opt-letter { color: #16202E; }
+.q-sub { font-size: 28px; font-weight: 600; color: #F3EFE6; }
+.q-why { font-size: 24px; line-height: 1.35; color: #B8C2CF; }
+.opts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.opt-wrap p { white-space: normal; line-height: 1.3; }

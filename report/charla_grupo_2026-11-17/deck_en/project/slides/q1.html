@@ -1,24 +1,35 @@
 <section id="q1" data-transition="fade" style="background:#16202E;color:#F3EFE6;padding:112px 128px 160px;display:flex;flex-direction:column;gap:40px">
-<div style="display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;flex-direction:column;gap:16px">
 <p class="q-eyebrow">Audience question · 1 of 3</p>
-<p class="q-text">Our objective has NA 0.07 and we use red light (λ = 0.63 µm). With coherent illumination, what is the finest period that reaches the camera? What NA would be needed to see a period of 1.4 µm?</p>
+<p class="q-text" style="font-size:44px">Our objective has NA 0.07, we use red light (λ = 0.63 µm) and the illumination is coherent.</p>
 </div>
-<div style="display:flex;gap:32px;align-items:center">
-<div style="position:relative;width:960px;height:528px">
-<img class="fragment" data-fragment-index="1" src="/_blob/d5b351a80f0ad006e17295e4549ba67d" alt="To-scale frequency plane: the NA 0.07 pupil and the peaks of a 9 µm grating right at its edge" style="position:absolute;left:0px;top:0px;width:960px;height:528px;object-fit:contain;border-radius:12px">
-<img class="fragment" data-fragment-index="2" src="/_blob/87822fc5fac3b50e88ee6a0aeb839f29" alt="Added: the peaks of a 1.4 µm grating, at 0.714 per micrometer, which only reach the dotted circle of synthetic NA 0.45" style="position:absolute;left:0px;top:0px;width:960px;height:528px;object-fit:contain;border-radius:12px">
+<div style="display:flex;gap:40px;align-items:center">
+<div style="width:680px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:14px">
+<p class="q-sub">1 · What is the finest period that reaches the camera?</p>
+<div class="opts">
+<div class="opt"><p><span class="opt-letter">A </span>4.5 µm</p></div>
+<div class="opt"><p><span class="opt-letter">B </span>0.011 µm</p></div>
+<div class="opt"><p><span class="opt-letter">C </span>9 µm</p><div class="opt-ok fragment" data-fragment-index="1"><p><span class="opt-letter">C </span>9 µm</p></div></div>
+<div class="opt"><p><span class="opt-letter">D </span>0.11 µm</p></div>
 </div>
-<div style="flex:1;display:flex;flex-direction:column;gap:20px">
-<div class="q-card fragment" data-fragment-index="1">
-<p class="q-label">Minimum period</p>
-<p class="q-body">p = λ / NA ≈ 9 µm</p>
+<p class="q-why fragment" data-fragment-index="1">p = λ / NA ≈ 9 µm (coherent cutoff)</p>
 </div>
-<div class="q-card fragment" data-fragment-index="2">
-<p class="q-label">For 1.4 µm</p>
-<p class="q-body">NA = λ / p ≈ 0.45: the FPM goal</p>
+<div style="display:flex;flex-direction:column;gap:14px">
+<p class="q-sub">2 · What NA would be needed to see a period of 1.4 µm?</p>
+<div class="opts">
+<div class="opt"><p><span class="opt-letter">A </span>0.22</p></div>
+<div class="opt"><p><span class="opt-letter">B </span>0.45</p><div class="opt-ok fragment" data-fragment-index="2"><p><span class="opt-letter">B </span>0.45</p></div></div>
+<div class="opt"><p><span class="opt-letter">C </span>2.2</p></div>
+<div class="opt"><p><span class="opt-letter">D </span>0.045</p></div>
+</div>
+<p class="q-why fragment" data-fragment-index="2">NA = λ / p ≈ 0.45: six times our objective, the FPM goal</p>
 </div>
 </div>
+<div style="position:relative;width:944px;height:519px">
+<img class="fragment" data-fragment-index="1" src="/_blob/d5b351a80f0ad006e17295e4549ba67d" alt="To-scale frequency plane: the NA 0.07 pupil and the peaks of a 9 µm grating right at its edge" style="position:absolute;left:0px;top:0px;width:944px;height:519px;object-fit:contain;border-radius:12px">
+<img class="fragment" data-fragment-index="2" src="/_blob/87822fc5fac3b50e88ee6a0aeb839f29" alt="Added: the peaks of a 1.4 µm grating, at 0.714 per micrometer, which only reach the dotted circle of synthetic NA 0.45" style="position:absolute;left:0px;top:0px;width:944px;height:519px;object-fit:contain;border-radius:12px">
 </div>
-<p class="foot-dark">FPM Mini-course · answer in two clicks: first the pupil (light blue), then the FPM goal (orange)</p>
-<aside>(1.5 min) Leave 30–60 s for them to think. It connects with the previous slide: the coherent cutoff is NA/λ, so the minimum period is λ/NA. First click: 9 µm. Second click: for 1.4 µm an NA ≈ 0.45 is needed, about 6 times that of the objective. If someone asks why 9 µm and not 4.5: 4.5 µm is the incoherent limit, λ/(2NA). In FPM each picture is coherent (an almost point-like LED), and the synthetic aperture is built by adding LEDs.</aside>
+</div>
+<aside>(2 min) Leave 30–60 s: ask for a show of hands for A, B, C, D on each question before clicking. Question 1, correct C (9 µm): the coherent cutoff is NA/λ, so the minimum period is λ/NA = 0.63/0.07 = 9 µm. Distractors: A, 4.5 µm = λ/(2NA), the incoherent limit (see below); D, 0.11 = NA/λ, the formula inverted (that is the cutoff frequency in µm⁻¹, not a period); B is a factor 10 off. Question 2, correct B (0.45): NA = λ/p = 0.63/1.4 ≈ 0.45, about 6 times our objective. Distractors: C, 2.2 = p/λ, the formula inverted, and impossible in air (NA cannot exceed 1, slide 3); A, 0.22 ≈ λ/(2p), the incoherent answer; D is a factor 10 off. Why 9 and not 4.5: with one LED the illumination is a single plane wave, so the image is coherent: the objective filters the FIELD, whose spectrum has the zero order at the centre of the pupil and the ±1 orders at ±1/p; the fringes need a first order inside the pupil, 1/p ≤ NA/λ. With incoherent (or extended, filled-condenser) illumination the camera records intensities from many angles at once, the transfer function is the autocorrelation of the pupil and reaches 2NA/λ: zero order at one edge, first order at the opposite edge, hence λ/(2NA). That is exactly what FPM does on purpose, one oblique LED at a time.</aside>
 </section>
