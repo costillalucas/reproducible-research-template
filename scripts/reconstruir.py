@@ -62,8 +62,8 @@ ITER_DIR = os.path.join(REPO, "scripts", "fpm_solver")
 
 RANGO = 4095                      # Mono12
 T0 = -0.20                        # ms, t_ef = t + T0 (inv/exposicion.json de octubre)
-MM_POR_PX = 6.0 / 3538.0          # corrimiento del eje en la matriz por px de ROI (visionpoint 21/10; = 1.315 · 1.29 µm)
-LRPX, NA_OBJ, Z_MM = 1.29, 0.069 * 1.25 / 1.29, 102.0
+MM_POR_PX = 6.0 / 3538.0          # corrimiento del eje en la matriz por px de ROI a z 102 mm (visionpoint 21/10; = 1.315 · 1.29 µm); ∝ z
+LRPX, NA_OBJ, Z_MM = 1.29, 0.069 * 1.25 / 1.29, 102.0   # Z_MM = z de referencia de MM_POR_PX y valor por defecto (tomas sin 'z_mm')
 FACTOR = {"red": 3, "green": 5, "blue": 5}
 COLOR = {"r": "red", "g": "green", "b": "blue"}
 CENTRO_LED = (17, 15)
@@ -359,6 +359,7 @@ def main():
     ap.add_argument("--anillo-max", type=int, default=None,
                     help="usar solo los LEDs con anillo = round(distancia al LED (17,15)) <= N (misma convención que precaptura)")
     ap.add_argument("--no-descartar", action="store_true", help="no descartar frames a oscuras (solo para comparar)")
+    ap.add_argument("--z-mm", type=float, default=None, help="distancia matriz-muestra [mm] (def. z_mm de captura.json; 102 si falta)")
     a = ap.parse_args()
     interactivo = sys.stdin.isatty()
 
@@ -393,8 +394,10 @@ def main():
     msg("\n---------- 1. LEYENDO LA CAPTURA ----------")
     SM, FL = indexar(carpeta, a.color), indexar(a.flat, a.color)
     sys.path.insert(0, os.path.join(REPO, "scripts"))
-    from grilla import lado as lado_grilla, leds as leds_grilla
+    from grilla import lado as lado_grilla, leds as leds_grilla, z_mm as z_captura
     n_lado = lado_grilla(carpeta)
+    z_mm = a.z_mm if a.z_mm is not None else z_captura(carpeta)
+    mm_por_px = MM_POR_PX * z_mm / Z_MM
     esperado = set(leds_grilla(CENTRO_LED, n_lado))
     if set(SM) != esperado:
         falt = sorted(esperado - set(SM)); extra = sorted(set(SM) - esperado)
@@ -448,8 +451,8 @@ def main():
     rec = Recorte(f0, c0, n)
     p, osc_frac = puntaje(q, satm, polvo, f0, c0, n, ejef, ejec)
     # centro del recorte en el sensor = offset del ROI + posición en el ROI; el eje es el del ROI calibrado
-    off_y = (eje_y - (roi_y + f0 + n / 2)) * MM_POR_PX
-    off_x = (eje_x - (roi_x + c0 + n / 2)) * MM_POR_PX
+    off_y = (eje_y - (roi_y + f0 + n / 2)) * mm_por_px
+    off_x = (eje_x - (roi_x + c0 + n / 2)) * mm_por_px
     msg(f"\n---------- 2. RECORTE ----------")
     msg(f"  {rec}  ({n} px = {n * LRPX:.0f} µm), {modo}")
     msg(f"  offset del LED por la posición del recorte en el sensor: y {off_y:+.3f} mm, x {off_x:+.3f} mm "
@@ -515,13 +518,13 @@ def main():
 
     msg("\n---------- 4. RECONSTRUCCIÓN ----------")
     F, IR = cargar_solver(color, FACTOR[color])
-    geo = F.geometry(Z_MM, offset_mm=(off_x, off_y), crop=n)
+    geo = F.geometry(z_mm, offset_mm=(off_x, off_y), crop=n)
     fr = np.hypot(*np.array([geo["fxy"][k] for k in keys]).T)
     bf = sorted([k for k, f in zip(keys, fr) if f < geo["na"] / geo["lam"]], key=lambda k: (k != CENTRO_LED, k))
     cerca = [k for k, f in zip(keys, fr) if abs(f / (geo["na"] / geo["lam"]) - 1) < 0.03]
     F.BF = bf
     D = F.load_real(os.path.join(salida, "datos", "prep.npz"))
-    msg(f"  geometría: z {Z_MM:g} mm, píxel {geo['lrpx']:.3f} µm, NA {geo['na']:.4f}, λ {geo['lam']} µm, factor {geo['factor']} "
+    msg(f"  geometría: z {z_mm:g} mm, píxel {geo['lrpx']:.3f} µm, NA {geo['na']:.4f}, λ {geo['lam']} µm, factor {geo['factor']} "
         f"-> píxel reconstruido {geo['hrpx']:.3f} µm")
     msg(f"  LEDs de campo claro (BF): {bf}")
     if cerca:
@@ -588,9 +591,9 @@ def main():
     L.append(f"recorte:            {rec}  ({n} px = {n * LRPX:.0f} µm), {modo}")
     L.append(f"ROI cámara:         OffsetX {roi_x}, OffsetY {roi_y}  (origen: {roi_src})"
              + ("" if roi_ok else "\n                    ¡OJO! no viene de captura.json: puede no ser el ROI de esta toma"))
-    L.append(f"offset LED:         y {off_y:+.3f} mm, x {off_x:+.3f} mm  (0.001696 mm por px entre el centro del recorte en el sensor"
+    L.append(f"offset LED:         y {off_y:+.3f} mm, x {off_x:+.3f} mm  ({mm_por_px:.6f} mm por px entre el centro del recorte en el sensor"
              f" y el eje calibrado, ROI {ROI_CAL[0]},{ROI_CAL[1]} + {ROI_CAL[2] // 2} px)")
-    L.append(f"geometría:          z {Z_MM:g} mm, píxel cámara en la muestra {geo['lrpx']:.3f} µm, NA {geo['na']:.4f}, "
+    L.append(f"geometría:          z {z_mm:g} mm, píxel cámara en la muestra {geo['lrpx']:.3f} µm, NA {geo['na']:.4f}, "
              f"factor {geo['factor']}, píxel reconstruido {geo['hrpx']:.4f} µm")
     L.append(f"LEDs BF:            {bf}")
     L.append(f"exposiciones:       " + ", ".join(f"{t:g} ms x{TT.count(t)}" for t in ts))

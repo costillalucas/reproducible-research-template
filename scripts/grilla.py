@@ -13,6 +13,7 @@ import sys
 
 N_DEFECTO = 15        # capturas viejas, sin 'n_lado' en captura.json
 T_MAX_DEFECTO = 1025.0  # ms; capturas viejas, sin 't_max_ms' (tope del script de captura desde el 22/10)
+Z_DEFECTO = 102.0       # mm; capturas viejas, sin 'z_mm' (valor que usaba el solver hasta el 17/11; la matriz estaba a ~99.5-102)
 
 
 def info(carpeta):
@@ -32,6 +33,15 @@ def t_max(carpeta):
             return float(json.load(f).get('t_max_ms', T_MAX_DEFECTO))
     except (OSError, ValueError):
         return T_MAX_DEFECTO
+
+
+def z_mm(carpeta):
+    """Distancia matriz de LEDs - muestra [mm] de la captura ('z_mm' en captura.json; 102 si falta, tomas anteriores al 17/11)."""
+    try:
+        with open(os.path.join(carpeta, 'captura.json')) as f:
+            return float(json.load(f).get('z_mm', Z_DEFECTO))
+    except (OSError, ValueError):
+        return Z_DEFECTO
 
 
 def lado(carpeta):

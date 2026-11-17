@@ -58,14 +58,30 @@ import time
 
 import numpy as np
 from PIL import Image
-from grilla import lado as lado_grilla, t_max as t_max_captura
+from grilla import lado as lado_grilla, t_max as t_max_captura, z_mm as z_captura
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt  # noqa: E402
 
 RANGO = 4095                 # Mono12
-PASO_PX = 3538.0             # px de ROI por paso de LED (visionpoint 21/10, rojo, z 102 mm, 2.5x)
-RADIO_PX = 4132.0            # radio del círculo de campo claro en px de ROI (= 1.168 pasos)
+PASO_PX = 3538.0             # px de ROI por paso de LED a Z_REF_MM (visionpoint 21/10, rojo, z 102 mm, 2.5x)
+Z_REF_MM = 102.0             # z de esa calibración
+RADIO_PX = 4132.0            # radio del círculo de campo claro en px de ROI (= 1.168 pasos a z 102); NO depende de z
+
+
+def paso_px(z):
+    """px de ROI por paso de LED a la altura z [mm]. Sistema no telecéntrico: un px de ROI corre el eje local sobre la
+    matriz una distancia proporcional a z, así que el paso de 6 mm ocupa menos px cuanto más lejos está la matriz (∝ 1/z)."""
+    return PASO_PX * Z_REF_MM / z
+
+
+NA_BORDE = 0.074             # NA del borde BF/DF medida con los arcos (17/11, z 143.5: 1.79 pasos; el 21/10 daba ~0.069)
+
+
+def radio_pasos(z):
+    """Radio del círculo de campo claro en pasos de LED a la altura z: z·NA_BORDE/PITCH (mismo valor que usa el script de
+    captura para elegir los LEDs de borde de la prueba)."""
+    return z * NA_BORDE / PITCH_MM
 PITCH_MM = 6.0               # paso de la matriz de LEDs
 OFFSET_REF = (4000, 1942)    # ROI bueno 21/10: eje sobre el LED (17,15)
 T0_MS = -0.20                # exposición efectiva = t + T0 (results/octubre_capturas_2026-10-21, prep_2110.py)
@@ -344,17 +360,24 @@ def cmd_centro(args):
     idx = indexar(args.carpeta, args.color)
     osc = Oscuro(args.dark)
     print(f'== precaptura centro: {args.carpeta}\n   LED objetivo {eje0}, ROI actual OffsetX {off[0]}, OffsetY {off[1]}, '
-          f'paso {args.paso_px:g} px/LED, oscuro: {"carpeta" if args.dark else f"nivel fijo {NIVEL_OSCURO:g}"}')
+          f'z {args.z_mm:g} mm, paso {args.paso_px:.0f} px/LED, oscuro: {"carpeta" if args.dark else f"nivel fijo {NIVEL_OSCURO:g}"}')
     if eje0 not in idx or not any(idx[eje0].values()):
         print(f'  [CORREGIR] falta la imagen del LED objetivo {eje0}: tomarla (sin muestra o con muestra rala).'); return 2
     t0, c_img = elegir_t(idx[eje0])
     C = (c_img - osc.en(t0)) / (t0 + T0_MS)
-    vec = [(eje0[0] + dr, eje0[1] + dc) for dr in (-1, 0, 1) for dc in (-1, 0, 1) if (dr, dc) != (0, 0)]
+    # LEDs de borde: los que caen a menos de medio paso del borde del círculo de campo claro a esta z (sus arcos son los que
+    # miden el eje). A z 102 son los 8 vecinos (radio 1.17 pasos); a z ~143 son las 4 diagonales y la cruz a 2 pasos (radio 1.64).
+    r_exp = radio_pasos(args.z_mm); m_ = int(math.ceil(r_exp + 1))
+    vec = [(eje0[0] + dr, eje0[1] + dc) for dr in range(-m_, m_ + 1) for dc in range(-m_, m_ + 1)
+           if (dr, dc) != (0, 0) and abs(math.hypot(dr, dc) - r_exp) < 0.5]
     pres = [k for k in vec if k in idx and any(idx[k].values())]
     falt = [k for k in vec if k not in pres]
-    cruz = [k for k in pres if abs(k[0] - eje0[0]) + abs(k[1] - eje0[1]) == 1]
+    m_ax = min(abs(k[0] - eje0[0]) + abs(k[1] - eje0[1]) for k in vec if k[0] == eje0[0] or k[1] == eje0[1])
+    cruz = [k for k in pres if (k[0] == eje0[0] or k[1] == eje0[1]) and abs(k[0] - eje0[0]) + abs(k[1] - eje0[1]) == m_ax]
+    print(f'  LEDs de borde a z {args.z_mm:g} mm (radio BF esperado {r_exp:.2f} pasos): {vec}')
     if len(cruz) < 4:
-        print(f'  [CORREGIR] faltan vecinos en cruz {sorted(set(vec) - set(pres))}: hacen falta los 4 (y mejor también las diagonales).')
+        print(f'  [CORREGIR] faltan LEDs de borde en cruz {sorted(set(vec) - set(pres))}: hacen falta los 4 (y mejor también los otros). '
+              f'Tomar la prueba con el script de captura actualizado (incluye los LEDs de borde para su Z_MM).')
         if len(pres) < 3:
             return 2
     elif falt:
@@ -387,11 +410,37 @@ def cmd_centro(args):
     p, cov = fit.ajustar(best[1], libres)
     R, w, s = p[2] * 1000, math.exp(p[3]), p[4] * 1000
     gr, gc = p[0], p[1]
+    if abs(R / s - radio_pasos(args.z_mm)) > 0.3:
+        # Sin arcos el modelo de borde no tiene de dónde agarrarse (pasa a z ~143 mm con el eje centrado: el círculo BF mide
+        # ~1.64 pasos, los 8 vecinos quedan adentro y el anillo de 2 pasos afuera). Entonces no se mide el eje con arcos, pero sí
+        # lo que importa para la toma: que ningún vecino tenga un borde BF/DF cruzando el ROI (cociente vecino/central uniforme).
+        unif = {}
+        for k, d in zip(pres, dks):
+            q = Qfull[d]; h2, w2 = q.shape[0] // 2, q.shape[1] // 2
+            cu = [np.nanmean(q[:h2, :w2]), np.nanmean(q[:h2, w2:]), np.nanmean(q[h2:, :w2]), np.nanmean(q[h2:, w2:])]
+            unif[k] = min(cu) / max(cu) if max(cu) > 0 else 0.0
+        peor = min(unif, key=unif.get)
+        print(f'  (a) el ajuste de arcos no converge (R = {R / s:.2f} pasos contra {radio_pasos(args.z_mm):.2f} esperado a z {args.z_mm:g} mm):'
+              f' ningún vecino muestra un arco, así que con arcos no se puede medir el eje a esta z.')
+        print('  uniformidad de cada vecino en el ROI (mín/máx de las medias por cuadrante del cociente vecino/central; 1 = sin borde): '
+              + ', '.join(f'{k} {v:.2f}' for k, v in sorted(unif.items())))
+        ok = bool(unif[peor] >= 0.85)
+        veredicto(ok, f'ningún vecino a caballo del borde BF/DF en el ROI (peor {peor}: {unif[peor]:.2f} >= 0.85). No tocar el ROI.' if ok else
+                  f'el vecino {peor} tiene un borde cruzando el ROI (uniformidad {unif[peor]:.2f} < 0.85): ese LED está a caballo. '
+                  f'Volver al ROI centrado en el eje (bueno 21/10: {OFFSET_REF[0]},{OFFSET_REF[1]}) o revisar z.')
+        png = ruta_png(args, 'centro', args.carpeta)
+        with open(os.path.splitext(png)[0] + '.json', 'w') as f:
+            json.dump({'ok': ok, 'fecha': time.strftime('%Y-%m-%d %H:%M'), 'carpeta': os.path.abspath(args.carpeta),
+                       'led': list(eje0), 'desvio_pasos': None, 'metodo': 'uniformidad (sin arcos)', 'z_mm': args.z_mm,
+                       'uniformidad': {f'{k[0]},{k[1]}': round(float(v), 3) for k, v in unif.items()},
+                       'offset_roi': list(off), 'offset_sugerido': None}, f, indent=1)
+        print(f'  resultado: {os.path.splitext(png)[0]}.json   ({time.time() - t_ini:.1f} s)')
+        return 0 if ok else 1
     # (b) FINO: simetría de los pares opuestos de la cruz. Con el eje en -s*eje (px), el cociente del vecino +d es el espejo del
     # de -d respecto de ese punto, sea cual sea la forma del borde (incluida la banda brillante junto al borde). Necesita que los
     # espejos se solapen en el ROI (|desvío| <~ 0.12 paso). Amplitud relativa del par = cociente de sus mesetas centrales.
     fino, unc = {}, {}
-    for comp, d in ((0, (1, 0)), (1, (0, 1))):
+    for comp, d in ((0, (m_ax, 0)), (1, (0, m_ax))):
         dm = (-d[0], -d[1])
         if d in Qfull and dm in Qfull and abs(p[comp]) < 0.12:
             ms = [espejo(Qfull[d], Qfull[dm], d, Yf, Xf, banda) for banda in ((-450, 450), (-450, 0), (0, 450))
@@ -404,7 +453,7 @@ def cmd_centro(args):
     sd = np.sqrt(np.abs(np.diag(cov)))[:2] * b
     print(f'  imágenes: central {tstr(t0)} ms; vecinos ' + ', '.join(f'{k}:{tstr(tk[k])}ms' for k in pres))
     print(f'  (a) modelo de borde, todos los vecinos: desvío (fila, col) = ({gr:+.3f}, {gc:+.3f}) pasos; R = {R:.0f} px = {R / s:.3f} pasos '
-          f'(calibración {RADIO_PX / PASO_PX:.3f}), ancho w = {w:.0f} px' + (f', s = {s:.0f} px/paso' if args.ajustar_paso else ''))
+          f'(calibración {radio_pasos(args.z_mm):.3f} a z {args.z_mm:g} mm), ancho w = {w:.0f} px' + (f', s = {s:.0f} px/paso' if args.ajustar_paso else ''))
     if fino:
         print('  (b) simetría de pares de la cruz: ' + ', '.join(f'{"fila" if c == 0 else "col"} {v:+.3f} (+-{unc[c]:.3f} mitades)'
                                                              for c, v in sorted(fino.items())))
@@ -413,8 +462,8 @@ def cmd_centro(args):
     print(f'  EJE ÓPTICO en LED fila {eje0[0] + dr:.3f}, columna {eje0[1] + dc:.3f}  ->  desvío ({dr:+.3f}, {dc:+.3f}) pasos'
           f' = ({dr * s:+.0f}, {dc * s:+.0f}) px de ROI  [fuente: fila {"(b)" if 0 in fino else "(a)"}, col {"(b)" if 1 in fino else "(a)"}]')
     mod = math.hypot(dr, dc)
-    if abs(R / s - RADIO_PX / PASO_PX) > 0.08:
-        veredicto(False, f'radio BF {R / s:.3f} pasos lejos de 1.168: ¿cambió z, el objetivo o el color? Rehacer la calibración de '
+    if abs(R / s - radio_pasos(args.z_mm)) > 0.08:
+        veredicto(False, f'radio BF {R / s:.3f} pasos lejos de {radio_pasos(args.z_mm):.3f} (z {args.z_mm:g} mm): ¿z mal anotado, el objetivo o el color? Rehacer la calibración de '
                          f'arcos (visionpoint) antes de confiar en px/paso.')
     disc = max([abs(fino[c] - p[c]) for c in fino] + [0.0])
     if disc > 0.06:
@@ -437,21 +486,22 @@ def cmd_centro(args):
                   f'alternativa: volver a ponerla en su lugar.')
         ok = False
     # figura
-    fig = plt.figure(figsize=(15, 11))
-    gs = fig.add_gridspec(3, 4)
+    mx = max(max(abs(d[0]), abs(d[1])) for d in dks)
+    fig = plt.figure(figsize=(15 if mx == 1 else 20, 11 if mx == 1 else 16))
+    gs = fig.add_gridspec(2 * mx + 1, 2 * mx + 2)
     amp = fit.amplitudes(p); perf = fit.perfiles(p)
     ext = (-W / 2, W / 2, H / 2, -H / 2); L = 1000
     for i, (d, q) in enumerate(zip(dks, Q)):
-        a = fig.add_subplot(gs[d[0] + 1, d[1] + 1])
+        a = fig.add_subplot(gs[d[0] + mx, d[1] + mx])
         a.imshow(q / max(amp[i][0], 0.05), extent=ext, cmap='gray', vmin=0, vmax=1.2)
         cy, cx = s * (d[0] - dr), s * (d[1] - dc); th = np.linspace(0, 2 * np.pi, 2000)
         a.plot(cx + R * np.cos(th), cy + R * np.sin(th), 'r-', lw=1)
         a.plot([-W / 2, W / 2, W / 2, -W / 2, -W / 2], [-H / 2, -H / 2, H / 2, H / 2, -H / 2], 'y-', lw=.8)
         a.set_xlim(-L, L); a.set_ylim(L, -L); a.set_xticks([]); a.set_yticks([])
         a.set_title(f'{pres[i]} {tstr(tk[pres[i]])} ms  A={amp[i][0]:.2f}', fontsize=9)
-    a = fig.add_subplot(gs[1, 1]); a.imshow(C, extent=ext, cmap='gray'); a.set_xlim(-L, L); a.set_ylim(L, -L)
+    a = fig.add_subplot(gs[mx, mx]); a.imshow(C, extent=ext, cmap='gray'); a.set_xlim(-L, L); a.set_ylim(L, -L)
     a.set_title(f'central {eje0} {tstr(t0)} ms (cuentas/ms)', fontsize=9); a.set_xticks([]); a.set_yticks([])
-    a = fig.add_subplot(gs[:, 3])
+    a = fig.add_subplot(gs[:, 2 * mx + 1])
     for rr in range(eje0[0] - 2, eje0[0] + 3):
         for cc in range(eje0[1] - 2, eje0[1] + 3):
             a.plot(cc, rr, 'o', color='0.6' if (rr, cc) not in idx else 'k', ms=6)
@@ -561,7 +611,7 @@ def cmd_exposicion(args):
                       for t in osc.tiempos()))
     keys = elegir_muestra([k for k in idx if any(idx[k].values())], eje, args.max_por_anillo)
     # BF: LEDs dentro del círculo de campo claro siempre se miden todos
-    keys = sorted(set(keys) | {k for k in idx if math.hypot(k[0] - eje[0], k[1] - eje[1]) < RADIO_PX / PASO_PX and any(idx[k].values())})
+    keys = sorted(set(keys) | {k for k in idx if math.hypot(k[0] - eje[0], k[1] - eje[1]) < radio_pasos(args.z_mm) and any(idx[k].values())})
     filas = {}
     for k in keys:
         filas[k] = stats_led(idx[k], osc, todas=True)
@@ -650,7 +700,7 @@ def cmd_exposicion(args):
         for rr in range(eje[0] - h, eje[0] + h + 1):
             for cc in range(eje[1] - h, eje[1] + h + 1):
                 q = anillo((rr, cc), eje)
-                if math.hypot(rr - eje[0], cc - eje[1]) < RADIO_PX / PASO_PX and 'BF' in rec:
+                if math.hypot(rr - eje[0], cc - eje[1]) < radio_pasos(args.z_mm) and 'BF' in rec:
                     r = rec['BF']
                 else:
                     r = rec.get(q) or rec.get(min((x for x in rec if x != 'BF'), key=lambda x: abs(x - q), default='BF'))
@@ -818,9 +868,10 @@ def main(argv=None):
         p.add_argument('--color', choices=('r', 'g', 'b'), default=None)
         p.add_argument('--dark', default=None, help='carpeta de oscuros (misma estructura, una carpeta por exposición)')
         p.add_argument('--png', default=None, help='ruta de la figura (def. ./precaptura_<sub>_<carpeta>.png)')
+        p.add_argument('--z-mm', type=float, default=None, help='distancia matriz-muestra [mm] (def. z_mm de captura.json; 102 si falta)')
         if nombre == 'centro':
             p.add_argument('--offset', default=f'{OFFSET_REF[0]},{OFFSET_REF[1]}', help='OffsetX,OffsetY actuales del ROI')
-            p.add_argument('--paso-px', type=float, default=PASO_PX, help='px de ROI por paso de LED (def. 3538, z 102 mm)')
+            p.add_argument('--paso-px', type=float, default=None, help='px de ROI por paso de LED (def. 3538·102/z)')
             p.add_argument('--radio-px', type=float, default=RADIO_PX, help='radio BF inicial en px (def. 4132)')
             p.add_argument('--ajustar-paso', action='store_true', help='ajustar también px/paso (necesita diagonales)')
         if nombre == 'exposicion':
@@ -829,6 +880,14 @@ def main(argv=None):
             p.add_argument('--flat', default=None)
     a = ap.parse_args(argv)
     a.carpeta = os.path.expanduser(a.carpeta)
+    if a.z_mm is None:
+        a.z_mm = z_captura(a.carpeta)
+    if a.cmd == 'centro' and abs(a.z_mm - Z_REF_MM) > 5 and not a.ajustar_paso:
+        # lejos de la z de la calibración, 3538·102/z es solo un punto de partida (17/11, z 143.5: ajustado 2056 contra 2515)
+        print(f'  (z {a.z_mm:g} mm lejos de la calibración a {Z_REF_MM:g} mm: se ajusta también px/paso)')
+        a.ajustar_paso = True
+    if getattr(a, 'paso_px', 0) is None:
+        a.paso_px = paso_px(a.z_mm)
     return a.func(a)
 
 
