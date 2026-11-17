@@ -3,7 +3,7 @@
 Charla de 40 minutos para todo el grupo (público mixto): unos 25 minutos de minicurso de FPM con tres preguntas al público y unos 13 minutos de resultados de nuestro equipo. Al final hay un anexo con las cuentas de geometría a Fourier y el redondeo en k.
 
 - **Presentación (Slides, privada hasta compartirla):** https://claude.ai/artifact/H3y6cow9rFre3RpnhLkdTG
-- **Versión en inglés (Slides, privada):** https://claude.ai/artifact/H13qVEWZm3r8hQLytSgWxB — texto, notas e imágenes traducidos, salvo `descartes_exp`, `descartes_alg` y `fft_real` (pendientes de correr en el lab) y los pequeños de `m5b`, `bfdf`, `bordes`, `c2`, `frc`, `pupila` y `recortes`, que no vienen de estos scripts.
+- **Versión en inglés (Slides, privada):** https://claude.ai/artifact/H13qVEWZm3r8hQLytSgWxB — texto, notas e imágenes traducidos, salvo `descartes_exp`, `descartes_alg` y `fft_real` (pendientes de correr en el lab) (las imágenes chicas restantes son capturas o reconstrucciones reales sin texto).
 - **Demos interactivas (públicas):**
   - v2 "Ver, comparar, reconstruir": https://rawcdn.githack.com/costillalucas/reproducible-research-template/a4cdc6186c6efaa88031a97813e71960d90ad800/report/fourier_interactivo_v2/index.html
   - v1 "Una imagen, muchos ángulos": https://rawcdn.githack.com/costillalucas/reproducible-research-template/a4cdc6186c6efaa88031a97813e71960d90ad800/report/fourier_interactivo/index.html
