@@ -39,7 +39,11 @@ Charla de 40 minutos para todo el grupo (público mixto): unos 25 minutos de min
 
 Los scripts de `scripts/` son bilingües (`scripts/idioma.py`): con `FIG_LANG=en` traducen todos los rótulos, usan punto decimal y escriben en `figuras_en/` con el mismo nombre; sin la variable salen en español, igual que antes. `bash scripts/correr_en.sh` las regenera (`lab` o `local` para elegir grupo).
 
-- **Se pueden correr en cualquier PC (simulación):** `puente`, `montaje`, `porque`, `algoritmo`, `resolucion`, `ventanas`, `validacion`, `descartes`, `figs_q`, `figs_z`, `q3_figs`. Ya se generaron en `figuras_en/` (15 PNG).
+- **Se pueden correr en cualquier PC (simulación):** `puente`, `cono_reciclado`, `montaje`, `porque`, `algoritmo`, `resolucion`, `ventanas`, `validacion`, `valid_cartas`, `descartes`, `figs_q`, `figs_z`, `q3_figs`, `barrido_realzado`. Ya se generaron en `figuras_en/` (20 PNG y el GIF).
 - **Hay que correrlos en la PC del lab (leen `AleYLu/`, nunca se corrieron con datos reales en inglés, solo con datos simulados):** `exposicion`, `fft_real`, `descartes_figs` (`descartes_exp.png`, `descartes_alg.png`). Si algún texto no entra, revisar el layout ahí.
-- **Sin script identificado en este repo:** `q1.png`, `valid_1..4.png`, `cono_reciclado.png`, `barrido_realzado.gif`. Probablemente son recortes o composiciones de otras figuras; hay que ubicar cómo se hicieron.
+- **Figuras que no tenían script y ahora sí** (reconstruidas a partir de la imagen original; ninguna lee `AleYLu/`):
+  - `valid_1..4.png` → `valid_cartas.py`: las cuatro tarjetas de `validacion.png`, recortadas y renumeradas en el orden de la pregunta 3 (objeto conocido, predecir lo no visto, dos mitades, control nulo). Importa `validacion.py`, que ahora arma la figura en `dibujar()`; su salida no cambió.
+  - `cono_reciclado.png` → `cono_reciclado.py`: recorta `puente.png` (pasos 1 y 3, renumerado como paso 2, con una flecha nueva). Usa el `puente.png` del idioma en curso (`figuras_en/` en inglés; en español, el que está junto al script o el de `figuras/`) y, si falta, corre `puente.py`: después de cambiar `puente.py` hay que regenerar primero ese PNG.
+  - `barrido_realzado.gif` → `barrido_realzado.py`: el modelo y el objeto «mixto» de `report/fourier_interactivo_v2/generate.py`. No tiene texto, así que la versión en inglés es la misma animación. Las curvas de realce del espectro se ajustaron contra el GIF original: se ve igual, pero no es idéntico píxel a píxel.
+  - `q1.png` quedó obsoleta (la reemplazan `q1a.png` y `q1b.png`); no tiene script ni versión en inglés.
 - Después: subir `figuras_en/` como recursos del deck en inglés y reemplazar los ids de imagen (`deck_en/blobmap.txt` mapea los ids ES -> EN actuales).

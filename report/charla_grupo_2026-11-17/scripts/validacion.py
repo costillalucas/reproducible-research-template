@@ -71,8 +71,9 @@ df = [imagen(M, FC_FOTO, k * np.cos(a), k * np.sin(a)) for a in (0.3, 1.9, 3.5, 
 pred = imagen(M, FC_FOTO, k * np.cos(0.9), k * np.sin(0.9))
 med = pred + 0.10 * pred.max() * np.sqrt(pred / pred.max() + 0.02) * rng.standard_normal((N, N))
 
-fig = plt.figure(figsize=(W / DPI, H / DPI), dpi=DPI, facecolor=BG)
-ax = fig.add_axes([0, 0, 1, 1]); ax.set_facecolor(BG); ax.axis("off")
+ax = None                          # ejes de la figura en curso (los crea dibujar())
+CW, GAP, MX = 567, 24, 30          # ancho de tarjeta, separación y margen (px)
+X0 = [MX + i * (CW + GAP) for i in range(4)]
 
 
 def img(a, x, y, s, vmax=None, borde=SEC):
@@ -100,70 +101,78 @@ def leds(x, y, s, color_de, n=7):
                                 color=color_de(i, j), zorder=4))
 
 
-CW, GAP, MX = 567, 24, 30
-titulos = [T("Objeto conocido", "Known object"), T("Dos mitades\nindependientes", "Two independent\nhalves"),
-           T("Control nulo", "Null control"), T("Predecir\nlo no visto", "Predict\nthe unseen")]
-lineas = [T("¿se separan barras de\ntamaño conocido?", "are bars of known\nsize resolved?"),
-          T("¿coinciden más allá de lo que\nve el objetivo? (FRC)", "do they agree beyond what\nthe objective sees? (FRC)"),
-          T("si destruyo el campo oscuro,\nel detalle tiene que\ndesaparecer", "if I destroy the dark field,\nthe detail has to\ndisappear"),
-          T("¿predice fotos que no usó?", "does it predict photos it\ndid not use?")]
-X0 = [MX + i * (CW + GAP) for i in range(4)]
-for i, x0 in enumerate(X0):
-    ax.add_patch(FancyBboxPatch((x0, 30), CW, 840, boxstyle="round,pad=0,rounding_size=28",
-                                fc=CARD, ec="none", zorder=1))
-    ax.add_patch(Circle((x0 + 58, 800), 33, color=ACC, zorder=3))
-    ax.text(x0 + 58, 798, str(i + 1), color=BG, fontsize=F_TIT, fontweight="bold",
-            ha="center", va="center", zorder=4)
-    ax.text(x0 + 108, 800, titulos[i], color=TXT, fontsize=F_TIT, fontweight="bold",
-            ha="left", va="center", linespacing=1.1, zorder=4)
-    ax.text(x0 + 28, 218, lineas[i], color=TXT, fontsize=F_LIN, ha="left", va="top",
-            linespacing=1.3, zorder=4)
+def dibujar():
+    """Arma y devuelve la figura de las cuatro tarjetas (valid_cartas.py la reusa y la recorta)."""
+    global ax
+    fig = plt.figure(figsize=(W / DPI, H / DPI), dpi=DPI, facecolor=BG)
+    ax = fig.add_axes([0, 0, 1, 1]); ax.set_facecolor(BG); ax.axis("off")
 
-# 1 - objeto conocido
-x0 = X0[0]; s = 250
-vm = np.percentile(u_rec, 99.5)
-img(u_foto, x0 + 22, 410, s, vm); img(u_rec, x0 + 295, 410, s, vm, borde=ACC)
-flecha((x0 + 275, 535), (x0 + 293, 535), lw=3)
-etiqueta(x0 + 22 + s / 2, 395, T("foto", "photo")); etiqueta(x0 + 295 + s / 2, 395, T("reconstrucción", "reconstruction"), ACC)
+    titulos = [T("Objeto conocido", "Known object"), T("Dos mitades\nindependientes", "Two independent\nhalves"),
+               T("Control nulo", "Null control"), T("Predecir\nlo no visto", "Predict\nthe unseen")]
+    lineas = [T("¿se separan barras de\ntamaño conocido?", "are bars of known\nsize resolved?"),
+              T("¿coinciden más allá de lo que\nve el objetivo? (FRC)", "do they agree beyond what\nthe objective sees? (FRC)"),
+              T("si destruyo el campo oscuro,\nel detalle tiene que\ndesaparecer", "if I destroy the dark field,\nthe detail has to\ndisappear"),
+              T("¿predice fotos que no usó?", "does it predict photos it\ndid not use?")]
+    for i, x0 in enumerate(X0):
+        ax.add_patch(FancyBboxPatch((x0, 30), CW, 840, boxstyle="round,pad=0,rounding_size=28",
+                                    fc=CARD, ec="none", zorder=1))
+        ax.add_patch(Circle((x0 + 58, 800), 33, color=ACC, zorder=3))
+        ax.text(x0 + 58, 798, str(i + 1), color=BG, fontsize=F_TIT, fontweight="bold",
+                ha="center", va="center", zorder=4)
+        ax.text(x0 + 108, 800, titulos[i], color=TXT, fontsize=F_TIT, fontweight="bold",
+                ha="left", va="center", linespacing=1.1, zorder=4)
+        ax.text(x0 + 28, 218, lineas[i], color=TXT, fontsize=F_LIN, ha="left", va="top",
+                linespacing=1.3, zorder=4)
 
-# 2 - dos mitades
-x0 = X0[1]; s = 195
-leds(x0 + 22, 385, 215, lambda i, j: ACC if (i + j) % 2 == 0 else BLUE)
-vm = np.percentile(m_rec, 99.7)
-img(rec_a, x0 + 305, 525, s, vm, borde=ACC); img(rec_b, x0 + 305, 262, s, vm, borde=BLUE)
-flecha((x0 + 243, 530), (x0 + 298, 610), ACC, rad=-0.2)
-flecha((x0 + 243, 455), (x0 + 298, 370), BLUE, rad=0.2)
-ax.text(x0 + 305 + s / 2, 490, "≈", color=TXT, fontsize=50 * PT, fontweight="bold", ha="center", va="center")
-ax.text(x0 + 530, 622, "A", color=ACC, fontsize=F_TIT, fontweight="bold", ha="center", va="center")
-ax.text(x0 + 530, 360, "B", color=BLUE, fontsize=F_TIT, fontweight="bold", ha="center", va="center")
-etiqueta(x0 + 22 + 107, 372, T("LEDs en\ndos grupos", "LEDs in\ntwo groups"), linespacing=1.15)
+    # 1 - objeto conocido
+    x0 = X0[0]; s = 250
+    vm = np.percentile(u_rec, 99.5)
+    img(u_foto, x0 + 22, 410, s, vm); img(u_rec, x0 + 295, 410, s, vm, borde=ACC)
+    flecha((x0 + 275, 535), (x0 + 293, 535), lw=3)
+    etiqueta(x0 + 22 + s / 2, 395, T("foto", "photo")); etiqueta(x0 + 295 + s / 2, 395, T("reconstrucción", "reconstruction"), ACC)
 
-# 3 - control nulo
-x0 = X0[2]; t = 105; g = 12
-vmd = np.percentile(np.array(df), 99.8)
-pos = [(x0 + 22, 420 + t + g), (x0 + 22 + t + g, 420 + t + g), (x0 + 22, 420), (x0 + 22 + t + g, 420)]
-for d, (px, py) in zip(df, pos):
-    img(d, px, py, t, vmd, borde=OFF)
-c = [(p[0] + t / 2, p[1] + t / 2) for p in pos]
-flecha(c[0], c[3], ACC, lw=6, estilo="<|-|>", rad=0.25)
-flecha(c[1], c[2], ACC, lw=6, estilo="<|-|>", rad=0.25)
-flecha((x0 + 256, 531), (x0 + 296, 531))
-img(rec_nulo, x0 + 305, 410, 240, vm)
-etiqueta(x0 + 22 + t + g / 2, 395, T("campo oscuro\nmezclado", "dark field\nshuffled"), linespacing=1.15)
-etiqueta(x0 + 305 + 120, 395, T("sin detalle", "no detail"))
+    # 2 - dos mitades
+    x0 = X0[1]; s = 195
+    leds(x0 + 22, 385, 215, lambda i, j: ACC if (i + j) % 2 == 0 else BLUE)
+    vm = np.percentile(m_rec, 99.7)
+    img(rec_a, x0 + 305, 525, s, vm, borde=ACC); img(rec_b, x0 + 305, 262, s, vm, borde=BLUE)
+    flecha((x0 + 243, 530), (x0 + 298, 610), ACC, rad=-0.2)
+    flecha((x0 + 243, 455), (x0 + 298, 370), BLUE, rad=0.2)
+    ax.text(x0 + 305 + s / 2, 490, "≈", color=TXT, fontsize=50 * PT, fontweight="bold", ha="center", va="center")
+    ax.text(x0 + 530, 622, "A", color=ACC, fontsize=F_TIT, fontweight="bold", ha="center", va="center")
+    ax.text(x0 + 530, 360, "B", color=BLUE, fontsize=F_TIT, fontweight="bold", ha="center", va="center")
+    etiqueta(x0 + 22 + 107, 372, T("LEDs en\ndos grupos", "LEDs in\ntwo groups"), linespacing=1.15)
 
-# 4 - predecir lo no visto
-x0 = X0[3]; s = 190
-res = {(1, 5), (4, 6), (5, 2), (2, 1), (6, 4), (0, 3), (3, 3)}
-leds(x0 + 40, 560, 170, lambda i, j: ACC if (i, j) in res else BLUE)
-for yy_, col, lab in [(680, BLUE, T("usados", "used")), (610, ACC, T("reservados", "held out"))]:
-    ax.add_patch(Circle((x0 + 262, yy_), 13, color=col, zorder=4))
-    ax.text(x0 + 290, yy_, lab, color=col, fontsize=F_LAB, ha="left", va="center")
-vmp = np.percentile(pred, 99.8)
-img(pred, x0 + 60, 345, s, vmp, borde=BLUE); img(med, x0 + 317, 345, s, vmp, borde=ACC)
-ax.text(x0 + 283.5, 440, "vs", color=SEC, fontsize=F_LAB, ha="center", va="center")
-etiqueta(x0 + 60 + s / 2, 332, T("foto predicha", "predicted photo"), BLUE); etiqueta(x0 + 317 + s / 2, 332, T("foto medida", "measured photo"), ACC)
+    # 3 - control nulo
+    x0 = X0[2]; t = 105; g = 12
+    vmd = np.percentile(np.array(df), 99.8)
+    pos = [(x0 + 22, 420 + t + g), (x0 + 22 + t + g, 420 + t + g), (x0 + 22, 420), (x0 + 22 + t + g, 420)]
+    for d, (px, py) in zip(df, pos):
+        img(d, px, py, t, vmd, borde=OFF)
+    c = [(p[0] + t / 2, p[1] + t / 2) for p in pos]
+    flecha(c[0], c[3], ACC, lw=6, estilo="<|-|>", rad=0.25)
+    flecha(c[1], c[2], ACC, lw=6, estilo="<|-|>", rad=0.25)
+    flecha((x0 + 256, 531), (x0 + 296, 531))
+    img(rec_nulo, x0 + 305, 410, 240, vm)
+    etiqueta(x0 + 22 + t + g / 2, 395, T("campo oscuro\nmezclado", "dark field\nshuffled"), linespacing=1.15)
+    etiqueta(x0 + 305 + 120, 395, T("sin detalle", "no detail"))
 
-ax.set_xlim(0, W); ax.set_ylim(0, H); ax.set_aspect("auto")
-fig.savefig(salida("validacion.png", os.path.dirname(os.path.abspath(__file__))),
-            dpi=DPI, facecolor=BG)
+    # 4 - predecir lo no visto
+    x0 = X0[3]; s = 190
+    res = {(1, 5), (4, 6), (5, 2), (2, 1), (6, 4), (0, 3), (3, 3)}
+    leds(x0 + 40, 560, 170, lambda i, j: ACC if (i, j) in res else BLUE)
+    for yy_, col, lab in [(680, BLUE, T("usados", "used")), (610, ACC, T("reservados", "held out"))]:
+        ax.add_patch(Circle((x0 + 262, yy_), 13, color=col, zorder=4))
+        ax.text(x0 + 290, yy_, lab, color=col, fontsize=F_LAB, ha="left", va="center")
+    vmp = np.percentile(pred, 99.8)
+    img(pred, x0 + 60, 345, s, vmp, borde=BLUE); img(med, x0 + 317, 345, s, vmp, borde=ACC)
+    ax.text(x0 + 283.5, 440, "vs", color=SEC, fontsize=F_LAB, ha="center", va="center")
+    etiqueta(x0 + 60 + s / 2, 332, T("foto predicha", "predicted photo"), BLUE); etiqueta(x0 + 317 + s / 2, 332, T("foto medida", "measured photo"), ACC)
+
+    ax.set_xlim(0, W); ax.set_ylim(0, H); ax.set_aspect("auto")
+    return fig
+
+
+if __name__ == "__main__":
+    dibujar().savefig(salida("validacion.png", os.path.dirname(os.path.abspath(__file__))),
+                      dpi=DPI, facecolor=BG)
