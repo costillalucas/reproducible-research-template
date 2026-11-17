@@ -25,7 +25,7 @@ Charla de 40 minutos para todo el grupo (público mixto): unos 25 minutos de min
 3. **Minicurso 2, iluminación y Fourier:** qué LEDs dan campo claro (sen θ contra NA), campo claro y oscuro, apertura sintética, barrido de 49 LEDs, demo; pregunta 2 (solapamiento: 47 % → 62 % al alejar la matriz).
 4. **Minicurso 3, reconstrucción:** ciclo del algoritmo e iteraciones.
 5. **Minicurso 4, validación:** pregunta 3 (objeto conocido, C1, C2 y nulo, de a uno) y FRC.
-6. **Nuestro equipo:** equipo y criterios, línea de tiempo, bordes y pupila, primer C2 que pasa (0,185 contra 0,008 en el nulo), esferas de 0,5 µm (6,4 → ~5 µm por el campo claro, ~5 → ~3 µm por el campo oscuro, ganancia real ~1,6×), descartes con evidencia (2 slides) y árbol de descartes.
+6. **Nuestro equipo:** equipo y criterios, línea de tiempo, bordes y pupila, primer C2 que pasa (0,185 contra 0,008 en el nulo), muestra densa de 500 nm (crudo 7,0 µm, nulo 5,3–7,9 µm, cada mitad 3,0–3,2 µm; son agregados, sin factor de resolución), descartes con evidencia (2 slides) y árbol de descartes.
 7. **Lo que sigue:** de cada duda, un experimento; próxima toma a z ≈ 143 mm; tres ideas para llevarse.
 8. **Anexo:** el microscopio en Fourier con datos reales (FFT del LED (17,16): NA 0,072, sen θ 0,062), los tres pasos de la geometría a Fourier, la pregunta extra del LED de 6 mm, el redondeo en k y la bibliografía.
 
