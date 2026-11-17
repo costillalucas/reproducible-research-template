@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1664 560" role="img" aria-label="Dos paneles. Con un recorte grande de 200 píxeles la grilla de Fourier es fina y la posición redondeada del LED queda dentro del círculo de la pupila, igual que la real. Con un recorte chico de 20 píxeles la grilla es gruesa y el redondeo lleva al LED fuera del círculo: el programa lo clasifica como campo claro pero el modelo lo calcula como campo oscuro.">
+<rect x="16" y="8" width="800" height="392" rx="16" fill="#EEF1F4"></rect>
+<text x="44" y="52" font-family="IBM Plex Sans, Arial, sans-serif" font-size="30" font-weight="bold" fill="#14213D">Large crop (200 px): fine grid</text>
+<g transform="translate(44,84)">
+<rect x="0" y="0" width="340" height="300" rx="8" fill="#FFFFFF"></rect>
+<path d="M20 0V300M40 0V300M60 0V300M80 0V300M100 0V300M120 0V300M140 0V300M160 0V300M180 0V300M200 0V300M220 0V300M240 0V300M260 0V300M280 0V300M300 0V300M320 0V300M0 10H340M0 30H340M0 50H340M0 70H340M0 90H340M0 110H340M0 130H340M0 150H340M0 170H340M0 190H340M0 210H340M0 230H340M0 250H340M0 270H340M0 290H340" stroke="#B8C2CF" stroke-width="1" fill="none"></path>
+<circle cx="170" cy="150" r="125" fill="#A85A14" fill-opacity="0.12" stroke="#A85A14" stroke-width="4"></circle>
+<rect x="102" y="80" width="136" height="30" rx="4" fill="#FFFFFF" fill-opacity="0.85"></rect>
+<text x="170" y="103" text-anchor="middle" font-family="IBM Plex Sans, Arial, sans-serif" font-size="22" font-weight="bold" fill="#A85A14">bright field</text>
+<rect x="96" y="277" width="148" height="22" rx="4" fill="#FFFFFF" fill-opacity="0.85"></rect>
+<text x="170" y="296" text-anchor="middle" font-family="IBM Plex Sans, Arial, sans-serif" font-size="22" font-weight="bold" fill="#4A5568">dark field</text>
+<circle cx="275" cy="186" r="10" fill="#2B6CB0" stroke="#FFFFFF" stroke-width="2"></circle>
+<polygon points="280,184 286,190 280,196 274,190" fill="#A85A14" stroke="#FFFFFF" stroke-width="1.5"></polygon>
+</g>
+<circle cx="422" cy="104" r="9" fill="#2B6CB0"></circle>
+<text x="442" y="112" font-family="IBM Plex Sans, Arial, sans-serif" font-size="22" font-weight="bold" fill="#2B6CB0">True position</text>
+<polygon points="422,130 432,140 422,150 412,140" fill="#A85A14"></polygon>
+<text x="442" y="148" font-family="IBM Plex Sans, Arial, sans-serif" font-size="22" font-weight="bold" fill="#A85A14">Rounded position</text>
+<text x="442" y="176" font-family="IBM Plex Sans, Arial, sans-serif" font-size="22" fill="#4A5568">(almost the same place)</text>
+<path d="M414 270L427 284L452 250" stroke="#2B6CB0" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"></path>
+<text x="468" y="262" font-family="IBM Plex Sans, Arial, sans-serif" font-size="24" font-weight="bold" fill="#14213D">Small rounding:</text>
+<text x="468" y="292" font-family="IBM Plex Sans, Arial, sans-serif" font-size="24" font-weight="bold" fill="#14213D">still inside</text>
+<text x="412" y="350" font-family="IBM Plex Sans, Arial, sans-serif" font-size="22" fill="#4A5568">Rounding: ~2.6% of the</text>
+<text x="412" y="378" font-family="IBM Plex Sans, Arial, sans-serif" font-size="22" fill="#4A5568">LED spacing</text>
+<rect x="848" y="8" width="800" height="392" rx="16" fill="#EEF1F4"></rect>
+<text x="876" y="52" font-family="IBM Plex Sans, Arial, sans-serif" font-size="30" font-weight="bold" fill="#14213D">Small crop (20 px): coarse grid</text>
+<g transform="translate(876,84)">
+<rect x="0" y="0" width="340" height="300" rx="8" fill="#FFFFFF"></rect>
+<path d="M20 0V300M120 0V300M220 0V300M320 0V300M0 50H340M0 150H340M0 250H340" stroke="#B8C2CF" stroke-width="2" fill="none"></path>
+<circle cx="170" cy="150" r="125" fill="#A85A14" fill-opacity="0.12" stroke="#A85A14" stroke-width="4"></circle>
+<circle cx="20" cy="50" r="5" fill="#4A5568"></circle>
+<circle cx="20" cy="150" r="5" fill="#4A5568"></circle>
+<circle cx="20" cy="250" r="5" fill="#4A5568"></circle>
+<circle cx="120" cy="50" r="5" fill="#4A5568"></circle>
+<circle cx="120" cy="150" r="5" fill="#4A5568"></circle>
+<circle cx="120" cy="250" r="5" fill="#4A5568"></circle>
+<circle cx="220" cy="50" r="5" fill="#4A5568"></circle>
+<circle cx="220" cy="150" r="5" fill="#4A5568"></circle>
+<circle cx="220" cy="250" r="5" fill="#4A5568"></circle>
+<circle cx="320" cy="50" r="5" fill="#4A5568"></circle>
+<circle cx="320" cy="150" r="5" fill="#4A5568"></circle>
+<circle cx="320" cy="250" r="5" fill="#4A5568"></circle>
+<rect x="102" y="80" width="136" height="30" rx="4" fill="#FFFFFF" fill-opacity="0.85"></rect>
+<text x="170" y="103" text-anchor="middle" font-family="IBM Plex Sans, Arial, sans-serif" font-size="22" font-weight="bold" fill="#A85A14">bright field</text>
+<rect x="96" y="277" width="148" height="22" rx="4" fill="#FFFFFF" fill-opacity="0.85"></rect>
+<text x="170" y="296" text-anchor="middle" font-family="IBM Plex Sans, Arial, sans-serif" font-size="22" font-weight="bold" fill="#4A5568">dark field</text>
+<line x1="283.6" y1="179.1" x2="298.1" y2="167.5" stroke="#A85A14" stroke-width="5"></line>
+<polygon points="310.6,157.5 303.1,173.7 293.1,161.2" fill="#A85A14"></polygon>
+<circle cx="275" cy="186" r="9" fill="#2B6CB0" stroke="#FFFFFF" stroke-width="2"></circle>
+<polygon points="320,140 330,150 320,160 310,150" fill="#A85A14" stroke="#FFFFFF" stroke-width="2"></polygon>
+</g>
+<circle cx="1254" cy="104" r="9" fill="#2B6CB0"></circle>
+<text x="1274" y="112" font-family="IBM Plex Sans, Arial, sans-serif" font-size="22" font-weight="bold" fill="#2B6CB0">True position:</text>
+<text x="1274" y="140" font-family="IBM Plex Sans, Arial, sans-serif" font-size="22" fill="#14213D">inside (bright field)</text>
+<polygon points="1254,166 1264,176 1254,186 1244,176" fill="#A85A14"></polygon>
+<text x="1274" y="184" font-family="IBM Plex Sans, Arial, sans-serif" font-size="22" font-weight="bold" fill="#A85A14">Rounded position:</text>
+<text x="1274" y="212" font-family="IBM Plex Sans, Arial, sans-serif" font-size="22" fill="#14213D">outside (dark field)</text>
+<path d="M1246 250L1282 286M1282 250L1246 286" stroke="#A85A14" stroke-width="8" stroke-linecap="round" fill="none"></path>
+<text x="1300" y="262" font-family="IBM Plex Sans, Arial, sans-serif" font-size="24" font-weight="bold" fill="#14213D">Crosses the edge:</text>
+<text x="1300" y="292" font-family="IBM Plex Sans, Arial, sans-serif" font-size="24" font-weight="bold" fill="#14213D">changes class</text>
+<text x="1244" y="350" font-family="IBM Plex Sans, Arial, sans-serif" font-size="22" fill="#4A5568">Rounding: up to 27% of the</text>
+<text x="1244" y="378" font-family="IBM Plex Sans, Arial, sans-serif" font-size="22" fill="#4A5568">LED spacing</text>
+<text x="832" y="442" text-anchor="middle" font-family="IBM Plex Sans, Arial, sans-serif" font-size="26" fill="#14213D">The program classifies with the true position but computes with the rounded one</text>
+<text x="832" y="476" text-anchor="middle" font-family="IBM Plex Sans, Arial, sans-serif" font-size="26" font-weight="bold" fill="#14213D">→ with small crops, an LED near the edge changes class.</text>
+<circle cx="262" cy="524" r="11" fill="#A85A14" fill-opacity="0.12" stroke="#A85A14" stroke-width="3"></circle>
+<text x="282" y="532" font-family="IBM Plex Sans, Arial, sans-serif" font-size="22" fill="#4A5568">objective pupil</text>
+<circle cx="550" cy="524" r="9" fill="#2B6CB0"></circle>
+<text x="570" y="532" font-family="IBM Plex Sans, Arial, sans-serif" font-size="22" fill="#4A5568">LED (true position)</text>
+<polygon points="840,514 850,524 840,534 830,524" fill="#A85A14"></polygon>
+<text x="860" y="532" font-family="IBM Plex Sans, Arial, sans-serif" font-size="22" fill="#4A5568">rounded position (grid node)</text>
+<text x="1648" y="532" text-anchor="end" font-family="IBM Plex Sans, Arial, sans-serif" font-size="22" font-style="italic" fill="#4A5568">schematic</text>
+</svg>

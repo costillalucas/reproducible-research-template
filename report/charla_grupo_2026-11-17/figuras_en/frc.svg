@@ -1,0 +1,311 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1664 700" role="img" aria-label="Diagrama de la Fourier Ring Correlation (FRC): los LEDs se dividen en dos mitades A y B en tablero de ajedrez, se reconstruye cada mitad por separado, se comparan sus transformadas de Fourier anillo por anillo, y la curva FRC frente a frecuencia (esquemática) se compara con el umbral 1/7 fuera de la banda del objetivo, junto a un control null.">
+<circle cx="31" cy="32" r="15" fill="#14213D"></circle>
+<text x="31" y="40" font-family="IBM Plex Sans, Arial, sans-serif" font-size="22" font-weight="bold" fill="#FFFFFF" text-anchor="middle">1</text>
+<text x="56" y="40" font-family="IBM Plex Sans, Arial, sans-serif" font-size="24" font-weight="bold" fill="#14213D" text-anchor="start">LED checkerboard</text>
+<circle cx="311" cy="32" r="15" fill="#14213D"></circle>
+<text x="311" y="40" font-family="IBM Plex Sans, Arial, sans-serif" font-size="22" font-weight="bold" fill="#FFFFFF" text-anchor="middle">2</text>
+<text x="336" y="40" font-family="IBM Plex Sans, Arial, sans-serif" font-size="24" font-weight="bold" fill="#14213D" text-anchor="start">Separately</text>
+<circle cx="571" cy="32" r="15" fill="#14213D"></circle>
+<text x="571" y="40" font-family="IBM Plex Sans, Arial, sans-serif" font-size="22" font-weight="bold" fill="#FFFFFF" text-anchor="middle">3</text>
+<text x="596" y="40" font-family="IBM Plex Sans, Arial, sans-serif" font-size="24" font-weight="bold" fill="#14213D" text-anchor="start">FFT and rings</text>
+<circle cx="831" cy="32" r="15" fill="#14213D"></circle>
+<text x="831" y="40" font-family="IBM Plex Sans, Arial, sans-serif" font-size="22" font-weight="bold" fill="#FFFFFF" text-anchor="middle">4</text>
+<text x="856" y="40" font-family="IBM Plex Sans, Arial, sans-serif" font-size="24" font-weight="bold" fill="#14213D" text-anchor="start">Correlation per ring</text>
+<circle cx="1211" cy="32" r="15" fill="#14213D"></circle>
+<text x="1211" y="40" font-family="IBM Plex Sans, Arial, sans-serif" font-size="22" font-weight="bold" fill="#FFFFFF" text-anchor="middle">5</text>
+<text x="1236" y="40" font-family="IBM Plex Sans, Arial, sans-serif" font-size="24" font-weight="bold" fill="#14213D" text-anchor="start">FRC vs. frequency (schematic)</text>
+<rect x="16" y="150" width="240" height="340" rx="10" fill="#EEF1F4"></rect>
+<circle cx="38" cy="175" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="52" cy="175" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="66" cy="175" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="80" cy="175" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="94" cy="175" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="108" cy="175" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="122" cy="175" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="136" cy="175" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="150" cy="175" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="164" cy="175" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="178" cy="175" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="192" cy="175" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="206" cy="175" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="220" cy="175" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="234" cy="175" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="38" cy="189" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="52" cy="189" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="66" cy="189" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="80" cy="189" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="94" cy="189" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="108" cy="189" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="122" cy="189" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="136" cy="189" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="150" cy="189" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="164" cy="189" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="178" cy="189" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="192" cy="189" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="206" cy="189" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="220" cy="189" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="234" cy="189" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="38" cy="203" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="52" cy="203" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="66" cy="203" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="80" cy="203" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="94" cy="203" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="108" cy="203" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="122" cy="203" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="136" cy="203" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="150" cy="203" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="164" cy="203" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="178" cy="203" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="192" cy="203" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="206" cy="203" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="220" cy="203" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="234" cy="203" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="38" cy="217" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="52" cy="217" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="66" cy="217" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="80" cy="217" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="94" cy="217" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="108" cy="217" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="122" cy="217" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="136" cy="217" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="150" cy="217" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="164" cy="217" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="178" cy="217" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="192" cy="217" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="206" cy="217" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="220" cy="217" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="234" cy="217" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="38" cy="231" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="52" cy="231" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="66" cy="231" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="80" cy="231" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="94" cy="231" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="108" cy="231" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="122" cy="231" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="136" cy="231" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="150" cy="231" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="164" cy="231" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="178" cy="231" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="192" cy="231" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="206" cy="231" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="220" cy="231" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="234" cy="231" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="38" cy="245" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="52" cy="245" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="66" cy="245" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="80" cy="245" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="94" cy="245" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="108" cy="245" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="122" cy="245" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="136" cy="245" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="150" cy="245" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="164" cy="245" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="178" cy="245" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="192" cy="245" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="206" cy="245" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="220" cy="245" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="234" cy="245" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="38" cy="259" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="52" cy="259" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="66" cy="259" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="80" cy="259" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="94" cy="259" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="108" cy="259" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="122" cy="259" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="136" cy="259" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="150" cy="259" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="164" cy="259" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="178" cy="259" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="192" cy="259" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="206" cy="259" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="220" cy="259" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="234" cy="259" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="38" cy="273" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="52" cy="273" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="66" cy="273" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="80" cy="273" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="94" cy="273" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="108" cy="273" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="122" cy="273" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="136" cy="273" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="150" cy="273" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="164" cy="273" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="178" cy="273" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="192" cy="273" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="206" cy="273" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="220" cy="273" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="234" cy="273" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="38" cy="287" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="52" cy="287" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="66" cy="287" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="80" cy="287" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="94" cy="287" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="108" cy="287" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="122" cy="287" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="136" cy="287" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="150" cy="287" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="164" cy="287" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="178" cy="287" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="192" cy="287" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="206" cy="287" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="220" cy="287" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="234" cy="287" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="38" cy="301" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="52" cy="301" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="66" cy="301" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="80" cy="301" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="94" cy="301" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="108" cy="301" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="122" cy="301" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="136" cy="301" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="150" cy="301" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="164" cy="301" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="178" cy="301" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="192" cy="301" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="206" cy="301" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="220" cy="301" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="234" cy="301" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="38" cy="315" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="52" cy="315" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="66" cy="315" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="80" cy="315" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="94" cy="315" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="108" cy="315" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="122" cy="315" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="136" cy="315" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="150" cy="315" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="164" cy="315" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="178" cy="315" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="192" cy="315" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="206" cy="315" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="220" cy="315" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="234" cy="315" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="38" cy="329" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="52" cy="329" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="66" cy="329" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="80" cy="329" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="94" cy="329" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="108" cy="329" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="122" cy="329" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="136" cy="329" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="150" cy="329" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="164" cy="329" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="178" cy="329" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="192" cy="329" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="206" cy="329" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="220" cy="329" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="234" cy="329" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="38" cy="343" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="52" cy="343" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="66" cy="343" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="80" cy="343" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="94" cy="343" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="108" cy="343" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="122" cy="343" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="136" cy="343" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="150" cy="343" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="164" cy="343" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="178" cy="343" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="192" cy="343" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="206" cy="343" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="220" cy="343" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="234" cy="343" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="38" cy="357" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="52" cy="357" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="66" cy="357" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="80" cy="357" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="94" cy="357" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="108" cy="357" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="122" cy="357" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="136" cy="357" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="150" cy="357" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="164" cy="357" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="178" cy="357" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="192" cy="357" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="206" cy="357" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="220" cy="357" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="234" cy="357" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="38" cy="371" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="52" cy="371" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="66" cy="371" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="80" cy="371" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="94" cy="371" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="108" cy="371" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="122" cy="371" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="136" cy="371" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="150" cy="371" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="164" cy="371" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="178" cy="371" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="192" cy="371" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="206" cy="371" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="220" cy="371" r="5.5" fill="#DD8A2E"></circle>
+<circle cx="234" cy="371" r="5.5" fill="#2B6CB0"></circle>
+<circle cx="40" cy="417" r="10" fill="#2B6CB0"></circle>
+<text x="58" y="425" font-family="IBM Plex Sans, Arial, sans-serif" font-size="22" font-weight="normal" fill="#14213D" text-anchor="start">A: row+col even</text>
+<circle cx="40" cy="457" r="10" fill="#DD8A2E"></circle>
+<text x="58" y="465" font-family="IBM Plex Sans, Arial, sans-serif" font-size="22" font-weight="normal" fill="#14213D" text-anchor="start">B: row+col odd</text>
+<text x="136" y="135" font-family="IBM Plex Sans, Arial, sans-serif" font-size="22" font-weight="normal" fill="#4A5568" text-anchor="middle">15 × 15</text>
+<rect x="296" y="170" width="220" height="120" rx="10" fill="#EEF1F4" stroke="#2B6CB0" stroke-width="5"></rect>
+<text x="406" y="215" font-family="IBM Plex Sans, Arial, sans-serif" font-size="24" font-weight="bold" fill="#14213D" text-anchor="middle">Reconstruction</text>
+<text x="406" y="265" font-family="IBM Plex Sans, Arial, sans-serif" font-size="44" font-weight="bold" fill="#2B6CB0" text-anchor="middle">A</text>
+<line x1="262" y1="230" x2="282" y2="230" stroke="#4A5568" stroke-width="4"></line>
+<polygon points="292,230 278,221 278,239" fill="#4A5568"></polygon>
+<line x1="522" y1="230" x2="542" y2="230" stroke="#4A5568" stroke-width="4"></line>
+<polygon points="552,230 538,221 538,239" fill="#4A5568"></polygon>
+<line x1="782" y1="230" x2="802" y2="230" stroke="#4A5568" stroke-width="4"></line>
+<polygon points="812,230 798,221 798,239" fill="#4A5568"></polygon>
+<rect x="296" y="350" width="220" height="120" rx="10" fill="#EEF1F4" stroke="#DD8A2E" stroke-width="5"></rect>
+<text x="406" y="395" font-family="IBM Plex Sans, Arial, sans-serif" font-size="24" font-weight="bold" fill="#14213D" text-anchor="middle">Reconstruction</text>
+<text x="406" y="445" font-family="IBM Plex Sans, Arial, sans-serif" font-size="44" font-weight="bold" fill="#DD8A2E" text-anchor="middle">B</text>
+<line x1="262" y1="410" x2="282" y2="410" stroke="#4A5568" stroke-width="4"></line>
+<polygon points="292,410 278,401 278,419" fill="#4A5568"></polygon>
+<line x1="522" y1="410" x2="542" y2="410" stroke="#4A5568" stroke-width="4"></line>
+<polygon points="552,410 538,401 538,419" fill="#4A5568"></polygon>
+<line x1="782" y1="410" x2="802" y2="410" stroke="#4A5568" stroke-width="4"></line>
+<polygon points="812,410 798,401 798,419" fill="#4A5568"></polygon>
+<text x="406" y="328" font-family="IBM Plex Sans, Arial, sans-serif" font-size="22" font-weight="normal" fill="#4A5568" text-anchor="middle">independent</text>
+<rect x="556" y="170" width="120" height="120" rx="10" fill="#EEF1F4" stroke="#2B6CB0" stroke-width="5"></rect>
+<circle cx="616" cy="230" r="12" fill="none" stroke="#4A5568" stroke-width="1.5"></circle>
+<circle cx="616" cy="230" r="26" fill="none" stroke="#4A5568" stroke-width="1.5"></circle>
+<circle cx="616" cy="230" r="54" fill="none" stroke="#4A5568" stroke-width="1.5"></circle>
+<circle cx="616" cy="230" r="40" fill="none" stroke="#A85A14" stroke-width="7"></circle>
+<text x="694" y="240" font-family="IBM Plex Sans, Arial, sans-serif" font-size="38" font-weight="bold" fill="#2B6CB0">F<tspan font-size="24" dy="9">A</tspan></text>
+<rect x="556" y="350" width="120" height="120" rx="10" fill="#EEF1F4" stroke="#DD8A2E" stroke-width="5"></rect>
+<circle cx="616" cy="410" r="12" fill="none" stroke="#4A5568" stroke-width="1.5"></circle>
+<circle cx="616" cy="410" r="26" fill="none" stroke="#4A5568" stroke-width="1.5"></circle>
+<circle cx="616" cy="410" r="54" fill="none" stroke="#4A5568" stroke-width="1.5"></circle>
+<circle cx="616" cy="410" r="40" fill="none" stroke="#A85A14" stroke-width="7"></circle>
+<text x="694" y="420" font-family="IBM Plex Sans, Arial, sans-serif" font-size="38" font-weight="bold" fill="#DD8A2E">F<tspan font-size="24" dy="9">B</tspan></text>
+<text x="616" y="328" font-family="IBM Plex Sans, Arial, sans-serif" font-size="22" font-weight="bold" fill="#A85A14" text-anchor="middle">ring |k|</text>
+<rect x="816" y="170" width="340" height="300" rx="10" fill="#EEF1F4"></rect>
+<text x="836" y="215" font-family="IBM Plex Sans, Arial, sans-serif" font-size="30" font-weight="bold" fill="#14213D" text-anchor="start">FRC(k) =</text>
+<text x="986" y="272" font-family="IBM Plex Sans, Arial, sans-serif" font-size="30" fill="#14213D" text-anchor="middle">| Σ <tspan fill="#2B6CB0" font-weight="bold">F</tspan><tspan fill="#2B6CB0" font-size="22" dy="7">A</tspan><tspan dy="-7"></tspan> · <tspan fill="#DD8A2E" font-weight="bold">F</tspan><tspan fill="#DD8A2E" font-size="22" dy="7">B</tspan><tspan dy="-7">* </tspan>|</text>
+<line x1="836" y1="290" x2="1136" y2="290" stroke="#14213D" stroke-width="3"></line>
+<text x="986" y="335" font-family="IBM Plex Sans, Arial, sans-serif" font-size="30" fill="#14213D" text-anchor="middle">√( Σ|<tspan fill="#2B6CB0" font-weight="bold">F</tspan><tspan fill="#2B6CB0" font-size="22" dy="7">A</tspan><tspan dy="-7">|²</tspan> · Σ|<tspan fill="#DD8A2E" font-weight="bold">F</tspan><tspan fill="#DD8A2E" font-size="22" dy="7">B</tspan><tspan dy="-7">|²</tspan> )</text>
+<text x="986" y="395" font-family="IBM Plex Sans, Arial, sans-serif" font-size="22" font-weight="bold" fill="#A85A14" text-anchor="middle">Σ: pixels in the ring |k|</text>
+<text x="986" y="437" font-family="IBM Plex Sans, Arial, sans-serif" font-size="22" font-weight="normal" fill="#4A5568" text-anchor="middle">1 = agree, 0 = noise</text>
+<line x1="1162" y1="320" x2="1182" y2="320" stroke="#4A5568" stroke-width="4"></line>
+<polygon points="1192,320 1178,311 1178,329" fill="#4A5568"></polygon>
+<rect x="1250" y="135" width="160" height="365" fill="#EEF1F4"></rect>
+<rect x="1410" y="135" width="230" height="365" fill="#A85A14" fill-opacity="0.14"></rect>
+<text x="1330" y="92" font-family="IBM Plex Sans, Arial, sans-serif" font-size="22" font-weight="normal" fill="#4A5568" text-anchor="middle">objective</text>
+<text x="1330" y="118" font-family="IBM Plex Sans, Arial, sans-serif" font-size="22" font-weight="normal" fill="#4A5568" text-anchor="middle">band</text>
+<text x="1525" y="92" font-family="IBM Plex Sans, Arial, sans-serif" font-size="22" font-weight="bold" fill="#A85A14" text-anchor="middle">out of band =</text>
+<text x="1525" y="118" font-family="IBM Plex Sans, Arial, sans-serif" font-size="22" font-weight="bold" fill="#A85A14" text-anchor="middle">super-resolution</text>
+<line x1="1410" y1="135" x2="1410" y2="508" stroke="#4A5568" stroke-width="2"></line>
+<path d="M1250,135 V500 H1640" fill="none" stroke="#14213D" stroke-width="3"></path>
+<line x1="1250" y1="451.4" x2="1640" y2="451.4" stroke="#A85A14" stroke-width="3" stroke-dasharray="10 7"></line>
+<text x="1240" y="168" font-family="IBM Plex Sans, Arial, sans-serif" font-size="22" font-weight="normal" fill="#14213D" text-anchor="end">1</text>
+<text x="1240" y="459.4" font-family="IBM Plex Sans, Arial, sans-serif" font-size="22" font-weight="bold" fill="#A85A14" text-anchor="end">1/7</text>
+<text x="1240" y="508" font-family="IBM Plex Sans, Arial, sans-serif" font-size="22" font-weight="normal" fill="#14213D" text-anchor="end">0</text>
+<path d="M1250,172 C1340,175 1385,200 1405,300 C1420,380 1430,445 1450,462 C1500,484 1580,488 1640,490" fill="none" stroke="#4A5568" stroke-width="4" stroke-dasharray="4 7" stroke-linecap="round"></path>
+<path d="M1250,172 C1380,174 1440,190 1490,290 C1530,375 1550,440 1575,455 C1600,470 1620,480 1640,484" fill="none" stroke="#14213D" stroke-width="6" stroke-linecap="round"></path>
+<circle cx="1568" cy="451.4" r="9" fill="#A85A14" stroke="#FFFFFF" stroke-width="2"></circle>
+<text x="1512" y="270" font-family="IBM Plex Sans, Arial, sans-serif" font-size="24" font-weight="bold" fill="#14213D" text-anchor="start">real</text>
+<text x="1392" y="350" font-family="IBM Plex Sans, Arial, sans-serif" font-size="22" font-weight="bold" fill="#4A5568" text-anchor="end">null:</text>
+<text x="1392" y="376" font-family="IBM Plex Sans, Arial, sans-serif" font-size="22" font-weight="normal" fill="#4A5568" text-anchor="end">DF shuffled</text>
+<text x="1410" y="532" font-family="IBM Plex Sans, Arial, sans-serif" font-size="22" font-weight="bold" fill="#14213D" text-anchor="middle">2NA/λ</text>
+<text x="1640" y="532" font-family="IBM Plex Sans, Arial, sans-serif" font-size="22" font-weight="normal" fill="#4A5568" text-anchor="end">frequency |k| →</text>
+<text x="1196" y="600" font-family="IBM Plex Sans, Arial, sans-serif" font-size="24" font-weight="bold" fill="#14213D" text-anchor="start">C2 passes if FRC ≥ 1/7 out of band</text>
+<text x="1196" y="634" font-family="IBM Plex Sans, Arial, sans-serif" font-size="22" font-weight="normal" fill="#4A5568" text-anchor="start">and the null drops near the edge</text>
+</svg>
