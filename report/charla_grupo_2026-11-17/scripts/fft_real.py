@@ -5,11 +5,13 @@ interior y el piso exterior, sobre perfiles radiales cada 1 grado (solo el arco 
 circulo gemelo); circulo por minimos cuadrados (Kasa) con recorte 3-sigma, iterado 6 veces.
 """
 import glob
+import os
 import numpy as np, tifffile
 import matplotlib; matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
 from matplotlib.patches import Circle
+from idioma import EN, T, num, salida
 
 D = '/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/'
 LED = 'fila17_col16'; EXPO = '18ms'
@@ -17,9 +19,9 @@ DX = 1.29            # um/px en la muestra (micrometro)
 LAM, LAM_MED = 0.63, 0.617
 Z, PITCH = 99.5, 6.0  # mm
 BG, T1, T2, AZ, NA_ = '#F6F4EE', '#1B2333', '#3E4756', '#2F6690', '#A9471A'
-OUT = __file__.replace('fft_real.py', 'fft_real.png')
+OUT = salida('fft_real.png', os.path.abspath(__file__)) if EN else __file__.replace('fft_real.py', 'fft_real.png')
 
-def coma(x, nd): return f'{x:.{nd}f}'.replace('.', ',')
+def coma(x, nd): return num(x, nd)
 
 def cargar():
     im = np.mean([tifffile.imread(f).astype(float) for f in sorted(glob.glob(D + f'2026-11-13.a/{LED}_colorr/{EXPO}/*.tiff'))], 0)
@@ -83,7 +85,7 @@ FS, FT = 22, 26                          # pt a 100 dpi -> 30,6 px y 36 px
 fig = plt.figure(figsize=(24, 10), dpi=100, facecolor=BG)
 
 # --- 1: foto
-a1 = fig.add_axes([0.015, 0.06, 0.31, 0.80]); a1.set_title('Foto con un LED de campo claro', fontsize=FT, pad=16, color=T1)
+a1 = fig.add_axes([0.015, 0.06, 0.31, 0.80]); a1.set_title(T('Foto con un LED de campo claro', 'Photo with a bright-field LED'), fontsize=FT, pad=16, color=T1)
 a1.imshow(im, cmap='gray', vmin=np.percentile(im, 0.5), vmax=np.percentile(im, 99.8)); a1.set_xticks([]); a1.set_yticks([])
 nb = 200 / DX
 a1.add_patch(plt.Rectangle((40, N - 150), nb + 40, 120, color=BG, alpha=0.92))
@@ -91,7 +93,7 @@ a1.plot([60, 60 + nb], [N - 55, N - 55], color=T1, lw=7, solid_capstyle='butt')
 a1.text(60 + nb/2, N - 75, '200 µm', ha='center', va='bottom', fontsize=FS, color=T1)
 
 # --- 2: FFT
-a2 = fig.add_axes([0.385, 0.13, 0.30, 0.73]); a2.set_title('Su transformada de Fourier', fontsize=FT, pad=16, color=T1)
+a2 = fig.add_axes([0.385, 0.13, 0.30, 0.73]); a2.set_title(T('Su transformada de Fourier', 'Its Fourier transform'), fontsize=FT, pad=16, color=T1)
 h = 380; o = N // 2; fm = h * df
 a2.imshow(L[o-h:o+h, o-h:o+h], cmap='gray', origin='lower', extent=[-fm, fm, -fm, fm],
           vmin=np.percentile(L, 25), vmax=np.percentile(L, 99.9))
@@ -103,21 +105,21 @@ a2.annotate('', xy=pe, xytext=cf, arrowprops=dict(arrowstyle='->', color='#7FB6D
 a2.annotate('', xy=cf, xytext=(0, 0), arrowprops=dict(arrowstyle='->', color='#F0A070', lw=4, mutation_scale=28))
 a2.plot(0, 0, 'o', color='#F0A070', ms=9)
 bb = dict(boxstyle='round,pad=0.3', fc=BG, ec='none', alpha=0.95)
-a2.text(0, fm*0.97, f'radio = NA/λ\n{coma(r_f, 3)} µm⁻¹  ({r:.0f} px)', ha='center', va='top', fontsize=FS, color=AZ, bbox=bb, linespacing=1.25)
-a2.text(0, -fm*0.97, f'corrimiento = k_LED = sinθ/λ\n{coma(k_f, 3)} µm⁻¹  ({k_px:.0f} px)', ha='center', va='bottom', fontsize=FS, color=NA_, bbox=bb, linespacing=1.25)
+a2.text(0, fm*0.97, f'{T("radio", "radius")} = NA/λ\n{coma(r_f, 3)} µm⁻¹  ({r:.0f} px)', ha='center', va='top', fontsize=FS, color=AZ, bbox=bb, linespacing=1.25)
+a2.text(0, -fm*0.97, f'{T("corrimiento", "shift")} = k_LED = sinθ/λ\n{coma(k_f, 3)} µm⁻¹  ({k_px:.0f} px)', ha='center', va='bottom', fontsize=FS, color=NA_, bbox=bb, linespacing=1.25)
 fmt = FuncFormatter(lambda v, _: coma(v, 1) if abs(v) > 1e-9 else '0')
 for ax_ in (a2.xaxis, a2.yaxis): ax_.set_major_formatter(fmt)
 a2.set_xticks([-0.2, 0, 0.2]); a2.set_yticks([-0.2, 0, 0.2]); a2.tick_params(labelsize=FS, length=8, width=2)
-a2.set_xlabel('frecuencia espacial (µm⁻¹)', fontsize=FS, labelpad=8)
+a2.set_xlabel(T('frecuencia espacial (µm⁻¹)', 'spatial frequency (µm⁻¹)'), fontsize=FS, labelpad=8)
 
 # --- 3: lo que se lee
 a3 = fig.add_axes([0.715, 0.0, 0.285, 1.0]); a3.axis('off'); a3.set_xlim(0, 1); a3.set_ylim(0, 1)
-a3.text(0.5, 0.905, 'Lo que se lee', ha='center', fontsize=FT, color=T1)
-a3.text(0.06, 0.80, 'NA medida = radio · λ', fontsize=FS, color=T2)
+a3.text(0.5, 0.905, T('Lo que se lee', 'What we read'), ha='center', fontsize=FT, color=T1)
+a3.text(0.06, 0.80, T('NA medida = radio · λ', 'Measured NA = radius · λ'), fontsize=FS, color=T2)
 a3.text(0.06, 0.645, coma(na, 3), fontsize=84, color=AZ, fontweight='bold')
-a3.text(0.06, 0.575, f'con λ = 0,63 µm (nominal);\ncon λ = 0,617 (medida): {coma(na2, 3)}', fontsize=FS, color=T2, va='top', linespacing=1.3)
-a3.text(0.06, 0.415, 'sinθ del LED = corrimiento · λ', fontsize=FS, color=T2)
+a3.text(0.06, 0.575, T('con λ = 0,63 µm (nominal);\ncon λ = 0,617 (medida): ', 'with λ = 0.63 µm (nominal);\nwith λ = 0.617 (measured): ') + coma(na2, 3), fontsize=FS, color=T2, va='top', linespacing=1.3)
+a3.text(0.06, 0.415, T('sinθ del LED = corrimiento · λ', 'LED sinθ = shift · λ'), fontsize=FS, color=T2)
 a3.text(0.06, 0.26, coma(st, 3), fontsize=84, color=NA_, fontweight='bold')
-a3.text(0.06, 0.19, f'esperado por geometría: {coma(st_esp, 3)}\n(LED a 6 mm del eje, z ≈ 99,5 mm)', fontsize=FS, color=T2, va='top', linespacing=1.3)
-fig.text(0.5, 0.012, 'El algoritmo necesita estos dos números: si están mal, las piezas no encajan.', ha='center', fontsize=FS, color=T1, fontweight='bold')
+a3.text(0.06, 0.19, T('esperado por geometría: ', 'expected from geometry: ') + coma(st_esp, 3) + T('\n(LED a 6 mm del eje, z ≈ 99,5 mm)', '\n(LED 6 mm off axis, z ≈ 99.5 mm)'), fontsize=FS, color=T2, va='top', linespacing=1.3)
+fig.text(0.5, 0.012, T('El algoritmo necesita estos dos números: si están mal, las piezas no encajan.', 'The algorithm needs these two numbers: if they are wrong, the pieces do not fit.'), ha='center', fontsize=FS, color=T1, fontweight='bold')
 fig.savefig(OUT, dpi=100, facecolor=BG)

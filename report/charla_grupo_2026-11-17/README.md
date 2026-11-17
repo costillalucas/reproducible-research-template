@@ -34,3 +34,12 @@ Charla de 40 minutos para todo el grupo (público mixto): unos 25 minutos de min
 - Las figuras se hicieron con agentes (modelo Fable) a partir de datos reales y simulaciones del repositorio; cada panel dice si es dato real o simulación.
 - Corrección hecha durante la preparación: el sobreajuste en verde (entrenamiento baja, validación sube) viene del barrido de magnificación del 19–20/10, no de EPRY. EPRY en rojo da 0,529 contra 0,517 del mejor método sin EPRY (dentro del mismo método mejora de 0,554 a 0,529), y en verde empeora.
 - La escala de la regla milimetrada (`AleYLu/regla_milimetrada.tif`) se volvió a medir sobre la imagen cruda: 77,6 px por cada 100 µm, o sea 1,289 µm/px.
+
+## Figuras en inglés (pendiente de correr)
+
+Los scripts de `scripts/` son bilingües (`scripts/idioma.py`): con `FIG_LANG=en` traducen todos los rótulos, usan punto decimal y escriben en `figuras_en/` con el mismo nombre; sin la variable salen en español, igual que antes. `bash scripts/correr_en.sh` las regenera (`lab` o `local` para elegir grupo).
+
+- **Se pueden correr en cualquier PC (simulación):** `puente`, `montaje`, `porque`, `algoritmo`, `resolucion`, `ventanas`, `validacion`, `descartes`, `figs_q`, `figs_z`, `q3_figs`. Ya se generaron en `figuras_en/` (15 PNG).
+- **Hay que correrlos en la PC del lab (leen `AleYLu/`, nunca se corrieron con datos reales en inglés, solo con datos simulados):** `exposicion`, `fft_real`, `descartes_figs` (`descartes_exp.png`, `descartes_alg.png`). Si algún texto no entra, revisar el layout ahí.
+- **Sin script identificado en este repo:** `q1.png`, `valid_1..4.png`, `cono_reciclado.png`, `barrido_realzado.gif`. Probablemente son recortes o composiciones de otras figuras; hay que ubicar cómo se hicieron.
+- Después: subir `figuras_en/` como recursos del deck en inglés y reemplazar los ids de imagen (`deck_en/blobmap.txt` mapea los ids ES -> EN actuales).

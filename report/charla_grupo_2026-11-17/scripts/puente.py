@@ -1,6 +1,7 @@
 """Slide puente: de la matriz de LEDs al espacio de Fourier, en tres pasos."""
 import os
 import numpy as np
+from idioma import EN, T, num, salida
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -12,7 +13,10 @@ DPI = 100
 px = lambda p: p * 72.0 / DPI          # tamaño en px -> pt
 plt.rcParams.update({"font.family": "DejaVu Sans", "mathtext.fontset": "dejavusans",
                      "text.color": T1, "axes.edgecolor": T2})
-com = lambda x, n=3: f"{x:.{n}f}".replace(".", ",")
+com = lambda x, n=3: num(x, n)
+SEN = T("sen", "sin")
+M = lambda s: s.replace(r"\mathrm{sen}", r"\mathrm{" + SEN + "}")   # sen -> sin en mathtext
+MN = lambda x, n=1: com(x, n).replace("-", "−")
 
 # ---------- números del ejemplo resuelto ----------
 r_mm, z_mm, lam, NA = 12.0, 100.0, 0.63, 0.07
@@ -20,8 +24,8 @@ sen = r_mm / np.hypot(r_mm, z_mm)
 k = sen / lam
 kp = NA / lam
 print(f"sen theta = {sen:.5f}  k = {k:.5f} um^-1  NA/lambda = {kp:.5f} um^-1  DF: {sen > NA}")
-assert com(sen) == "0,119" and com(k) == "0,189" and com(kp) == "0,111"
-assert com(0.119 / 0.63) == "0,189"     # la cuenta con valores redondeados da lo mismo
+assert com(sen) == com(0.119) and com(k) == com(0.189) and com(kp) == com(0.111)
+assert com(0.119 / 0.63) == com(0.189)     # la cuenta con valores redondeados da lo mismo
 
 # ---------- simulación de las mini-fotos ----------
 def foto(sen_led, N=512, dx=0.4, seed=3):
@@ -59,9 +63,9 @@ def titulo(x, n, txt):
              bbox=dict(boxstyle="circle,pad=0.25", fc=NJ, ec="none"))
     fig.text(x + 0.021, 0.925, txt, fontsize=px(36), weight="bold", ha="left", va="center")
 
-titulo(0.019, 1, "Geometría: el ángulo del LED")
-titulo(0.328, 2, "Fourier: cuánto se corre")
-titulo(0.617, 3, "Regla: ¿entra el orden cero?")
+titulo(0.019, 1, T("Geometría: el ángulo del LED", "Geometry: the LED angle"))
+titulo(0.328, 2, T("Fourier: cuánto se corre", "Fourier: how far it shifts"))
+titulo(0.617, 3, T("Regla: ¿entra el orden cero?", "Rule: does the zero order get in?"))
 
 for x0 in (0.283, 0.578):
     fig.add_artist(FancyArrowPatch((x0, 0.52), (x0 + 0.03, 0.52), transform=fig.transFigure,
@@ -84,17 +88,17 @@ a1.add_patch(Rectangle((-0.62, Z_), 1.24, 0.07, fc=AZ, ec="none"))
 ang = np.degrees(np.arctan2(R_, Z_ - 0.04))
 a1.add_patch(Arc((0, Z_), 1.0, 1.0, theta1=270, theta2=270 + ang, color=T1, lw=2.5))
 a1.text(0.14, Z_ - 0.72, r"$\theta$", fontsize=px(40), ha="center", va="center")
-a1.text(0.72, Z_ + 0.10, "muestra", fontsize=px(31), color=AZ, ha="left", va="bottom")
-a1.text(-1.15, -0.22, "matriz de LEDs", fontsize=px(31), color=T2, ha="left", va="top")
+a1.text(0.72, Z_ + 0.10, T("muestra", "sample"), fontsize=px(31), color=AZ, ha="left", va="bottom")
+a1.text(-1.15, -0.22, T("matriz de LEDs", "LED array"), fontsize=px(31), color=T2, ha="left", va="top")
 a1.text(R_ / 2, 0.10, r"$r$", fontsize=px(40), ha="center", va="bottom")
 a1.text(-0.10, Z_ / 2, r"$z$", fontsize=px(40), ha="right", va="center")
 a1.text(R_ + 0.10, 0.16, "LED", fontsize=px(31), color=NJ, weight="bold", ha="left", va="bottom")
-a1.text(0.62, 0.95, "rayo", fontsize=px(31), color=NJ, ha="left", va="center")
-a1.text(1.72, -0.22, "(no a escala)", fontsize=px(30), color=T2, style="italic", ha="right", va="top")
+a1.text(0.62, 0.95, T("rayo", "ray"), fontsize=px(31), color=NJ, ha="left", va="center")
+a1.text(1.72, -0.22, T("(no a escala)", "(not to scale)"), fontsize=px(30), color=T2, style="italic", ha="right", va="top")
 
-fig.text(0.142, 0.295, r"$\mathrm{sen}\,\theta=\frac{r}{\sqrt{r^{2}+z^{2}}}$", fontsize=px(58), ha="center", va="center")
-fig.text(0.142, 0.185, "Ejemplo:  r = 12 mm,  z = 100 mm", fontsize=px(30), color=T2, ha="center", va="center")
-fig.text(0.142, 0.118, r"$\mathrm{sen}\,\theta=\frac{12}{\sqrt{144+10000}}\approx$" + com(sen), fontsize=px(40), ha="center", va="center")
+fig.text(0.142, 0.295, M(r"$\mathrm{sen}\,\theta=\frac{r}{\sqrt{r^{2}+z^{2}}}$"), fontsize=px(58), ha="center", va="center")
+fig.text(0.142, 0.185, T("Ejemplo:  r = 12 mm,  z = 100 mm", "Example:  r = 12 mm,  z = 100 mm"), fontsize=px(30), color=T2, ha="center", va="center")
+fig.text(0.142, 0.118, M(r"$\mathrm{sen}\,\theta=\frac{12}{\sqrt{144+10000}}\approx$") + com(sen), fontsize=px(40), ha="center", va="center")
 
 # ---- panel 2a: por qué k = sen θ / λ (onda inclinada sobre la muestra) ----
 WM, HM = 710, 230                                   # px reales del mini-dibujo (1 unidad = 1 px)
@@ -121,7 +125,7 @@ am_.text(mid[0], mid[1], r"$\lambda$", fontsize=px(36), ha="center", va="center"
 for x0 in xm[1:3]:
     am_.plot([x0, x0], [ys + 8, ys + 34], color=T1, lw=1.8)
 am_.annotate("", xy=(xm[2], ys + 24), xytext=(xm[1], ys + 24), arrowprops=dim, zorder=6)
-am_.text((xm[1] + xm[2]) / 2, ys + 54, r"$\lambda\,/\,\mathrm{sen}\,\theta$", fontsize=px(34), ha="center", va="center")
+am_.text((xm[1] + xm[2]) / 2, ys + 54, M(r"$\lambda\,/\,\mathrm{sen}\,\theta$"), fontsize=px(34), ha="center", va="center")
 # ángulo θ entre frente y muestra
 am_.add_patch(Arc((xm[0], ys), 190, 190, theta1=180, theta2=215, color=T1, lw=2.2, zorder=4))
 am_.text(xm[0] - 122 * np.cos(TH / 2), ys - 122 * np.sin(TH / 2), r"$\theta$", fontsize=px(34), ha="center", va="center")
@@ -132,13 +136,13 @@ am_.annotate("", xy=(xr, ys - 3), xytext=(xr + Lr * sT, ys - Lr * cT),
              arrowprops=dict(arrowstyle="-|>,head_width=0.45,head_length=0.9", color=NJ, lw=4, shrinkA=0, shrinkB=0), zorder=6)
 am_.add_patch(Arc((xr, ys), 150, 150, theta1=270, theta2=305, color=T1, lw=2.2, zorder=4))
 am_.text(xr + 100 * np.sin(TH / 2), ys - 100 * np.cos(TH / 2), r"$\theta$", fontsize=px(34), ha="center", va="center")
-am_.text(WM - 4, ys + 14, "muestra", fontsize=px(31), color=AZ, ha="right", va="bottom")
-am_.text(4, ys + 14, "(esquema)", fontsize=px(30), color=T2, style="italic", ha="left", va="bottom")
-am_.text(150, 22, "frentes de onda", fontsize=px(30), color=NJ, ha="left", va="center")
+am_.text(WM - 4, ys + 14, T("muestra", "sample"), fontsize=px(31), color=AZ, ha="right", va="bottom")
+am_.text(4, ys + 14, T("(esquema)", "(sketch)"), fontsize=px(30), color=T2, style="italic", ha="left", va="bottom")
+am_.text(150, 22, T("frentes de onda", "wavefronts"), fontsize=px(30), color=NJ, ha="left", va="center")
 
-fig.text(0.445, 1 - 372 / 1050, "una onda inclinada pone sobre la muestra", fontsize=px(30), color=T2, ha="center", va="center")
-fig.text(0.445, 1 - 411 / 1050, "una «red» de período λ / sen θ  →  frecuencia", fontsize=px(30), color=T2, ha="center", va="center")
-fig.text(0.445, 1 - 482 / 1050, r"$k=\frac{\mathrm{sen}\,\theta}{\lambda}$", fontsize=px(58), ha="center", va="center")
+fig.text(0.445, 1 - 372 / 1050, T("una onda inclinada pone sobre la muestra", "a tilted wave puts on the sample"), fontsize=px(30), color=T2, ha="center", va="center")
+fig.text(0.445, 1 - 411 / 1050, T("una «red» de período λ / sen θ  →  frecuencia", "a “grating” of period λ / sin θ  →  frequency"), fontsize=px(30), color=T2, ha="center", va="center")
+fig.text(0.445, 1 - 482 / 1050, M(r"$k=\frac{\mathrm{sen}\,\theta}{\lambda}$"), fontsize=px(58), ha="center", va="center")
 
 # ---- panel 2b: plano de Fourier a escala ----
 xl0, xl1, hy = -0.135, 0.29, 0.125
@@ -150,22 +154,22 @@ a2.add_patch(Circle((0, 0), kp, fc=AZ, alpha=0.16, ec="none")); a2.add_patch(Cir
 a2.annotate("", xy=(k - 0.014, 0), xytext=(0, 0), arrowprops=dict(arrowstyle="-|>,head_width=0.5,head_length=1.0", color=NJ, lw=4.5), zorder=5)
 a2.plot([k], [0], marker="*", ms=36, color=NJ, mec=T1, mew=1.2, zorder=6)
 a2.plot([0], [0], "o", ms=8, color=T1, zorder=7)
-a2.text(0, 0.070, "pupila", fontsize=px(30), color=AZ, weight="bold", ha="center", va="center")
-a2.text(0, 0.036, "radio NA/λ", fontsize=px(30), color=AZ, weight="bold", ha="center", va="center")
-a2.text(0, -0.048, "0,111 µm⁻¹", fontsize=px(30), color=AZ, ha="center", va="center")
-a2.text(0.284, 0.034, "orden cero", fontsize=px(30), color=NJ, weight="bold", ha="right", va="bottom")
+a2.text(0, 0.070, T("pupila", "pupil"), fontsize=px(30), color=AZ, weight="bold", ha="center", va="center")
+a2.text(0, 0.036, T("radio NA/λ", "radius NA/λ"), fontsize=px(30), color=AZ, weight="bold", ha="center", va="center")
+a2.text(0, -0.048, com(0.111) + " µm⁻¹", fontsize=px(30), color=AZ, ha="center", va="center")
+a2.text(0.284, 0.034, T("orden cero", "zero order"), fontsize=px(30), color=NJ, weight="bold", ha="right", va="bottom")
 a2.text(k - 0.040, -0.036, "k", fontsize=px(34), color=NJ, style="italic", weight="bold", ha="center", va="center")
 tk = [-0.1, 0, 0.1, 0.2]
 a2.set_xticks(tk); a2.set_xticklabels([com(t, 1) if t else "0" for t in tk])
-a2.set_yticks([-0.1, 0, 0.1]); a2.set_yticklabels(["−0,1", "0", "0,1"])
+a2.set_yticks([-0.1, 0, 0.1]); a2.set_yticklabels([MN(-0.1), "0", MN(0.1)])
 a2.tick_params(labelsize=px(28), colors=T2, length=6, width=1.5)
-a2.set_xlabel("frecuencia espacial (µm⁻¹) — a escala", fontsize=px(30), color=T2, labelpad=4)
+a2.set_xlabel(T("frecuencia espacial (µm⁻¹) — a escala", "spatial frequency (µm⁻¹) — to scale"), fontsize=px(30), color=T2, labelpad=4)
 
-fig.text(0.445, 1 - 950 / 1050, r"$k\approx\frac{0{,}119}{0{,}63\ \mathrm{\mu m}}\approx$" + com(k) + " µm⁻¹", fontsize=px(40), ha="center", va="center")
+fig.text(0.445, 1 - 950 / 1050, r"$k\approx\frac{0" + T("{,}", ".") + r"119}{0" + T("{,}", ".") + r"63\ \mathrm{\mu m}}\approx$" + com(k) + " µm⁻¹", fontsize=px(40), ha="center", va="center")
 
 # ---- panel 3: los dos casos ----
 def caso(xc, signo, k_led, img, l1, l2, l3, vmax, col):
-    fig.text(xc, 0.835, rf"$\mathrm{{sen}}\,\theta{signo}\mathrm{{NA}}$", fontsize=px(46), color=col, ha="center", va="center")
+    fig.text(xc, 0.835, M(rf"$\mathrm{{sen}}\,\theta{signo}\mathrm{{NA}}$"), fontsize=px(46), color=col, ha="center", va="center")
     w = 0.092; h = w * 2400 / 1050
     am = fig.add_axes([xc - w / 2, 0.575, w, h]); am.set_facecolor("white")
     am.set_xlim(-0.23, 0.23); am.set_ylim(-0.23, 0.23); am.set_aspect("equal"); am.set_xticks([]); am.set_yticks([])
@@ -181,14 +185,14 @@ def caso(xc, signo, k_led, img, l1, l2, l3, vmax, col):
     fig.text(xc, 0.200, l2, fontsize=px(36), color=col, weight="bold", ha="center", va="center")
     fig.text(xc, 0.150, l3, fontsize=px(30), color=T2, ha="center", va="center")
 
-caso(0.688, "<", 0.03 / lam, I_bf, "el orden cero entra", "campo claro", "(fondo brillante)", 1.45, AZ)
-caso(0.872, ">", k, I_df, "queda afuera", "campo oscuro", "(solo bordes brillantes)", I_df.max() * 0.55, NJ)
+caso(0.688, "<", 0.03 / lam, I_bf, T("el orden cero entra", "the zero order gets in"), T("campo claro", "bright field"), T("(fondo brillante)", "(bright background)"), 1.45, AZ)
+caso(0.872, ">", k, I_df, T("queda afuera", "falls outside"), T("campo oscuro", "dark field"), T("(solo bordes brillantes)", "(only bright edges)"), I_df.max() * 0.55, NJ)
 fig.add_artist(plt.Line2D([0.781, 0.781], [0.14, 0.86], color="#C9C5BA", lw=2, transform=fig.transFigure))
-fig.text(0.872, 0.090, "ejemplo de 12 mm: 0,119 > 0,07", fontsize=px(30), color="white", weight="bold", ha="center", va="center",
+fig.text(0.872, 0.090, T("ejemplo de 12 mm: 0,119 > 0,07", "12 mm example: 0.119 > 0.07"), fontsize=px(30), color="white", weight="bold", ha="center", va="center",
          bbox=dict(boxstyle="round,pad=0.35", fc=NJ, ec="none"))
 
-fig.text(0.5, 0.030, "con estos tres pasos se ubica cada foto en el espectro", fontsize=px(34), color=T1, style="italic", ha="center", va="center")
+fig.text(0.5, 0.030, T("con estos tres pasos se ubica cada foto en el espectro", "these three steps place each photo in the spectrum"), fontsize=px(34), color=T1, style="italic", ha="center", va="center")
 
-out = os.path.join(os.path.dirname(os.path.abspath(__file__)), "puente.png")
+out = salida("puente.png", os.path.dirname(os.path.abspath(__file__)))
 fig.savefig(out, dpi=DPI, facecolor=BG)
 print(out)

@@ -8,6 +8,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.patches import Circle, Wedge
 from matplotlib.ticker import FuncFormatter, MultipleLocator
+from idioma import EN, T, num, salida
 
 AQUI = os.path.dirname(os.path.abspath(__file__))
 
@@ -38,7 +39,7 @@ plt.rcParams.update({"font.family": "DejaVu Sans", "text.color": TXT,
 
 
 def coma(x, nd):
-    return f"{x:.{nd}f}".replace(".", ",")
+    return num(x, nd)
 
 
 # ---------- fisica ----------
@@ -115,34 +116,35 @@ def fig_siguiente(nums):
         ax.plot([0], [0], marker="+", color=FONDO, ms=16, mew=3, zorder=6)
         ax.xaxis.set_major_locator(MultipleLocator(12)); ax.yaxis.set_major_locator(MultipleLocator(12))
         ax.tick_params(labelsize=px(30), length=8, width=2)
-        ax.set_xlabel("x sobre la matriz (mm)", fontsize=px(30), labelpad=6)
+        ax.set_xlabel(T("x sobre la matriz (mm)", "x on the array (mm)"), fontsize=px(30), labelpad=6)
         if k == 0:
             ax.set_ylabel("y (mm)", fontsize=px(30), labelpad=2)
         for s in ax.spines.values():
             s.set_linewidth(1.8)
         # textos
         zt = coma(z, 1 if z < 100 else 0)
-        fig.text(cx, 0.955, f"z = {zt} mm ({'actual' if k == 0 else 'propuesta'})  ·  borde de pupila a "
+        fig.text(cx, 0.955, f"z = {zt} mm ({T('actual', 'current') if k == 0 else T('propuesta', 'proposed')})  ·  "
+                 f"{T('borde de pupila a', 'pupil edge at')} "
                  f"r = {coma(n['rb'], 2 if z < 100 else 1)} mm",
                  ha="center", va="center", fontsize=px(36), color=TXT2)
-        fig.text(cx, 0.885, f"{n['bf']} LEDs de campo claro", ha="center", va="center",
+        fig.text(cx, 0.885, f"{n['bf']} {T('LEDs de campo claro', 'bright-field LEDs')}", ha="center", va="center",
                  fontsize=px(54), color=AZUL, fontweight="bold")
-        fig.text(cx, 0.112, f"solapamiento entre vecinos ≈ {round(100 * n['eta']):d} %",
+        fig.text(cx, 0.112, f"{T('solapamiento entre vecinos', 'overlap between neighbors')} ≈ {round(100 * n['eta']):d} %",
                  ha="center", va="center", fontsize=px(36), color=TXT)
-        fig.text(cx, 0.064, f"NA de iluminación máxima (LED a 10 pasos en cruz) = {coma(n['na_il'], 2)}",
+        fig.text(cx, 0.064, f"{T('NA de iluminación máxima (LED a 10 pasos en cruz)', 'Maximum illumination NA (LED 10 steps along the cross)')} = {coma(n['na_il'], 2)}",
                  ha="center", va="center", fontsize=px(30), color=TXT2)
-        fig.text(cx, 0.024, f"NA sintética = {coma(n['na_il'], 2)} + {coma(NA, 2)} ≈ {coma(n['na_sint'], 2)}",
+        fig.text(cx, 0.024, f"{T('NA sintética', 'Synthetic NA')} = {coma(n['na_il'], 2)} + {coma(NA, 2)} ≈ {coma(n['na_sint'], 2)}",
                  ha="center", va="center", fontsize=px(30), color=TXT2)
     # leyenda central
     lax = fig.add_axes([0.435, 0.33, 0.13, 0.42], facecolor=FONDO)
     lax.set_xlim(0, 1); lax.set_ylim(0, 1); lax.axis("off")
-    lax.plot([0.08], [0.90], "o", ms=26, color=AZUL); lax.text(0.2, 0.90, "campo claro", fontsize=px(30), va="center", color=TXT2)
-    lax.plot([0.08], [0.72], "o", ms=26, color=GRIS); lax.text(0.2, 0.72, "campo oscuro", fontsize=px(30), va="center", color=TXT2)
-    lax.plot([0.08], [0.54], "o", ms=26, mfc=AZUL, mec=TXT, mew=3.5); lax.text(0.2, 0.54, "LED central", fontsize=px(30), va="center", color=TXT2)
-    lax.plot([0.0, 0.16], [0.36, 0.36], "-", lw=4, color=ACENTO); lax.text(0.2, 0.36, "NA 0,070", fontsize=px(30), va="center", color=TXT2)
+    lax.plot([0.08], [0.90], "o", ms=26, color=AZUL); lax.text(0.2, 0.90, T("campo claro", "bright field"), fontsize=px(30), va="center", color=TXT2)
+    lax.plot([0.08], [0.72], "o", ms=26, color=GRIS); lax.text(0.2, 0.72, T("campo oscuro", "dark field"), fontsize=px(30), va="center", color=TXT2)
+    lax.plot([0.08], [0.54], "o", ms=26, mfc=AZUL, mec=TXT, mew=3.5); lax.text(0.2, 0.54, T("LED central", "central LED"), fontsize=px(30), va="center", color=TXT2)
+    lax.plot([0.0, 0.16], [0.36, 0.36], "-", lw=4, color=ACENTO); lax.text(0.2, 0.36, T("NA 0,070", "NA 0.070"), fontsize=px(30), va="center", color=TXT2)
     lax.add_patch(plt.Rectangle((0.0, 0.14), 0.16, 0.08, facecolor=NARANJA_CL, alpha=0.45, edgecolor="none"))
-    lax.text(0.2, 0.18, "NA 0,067–\n0,074", fontsize=px(30), va="center", color=TXT2, linespacing=1.1)
-    fig.savefig(os.path.join(AQUI, "siguiente.png"), dpi=DPI, facecolor=FONDO)
+    lax.text(0.2, 0.18, T("NA 0,067–\n0,074", "NA 0.067–\n0.074"), fontsize=px(30), va="center", color=TXT2, linespacing=1.1)
+    fig.savefig(salida("siguiente.png", AQUI), dpi=DPI, facecolor=FONDO)
     plt.close(fig)
 
 
@@ -156,7 +158,7 @@ def fig_damero():
     ancho = alto * H_IN / W_IN
     lim = 0.36
     fmt = FuncFormatter(lambda v, _: coma(v, 1) if abs(v) > 1e-9 else "0")
-    titulos = ("todos los LEDs", "una mitad (tablero)")
+    titulos = (T("todos los LEDs", "all LEDs"), T("una mitad (tablero)", "half of them (checkerboard)"))
     for k in range(2):
         cx = 0.27 + 0.5 * k
         ax = fig.add_axes([cx - ancho / 2, 0.135, ancho, alto], facecolor=FONDO)
@@ -189,18 +191,18 @@ def fig_damero():
     lax = fig.add_axes([0.445, 0.25, 0.15, 0.50], facecolor=FONDO)
     lax.set_xlim(0, 1); lax.set_ylim(0, 1); lax.axis("off")
     lax.plot([0.07], [0.92], "o", ms=30, color=AZUL, alpha=0.3)
-    lax.text(0.17, 0.92, "pupila de\ncada LED", fontsize=px(30), va="center", color=TXT2, linespacing=1.1)
+    lax.text(0.17, 0.92, T("pupila de\ncada LED", "pupil of\neach LED"), fontsize=px(30), va="center", color=TXT2, linespacing=1.1)
     lax.plot([0.07], [0.68], "o", ms=30, mfc="none", mec=ACENTO, mew=4)
-    lax.text(0.17, 0.68, "LED central\n(eje)", fontsize=px(30), va="center", color=TXT2, linespacing=1.1)
+    lax.text(0.17, 0.68, T("LED central\n(eje)", "central LED\n(axis)"), fontsize=px(30), va="center", color=TXT2, linespacing=1.1)
     lax.plot([0.07], [0.46], "o", ms=11, color=TXT)
-    lax.text(0.17, 0.46, "k del LED", fontsize=px(30), va="center", color=TXT2)
+    lax.text(0.17, 0.46, T("k del LED", "LED k"), fontsize=px(30), va="center", color=TXT2)
     lax.plot([0.07], [0.30], "o", ms=11, mfc=FONDO, mec=GRIS, mew=2.2)
-    lax.text(0.17, 0.30, "LED de la\notra mitad", fontsize=px(30), va="center", color=TXT2, linespacing=1.1)
-    lax.text(0.0, 0.07, f"radio = NA/λ\n= {coma(R, 3)} µm⁻¹", fontsize=px(30), va="center", color=ACENTO, linespacing=1.15)
-    fig.text(0.5, 0.027, f"espacio de Fourier a escala · z = {coma(z, 1)} mm · NA = {coma(NA, 3)} · "
-             f"λ = {coma(LAM, 2)} µm · vecindario de 5×5 LEDs",
+    lax.text(0.17, 0.30, T("LED de la\notra mitad", "LED of the\nother half"), fontsize=px(30), va="center", color=TXT2, linespacing=1.1)
+    lax.text(0.0, 0.07, f"{T('radio', 'radius')} = NA/λ\n= {coma(R, 3)} µm⁻¹", fontsize=px(30), va="center", color=ACENTO, linespacing=1.15)
+    fig.text(0.5, 0.027, f"{T('espacio de Fourier a escala', 'Fourier space to scale')} · z = {coma(z, 1)} mm · NA = {coma(NA, 3)} · "
+             f"λ = {coma(LAM, 2)} µm · {T('vecindario de 5×5 LEDs', '5×5 LED neighborhood')}",
              ha="center", va="center", fontsize=px(30), color=TXT2)
-    fig.savefig(os.path.join(AQUI, "damero.png"), dpi=DPI, facecolor=FONDO)
+    fig.savefig(salida("damero.png", AQUI), dpi=DPI, facecolor=FONDO)
     plt.close(fig)
     return R
 

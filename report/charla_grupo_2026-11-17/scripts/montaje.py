@@ -6,6 +6,7 @@ Miniaturas: imagenes coherentes simuladas (pupila desplazada) para LED A y B.
 """
 import os
 import numpy as np
+from idioma import EN, T, num, salida
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -37,7 +38,8 @@ NA_SINT = NA_IL_EJE + NA
 NA_SINT_DIAG = NA_IL_DIAG + NA
 
 def c(v, n=3):
-    return f"{v:.{n}f}".replace(".", ",").replace("-", "−")
+    return num(v, n).replace("-", "−")
+SEN = T("sen", "sin")
 
 # ----------------------------------------------------------------- simulacion
 def simular():
@@ -97,7 +99,7 @@ def titulo(x, y, fuerte, suave):
     fig.canvas.draw()
     x1 = t.get_window_extent().x1 / W
     fig.text(x1 + 0.008, y, suave, fontsize=FS, color=T2, va="baseline")
-titulo(0.020, 0.945, "El montaje", "(esquema, no a escala)")
+titulo(0.020, 0.945, T("El montaje", "The setup"), T("(esquema, no a escala)", "(sketch, not to scale)"))
 
 YLED, YM, YOB, YOB2, YTL, YCAM = 4.0, 22.0, 34.0, 44.0, 49.0, 55.0
 ZD = YM - YLED                       # 100 mm dibujados como ZD unidades
@@ -115,7 +117,7 @@ for k in range(-4, 5):
     axm.add_patch(Rectangle((xk - HL, YLED - 0.5), 2 * HL, 1.6, fc=col, ec=T2, lw=1.5, zorder=3))
 for s in (-1, 1):
     axm.text(s * 32, YLED - 0.6, "···", ha="center", va="center", color=G2, fontsize=FS)
-axm.text(2.5, -1.2, "LEDs: 21×21, paso 6 mm", ha="right", va="center", color=T2)
+axm.text(2.5, -1.2, T("LEDs: 21×21, paso 6 mm", "LEDs: 21×21, 6 mm pitch"), ha="right", va="center", color=T2)
 # cota z
 axm.annotate("", (-27, YLED - 0.4), (-27, YM), arrowprops=dict(arrowstyle="<->", color=T2, lw=2))
 axm.text(-28.2, (YLED + YM) / 2, "z ≈\n100 mm", ha="right", va="center", color=T2, linespacing=1.25)
@@ -123,7 +125,7 @@ axm.text(-28.2, (YLED + YM) / 2, "z ≈\n100 mm", ha="right", va="center", color
 axm.add_patch(Rectangle((-15, YM - 0.6), 30, 1.2, fc="#DDE6EC", ec=T2, lw=1.5, zorder=4))
 for xs in (-6, -2.5, 0, 3.5, 8):
     axm.add_patch(Circle((xs, YM), 0.42, fc=T2, ec="none", zorder=5))
-axm.text(17, YM, "muestra", va="center", color=T1)
+axm.text(17, YM, T("muestra", "sample"), va="center", color=T1)
 # cono de aceptacion
 axm.add_patch(Polygon([(0, YM), (-half, YOB), (half, YOB)], fc=T2, alpha=0.16, ec="none", zorder=2))
 # limite de NA a rayas (mismo estilo que el circulo del plano de Fourier): del punto
@@ -135,18 +137,18 @@ YPL = YLED - 0.4                     # cara superior de la placa
 for s in (-1, 1):
     axm.plot([s * PEND * (YM - YPL), 0, s * half], [YPL, YM, YOB], color="#1F4E79", lw=2.6,
              ls=(0, (5, 3)), zorder=2.5, solid_capstyle="butt")
-axm.text(6.3, 31.4, f"cono de aceptación\n(NA {c(NA, 2)})", va="center", color="#1F4E79", linespacing=1.25)
+axm.text(6.3, 31.4, T(f"cono de aceptación\n(NA {c(NA, 2)})", f"acceptance cone\n(NA {c(NA, 2)})"), va="center", color="#1F4E79", linespacing=1.25)
 # objetivo
 axm.add_patch(Polygon([(-half, YOB), (half, YOB), (6.8, YOB + 3.2), (6.8, YOB2), (-6.8, YOB2), (-6.8, YOB + 3.2)],
                       fc=G1, ec=T2, lw=2, zorder=6))
-axm.text(9.5, 42.3, "objetivo 2,5× / NA 0,07", va="center", weight="bold")
+axm.text(9.5, 42.3, T("objetivo 2,5× / NA 0,07", "2.5× objective / NA 0.07"), va="center", weight="bold")
 # (rotulo acepta ±4 quitado) axm.text(9.5, 38.0, "acepta ±4°\n(dibujado exagerado)", va="center", color=T2, linespacing=1.25)
 # espacio infinito + lente de tubo + camara
 axm.add_patch(Polygon([(-3.4, YOB2), (3.4, YOB2), (3.4, YTL), (0, YCAM), (-3.4, YTL)], fc=T2, alpha=0.13, ec="none", zorder=2))
 axm.add_patch(Ellipse((0, YTL), 17, 2.3, fc="#DDE6EC", ec=T2, lw=2, zorder=6))
-axm.text(11, YTL, "lente de tubo", va="center")
+axm.text(11, YTL, T("lente de tubo", "tube lens"), va="center")
 axm.add_patch(Rectangle((-7.5, YCAM), 15, 3.2, fc=T2, ec=T1, lw=1.5, zorder=6))
-axm.text(9.5, YCAM + 1.6, "cámara: una foto por LED", va="center", weight="bold")
+axm.text(9.5, YCAM + 1.6, T("cámara: una foto por LED", "camera: one photo per LED"), va="center", weight="bold")
 
 # rayos directos
 def punto(x0, y):                     # recta LED(x0) -> centro de la muestra
@@ -160,21 +162,21 @@ axm.annotate("", (punto(XB, yfin), yfin), (XB, y0), zorder=7,
 # luz difractada de B
 axm.annotate("", (2.2, YOB - 0.3), (0.3, YM + 0.9), zorder=8,
              arrowprops=dict(arrowstyle="-|>,head_length=0.6,head_width=0.25", color=NJC, lw=3, ls=(0, (3, 2)), shrinkA=0, shrinkB=0))
-axm.text(7.5, 26.3, "luz difractada", va="center", color=NJ)
+axm.text(7.5, 26.3, T("luz difractada", "diffracted light"), va="center", color=NJ)
 # rotulos de LEDs y regimen
 axm.text(XA + 3.0, 8.3, "A", color=AZ, weight="bold", ha="center", va="center", fontsize=FS + 2)
 axm.text(XB + 3.2, 8.3, "B", color=NJ, weight="bold", ha="center", va="center", fontsize=FS + 2)
-axm.text(-5.6, 12.5, "campo claro", color=AZ, weight="bold", ha="right", va="center")
-axm.text(11.0, 16.3, "campo oscuro", color=NJ, weight="bold", ha="left", va="center")
-axm.text(-36.3, 49.5, "el haz directo de B\nno entra al objetivo", color=NJ, ha="left", va="center", linespacing=1.25)
+axm.text(-5.6, 12.5, T("campo claro", "bright field"), color=AZ, weight="bold", ha="right", va="center")
+axm.text(11.0, 16.3, T("campo oscuro", "dark field"), color=NJ, weight="bold", ha="left", va="center")
+axm.text(-36.3, 49.5, T("el haz directo de B\nno entra al objetivo", "the direct beam of B\nmisses the objective"), color=NJ, ha="left", va="center", linespacing=1.25)
 
 # ================================================================= Fourier
 LIM = 1.02
 FX0, FY0, SF = 1570, 262, 700        # px: esquina inferior izquierda y lado
 axf = fig.add_axes([FX0 / W, FY0 / H, SF / W, SF / H]); axf.set_xlim(-LIM, LIM); axf.set_ylim(-LIM, LIM)
 axf.set_aspect("equal"); axf.set_facecolor("#FBFAF6")
-titulo(FX0 / W, 0.945, "El plano de Fourier", "(a escala)")
-fig.text(FX0 / W, 0.905, f"cada disco: radio NA/λ = {c(R_PUP)} µm⁻¹", fontsize=FS, color=T2, va="center")
+titulo(FX0 / W, 0.945, T("El plano de Fourier", "The Fourier plane"), T("(a escala)", "(to scale)"))
+fig.text(FX0 / W, 0.905, T("cada disco: radio NA/λ", "each disk: radius NA/λ") + f" = {c(R_PUP)} µm⁻¹", fontsize=FS, color=T2, va="center")
 for kx, ky in zip(KX.ravel(), KY.ravel()):
     axf.add_patch(Circle((kx, ky), R_PUP, fc=G2, alpha=0.07, ec="none", zorder=1))
     axf.add_patch(Circle((kx, ky), R_PUP, fc="none", ec=G2, alpha=0.55, lw=0.9, zorder=2))
@@ -184,16 +186,16 @@ for f0, col in ((FA, AZ), (FB, NJ)):
     axf.add_patch(Circle((f0, 0), R_PUP, fc="none", ec=col, lw=3.5, zorder=6))
 axf.add_patch(Circle((0, 0), R_PUP, fc="none", ec="#1F4E79", lw=3.0, ls=(0, (5, 3)), zorder=7))
 caja = dict(boxstyle="round,pad=0.18", fc=BG, ec="none", alpha=0.90)
-axf.annotate(f"límite NA {c(NA, 2)} (rayas):\nsi el centro del disco cae\nadentro → campo claro",
+axf.annotate(T(f"límite NA {c(NA, 2)} (rayas):\nsi el centro del disco cae\nadentro → campo claro", f"NA {c(NA, 2)} limit (dashed):\nif the disk center falls\ninside → bright field"),
              (-R_PUP * 0.707, R_PUP * 0.707), (-0.42, 0.66), ha="center", va="center", zorder=9, bbox=caja,
              color="#1F4E79", fontsize=FS, linespacing=1.25,
              arrowprops=dict(arrowstyle="-", color="#1F4E79", lw=1.8, shrinkA=4, shrinkB=0))
 axf.plot(0, 0, marker="+", ms=20, mew=3.2, color=T1, zorder=8)
-axf.annotate("orden cero", (-0.035, 0.0), (-0.20, 0.0), ha="right", va="center", zorder=9, bbox=caja,
+axf.annotate(T("orden cero", "zero order"), (-0.035, 0.0), (-0.20, 0.0), ha="right", va="center", zorder=9, bbox=caja,
              arrowprops=dict(arrowstyle="-", color=T1, lw=1.8, shrinkA=2, shrinkB=0))
-axf.text(FA + 0.12, -0.225, "A: campo claro", color=AZ, weight="bold", ha="center", va="center", bbox=caja, zorder=9)
-axf.text(FB + 0.04, 0.205, "B: campo oscuro", color=NJ, weight="bold", ha="left", va="center", bbox=caja, zorder=9)
-axf.text(0, -0.62, "apertura sintética (punteado)\n"
+axf.text(FA + 0.12, -0.225, T("A: campo claro", "A: bright field"), color=AZ, weight="bold", ha="center", va="center", bbox=caja, zorder=9)
+axf.text(FB + 0.04, 0.205, T("B: campo oscuro", "B: dark field"), color=NJ, weight="bold", ha="left", va="center", bbox=caja, zorder=9)
+axf.text(0, -0.62, T("apertura sintética (punteado)", "synthetic aperture (dotted)") + "\n"
          f"NA ≈ {c(NA_IL_EJE, 2)} + {c(NA, 2)} = {c(NA_SINT, 2)}",
          ha="center", va="center", bbox=caja, zorder=9, linespacing=1.3)
 tk = [-1, -0.5, 0, 0.5, 1]
@@ -210,9 +212,9 @@ PX0, PT = 1230, 260                  # px: borde izquierdo y lado de las fotos
 YB_B, YB_A = 728, 236                # px: borde inferior de cada foto
 vA = 1.7 * np.median(IA); vB = np.percentile(IB, 99.7)
 for yb, im, vm, col, lineas in (
-        (YB_B, IB, vB, NJ, [("foto del LED B", 1), ("campo oscuro", 1), (f"sen θ = {c(SB)} > NA", 0),
-                            (f"(brillo ×{round(vA / vB, -1):.0f})", 0)]),
-        (YB_A, IA, vA, AZ, [("foto del LED A", 1), ("campo claro", 1), (f"sen θ = {c(SA)} < NA", 0)])):
+        (YB_B, IB, vB, NJ, [(T("foto del LED B", "photo of LED B"), 1), (T("campo oscuro", "dark field"), 1), (f"{SEN} θ = {c(SB)} > NA", 0),
+                            (T(f"(brillo ×{round(vA / vB, -1):.0f})", f"(brightness ×{round(vA / vB, -1):.0f})"), 0)]),
+        (YB_A, IA, vA, AZ, [(T("foto del LED A", "photo of LED A"), 1), (T("campo claro", "bright field"), 1), (f"{SEN} θ = {c(SA)} < NA", 0)])):
     a = fig.add_axes([PX0 / W, yb / H, PT / W, PT / H]); a.imshow(im, cmap="gray", vmin=0, vmax=vm)
     a.set_xticks([]); a.set_yticks([])
     for s in a.spines.values():
@@ -222,7 +224,7 @@ for yb, im, vm, col, lineas in (
                  color=col if fuerte else T2, weight="bold" if fuerte else "normal")
 
 # ================================================================= mensaje
-fig.text(0.5, 0.040, "cada foto mide un disco del espectro; los discos vecinos se solapan y el algoritmo los cose",
+fig.text(0.5, 0.040, T("cada foto mide un disco del espectro; los discos vecinos se solapan y el algoritmo los cose", "each photo measures one disk of the spectrum; neighboring disks overlap and the algorithm stitches them"),
          ha="center", va="center", fontsize=FST, color=T1, weight="bold")
 
 # ================================================================= flechas LED -> foto -> disco
@@ -249,7 +251,7 @@ flecha(a0, a0 + (110, -100), (PX0 - 140, YB_A - 120), (PX0 - G, YB_A + 70), AZ)
 a1 = borde_disco(FA, 205)
 flecha((PX0 + PT + G, YB_A + 205), (PX0 + PT + 140, YB_A + 205), borde_disco(FA, 205, 0.40), a1, AZ)
 
-out = os.path.join(os.path.dirname(os.path.abspath(__file__)), "montaje.png")
+out = salida("montaje.png", os.path.dirname(os.path.abspath(__file__)))
 fig.savefig(out, dpi=100, facecolor=BG)
 print(f"sen A = {SA:.4f}  fA = {FA:.4f} um^-1 | sen B = {SB:.4f}  fB = {FB:.4f} um^-1")
 print(f"radio pupila = {R_PUP:.4f} um^-1 | A contiene origen: {FA < R_PUP} | B: {FB < R_PUP}")

@@ -2,6 +2,7 @@
 Todas las miniaturas salen de una simulacion numpy (objeto 128x128, pupila r=18 px)."""
 import os
 import numpy as np
+from idioma import EN, T, salida
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -93,23 +94,23 @@ def title(x0, n, txt):
     ov.add_patch(Circle((x0 + 26, 60), 26, fc=ACC, ec="none"))
     ov.text(x0 + 26, 61, str(n), color="white", fontsize=pt(36), fontweight="bold", ha="center", va="center")
     ov.text(x0 + 66, 60, txt, color=T1, fontsize=pt(35), fontweight="bold", ha="left", va="center", linespacing=1.15)
-title(X[0], 1, "Estimación actual\ndel objeto")
-title(X[1], 2, "Predecir la foto")
-title(X[3], 3, "Comparar con\nla foto medida")
-title(X[4], 4, "Corregir solo\nesa ventana")
+title(X[0], 1, T("Estimación actual\ndel objeto", "Current estimate\nof the object"))
+title(X[1], 2, T("Predecir la foto", "Predict the photo"))
+title(X[3], 3, T("Comparar con\nla foto medida", "Compare with\nthe measurement"))
+title(X[4], 4, T("Corregir solo\nesa ventana", "Correct only\nthat window"))
 
 LY = [496, 537, 578, 619]
 def cap(xc, row, txt, color=T2, **kw):
     ov.text(xc, LY[row], txt, color=color, fontsize=pt(30), ha="center", va="center", **kw)
 c = lambda i: X[i] + S / 2
-cap(c(0), 0, r"espectro $\tilde{O}(\mathbf{k})$,"); cap(c(0), 1, "ventana del LED $j$", color=ACC)
-cap(c(1), 0, r"fase de $\psi_j$"); cap(c(2), 0, r"foto predicha $|\psi_j|^2$")
-cap((X[1] + X[2] + S) / 2, 1, "recortar la ventana y volver al espacio real")
-cap(c(3), 0, r"foto medida $I_j$")
-cap(c(3), 1, "conservar la fase,", color=ACC, fontweight="bold")
-cap(c(3), 2, "reemplazar la amplitud", color=ACC, fontweight="bold")
-cap(c(3), 3, r"por $\sqrt{I_j}$", color=ACC, fontweight="bold")
-cap(c(4), 0, "cambia solo lo de"); cap(c(4), 1, "adentro del círculo")
+cap(c(0), 0, T(r"espectro $\tilde{O}(\mathbf{k})$,", r"spectrum $\tilde{O}(\mathbf{k})$,")); cap(c(0), 1, T("ventana del LED $j$", "window of LED $j$"), color=ACC)
+cap(c(1), 0, T(r"fase de $\psi_j$", r"phase of $\psi_j$")); cap(c(2), 0, T(r"foto predicha $|\psi_j|^2$", r"predicted photo $|\psi_j|^2$"))
+cap((X[1] + X[2] + S) / 2, 1, T("recortar la ventana y volver al espacio real", "crop the window and go back to real space"))
+cap(c(3), 0, T(r"foto medida $I_j$", r"measured photo $I_j$"))
+cap(c(3), 1, T("conservar la fase,", "keep the phase,"), color=ACC, fontweight="bold")
+cap(c(3), 2, T("reemplazar la amplitud", "replace the amplitude"), color=ACC, fontweight="bold")
+cap(c(3), 3, T(r"por $\sqrt{I_j}$", r"by $\sqrt{I_j}$"), color=ACC, fontweight="bold")
+cap(c(4), 0, T("cambia solo lo de", "only what is")); cap(c(4), 1, T("adentro del círculo", "inside the circle"))
 
 def arrow(p, q, **kw):
     ov.add_patch(FancyArrowPatch(p, q, arrowstyle="-|>", mutation_scale=42, lw=7, color=ACC,
@@ -124,18 +125,18 @@ for xa, xb, lab, fs in [(X[0] + S, X[1], r"$\mathcal{F}^{-1}$", 38), (X[2] + S, 
 YR = 676
 ov.plot([c(4), c(4), c(0), c(0)], [578, YR, YR, 600], color=ACC, lw=7, solid_joinstyle="round", solid_capstyle="butt")
 arrow((c(0), 610), (c(0), 566))
-ov.text((c(0) + c(3)) / 2 - 120, YR, r"siguiente LED:  $j \rightarrow j+1$", color=ACC, fontsize=pt(32), fontweight="bold",
+ov.text((c(0) + c(3)) / 2 - 120, YR, T(r"siguiente LED:  $j \rightarrow j+1$", r"next LED:  $j \rightarrow j+1$"), color=ACC, fontsize=pt(32), fontweight="bold",
         ha="center", va="center", bbox=dict(fc=BG, ec="none", pad=10))
 
 # formula y recuadro
 ov.text(780, 800, r"$I_j(\mathbf{r}) \;=\; \left|\; \mathcal{F}^{-1}\left\{\, P(\mathbf{k}) \cdot \tilde{O}(\mathbf{k}-\mathbf{k}_j) \,\right\} \;\right|^{2}$",
         color=T1, fontsize=pt(50), ha="center", va="center")
-ov.text(780, 905, r"$P$: pupila del objetivo  ·  $\tilde{O}$: espectro del objeto  ·  $\mathbf{k}_j$: inclinación del LED $j$",
+ov.text(780, 905, T(r"$P$: pupila del objetivo  ·  $\tilde{O}$: espectro del objeto  ·  $\mathbf{k}_j$: inclinación del LED $j$", r"$P$: objective pupil  ·  $\tilde{O}$: object spectrum  ·  $\mathbf{k}_j$: tilt of LED $j$"),
         color=T2, fontsize=pt(30), ha="center", va="center")
 ov.add_patch(FancyBboxPatch((1560, 762), 730, 170, boxstyle="round,pad=0,rounding_size=18", fc="#FFFFFF", ec=AZ, lw=3))
-ov.text(1925, 847, "El error de entrenamiento siempre\nbaja: se corta con LEDs reservados", color=T1,
+ov.text(1925, 847, T("El error de entrenamiento siempre\nbaja: se corta con LEDs reservados", "The training error always goes\ndown: we stop it with held-out LEDs"), color=T1,
         fontsize=pt(31), ha="center", va="center", linespacing=1.35)
 
-out = os.path.join(os.path.dirname(os.path.abspath(__file__)), "algoritmo.png")
+out = salida("algoritmo.png", os.path.dirname(os.path.abspath(__file__)))
 fig.savefig(out, dpi=DPI, facecolor=BG)
 print(out, "dif. relativa predicha/medida:", round(float(np.abs(I_pred - Ij).sum() / Ij.sum()), 3))

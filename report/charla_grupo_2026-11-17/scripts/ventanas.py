@@ -11,6 +11,7 @@ from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.patches import Circle, FancyArrowPatch, Rectangle
 from matplotlib import font_manager
 from PIL import Image, ImageDraw, ImageFont
+from idioma import T, salida
 
 FONDO, TXT, TXT2 = "#F6F4EE", "#1B2333", "#3E4756"
 AZUL, NAR, NARCL = "#2F6690", "#A9471A", "#E8925E"
@@ -98,14 +99,14 @@ def espectro(a, ventanas, sombra=None):
 
 # ---------- panel 1 ----------
 X1 = 40
-titulo(X1, 1, "La cámara pierde la fase")
-texto(X1 + 140, 872, "amplitud")
+titulo(X1, 1, T("La cámara pierde la fase", "The camera loses the phase"))
+texto(X1 + 140, 872, T("amplitud", "amplitude"))
 eje(X1, 570, 280, 280).imshow(amp, cmap="gray", vmin=0, vmax=1.05)
-texto(X1 + 140, 546, "fase")
+texto(X1 + 140, 546, T("fase", "phase"))
 eje(X1, 245, 280, 280).imshow(fase, cmap=cmap_fase, vmin=-2, vmax=2)
-texto(X1 + 500, 872, "la cámara mide |ψ|²")
+texto(X1 + 500, 872, T("la cámara mide |ψ|²", "the camera measures |ψ|²"))
 eje(X1 + 360, 570, 280, 280).imshow(I_cam, cmap="gray", vmin=0, vmax=1.1)
-texto(X1 + 500, 546, "¿fase?", color=NAR, weight="bold")
+texto(X1 + 500, 546, T("¿fase?", "phase?"), color=NAR, weight="bold")
 ov.add_patch(Rectangle((X1 + 360, 245), 280, 280, fill=True, fc="#ECE8DD", ec=NAR,
                        lw=4 * PT, ls=(0, (5, 4))))
 texto(X1 + 500, 380, "?", px=210, color=NAR, weight="bold")
@@ -113,22 +114,22 @@ flecha((X1 + 290, 710), (X1 + 350, 710))
 flecha((X1 + 290, 385), (X1 + 350, 385), color="#9A9FA8", lw=5, ls=(0, (2.5, 2)))
 ov.plot([X1 + 303, X1 + 333], [366, 404], color=NAR, lw=6 * PT, solid_capstyle="round")
 ov.plot([X1 + 303, X1 + 333], [404, 366], color=NAR, lw=6 * PT, solid_capstyle="round")
-texto(X1 + 320, 150, "misma foto para infinitas fases", px=32, color=TXT2, style="italic")
+texto(X1 + 320, 150, T("misma foto para infinitas fases", "same photo for infinitely many phases"), px=32, color=TXT2, style="italic")
 
 # ---------- panel 2 ----------
 X2 = 800
-titulo(X2, 2, "Cada medida ve por una ventana")
-texto(X2 + 190, 792, "espectro del objeto")
+titulo(X2, 2, T("Cada medida ve por una ventana", "Each photo sees a window"))
+texto(X2 + 190, 792, T("espectro del objeto", "object spectrum"))
 espectro(eje(X2, 375, 380, 380), [((0, 0), AZUL)])
-texto(X2 + 190, 337, "una ventana (pupila)", color=AZUL, weight="bold")
+texto(X2 + 190, 337, T("una ventana (pupila)", "one window (pupil)"), color=AZUL, weight="bold")
 flecha((X2 + 390, 565), (X2 + 442, 565), color=AZUL)
-texto(X2 + 600, 752, "su foto")
+texto(X2 + 600, 752, T("su foto", "its photo"))
 eje(X2 + 450, 415, 300, 300, AZUL, 6).imshow(I1, cmap="gray", vmin=0, vmax=1.1)
-texto(X2 + 600, 377, "baja resolución", color=TXT2)
+texto(X2 + 600, 377, T("baja resolución", "low resolution"), color=TXT2)
 
 # ---------- panel 3 ----------
 X3 = 1670
-titulo(X3, 3, "Ventanas que se solapan\natan la fase")
+titulo(X3, 3, T("Ventanas que se solapan\natan la fase", "Overlapping windows\ntie down the phase"))
 ys = 385
 espectro(eje(X3, ys, 380, 380), [((0, 0), AZUL), (D, NAR)], sombra=True)
 esc = 380 / (2 * C)
@@ -136,20 +137,20 @@ xl, yl = X3 + 190 + D[0] / 2 * esc, ys + 190
 ov.plot([xl, xl], [ys - 22, ys], color=NAR, lw=4 * PT)
 ov.plot([xl, xl], [ys, yl - 40], color=FONDO, lw=4 * PT)
 ov.add_patch(Circle((xl, yl - 40), 9, color=FONDO))
-texto(X3 + 190, ys - 45, f"medida dos veces  ≈ {100*solape:.0f} %", color=NAR, weight="bold")
-texto(X3 + 570, 878, "LED central", color=AZUL, weight="bold")
+texto(X3 + 190, ys - 45, T(f"medida dos veces  ≈ {100*solape:.0f} %", f"measured twice  ≈ {100*solape:.0f} %"), color=NAR, weight="bold")
+texto(X3 + 570, 878, T("LED central", "central LED"), color=AZUL, weight="bold")
 eje(X3 + 440, 598, 260, 260, AZUL, 6).imshow(I1, cmap="gray", vmin=0, vmax=1.1)
-texto(X3 + 570, 568, "LED vecino", color=NAR, weight="bold")
+texto(X3 + 570, 568, T("LED vecino", "neighbor LED"), color=NAR, weight="bold")
 eje(X3 + 440, 288, 260, 260, NAR, 6).imshow(I2, cmap="gray", vmin=0, vmax=1.1)
 flecha((X3 + 388, 650), (X3 + 432, 715), color=AZUL, lw=6, ms=30)
 flecha((X3 + 388, 500), (X3 + 432, 430), color=NAR, lw=6, ms=30)
-texto(X3 + 350, 170, "las dos fotos tienen que explicarse", px=32)
-ov.text(X3 + 350, 122, "con el mismo campo → eso fija la fase", fontsize=32 * PT, color=TXT,
+texto(X3 + 350, 170, T("las dos fotos tienen que explicarse", "both photos have to be explained"), px=32)
+ov.text(X3 + 350, 122, T("con el mismo campo → eso fija la fase", "by the same field → that fixes the phase"), fontsize=32 * PT, color=TXT,
         ha="center", va="center", weight="bold")
 
 # ---------- flechas entre paneles ----------
 flecha((700, 565), (782, 565), lw=11, ms=52)
 flecha((1570, 565), (1652, 565), lw=11, ms=52)
 
-fig.savefig(os.path.join(os.path.dirname(os.path.abspath(__file__)), "ventanas.png"),
+fig.savefig(salida("ventanas.png", os.path.dirname(os.path.abspath(__file__))),
             dpi=DPI, facecolor=FONDO)

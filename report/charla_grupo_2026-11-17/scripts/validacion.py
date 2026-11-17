@@ -6,6 +6,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.patches import FancyBboxPatch, Circle, Rectangle, FancyArrowPatch
+from idioma import T, salida
 
 BG, CARD, TXT, SEC, ACC, BLUE = "#16202E", "#22303F", "#F3EFE6", "#B8C2CF", "#E8925E", "#6FA8D6"
 OFF = "#44546A"
@@ -100,11 +101,12 @@ def leds(x, y, s, color_de, n=7):
 
 
 CW, GAP, MX = 567, 24, 30
-titulos = ["Objeto conocido", "Dos mitades\nindependientes", "Control nulo", "Predecir\nlo no visto"]
-lineas = ["¿se separan barras de\ntamaño conocido?",
-          "¿coinciden más allá de lo que\nve el objetivo? (FRC)",
-          "si destruyo el campo oscuro,\nel detalle tiene que\ndesaparecer",
-          "¿predice fotos que no usó?"]
+titulos = [T("Objeto conocido", "Known object"), T("Dos mitades\nindependientes", "Two independent\nhalves"),
+           T("Control nulo", "Null control"), T("Predecir\nlo no visto", "Predict\nthe unseen")]
+lineas = [T("¿se separan barras de\ntamaño conocido?", "are bars of known\nsize resolved?"),
+          T("¿coinciden más allá de lo que\nve el objetivo? (FRC)", "do they agree beyond what\nthe objective sees? (FRC)"),
+          T("si destruyo el campo oscuro,\nel detalle tiene que\ndesaparecer", "if I destroy the dark field,\nthe detail has to\ndisappear"),
+          T("¿predice fotos que no usó?", "does it predict photos it\ndid not use?")]
 X0 = [MX + i * (CW + GAP) for i in range(4)]
 for i, x0 in enumerate(X0):
     ax.add_patch(FancyBboxPatch((x0, 30), CW, 840, boxstyle="round,pad=0,rounding_size=28",
@@ -122,7 +124,7 @@ x0 = X0[0]; s = 250
 vm = np.percentile(u_rec, 99.5)
 img(u_foto, x0 + 22, 410, s, vm); img(u_rec, x0 + 295, 410, s, vm, borde=ACC)
 flecha((x0 + 275, 535), (x0 + 293, 535), lw=3)
-etiqueta(x0 + 22 + s / 2, 395, "foto"); etiqueta(x0 + 295 + s / 2, 395, "reconstrucción", ACC)
+etiqueta(x0 + 22 + s / 2, 395, T("foto", "photo")); etiqueta(x0 + 295 + s / 2, 395, T("reconstrucción", "reconstruction"), ACC)
 
 # 2 - dos mitades
 x0 = X0[1]; s = 195
@@ -134,7 +136,7 @@ flecha((x0 + 243, 455), (x0 + 298, 370), BLUE, rad=0.2)
 ax.text(x0 + 305 + s / 2, 490, "≈", color=TXT, fontsize=50 * PT, fontweight="bold", ha="center", va="center")
 ax.text(x0 + 530, 622, "A", color=ACC, fontsize=F_TIT, fontweight="bold", ha="center", va="center")
 ax.text(x0 + 530, 360, "B", color=BLUE, fontsize=F_TIT, fontweight="bold", ha="center", va="center")
-etiqueta(x0 + 22 + 107, 372, "LEDs en\ndos grupos", linespacing=1.15)
+etiqueta(x0 + 22 + 107, 372, T("LEDs en\ndos grupos", "LEDs in\ntwo groups"), linespacing=1.15)
 
 # 3 - control nulo
 x0 = X0[2]; t = 105; g = 12
@@ -147,21 +149,21 @@ flecha(c[0], c[3], ACC, lw=6, estilo="<|-|>", rad=0.25)
 flecha(c[1], c[2], ACC, lw=6, estilo="<|-|>", rad=0.25)
 flecha((x0 + 256, 531), (x0 + 296, 531))
 img(rec_nulo, x0 + 305, 410, 240, vm)
-etiqueta(x0 + 22 + t + g / 2, 395, "campo oscuro\nmezclado", linespacing=1.15)
-etiqueta(x0 + 305 + 120, 395, "sin detalle")
+etiqueta(x0 + 22 + t + g / 2, 395, T("campo oscuro\nmezclado", "dark field\nshuffled"), linespacing=1.15)
+etiqueta(x0 + 305 + 120, 395, T("sin detalle", "no detail"))
 
 # 4 - predecir lo no visto
 x0 = X0[3]; s = 190
 res = {(1, 5), (4, 6), (5, 2), (2, 1), (6, 4), (0, 3), (3, 3)}
 leds(x0 + 40, 560, 170, lambda i, j: ACC if (i, j) in res else BLUE)
-for yy_, col, lab in [(680, BLUE, "usados"), (610, ACC, "reservados")]:
+for yy_, col, lab in [(680, BLUE, T("usados", "used")), (610, ACC, T("reservados", "held out"))]:
     ax.add_patch(Circle((x0 + 262, yy_), 13, color=col, zorder=4))
     ax.text(x0 + 290, yy_, lab, color=col, fontsize=F_LAB, ha="left", va="center")
 vmp = np.percentile(pred, 99.8)
 img(pred, x0 + 60, 345, s, vmp, borde=BLUE); img(med, x0 + 317, 345, s, vmp, borde=ACC)
 ax.text(x0 + 283.5, 440, "vs", color=SEC, fontsize=F_LAB, ha="center", va="center")
-etiqueta(x0 + 60 + s / 2, 332, "foto predicha", BLUE); etiqueta(x0 + 317 + s / 2, 332, "foto medida", ACC)
+etiqueta(x0 + 60 + s / 2, 332, T("foto predicha", "predicted photo"), BLUE); etiqueta(x0 + 317 + s / 2, 332, T("foto medida", "measured photo"), ACC)
 
 ax.set_xlim(0, W); ax.set_ylim(0, H); ax.set_aspect("auto")
-fig.savefig(os.path.join(os.path.dirname(os.path.abspath(__file__)), "validacion.png"),
+fig.savefig(salida("validacion.png", os.path.dirname(os.path.abspath(__file__))),
             dpi=DPI, facecolor=BG)

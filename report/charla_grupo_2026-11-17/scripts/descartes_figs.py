@@ -3,6 +3,7 @@
 Solo LEE datos. Salidas: descartes_exp.png y descartes_alg.png (2400x1000) junto a este script.
 Cada numero sale del archivo indicado en el comentario del panel."""
 import os, re, json, csv
+from idioma import EN, T, salida
 import numpy as np
 from PIL import Image
 import matplotlib
@@ -28,7 +29,14 @@ plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": F_EJE, "text.col
 
 def coma(x, n=3, signo=False):
     s = f"{x:+.{n}f}" if signo else f"{x:.{n}f}"
-    return s.replace(".", ",").replace("-", "−")
+    if not EN:
+        s = s.replace(".", ",")
+    return s.replace("-", "−")
+
+
+def d1(x):
+    """Etiqueta de eje con coma decimal en espanol: '0,5' (es) / '0.5' (en)."""
+    return x.replace(",", ".") if EN else x
 
 
 def c1_resumen(path):
@@ -60,7 +68,7 @@ def tarjeta(fig, i, titulo, rotulo, conclusion):
         fig.lines.append(Line2D([cx - sx * w / 2, cx + sx * w / 2], [cy - h / 2, cy + h / 2],
                                 transform=fig.transFigure, color=GRIS, lw=7, solid_capstyle="round"))
     fig.text(x + 0.037, 0.905, titulo, fontsize=F_TIT, fontweight="bold", va="center", ha="left", color=T1)
-    col = AZUL if rotulo.startswith("datos reales") and "sim" not in rotulo else NAR
+    col = AZUL if rotulo.startswith(T("datos reales", "real data")) and "sim" not in rotulo else NAR
     if "+" in rotulo:
         col = GRIS
     fig.text(x + 0.016, 0.828, rotulo.upper(), fontsize=F_ROT, fontweight="bold", va="center", ha="left",
@@ -94,14 +102,14 @@ def figura_exp():
     c1 = {1025: c1_resumen(A + "/reconstrucciones/2026-11-13.a_15x15_flat12_1519/resumen.txt"),
           2048: c1_resumen(A + "/reconstrucciones/2026-11-13_15x15_flat12_1501/resumen.txt")}
     print("P1: C1", c1)
-    x = tarjeta(fig, 0, "No es el ruido", "datos reales · 13/11",
-                "×%s de señal/ruido, C1 igual" % coma(np.median(coc), 1))
+    x = tarjeta(fig, 0, T("No es el ruido", "Not the noise"), T("datos reales · 13/11", "real data · 13/11"),
+                T("×%s de señal/ruido, C1 igual", "×%s signal/noise, same C1") % coma(np.median(coc), 1))
     ax = ejes(fig, x, (0.135, 0.275, 0.42, 0.49))
     for t, c in ((1025, AZUL), (2048, NAR)):
         ax.plot(an, med[t], "-o", color=c, lw=4, ms=10)
     ax.set_yscale("log")
-    ax.set_xlabel("anillo de LEDs")
-    ax.set_ylabel("señal / ruido (mediana)")
+    ax.set_xlabel(T("anillo de LEDs", "LED ring"))
+    ax.set_ylabel(T("señal / ruido (mediana)", "signal / noise (median)"))
     ax.set_xticks([a for a in an if a % 2 == 0])
     ax.set_yticks([1, 2, 5, 10, 20, 50]); ax.set_yticklabels(["1", "2", "5", "10", "20", "50"])
     ax.minorticks_off()
@@ -115,16 +123,18 @@ def figura_exp():
         ax2.text(i, v + 0.02, coma(v), ha="center", va="bottom", fontweight="bold", fontsize=18)
     ax2.set_ylim(0, 1); ax2.set_xlim(-0.65, 1.65)
     ax2.set_xticks([0, 1]); ax2.set_xticklabels(["1025", "2048"])
-    ax2.set_yticks([0, 0.5, 1]); ax2.set_yticklabels(["0", "0,5", "1"])
-    ax2.set_xlabel("exposición (ms)")
-    ax2.set_title("error C1", fontsize=F_EJE, color=T1, pad=12)
+    ax2.set_yticks([0, 0.5, 1]); ax2.set_yticklabels(["0", d1("0,5"), "1"])
+    ax2.set_xlabel(T("exposición (ms)", "exposure (ms)"))
+    ax2.set_title(T("error C1", "C1 error"), fontsize=F_EJE, color=T1, pad=12)
 
     # ---- panel 2: magnificacion.  micrometro.json + recorte de fig_micrometro.png (la cruda ya no esta en disco)
     mj = json.load(open(R + "/docs/resultados_2026-10-20/offset_color/micrometro.json"))
     um_px, aum, per = mj["um_por_px"], mj["aumento"], mj["periodo_rayas_px"]
     nominal = 2.28
-    x = tarjeta(fig, 1, "No es la magnificación", "datos reales · regla milimetrada",
-                "medido: %s µm/px (%s×);\nel %s× nominal queda excluido" % (coma(um_px), coma(aum, 2), coma(nominal, 2)))
+    x = tarjeta(fig, 1, T("No es la magnificación", "Not the magnification"),
+                T("datos reales · regla milimetrada", "real data · millimeter ruler"),
+                T("medido: %s µm/px (%s×);\nel %s× nominal queda excluido",
+                  "measured: %s µm/px (%s×);\nthe nominal %s× is ruled out") % (coma(um_px), coma(aum, 2), coma(nominal, 2)))
     import tifffile
     raw = tifffile.imread("/home/chanoscopio/Documents/AleYLu/regla_milimetrada.tif").astype(float)
     im = raw[180:580, 0:773]
@@ -140,21 +150,21 @@ def figura_exp():
     ax.plot([x0r, x0r + 3 * per100], [yb, yb], color=NARC, lw=5, solid_capstyle="butt")
     for k in range(4):
         ax.plot([x0r + k * per100] * 2, [yb - 12, yb + 12], color=NARC, lw=4)
-    ax.text(x0r + 3 * per100 + 14, yb, "cada división: 100 µm = %s px" % coma(per100, 1), color="white", fontsize=F_EJE,
+    ax.text(x0r + 3 * per100 + 14, yb, T("cada división: 100 µm = %s px", "each division: 100 µm = %s px") % coma(per100, 1), color="white", fontsize=F_EJE,
             fontweight="bold", va="center", ha="left",
             bbox=dict(boxstyle="round,pad=0.25", fc="#1B2333", ec="none", alpha=0.85))
     ax.set_xlim(0, im.shape[1] - 1); ax.set_ylim(im.shape[0] - 1, 0)
     # recta de aumento
     ax3 = ejes(fig, x, (0.08, 0.285, 0.84, 0.06))
-    fig.text(x + W / 2, 0.185, "con %s×, el error de predicción sube +0,069" % coma(nominal, 2), color=T2, ha="center", va="center", fontsize=F_EJE)
+    fig.text(x + W / 2, 0.185, T("con %s×, el error de predicción sube +0,069", "with %s×, the prediction error rises by +0.069") % coma(nominal, 2), color=T2, ha="center", va="center", fontsize=F_EJE)
     ax3.set_xlim(2.2, 2.6); ax3.set_ylim(0, 1)
     ax3.spines["left"].set_visible(False); ax3.set_yticks([])
     ax3.patch.set_alpha(0)
-    ax3.set_xticks([2.2, 2.3, 2.4, 2.5, 2.6]); ax3.set_xticklabels(["2,2", "2,3", "2,4", "2,5", "2,6×"])
+    ax3.set_xticks([2.2, 2.3, 2.4, 2.5, 2.6]); ax3.set_xticklabels([d1("2,2"), d1("2,3"), d1("2,4"), d1("2,5"), d1("2,6×")])
     ax3.plot([aum], [0.0], "o", color=AZUL, ms=22, clip_on=False, zorder=5)
     ax3.plot([nominal], [0.0], "X", color=GRIS, ms=22, clip_on=False, zorder=5)
-    ax3.text(aum, 0.75, "medido %s×" % coma(aum, 2), color=AZUL, fontweight="bold", ha="center", va="bottom")
-    ax3.text(nominal, 0.75, "nominal %s×" % coma(nominal, 2), color=GRIS, fontweight="bold", ha="center", va="bottom")
+    ax3.text(aum, 0.75, T("medido %s×", "measured %s×") % coma(aum, 2), color=AZUL, fontweight="bold", ha="center", va="bottom")
+    ax3.text(nominal, 0.75, T("nominal %s×", "nominal %s×") % coma(nominal, 2), color=GRIS, fontweight="bold", ha="center", va="bottom")
 
     # ---- panel 3: posicion de la matriz
     # rotacion: C1 por mitades a la MISMA epoca (14) en snapshots/metricas_mitad{0,1}.csv
@@ -183,8 +193,10 @@ def figura_exp():
     e4 = c1_resumen(R + "/docs/resultados_2026-11-05/epocas_400b/resumen.txt")
     ref = abs(e4[1] - e4[2])
     print("P3: mitades A-B epocas_400b %.3f ; 23/10 base %.3f" % (ref, abs(vb[0] - vb[1])))
-    x = tarjeta(fig, 2, "No es la posición de la matriz", "datos reales + simulación",
-                "errores de posición plausibles mueven C1\nmenos que la variación entre mitades")
+    x = tarjeta(fig, 2, T("No es la posición de la matriz", "Not the array position"),
+                T("datos reales + simulación", "real data + simulation"),
+                T("errores de posición plausibles mueven C1\nmenos que la variación entre mitades",
+                  "plausible position errors move C1\nless than the variation between halves"))
     ax = ejes(fig, x, (0.165, 0.335, 0.80, 0.43))
     vals = [rp - base, rm - base, inc["tx1"], inc["tx3"]]
     cols = [AZUL, AZUL, NAR, NAR]
@@ -192,18 +204,18 @@ def figura_exp():
     for i, v in enumerate(vals):
         ax.text(i, v + 0.0007, coma(v, 3, True), ha="center", va="bottom", fontweight="bold")
     ax.axhline(ref, color=GRIS, lw=3.5, ls=(0, (6, 4)))
-    ax.text(-0.45, ref + 0.0008, "variación normal entre mitades ≈ %s" % coma(ref, 2), color=GRIS,
+    ax.text(-0.45, ref + 0.0008, T("variación normal entre mitades ≈ %s", "normal variation between halves ≈ %s") % coma(ref, 2), color=GRIS,
             ha="left", va="bottom", fontweight="bold")
     ax.axhline(0, color=T2, lw=1.6)
     ax.set_ylim(-0.001, 0.0255); ax.set_xlim(-0.6, 3.6)
-    ax.set_yticks([0, 0.01, 0.02]); ax.set_yticklabels(["0", "0,01", "0,02"])
-    ax.set_ylabel("cambio del error C1")
-    ax.set_xticks(range(4)); ax.set_xticklabels(["giro\n+1°", "giro\n−1°", "inclin.\n1°", "inclin.\n3°"])
+    ax.set_yticks([0, 0.01, 0.02]); ax.set_yticklabels(["0", d1("0,01"), d1("0,02")])
+    ax.set_ylabel(T("cambio del error C1", "change in C1 error"))
+    ax.set_xticks(range(4)); ax.set_xticklabels([T("giro\n+1°", "rotation\n+1°"), T("giro\n−1°", "rotation\n−1°"), T("inclin.\n1°", "tilt\n1°"), T("inclin.\n3°", "tilt\n3°")])
     ax.tick_params(axis="x", length=0, pad=10)
-    fig.text(x + (0.165 + 0.20) * W, 0.215, "medido", color=AZUL, fontweight="bold", ha="center", fontsize=F_EJE)
-    fig.text(x + (0.165 + 0.60) * W, 0.215, "simulado", color=NAR, fontweight="bold", ha="center", fontsize=F_EJE)
+    fig.text(x + (0.165 + 0.20) * W, 0.215, T("medido", "measured"), color=AZUL, fontweight="bold", ha="center", fontsize=F_EJE)
+    fig.text(x + (0.165 + 0.60) * W, 0.215, T("simulado", "simulated"), color=NAR, fontweight="bold", ha="center", fontsize=F_EJE)
 
-    fig.savefig(os.path.join(AQUI, "descartes_exp.png"), dpi=100, facecolor=FONDO)
+    fig.savefig(salida("descartes_exp.png", AQUI), dpi=100, facecolor=FONDO)
     plt.close(fig)
 
 
@@ -215,26 +227,27 @@ def figura_alg():
     cur = json.load(open(R + "/docs/resultados_2026-11-05/epocas_400b/curvas.json"))
     ep = [r["ep"] for r in cur]; C1 = [r["C1"] for r in cur]; C2 = [r["C2"] for r in cur]
     print("P4: C1 %.3f -> %.3f ; C2 %.3f -> %.3f (ep %d -> %d)" % (C1[0], C1[-1], C2[0], C2[-1], ep[0], ep[-1]))
-    x = tarjeta(fig, 0, "No son pocas iteraciones", "datos reales · rojo 03/11",
-                "%d épocas: C1 casi no cambia\n(%s → %s)" % (ep[-1], coma(C1[0]), coma(C1[-1])))
+    x = tarjeta(fig, 0, T("No son pocas iteraciones", "Not too few iterations"),
+                T("datos reales · rojo 03/11", "real data · red 03/11"),
+                T("%d épocas: C1 casi no cambia\n(%s → %s)", "%d epochs: C1 barely changes\n(%s → %s)") % (ep[-1], coma(C1[0]), coma(C1[-1])))
     ax = ejes(fig, x, (0.175, 0.555, 0.775, 0.22))
     ax.plot(ep, C1, "-o", color=AZUL, lw=4, ms=8)
     ax.set_ylim(0, 1); ax.set_xlim(0, 415)
-    ax.set_yticks([0, 0.5, 1]); ax.set_yticklabels(["0", "0,5", "1"])
+    ax.set_yticks([0, 0.5, 1]); ax.set_yticklabels(["0", d1("0,5"), "1"])
     ax.set_xticks([0, 100, 200, 300, 400]); ax.set_xticklabels([])
-    ax.set_ylabel("error C1")
+    ax.set_ylabel(T("error C1", "C1 error"))
     ax.text(400, C1[-1] + 0.07, "%s → %s" % (coma(C1[0]), coma(C1[-1])), color=AZUL, fontweight="bold", ha="right", va="bottom")
     ax = ejes(fig, x, (0.175, 0.275, 0.775, 0.22))
     ax.plot(ep, C2, "-o", color=NAR, lw=4, ms=8)
     ax.axhline(1 / 7, color=GRIS, lw=3, ls=(0, (6, 4)))
-    ax.text(400, 1 / 7 - 0.012, "umbral 1/7", color=GRIS, fontweight="bold", ha="right", va="top")
-    ax.text(395, C2[-1] + 0.012, "%s → %s, sigue subiendo" % (coma(C2[0]), coma(C2[-1])), color=NAR,
+    ax.text(400, 1 / 7 - 0.012, T("umbral 1/7", "threshold 1/7"), color=GRIS, fontweight="bold", ha="right", va="top")
+    ax.text(395, C2[-1] + 0.012, T("%s → %s, sigue subiendo", "%s → %s, still rising") % (coma(C2[0]), coma(C2[-1])), color=NAR,
             fontweight="bold", ha="right", va="bottom")
     ax.set_ylim(0, 0.29); ax.set_xlim(0, 415)
-    ax.set_yticks([0, 0.1, 0.2]); ax.set_yticklabels(["0", "0,1", "0,2"])
+    ax.set_yticks([0, 0.1, 0.2]); ax.set_yticklabels(["0", d1("0,1"), d1("0,2")])
     ax.set_xticks([0, 100, 200, 300, 400])
     ax.set_ylabel("C2")
-    ax.set_xlabel("época")
+    ax.set_xlabel(T("época", "epoch"))
 
     # ---- panel 5: EPRY.  INFORME.md rojo 25/09 (tabla) + t3_causes.json verde 24/09
     rojo = {}
@@ -246,8 +259,10 @@ def figura_alg():
     verde = {"sin": (t3["base"]["heldout_res_mean"], t3["base"]["heldout_res_std"]),
              "con": (t3["d_epry"]["heldout_res_mean"], t3["d_epry"]["heldout_res_std"])}
     print("P5: rojo", rojo, "verde", verde)
-    x = tarjeta(fig, 1, "No son aberraciones", "datos reales · 24 y 25/09",
-                "recuperar la pupila no supera al mejor\nmétodo sin ella (y en verde empeora)")
+    x = tarjeta(fig, 1, T("No son aberraciones", "Not aberrations"),
+                T("datos reales · 24 y 25/09", "real data · 24 and 25/09"),
+                T("recuperar la pupila no supera al mejor\nmétodo sin ella (y en verde empeora)",
+                  "recovering the pupil does not beat the best\nmethod without it (and is worse in green)"))
     ax = ejes(fig, x, (0.165, 0.275, 0.80, 0.49))
     bw = 0.36
     for j, (nom, dd) in enumerate((("rojo", rojo), ("verde", verde))):
@@ -258,12 +273,12 @@ def figura_alg():
             ax.errorbar(xx, v, yerr=e, color=T1, lw=3, capsize=8, capthick=3)
             ax.text(xx, v + e + 0.02, coma(v), ha="center", va="bottom", fontweight="bold")
     ax.set_ylim(0, 1.08); ax.set_xlim(-0.6, 1.6)
-    ax.set_yticks([0, 0.5, 1]); ax.set_yticklabels(["0", "0,5", "1"])
-    ax.set_xticks([0, 1]); ax.set_xticklabels(["rojo (25/09)", "verde (24/09)"])
+    ax.set_yticks([0, 0.5, 1]); ax.set_yticklabels(["0", d1("0,5"), "1"])
+    ax.set_xticks([0, 1]); ax.set_xticklabels([T("rojo (25/09)", "red (25/09)"), T("verde (24/09)", "green (24/09)")])
     ax.tick_params(axis="x", length=0, pad=10)
-    ax.set_ylabel("error en imágenes no vistas")
-    ax.text(-0.55, 1.06, "mejor método sin EPRY", color=AZUL, fontweight="bold", ha="left", va="top")
-    ax.text(-0.55, 0.96, "con corrección (EPRY)", color=NAR, fontweight="bold", ha="left", va="top")
+    ax.set_ylabel(T("error en imágenes no vistas", "error on unseen images"))
+    ax.text(-0.55, 1.06, T("mejor método sin EPRY", "best method without EPRY"), color=AZUL, fontweight="bold", ha="left", va="top")
+    ax.text(-0.55, 0.96, T("con corrección (EPRY)", "with correction (EPRY)"), color=NAR, fontweight="bold", ha="left", va="top")
 
     # ---- panel 6: espesor.  sim_grueso_2026-10-20: INFORME.md (fila real) + resultados.json (A_ruido, B)
     rj = json.load(open(R + "/results/sim_grueso_2026-10-20/resultados.json"))
@@ -275,8 +290,10 @@ def figura_alg():
         if l.startswith("| **Real"):
             real = [float(v) for v in re.findall(r"\|\s*\**([\d.]+)\**\s*(?=\|)", l)[:3]]
     print("P6: real", real, "delgada", delg, "gruesa", grue)
-    x = tarjeta(fig, 2, "No es el espesor de las esferas", "simulación BPM · 20/10",
-                "grueso ≈ delgado; el déficit real en verde\ny azul no lo explica el espesor")
+    x = tarjeta(fig, 2, T("No es el espesor de las esferas", "Not the sphere thickness"),
+                T("simulación BPM · 20/10", "BPM simulation · 20/10"),
+                T("grueso ≈ delgado; el déficit real en verde\ny azul no lo explica el espesor",
+                  "thick ≈ thin; the real deficit in green\nand blue is not explained by thickness"))
     ax = ejes(fig, x, (0.135, 0.275, 0.845, 0.49))
     bw = 0.30
     for k, (vals, c) in enumerate(((real, GRIS), (delg, NARC), (grue, NAR))):
@@ -285,14 +302,14 @@ def figura_alg():
             ax.bar(xx, v, width=bw, color=c)
             ax.text(xx, v + 0.015, coma(v, 2), ha="center", va="bottom", fontweight="bold", fontsize=17.5)
     ax.set_ylim(0, 1.22); ax.set_xlim(-0.52, 2.52)
-    ax.set_yticks([0, 0.5, 1]); ax.set_yticklabels(["0", "0,5", "1"])
-    ax.set_xticks([0, 1, 2]); ax.set_xticklabels(["rojo", "verde", "azul"])
+    ax.set_yticks([0, 0.5, 1]); ax.set_yticklabels(["0", d1("0,5"), "1"])
+    ax.set_xticks([0, 1, 2]); ax.set_xticklabels([T("rojo", "red"), T("verde", "green"), T("azul", "blue")])
     ax.tick_params(axis="x", length=0, pad=10)
-    ax.set_ylabel("fase recuperada (d_vol / d)")
-    for k, (t, c) in enumerate((("medido", GRIS), ("sim. delgada", NARC), ("sim. gruesa", NAR))):
+    ax.set_ylabel(T("fase recuperada (d_vol / d)", "recovered phase (d_vol / d)"))
+    for k, (t, c) in enumerate(((T("medido", "measured"), GRIS), (T("sim. delgada", "sim. thin"), NARC), (T("sim. gruesa", "sim. thick"), NAR))):
         ax.text([-0.47, 0.42, 1.62][k], 1.2, t, color=c, fontweight="bold", ha="left", va="top")
 
-    fig.savefig(os.path.join(AQUI, "descartes_alg.png"), dpi=100, facecolor=FONDO)
+    fig.savefig(salida("descartes_alg.png", AQUI), dpi=100, facecolor=FONDO)
     plt.close(fig)
 
 

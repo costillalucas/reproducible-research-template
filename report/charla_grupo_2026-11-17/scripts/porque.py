@@ -4,6 +4,7 @@ Uso: python3 porque.py  -> porque.png (2400x1000 px)
 """
 import os
 import numpy as np
+from idioma import EN, T as tr, num, salida   # tr: T es la transmision del objeto en este script
 import scipy.fft as sfft
 from scipy.spatial import cKDTree
 import matplotlib
@@ -191,12 +192,12 @@ def con_zoom(ax, I):
 ax1 = panel(0)
 con_zoom(ax1, I_lo)
 ax1.add_patch(Rectangle(BOX_HI, FOV_HI, FOV_HI, fc="none", ec=BLUE, lw=4, zorder=7))
-ax1.text(BOX_HI[0] + FOV_HI / 2, BOX_HI[1] - 14, "campo del 10×", ha="center", va="bottom",
+ax1.text(BOX_HI[0] + FOV_HI / 2, BOX_HI[1] - 14, tr("campo del 10×", "10× field"), ha="center", va="bottom",
          fontsize=28 * PX, color=BLUE, fontweight="bold", zorder=8,
          bbox=dict(fc=BG, ec="none", alpha=0.9, pad=3))
 barra(ax1, FOV, 200, "200 µm")
-titulo(ax1, "Objetivo 2,5× · NA 0,07")
-pie(ax1, "campo 1,4 mm · detalle ≈ 4,5 µm", "ve todo, pero borroso")
+titulo(ax1, tr("Objetivo 2,5× · NA 0,07", "2.5× objective · NA 0.07"))
+pie(ax1, tr("campo 1,4 mm · detalle ≈ 4,5 µm", "1.4 mm field · detail ≈ 4.5 µm"), tr("ve todo, pero borroso", "sees everything, but blurry"))
 
 # 2) objetivo 10x
 ax2 = panel(1)
@@ -207,16 +208,16 @@ for sp in ax2.spines.values():
 ax2.add_patch(Rectangle((ZOOM_XY[0] - BOX_HI[0], ZOOM_XY[1] - BOX_HI[1]), ZOOM, ZOOM,
                         fc="none", ec=ACC, lw=3, zorder=7))
 barra(ax2, FOV_HI, 50, "50 µm")
-titulo(ax2, "Objetivo 10× · NA 0,25")
-pie(ax2, "campo 0,35 mm · detalle ≈ 1,3 µm", "nítido, pero 1/16 del área", BLUE)
+titulo(ax2, tr("Objetivo 10× · NA 0,25", "10× objective · NA 0.25"))
+pie(ax2, tr("campo 0,35 mm · detalle ≈ 1,3 µm", "0.35 mm field · detail ≈ 1.3 µm"), tr("nítido, pero 1/16 del área", "sharp, but 1/16 of the area"), BLUE)
 
 # 3) FPM (meta)
 ax3 = panel(2)
 con_zoom(ax3, I_fp)
 barra(ax3, FOV, 200, "200 µm")
-titulo(ax3, "FPM con el 2,5× (meta)", ACC)
-pie(ax3, "campo 1,4 mm · detalle ≈ 1,4 µm", "meta: NA sintética ≈ 0,45 (simulado)", ACC)
+titulo(ax3, tr("FPM con el 2,5× (meta)", "FPM with the 2.5× (goal)"), ACC)
+pie(ax3, tr("campo 1,4 mm · detalle ≈ 1,4 µm", "1.4 mm field · detail ≈ 1.4 µm"), tr("meta: NA sintética ≈ 0,45 (simulado)", "goal: synthetic NA ≈ 0.45 (simulated)"), ACC)
 
-out = os.path.join(os.path.dirname(os.path.abspath(__file__)), "porque.png")
+out = salida("porque.png", os.path.dirname(os.path.abspath(__file__)))
 fig.savefig(out, dpi=DPI, facecolor=BG)
 print(out)

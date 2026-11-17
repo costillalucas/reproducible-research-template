@@ -8,6 +8,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.patches import Circle
+from idioma import EN, T, salida
 
 LAM, NA = 0.63, 0.07
 KC = NA / LAM                      # 0,111 µm^-1
@@ -55,13 +56,14 @@ FOVY = FOVX * PH / PW
 KY = 0.125
 KX = KY * PW / PH
 
-for xc, s in zip(X0, ["la muestra", "su espectro y la pupila", "lo que ve la cámara"]):
+for xc, s in zip(X0, [T("la muestra", "the sample"), T("su espectro y la pupila", "its spectrum and the pupil"),
+                                T("lo que ve la cámara", "what the camera sees")]):
     txt(xc + PW / 2, 50, s, ha="center", va="center", fontsize=px(38),
         color=T1, fontweight="bold")
 
-rot = [("pasa", None, T1),
-       ("en el límite", "pasa medio pico:\nbaja el contraste", NAR),
-       ("se pierde", None, T2)]
+rot = [(T("pasa", "passes"), None, T1),
+       (T("en el límite", "at the limit"), T("pasa medio pico:\nbaja el contraste", "half a peak gets through:\ncontrast drops"), NAR),
+       (T("se pierde", "lost"), None, T2)]
 ext = [-FOVX / 2, FOVX / 2, -FOVY / 2, FOVY / 2]
 sel = (np.abs(X) <= FOVX / 2) & (np.abs(Y) <= FOVY / 2)
 ny = int(np.sum(np.abs(x) <= FOVY / 2)); nx = int(np.sum(np.abs(x) <= FOVX / 2))
@@ -69,7 +71,7 @@ ny = int(np.sum(np.abs(x) <= FOVY / 2)); nx = int(np.sum(np.abs(x) <= FOVX / 2))
 for i, p in enumerate(PERIODOS):
     obj, cam = simular(p)
     y0 = Y0[i]
-    txt(225, y0 + PH / 2, "período\n%s µm" % ("%g" % p).replace(".", ","),
+    txt(225, y0 + PH / 2, T("período\n%s µm", "period\n%s µm") % (("%g" % p) if EN else ("%g" % p).replace(".", ",")),
         ha="right", va="center", fontsize=px(32), color=T1, linespacing=1.25)
 
     for col, img in ((0, obj), (2, cam)):
@@ -108,15 +110,15 @@ for i, p in enumerate(PERIODOS):
         else:  # justo en el borde: medio pico adentro
             a.plot(s * k1, 0, "o", ms=ms, color=NARC, markerfacecoloralt="#D9DADC",
                    fillstyle="left" if s > 0 else "right", mec=T1, mew=1.5, zorder=5)
-    a.text(-KX + 0.008, KY - 0.008, "1/p = " + ("%.3g" % round(k1, 3)).replace(".", ","),
+    a.text(-KX + 0.008, KY - 0.008, "1/p = " + (("%.3g" % round(k1, 3)) if EN else ("%.3g" % round(k1, 3)).replace(".", ",")),
            ha="left", va="top", fontsize=px(30), color=T1)
     if i == 0:
-        a.text(KX - 0.008, KY - 0.008, "pupila", ha="right", va="top",
+        a.text(KX - 0.008, KY - 0.008, T("pupila", "pupil"), ha="right", va="top",
                fontsize=px(30), color=AZUL, fontweight="bold")
     a.set_yticks([])
     if i == 2:
         a.set_xticks([-0.2, -0.1, 0, 0.1, 0.2])
-        a.set_xticklabels(["−0,2", "", "0", "", "0,2"], fontsize=px(30), color=T2)
+        a.set_xticklabels([T("−0,2", "−0.2"), "", "0", "", T("0,2", "0.2")], fontsize=px(30), color=T2)
         a.tick_params(axis="x", length=8, width=1.5, color=T2, pad=4)
         a.text(KX, -KY - 0.012, "µm⁻¹", ha="right", va="top", fontsize=px(30),
                color=T2, clip_on=False)
@@ -135,10 +137,12 @@ for i, p in enumerate(PERIODOS):
         txt(XR, y0 + PH / 2, tit, ha="left", va="center", fontsize=px(38),
             color=colr, fontweight="bold")
 
-txt(W / 2, 995, "la pupila del objetivo (radio NA/λ) decide qué detalles llegan: "
-    "período mínimo ≈ λ/NA ≈ 9 µm (coherente)",
+txt(W / 2, 995, T("la pupila del objetivo (radio NA/λ) decide qué detalles llegan: "
+      "período mínimo ≈ λ/NA ≈ 9 µm (coherente)",
+      "the objective pupil (radius NA/λ) decides which details get through: "
+      "minimum period ≈ λ/NA ≈ 9 µm (coherent)"),
     ha="center", va="center", fontsize=px(36), color=T1)
 
-out = os.path.join(os.path.dirname(os.path.abspath(__file__)), "resolucion.png")
+out = salida("resolucion.png", os.path.dirname(os.path.abspath(__file__)))
 fig.savefig(out, dpi=DPI, facecolor=BG)
 print(out)

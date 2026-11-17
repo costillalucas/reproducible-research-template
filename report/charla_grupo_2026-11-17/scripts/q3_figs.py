@@ -6,6 +6,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.patches import Circle, Polygon, Arc, FancyArrowPatch
+from idioma import EN, T, num, salida
 
 AQUI = os.path.dirname(os.path.abspath(__file__))
 BG, TXT, SEC, AZ, AC = "#16202E", "#F3EFE6", "#B8C2CF", "#6FA8D6", "#E8925E"
@@ -18,7 +19,7 @@ def px(p):  # tamaño de fuente en px reales -> pt
 
 
 def coma(x, n):
-    return f"{x:.{n}f}".replace(".", ",")
+    return num(x, n)
 
 
 # ---------- física ----------
@@ -49,7 +50,7 @@ def disco(ax, x, y, r):
 # ---------- Imagen A ----------
 def fig_a():
     fig, ax = lienzo(1000, 700)
-    ax.text(500, 640, "Sin solapamiento", color=TXT, fontsize=px(46),
+    ax.text(500, 640, T("Sin solapamiento", "No overlap"), color=TXT, fontsize=px(46),
             fontweight="bold", ha="center", va="center")
     r, cy = 150, 400
     for cx, a0 in ((320, 60), (680, 200)):
@@ -65,13 +66,13 @@ def fig_a():
         p1 = (p0[0] - 6 * np.sin(t), p0[1] + 6 * np.cos(t))
         ax.add_patch(FancyArrowPatch(p0, p1, arrowstyle="-|>", mutation_scale=34,
                                      color=AC, lw=0, shrinkA=0, shrinkB=0))
-    ax.text(500, 178, "cada ventana tiene su fase libre:", color=TXT,
+    ax.text(500, 178, T("cada ventana tiene su fase libre:", "each window has its own free phase:"), color=TXT,
             fontsize=px(34), ha="center", va="center")
-    ax.text(500, 128, "nada las ata → la solución no es única", color=AC,
+    ax.text(500, 128, T("nada las ata → la solución no es única", "nothing ties them → the solution is not unique"), color=AC,
             fontsize=px(34), fontweight="bold", ha="center", va="center")
-    ax.text(500, 50, "regla práctica: solapamiento ≥ 40–60 %", color=SEC,
+    ax.text(500, 50, T("regla práctica: solapamiento ≥ 40–60 %", "rule of thumb: overlap ≥ 40–60 %"), color=SEC,
             fontsize=px(30), ha="center", va="center")
-    fig.savefig(os.path.join(AQUI, "sin_solap.png"), dpi=DPI, facecolor=BG)
+    fig.savefig(salida("sin_solap.png", AQUI), dpi=DPI, facecolor=BG)
     plt.close(fig)
 
 
@@ -80,7 +81,7 @@ def fig_b():
     W, H = 1300, 700
     S = 1100.0                                   # px por µm^-1 (MISMA en ambos paneles)
     fig, ax = lienzo(W, H)
-    ax.text(W / 2, 645, "Alejar la matriz de LEDs", color=TXT, fontsize=px(46),
+    ax.text(W / 2, 645, T("Alejar la matriz de LEDs", "Moving the LED array farther away"), color=TXT, fontsize=px(46),
             fontweight="bold", ha="center", va="center")
     cy = 322
     for cx, z in ((335, 99.5), (965, 143.0)):
@@ -97,21 +98,21 @@ def fig_b():
                 fontsize=px(36), fontweight="bold", ha="center", va="center")
         ax.text(cx, 497, f"≈ {eta * 100:.0f} %", color=AC, fontsize=px(58),
                 fontweight="bold", ha="center", va="center")
-        ax.text(cx, 158, f"NA de iluminación máx. {coma(na_il, 2)}", color=SEC,
+        ax.text(cx, 158, f"{T('NA de iluminación máx.', 'Max. illumination NA')} {coma(na_il, 2)}", color=SEC,
                 fontsize=px(31), ha="center", va="center")
     # barra de escala común
     L = 0.1 * S
     ax.plot([W / 2 - L / 2, W / 2 + L / 2], [250, 250], color=SEC, lw=3, solid_capstyle="butt")
     for xx in (W / 2 - L / 2, W / 2 + L / 2):
         ax.plot([xx, xx], [241, 259], color=SEC, lw=3)
-    ax.text(W / 2, 285, "0,1 µm⁻¹", color=SEC, fontsize=px(30), ha="center", va="center")
+    ax.text(W / 2, 285, T("0,1 µm⁻¹", "0.1 µm⁻¹"), color=SEC, fontsize=px(30), ha="center", va="center")
     # línea final
     ax.plot([120, W - 120], [108, 108], color=SEC, lw=1, alpha=0.4)
     kw = dict(fontsize=px(38), fontweight="bold", va="center")
-    ax.text(W / 2 - 22, 55, "ganamos solapamiento", color=AC, ha="right", **kw)
+    ax.text(W / 2 - 22, 55, T("ganamos solapamiento", "we gain overlap"), color=AC, ha="right", **kw)
     ax.text(W / 2, 55, "·", color=SEC, ha="center", **kw)
-    ax.text(W / 2 + 22, 55, "perdemos NA sintética", color=AZ, ha="left", **kw)
-    fig.savefig(os.path.join(AQUI, "alejar.png"), dpi=DPI, facecolor=BG)
+    ax.text(W / 2 + 22, 55, T("perdemos NA sintética", "we lose synthetic NA"), color=AZ, ha="left", **kw)
+    fig.savefig(salida("alejar.png", AQUI), dpi=DPI, facecolor=BG)
     plt.close(fig)
 
 

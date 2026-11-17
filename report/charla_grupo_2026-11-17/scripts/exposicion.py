@@ -14,6 +14,7 @@ import numpy as np, tifffile
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from idioma import EN, T, num, salida
 
 AQUI = os.path.dirname(os.path.abspath(__file__))
 BASE = "/home/chanoscopio/Documents/AleYLu"
@@ -76,7 +77,7 @@ def c1(t):
 
 
 def coma(x, n=3):
-    return f"{x:.{n}f}".replace(".", ",")
+    return num(x, n)
 
 
 def main():
@@ -109,7 +110,7 @@ def main():
     fig = plt.figure(figsize=(24, 10), dpi=100, facecolor=FONDO)
 
     # --- panel 1: misma foto de campo oscuro
-    fig.text(0.02, 0.945, "Misma foto de campo oscuro", fontsize=TI, fontweight="bold", va="center")
+    fig.text(0.02, 0.945, T("Misma foto de campo oscuro", "Same dark-field photo"), fontsize=TI, fontweight="bold", va="center")
     im = {}
     for t in (1025, 2048):
         fr = frames(CAP[t], *LED_FOTO, t)
@@ -123,8 +124,10 @@ def main():
             s.set_edgecolor(COL[t]); s.set_linewidth(5)
         ax.set_title(f"{t} ms", fontsize=TI, color=COL[t], fontweight="bold", pad=12)
         print(t, "foto: desvio en zona de fondo (cuentas/s)", im[t][:40, :40].std())
-    fig.text(0.02 + 0.40 / 2, 0.16, f"LED ({LED_FOTO[0]},{LED_FOTO[1]}), a 7 pasos del eje · menos dark\n"
-             "misma escala de grises en cuentas/s", fontsize=ET, color=T2, ha="center", va="center", linespacing=1.3)
+    fig.text(0.02 + 0.40 / 2, 0.16, T(f"LED ({LED_FOTO[0]},{LED_FOTO[1]}), a 7 pasos del eje · menos dark\n"
+               "misma escala de grises en cuentas/s",
+               f"LED ({LED_FOTO[0]},{LED_FOTO[1]}), 7 steps from the axis · dark subtracted\n"
+               "same gray scale in counts/s"), fontsize=ET, color=T2, ha="center", va="center", linespacing=1.3)
 
     # --- panel 2: SNR por anillo
     ax = fig.add_axes([0.505, 0.19, 0.20, 0.66])
@@ -132,8 +135,8 @@ def main():
     for t in (1025, 2048):
         ax.plot(anillos, med[t], "-o", color=COL[t], lw=4, ms=11)
     ax.set_yscale("log")
-    ax.set_xlabel("distancia del LED al eje (pasos)", fontsize=ET)
-    ax.set_ylabel("señal / ruido (mediana)", fontsize=ET)
+    ax.set_xlabel(T("distancia del LED al eje (pasos)", "LED distance to axis (steps)"), fontsize=ET)
+    ax.set_ylabel(T("señal / ruido (mediana)", "signal / noise (median)"), fontsize=ET)
     ax.tick_params(labelsize=ET, length=7, width=1.5)
     ax.tick_params(which="minor", length=4)
     from matplotlib.ticker import FuncFormatter, NullFormatter
@@ -147,7 +150,7 @@ def main():
                 fontsize=ET, color=COL[2048], fontweight="bold")
     ax.annotate("1025 ms", (anillos[i], med[1025][i]), xytext=(-6, -52), textcoords="offset points",
                 fontsize=ET, color=COL[1025], fontweight="bold", ha="right")
-    fig.text(0.455, 0.945, f"Señal/ruido: ×{coma(np.median(cociente), 1)}", fontsize=TI, fontweight="bold", va="center")
+    fig.text(0.455, 0.945, T("Señal/ruido", "Signal/noise") + f": ×{coma(np.median(cociente), 1)}", fontsize=TI, fontweight="bold", va="center")
 
     # --- panel 3: C1
     ax = fig.add_axes([0.785, 0.24, 0.20, 0.61])
@@ -167,15 +170,16 @@ def main():
     ax.set_yticks([0, 0.2, 0.4, 0.6, 0.8])
     ax.yaxis.set_major_formatter(FuncFormatter(lambda x, _: coma(x, 1)))
     ax.tick_params(labelsize=ET, length=7, width=1.5); ax.tick_params(axis="x", length=0, pad=10)
-    ax.set_ylabel("C1, error en LEDs no vistos", fontsize=ET)
+    ax.set_ylabel(T("C1, error en LEDs no vistos", "C1, error on unseen LEDs"), fontsize=ET)
     for s in ("top", "right"):
         ax.spines[s].set_visible(False)
-    fig.text(0.74, 0.945, f"Reconstrucción: Δ = {coma(abs(v[2048][0] - v[1025][0]))}",
+    fig.text(0.74, 0.945, T("Reconstrucción", "Reconstruction") + f": Δ = {coma(abs(v[2048][0] - v[1025][0]))}",
              fontsize=TI, fontweight="bold", va="center")
-    fig.text(0.885, 0.065, f"banda clara: mejora mínima {coma(UMBRAL, 2)}\nmenor es mejor", fontsize=ET, color=T2, ha="center", va="center", linespacing=1.3)
+    fig.text(0.885, 0.065, T(f"banda clara: mejora mínima {coma(UMBRAL, 2)}\nmenor es mejor",
+               f"light band: min. gain {coma(UMBRAL, 2)}\nlower is better"), fontsize=ET, color=T2, ha="center", va="center", linespacing=1.3)
     print("C1", {t: v[t] for t in v}, "dif", v[2048][0] - v[1025][0])
 
-    fig.savefig(os.path.join(AQUI, "exposicion.png"), dpi=100, facecolor=FONDO)
+    fig.savefig(salida("exposicion.png", AQUI), dpi=100, facecolor=FONDO)
 
 
 if __name__ == "__main__":

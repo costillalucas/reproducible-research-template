@@ -4,6 +4,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.patches import FancyBboxPatch
+from idioma import T, salida
 
 BG, BOX, TXT, SEC, GRIS, AC = "#16202E", "#22303F", "#F3EFE6", "#B8C2CF", "#6B7280", "#E8925E"
 DPI = 100
@@ -27,20 +28,20 @@ def txt(x, y, s, size, color=TXT, bold=False, ha="left", va="center"):
 # --- pregunta central ---
 QX, QY, QW, QH = 40, 320, 580, 360
 caja(QX, QY, QW, QH, borde=SEC, lw=2.5)
-txt(QX + 34, 612, "¿Por qué con datos reales", 34, bold=True)
-txt(QX + 34, 560, "el modelo predice peor?", 34, bold=True)
+txt(QX + 34, 612, T("¿Por qué con datos reales", "Why is the model worse"), 34, bold=True)
+txt(QX + 34, 560, T("el modelo predice peor?", "on real data?"), 34, bold=True)
 ax.plot([QX + 34, QX + QW - 34], [505, 505], color=GRIS, lw=px(2), zorder=3)
-txt(QX + 34, 448, "residuo real ≈ 0,68", 32)
-txt(QX + 34, 398, "contra 0,15 en simulación", 30, color=SEC)
+txt(QX + 34, 448, T("residuo real ≈ 0,68", "real residual ≈ 0.68"), 32)
+txt(QX + 34, 398, T("contra 0,15 en simulación", "versus 0.15 in simulation"), 30, color=SEC)
 
 # --- ramas ---
 descartadas = [
-    ("Ruido", "4× exposición: el error baja 9 %; 2× (13/11): C1 igual"),
-    ("Pocas iteraciones", "20 → 400 épocas: C1 0,597 → 0,585"),
-    ("Posición de la matriz", "rotación ±1°, inclinación 1–3°: invisibles"),
-    ("Aberraciones", "recuperar la pupila (EPRY) no mejora"),
-    ("Magnificación", "micrómetro: 1,290 µm/px"),
-    ("Espesor de las esferas", "simulación BPM: cambia 1–4 %"),
+    (T("Ruido", "Noise"), T("4× exposición: el error baja 9 %; 2× (13/11): C1 igual", "4× exposure: error −9 %; 2× (13/11): C1 same")),
+    (T("Pocas iteraciones", "Too few iterations"), T("20 → 400 épocas: C1 0,597 → 0,585", "20 → 400 epochs: C1 0.597 → 0.585")),
+    (T("Posición de la matriz", "Array position"), T("rotación ±1°, inclinación 1–3°: invisibles", "rotation ±1°, tilt 1–3°: not visible")),
+    (T("Aberraciones", "Aberrations"), T("recuperar la pupila (EPRY) no mejora", "recovering the pupil (EPRY) does not help")),
+    (T("Magnificación", "Magnification"), T("micrómetro: 1,290 µm/px", "micrometer: 1.290 µm/px")),
+    (T("Espesor de las esferas", "Sphere thickness"), T("simulación BPM: cambia 1–4 %", "BPM simulation: changes 1–4 %")),
 ]
 BX, BW, H, GAP, TOP = 770, 900, 104, 16, 955
 XBUS, YQ = 695, QY + QH / 2
@@ -71,14 +72,14 @@ ax.plot([XBUS, XBUS], [ycs[0], YQ], color=GRIS, lw=px(4), zorder=1, solid_capsty
 ax.plot([XBUS, XBUS], [ycs[-1], YQ], color=GRIS, lw=px(4), zorder=1)
 ax.plot([XBUS, XBUS, BX], [YQ, lyc, lyc], color=AC, lw=px(7), zorder=1.5, solid_joinstyle="round")
 caja(BX, ly0, BW, LH, borde=AC, lw=5)
-txt(BX + 40, lyc + 36, "Error de modelo no geométrico", 40, color=AC, bold=True)
-txt(BX + 40, lyc - 36, "luz parásita · brillo de cada LED · forma de la pupila", 27, color=TXT)
+txt(BX + 40, lyc + 36, T("Error de modelo no geométrico", "Non-geometric model error"), 40, color=AC, bold=True)
+txt(BX + 40, lyc - 36, T("luz parásita · brillo de cada LED · forma de la pupila", "stray light · brightness of each LED · pupil shape"), 27, color=TXT)
 txt(BX + BW - 62, lyc + 2, "?", 120, color=AC, bold=True, ha="center")
 
 # --- esquina: 66 ---
 CX = 2040
 txt(CX, 820, "66", 150, bold=True, ha="center")
-txt(CX, 700, "hipótesis puestas a prueba", 34, ha="center")
-txt(CX, 640, "+ 60 más, en el documento de recorrido", 26, color=SEC, ha="center")
+txt(CX, 700, T("hipótesis puestas a prueba", "hypotheses tested"), 34, ha="center")
+txt(CX, 640, T("+ 60 más, en el documento de recorrido", "+ 60 more, in the walkthrough document"), 26, color=SEC, ha="center")
 
-fig.savefig(os.path.join(os.path.dirname(os.path.abspath(__file__)), "descartes.png"), dpi=DPI, facecolor=BG)
+fig.savefig(salida("descartes.png", os.path.dirname(os.path.abspath(__file__))), dpi=DPI, facecolor=BG)
