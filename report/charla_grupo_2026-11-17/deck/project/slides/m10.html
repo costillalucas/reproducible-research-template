@@ -1,44 +1,46 @@
 <section id="m10" data-transition="fade" style="background:#F6F4EE;color:#1B2333;font-family:'IBM Plex Sans', Arial, sans-serif;padding:112px 128px 160px;display:flex;flex-direction:column;gap:36px">
 <div style="display:flex;flex-direction:column;gap:8px">
-<p style="font-size:24px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#A9471A">Resultado · esferas de 0,5 µm</p>
+<p style="font-size:24px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#A9471A">Resultado · muestra densa de esferas de 500 nm</p>
 <h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:64px;font-weight:600;line-height:1.1;color:#1B2333">El campo oscuro aporta, pero estamos lejos de la meta</h2>
 </div>
 <div style="display:flex;flex-direction:column;gap:28px">
 <div style="display:flex;align-items:center;gap:32px">
 <p style="width:380px;font-size:30px;font-weight:600;color:#3E4756">Foto cruda</p>
-<div style="width:1024px;height:64px;background:#B8C2CF;border-radius:8px"></div>
-<p style="font-size:34px;font-weight:600">6,4 µm</p>
+<div style="width:896px;height:64px;background:#B8C2CF;border-radius:8px"></div>
+<p style="font-size:34px;font-weight:600">7,0 µm</p>
 </div>
 <div style="display:flex;align-items:center;gap:32px">
-<p style="width:380px;font-size:30px;font-weight:600;color:#3E4756">Nulo (solo campo claro sirve)</p>
-<div style="width:816px;height:64px;background:#6B7280;border-radius:8px"></div>
-<p style="font-size:34px;font-weight:600">4,7–5,5 µm</p>
+<p style="width:380px;font-size:30px;font-weight:600;color:#3E4756">Nulo (campo oscuro mezclado)</p>
+<div style="display:flex;width:1011px;height:64px">
+<div style="width:678px;height:64px;background:#6B7280;border-radius:8px 0 0 8px"></div>
+<div style="width:333px;height:64px;background:#B8C2CF;border-radius:0 8px 8px 0"></div>
+</div>
+<p style="font-size:34px;font-weight:600">5,3–7,9 µm</p>
 </div>
 <div style="display:flex;align-items:center;gap:32px">
-<p style="width:380px;font-size:30px;font-weight:600;color:#A9471A">Reconstrucción FPM</p>
-<div style="width:496px;height:64px;background:#A9471A;border-radius:8px"></div>
+<p style="width:380px;font-size:30px;font-weight:600;color:#A9471A">FPM, cada mitad</p>
+<div style="width:397px;height:64px;background:#A9471A;border-radius:8px"></div>
 <p style="font-size:34px;font-weight:600;color:#A9471A">3,0–3,2 µm</p>
 </div>
 <div style="display:flex;align-items:center;gap:32px">
 <p style="width:380px;font-size:30px;font-weight:600;color:#2F6690">Meta (NA 0,45)</p>
-<div style="width:160px;height:64px;background:#F6F4EE;border:4px dashed #2F6690;border-radius:8px;box-sizing:border-box"></div>
+<div style="width:128px;height:64px;background:#F6F4EE;border:4px dashed #2F6690;border-radius:8px;box-sizing:border-box"></div>
 <p style="font-size:34px;font-weight:600;color:#2F6690">~1 µm</p>
 </div>
 </div>
 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px">
 <div style="background:#ECE8DE;border-radius:16px;padding:24px 32px;display:flex;flex-direction:column;gap:6px">
-<p style="font-size:28px;font-weight:600;color:#3E4756">6,4 → ~5 µm</p>
-<p style="font-size:26px;line-height:1.35;color:#3E4756">lo da el campo claro (también en el nulo)</p>
+<p style="font-size:28px;font-weight:600;color:#3E4756">Nulo: sin ganancia consistente</p>
+<p style="font-size:26px;line-height:1.35;color:#3E4756">5,3–7,9 µm contra 7,0 µm en crudo</p>
 </div>
 <div style="background:#16202E;border-radius:16px;padding:24px 32px;display:flex;flex-direction:column;gap:6px">
-<p style="font-size:28px;font-weight:600;color:#E8925E">~5 → ~3 µm</p>
-<p style="font-size:26px;line-height:1.35;color:#F3EFE6">lo aporta el campo oscuro: ganancia real</p>
+<p style="font-size:28px;font-weight:600;color:#E8925E">~7 → ~3 µm</p>
+<p style="font-size:26px;line-height:1.35;color:#F3EFE6">solo con el campo oscuro real, en las dos mitades</p>
 </div>
 <div style="background:#ECE8DE;border-radius:16px;padding:24px 32px;display:flex;flex-direction:column;gap:6px">
-<p style="font-size:28px;font-weight:600;color:#2F6690">~3 → ~1 µm</p>
-<p style="font-size:26px;line-height:1.35;color:#3E4756">falta: ¿límite del modelo o del equipo?</p>
+<p style="font-size:28px;font-weight:600;color:#2F6690">Todavía no es una PSF limpia</p>
+<p style="font-size:26px;line-height:1.35;color:#3E4756">los objetos son agregados; próximo paso: esferas diluidas</p>
 </div>
 </div>
-<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#6B7280">Nuestro equipo · ancho a media altura (FWHM) de 30 esferas de 500 nm, rojo · barras proporcionales al ancho</p>
-<aside>(1,5 min) Un resultado con la prueba de "esferas más chicas que la resolución": la imagen de cada esfera es la respuesta del sistema, y su ancho dice qué resolución tenemos. Con 30 esferas de 500 nm en rojo: la foto cruda da 6,4 µm (NA ~0,07, la del objetivo). El nulo, con el campo oscuro mezclado, da 4,7–5,5 µm: también mejora, porque conserva los LEDs de campo claro (el del eje y los cuatro vecinos), que ya amplían un poco la apertura. La reconstrucción FPM da 3,0–3,2 µm (NA efectiva ~0,14, con NA_ef ≈ 0,705·λ/FWHM en coherente). Lectura honesta, por tramos: de 6,4 a ~5 µm lo explica el campo claro; de ~5 a ~3 µm lo aporta el campo oscuro, y esa es la ganancia real (~1,6×) porque desaparece en el nulo; de ~3 a ~1 µm (lo que permitiría NA sintética 0,45) falta. Si eso es realizable con este equipo todavía no lo sabemos: es el error de modelo de las preguntas abiertas. Ojo: 3 µm sigue muy por encima de 0,5 µm, así que no está demostrada la superresolución completa. Trampas de esta prueba: las esferas tienen que estar aisladas, y el ancho depende del criterio (FWHM, Rayleigh).</aside>
+<aside>(1,5 min) Captura roja del 21/10, una muestra densa de esferas de poliamida de 500 nm. La idea de la prueba: un objeto más chico que la resolución muestra la respuesta del sistema, y su ancho dice la resolución. En la foto cruda de campo claro elegimos 34 objetos que se ven aislados (nada brillante a menos de 10 µm) y medimos el ancho a media altura (FWHM) de su perfil promediado y centrado, igual para la foto cruda, cada mitad del tablero y el nulo. Foto cruda: 7,0 µm (la teoría coherente para la NA del objetivo da 6,6 µm). Nulo, con las fotos de campo oscuro mezcladas: 5,3 µm en una mitad y 7,9 µm en la otra, o sea sin un angostamiento consistente. FPM, cada mitad: 3,0 y 3,2 µm. Lectura honesta: los objetos quedan 2–3 veces más angostos solo cuando se usa el campo oscuro real, y las mismas formas aparecen en las dos mitades y no en el nulo. Pero en la reconstrucción esos puntos "aislados" son agregados de varias esferas (cruces, formas de Y, cadenas), no esferas sueltas, así que no es una PSF limpia y no damos un factor de resolución ni una NA efectiva. Esa misma captura no pasa C2 en global (0,011 contra 0,009 en el nulo): el modelo no predice bien esta muestra densa. Además, ~3 µm sigue lejos del ~1 µm que permitiría la NA sintética de 0,45, y muy por encima de 0,5 µm. Próximo paso para una prueba limpia: esferas diluidas, separadas más de 15–20 µm. Si preguntan si podrían ser polvo: están en el plano de la muestra (el re-enfoque digital de ±40 µm da el ancho mínimo en z = 0) y el detalle sale del campo oscuro (nulo), pero falta probar que sean esferas sueltas: eso pide una muestra blanco y una diluida. Fuente: docs/resultados_2026-10-21/captura_500nm/INFORME.md, sección 4.</aside>
 </section>
