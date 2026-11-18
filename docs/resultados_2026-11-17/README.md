@@ -63,16 +63,18 @@ LED del eje, 18 ms, 14 tomas rojas del 13/11 (distintos campos de la misma muest
 ## 5. Lote del 13/11 (`lote_13-11/correr.sh`, salida en `AleYLu/reconstrucciones/lote_2026-11-13/`)
 
 14 tomas rojas, flat del mismo día (`2026-11-13.fondo`), 160 épocas, `--validar`, vistas 15×15 (el solver no acepta
-21×21). Parcial al cierre (sigue corriendo):
+21×21). Terminado 17/11 19:28 (log: `lote.log` en la carpeta de salida):
 
-| campo | C1 (mitades) |
-|---|---|
-| 13.a (1025 ms) | 0,645 |
-| 13 (2048 ms, mismo campo) | 0,647 |
-| med1 | 0,667 |
-| med2 | 0,700 |
-| med3 | 0,730 |
-| med4 | 0,644 |
+| campo | C1 (mitades) | campo | C1 (mitades) |
+|---|---|---|---|
+| 13.a (1025 ms) | 0,645 | med6 | 0,657 |
+| 13 (2048 ms, mismo campo) | 0,647 | med7 | 0,637 |
+| med1 | 0,667 | med8 | 0,710 |
+| med2 | 0,700 | med9 | 0,729 |
+| med3 | 0,730 | med10 | 0,685 |
+| med4 | 0,644 | med11 | 0,676 |
+| med5 | 0,633 | zonarojo | 0,671 |
 
 El 13/11, el mismo campo 13.a con el flat del 12/11 había dado 0,728–0,734: el flat del mismo día baja C1 ~0,08.
-Repetibilidad en un mismo campo (13 contra 13.a): 0,002. Entre campos: 0,64–0,73.
+Repetibilidad en un mismo campo (13 contra 13.a): 0,002. Entre campos: 0,63–0,73 (media ~0,675): la dispersión
+es de la muestra, no del sistema. Ningún campo baja de ~0,63.

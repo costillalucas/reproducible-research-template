@@ -1,0 +1,43 @@
+== 2026-11-13.a 15:52
+tiempo:             total 15.5 min (preprocesado 0.6, reconstrucción 14.7), 3 núcleo(s)
+C1 R held-out (validación por mitades): 0.645   (mitad A 0.645, mitad B 0.645; 145 LEDs de anillo < 7 no vistos)
+== 2026-11-13 16:07
+tiempo:             total 15.2 min (preprocesado 0.5, reconstrucción 14.4), 3 núcleo(s)
+C1 R held-out (validación por mitades): 0.647   (mitad A 0.646, mitad B 0.649; 145 LEDs de anillo < 7 no vistos)
+== 2026-11-13.med1 16:22
+tiempo:             total 17.5 min (preprocesado 0.6, reconstrucción 16.7), 3 núcleo(s)
+C1 R held-out (validación por mitades): 0.667   (mitad A 0.678, mitad B 0.656; 145 LEDs de anillo < 7 no vistos)
+== 2026-11-13.med2 16:40
+tiempo:             total 15.5 min (preprocesado 0.5, reconstrucción 14.7), 3 núcleo(s)
+C1 R held-out (validación por mitades): 0.700   (mitad A 0.710, mitad B 0.690; 145 LEDs de anillo < 7 no vistos)
+== 2026-11-13.med3 16:55
+tiempo:             total 18.6 min (preprocesado 0.6, reconstrucción 17.8), 3 núcleo(s)
+C1 R held-out (validación por mitades): 0.730   (mitad A 0.743, mitad B 0.716; 145 LEDs de anillo < 7 no vistos)
+== 2026-11-13.med4 17:14
+tiempo:             total 18.3 min (preprocesado 0.7, reconstrucción 17.4), 3 núcleo(s)
+C1 R held-out (validación por mitades): 0.644   (mitad A 0.650, mitad B 0.638; 145 LEDs de anillo < 7 no vistos)
+== 2026-11-13.med5 17:32
+tiempo:             total 18.7 min (preprocesado 0.6, reconstrucción 17.9), 3 núcleo(s)
+C1 R held-out (validación por mitades): 0.633   (mitad A 0.637, mitad B 0.629; 145 LEDs de anillo < 7 no vistos)
+== 2026-11-13.med6 17:51
+tiempo:             total 13.9 min (preprocesado 0.5, reconstrucción 13.2), 3 núcleo(s)
+C1 R held-out (validación por mitades): 0.657   (mitad A 0.655, mitad B 0.659; 145 LEDs de anillo < 7 no vistos)
+== 2026-11-13.med7 18:05
+tiempo:             total 13.6 min (preprocesado 0.5, reconstrucción 12.9), 3 núcleo(s)
+C1 R held-out (validación por mitades): 0.637   (mitad A 0.648, mitad B 0.626; 145 LEDs de anillo < 7 no vistos)
+== 2026-11-13.med8 18:18
+tiempo:             total 13.7 min (preprocesado 0.5, reconstrucción 13.0), 3 núcleo(s)
+C1 R held-out (validación por mitades): 0.710   (mitad A 0.714, mitad B 0.705; 145 LEDs de anillo < 7 no vistos)
+== 2026-11-13.med9 18:32
+tiempo:             total 14.1 min (preprocesado 0.5, reconstrucción 13.4), 3 núcleo(s)
+C1 R held-out (validación por mitades): 0.729   (mitad A 0.739, mitad B 0.719; 145 LEDs de anillo < 7 no vistos)
+== 2026-11-13.med10 18:46
+tiempo:             total 14.0 min (preprocesado 0.5, reconstrucción 13.3), 3 núcleo(s)
+C1 R held-out (validación por mitades): 0.685   (mitad A 0.691, mitad B 0.680; 145 LEDs de anillo < 7 no vistos)
+== 2026-11-13.med11 19:00
+tiempo:             total 13.9 min (preprocesado 0.5, reconstrucción 13.2), 3 núcleo(s)
+C1 R held-out (validación por mitades): 0.676   (mitad A 0.691, mitad B 0.662; 145 LEDs de anillo < 7 no vistos)
+== 2026-11-13.zonarojo 19:14
+tiempo:             total 13.8 min (preprocesado 0.5, reconstrucción 13.1), 3 núcleo(s)
+C1 R held-out (validación por mitades): 0.671   (mitad A 0.676, mitad B 0.666; 145 LEDs de anillo < 7 no vistos)
+FIN 19:28
