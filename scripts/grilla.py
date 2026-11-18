@@ -13,6 +13,7 @@ import sys
 
 N_DEFECTO = 15        # capturas viejas, sin 'n_lado' en captura.json
 T_MAX_DEFECTO = 1025.0  # ms; capturas viejas, sin 't_max_ms' (tope del script de captura desde el 22/10)
+EJE_DEFECTO = (17, 15)  # LED sobre el eje óptico; capturas viejas, sin 'eje' (eje calibrado el 21/10)
 Z_DEFECTO = 102.0       # mm; capturas viejas, sin 'z_mm' (valor que usaba el solver hasta el 17/11; la matriz estaba a ~99.5-102)
 
 
@@ -42,6 +43,16 @@ def z_mm(carpeta):
             return float(json.load(f).get('z_mm', Z_DEFECTO))
     except (OSError, ValueError):
         return Z_DEFECTO
+
+
+def eje(carpeta):
+    """LED (fila, col) sobre el eje óptico ('eje' en captura.json; (17, 15) si falta). La grilla se centra en él."""
+    try:
+        with open(os.path.join(carpeta, 'captura.json')) as f:
+            e = json.load(f).get('eje', EJE_DEFECTO)
+        return int(e[0]), int(e[1])
+    except (OSError, ValueError, TypeError, IndexError):
+        return EJE_DEFECTO
 
 
 def lado(carpeta):

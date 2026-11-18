@@ -63,12 +63,15 @@ ITER_DIR = os.path.join(REPO, "scripts", "fpm_solver")
 RANGO = 4095                      # Mono12
 T0 = -0.20                        # ms, t_ef = t + T0 (inv/exposicion.json de octubre)
 MM_POR_PX = 6.0 / 3538.0          # corrimiento del eje en la matriz por px de ROI a z 102 mm (visionpoint 21/10; = 1.315 · 1.29 µm); ∝ z
-LRPX, NA_OBJ, Z_MM = 1.29, 0.069 * 1.25 / 1.29, 102.0   # Z_MM = z de referencia de MM_POR_PX y valor por defecto (tomas sin 'z_mm')
+# NA_OBJ 0.0747 (18/11): radio del disco BF en la FFT del LED del eje, calibrado con simulación, igual a z ~100 y 143.5
+# (λ 0.630); en el 2x2 del 18/11 (z 143.5) da C1 y R por anillo equivalentes al 0.069·1.25/1.29 = 0.0669 de octubre (≤ 0.01).
+LRPX, NA_OBJ, Z_MM = 1.29, 0.0747, 102.0   # Z_MM = z de referencia de MM_POR_PX y valor por defecto (tomas sin 'z_mm')
 FACTOR = {"red": 3, "green": 5, "blue": 5}
 COLOR = {"r": "red", "g": "green", "b": "blue"}
 CENTRO_LED = (17, 15)
 ROI_CAL = (4000, 1942, 1120)      # ROI calibrado (OffsetX, OffsetY, lado): eje sobre el LED (17,15) en su centro (visionpoint 21/10)
-# grilla de LEDs: N_LADO x N_LADO centrada en CENTRO_LED, con N_LADO leído de captura.json (scripts/grilla.py; 15 si falta)
+# grilla de LEDs: N_LADO x N_LADO centrada en el EJE de captura.json ('n_lado', 'eje'; scripts/grilla.py: 15 y (17,15) si faltan).
+# CENTRO_LED es solo el LED del eje CALIBRADO (ROI_CAL), respaldo si la toma no trae chequeo de centrado (--centro / 'centro').
 RX_LED = re.compile(r"^fila(\d+)_col(\d+)_color([rgb])$")
 RX_T = re.compile(r"^(\d+(?:\.\d+)?)ms$")
 DESCARTAR = True                  # --no-descartar lo apaga (solo para comparar con los INFORME, que promediaban todo)
@@ -189,11 +192,11 @@ def elegir_t(ts, rec):
 
 
 # ---------------------------------------------------------------------------------------------------- recorte
-def mapa_bf(SM, FL, oscm, oscf):
+def mapa_bf(SM, FL, oscm, oscf, eje):
     """Cociente muestra/flat del LED central en el ROI entero, y máscaras de saturación y polvo (para elegir recorte)."""
-    tm, tf = max(SM[CENTRO_LED]), max(FL[CENTRO_LED])
-    s = np.mean(leer_frames(SM[CENTRO_LED][tm]), 0)
-    f = np.mean(leer_frames(FL[CENTRO_LED][tf]), 0)
+    tm, tf = max(SM[eje]), max(FL[eje])
+    s = np.mean(leer_frames(SM[eje][tm]), 0)
+    f = np.mean(leer_frames(FL[eje][tf]), 0)
     sat = s >= RANGO
     s = (s - oscm.en(tm)) / (tm + T0); f = (f - oscf.en(tf)) / (tf + T0)
     q = s / np.maximum(gaussian_filter(f, 2), 1e-6)
@@ -222,8 +225,9 @@ def sugerir(q, sat, polvo, n, ejef, ejec, paso=20, margen=60):
 
 
 # ---------------------------------------------------------------------------------------------------- solver
-def cargar_solver(color, factor):
-    """fpm_red de r500_red (sin el offset x del recorte .500: lo ponemos nosotros) + objetivo medido + factor fijo."""
+def cargar_solver(color, factor, n_lado, eje, na=NA_OBJ):
+    """fpm_red de r500_red (sin el offset x del recorte .500: lo ponemos nosotros) + objetivo medido + factor fijo.
+    Grilla del modelo = n_lado x n_lado centrada en eje (fila, col): base = eje - n_lado // 2."""
     os.environ["R500_XOFF"] = "0"
     sys.path.insert(0, ITER_DIR)
     import importlib.util
@@ -234,10 +238,11 @@ def cargar_solver(color, factor):
     from ptyco_full_simulator import config, optics as _opt
 
     def _setup(z_mm=98.0, offset_mm=(0.0, 0.0), crop=400):
-        s0 = config.default_setup(color, 15, objective=F.cc.OBJECTIVE, resolution_px=(crop, crop), row_index_base=10,
-                                  col_index_base=8, z_distance_mm=z_mm, led_center_offset_mm=offset_mm)
-        return _rep(s0, objective=_rep(s0.objective, magnification=3.2 / LRPX, na=NA_OBJ, name=s0.objective.name + "+medido"))
+        s0 = config.default_setup(color, n_lado, objective=F.cc.OBJECTIVE, resolution_px=(crop, crop),
+                                  row_index_base=eje[0] - n_lado // 2, col_index_base=eje[1] - n_lado // 2, z_distance_mm=z_mm, led_center_offset_mm=offset_mm)
+        return _rep(s0, objective=_rep(s0.objective, magnification=3.2 / LRPX, na=na, name=s0.objective.name + "+medido"))
     F.setup = _setup
+    F.CENTER = (float(eje[0]), float(eje[1]))   # ring(k) (anillos, set C1) medido desde el eje de la captura
     F.cc.factor_for = lambda s0: max(factor, _opt.canvas_upsampling_factor(s0))
     return F, IR
 
@@ -359,6 +364,8 @@ def main():
     ap.add_argument("--anillo-max", type=int, default=None,
                     help="usar solo los LEDs con anillo = round(distancia al LED (17,15)) <= N (misma convención que precaptura)")
     ap.add_argument("--no-descartar", action="store_true", help="no descartar frames a oscuras (solo para comparar)")
+    ap.add_argument("--na", type=float, default=None, help=f"NA del objetivo en el modelo (def. {NA_OBJ:.4f}, medido por FFT el 18/11; antes 0.0669)")
+    ap.add_argument("--centro", default=None, help="centro.json de ./chequeo.sh para esta toma (def. 'centro' de captura.json)")
     ap.add_argument("--z-mm", type=float, default=None, help="distancia matriz-muestra [mm] (def. z_mm de captura.json; 102 si falta)")
     a = ap.parse_args()
     interactivo = sys.stdin.isatty()
@@ -394,11 +401,12 @@ def main():
     msg("\n---------- 1. LEYENDO LA CAPTURA ----------")
     SM, FL = indexar(carpeta, a.color), indexar(a.flat, a.color)
     sys.path.insert(0, os.path.join(REPO, "scripts"))
-    from grilla import lado as lado_grilla, leds as leds_grilla, z_mm as z_captura
+    from grilla import lado as lado_grilla, leds as leds_grilla, z_mm as z_captura, eje as eje_captura
     n_lado = lado_grilla(carpeta)
+    eje = eje_captura(carpeta)
     z_mm = a.z_mm if a.z_mm is not None else z_captura(carpeta)
     mm_por_px = MM_POR_PX * z_mm / Z_MM
-    esperado = set(leds_grilla(CENTRO_LED, n_lado))
+    esperado = set(leds_grilla(eje, n_lado))
     if set(SM) != esperado:
         falt = sorted(esperado - set(SM)); extra = sorted(set(SM) - esperado)
         fs, cs = sorted({k[0] for k in esperado}), sorted({k[1] for k in esperado})
@@ -417,7 +425,7 @@ def main():
         roi_x, roi_y = (int(v) for v in o[0].split(","))
         roi_src = o[1] if len(o) > 1 else "?"
     roi_ok = roi_src.startswith("captura.json") or roi_src.startswith("--offset-roi")
-    shp = tifffile.imread(SM[CENTRO_LED][max(SM[CENTRO_LED])][0]).shape
+    shp = tifffile.imread(SM[eje][max(SM[eje])][0]).shape
     H, W = shp
     msg(f"  muestra: {carpeta}  ({len(esperado)} LEDs, {n_lado}x{n_lado}, imágenes {H}x{W})")
     msg(f"  flat:    {a.flat}")
@@ -432,9 +440,33 @@ def main():
     full = Recorte(0, 0, max(H, W))
     oscm_full = Oscuros([a.dark, a.dark_flat], None)
     oscf_full = Oscuros([a.dark_flat or a.dark, a.dark], None)
-    q, satm, polvo = mapa_bf(SM, FL, oscm_full, oscf_full)
+    q, satm, polvo = mapa_bf(SM, FL, oscm_full, oscf_full, eje)
     n = a.tam
-    eje_x, eje_y = ROI_CAL[0] + ROI_CAL[2] / 2, ROI_CAL[1] + ROI_CAL[2] / 2   # eje (LED (17,15)) en px del sensor
+    # eje óptico en px del sensor = píxel cuyo eje local cae sobre el LED `eje`. Fuente, en orden:
+    #   1) chequeo de centrado de ESTA toma (--centro, o 'centro' de captura.json): el eje del centro del ROI cae en
+    #      eje + desvío (fila, col) pasos → píxel del eje = centro del ROI − desvío · 6 mm / mm_por_px (filas → y).
+    #   2) ROI_CAL (calibración visionpoint 21/10, z 102): vale solo si la matriz no se movió desde entonces.
+    import json as _json
+    centro = None
+    if a.centro:
+        centro = _json.load(open(a.centro)); fuente_c = a.centro
+    else:
+        try:
+            centro = _json.load(open(os.path.join(carpeta, "captura.json"))).get("centro"); fuente_c = "captura.json"
+        except (OSError, ValueError):
+            centro = None
+    if centro is not None and list(centro.get("offset_roi", [])) == [roi_x, roi_y] and tuple(centro.get("led", ())) == eje:
+        dr, dc = centro.get("desvio_pasos") or (0.0, 0.0)
+        eje_x = roi_x + W / 2 - dc * 6.0 / mm_por_px
+        eje_y = roi_y + H / 2 - dr * 6.0 / mm_por_px
+        msg(f"  eje óptico: chequeo de centrado ({fuente_c}, {centro.get('fecha', '?')}): desvío (fila, col) = ({dr:+.4f}, {dc:+.4f}) pasos"
+            + ("" if centro.get("desvio_pasos") else "  [sin desvío medido: se toma 0]"))
+    else:
+        if centro is not None:
+            msg(f"  [AVISO] el chequeo de centrado ({fuente_c}) es de otro ROI {centro.get('offset_roi')} o LED {centro.get('led')}: no se usa.")
+        eje_x, eje_y = ROI_CAL[0] + ROI_CAL[2] / 2, ROI_CAL[1] + ROI_CAL[2] / 2
+        msg(f"  [AVISO] eje óptico desde ROI_CAL (calibración 21/10, z {Z_MM:g}, LED {CENTRO_LED}). Si la matriz se movió desde "
+            "entonces (p. ej. 17/11, z 143.5), la geometría está MAL: pasá --centro <centro.json del chequeo de esta toma>.")
     ejef, ejec = eje_y - roi_y, eje_x - roi_x                                  # ... y en px de este ROI
     if a.recorte in (None, "", "centro"):
         f0 = int(np.clip(round(ejef - n / 2), 0, H - n)); c0 = int(np.clip(round(ejec - n / 2), 0, W - n))
@@ -450,7 +482,7 @@ def main():
         raise SystemExit(f"ERROR: el recorte {f0},{c0} de {n} px se sale de la imagen {H}x{W}.")
     rec = Recorte(f0, c0, n)
     p, osc_frac = puntaje(q, satm, polvo, f0, c0, n, ejef, ejec)
-    # centro del recorte en el sensor = offset del ROI + posición en el ROI; el eje es el del ROI calibrado
+    # centro del recorte en el sensor = offset del ROI + posición en el ROI; eje_x/eje_y del chequeo o de ROI_CAL (arriba)
     off_y = (eje_y - (roi_y + f0 + n / 2)) * mm_por_px
     off_x = (eje_x - (roi_x + c0 + n / 2)) * mm_por_px
     msg(f"\n---------- 2. RECORTE ----------")
@@ -472,13 +504,13 @@ def main():
     oscm = Oscuros([a.dark, a.dark_flat], rec)
     oscf = Oscuros([a.dark_flat or a.dark, a.dark], rec)
     msg("  oscuros (cuentas medias): " + ", ".join(f"{t:g} ms {v.mean():.1f}" for t, v in sorted(oscm.img.items())))
-    tfc = max(FL[CENTRO_LED])
-    f0c = np.mean(leer_frames(FL[CENTRO_LED][tfc], rec), 0) - oscf.en(tfc)
+    tfc = max(FL[eje])
+    f0c = np.mean(leer_frames(FL[eje][tfc], rec), 0) - oscf.en(tfc)
     DUST = binary_dilation(f0c / gaussian_filter(f0c, 15) < 0.8, iterations=4)
     msg(f"  polvo/manchas del sensor enmascarados: {DUST.sum()} px ({100 * DUST.mean():.2f} % del recorte)")
     keys = sorted(SM)
     if a.anillo_max is not None:
-        keys = [k for k in keys if round(np.hypot(k[0] - CENTRO_LED[0], k[1] - CENTRO_LED[1])) <= a.anillo_max]
+        keys = [k for k in keys if round(np.hypot(k[0] - eje[0], k[1] - eje[1])) <= a.anillo_max]
         msg(f"  --anillo-max {a.anillo_max}: se usan {len(keys)} de {len(SM)} LEDs")
     S, Fl, V, SAT, TT, TF, NF, descartes, sat_leds = [], [], [], [], [], [], [], [], []
     for i, k in enumerate(keys):
@@ -517,10 +549,10 @@ def main():
     msg(f"  preprocesado listo en {time.time() - tp:.0f} s")
 
     msg("\n---------- 4. RECONSTRUCCIÓN ----------")
-    F, IR = cargar_solver(color, FACTOR[color])
+    F, IR = cargar_solver(color, FACTOR[color], n_lado, eje, NA_OBJ if a.na is None else a.na)
     geo = F.geometry(z_mm, offset_mm=(off_x, off_y), crop=n)
     fr = np.hypot(*np.array([geo["fxy"][k] for k in keys]).T)
-    bf = sorted([k for k, f in zip(keys, fr) if f < geo["na"] / geo["lam"]], key=lambda k: (k != CENTRO_LED, k))
+    bf = sorted([k for k, f in zip(keys, fr) if f < geo["na"] / geo["lam"]], key=lambda k: (k != eje, k))
     cerca = [k for k, f in zip(keys, fr) if abs(f / (geo["na"] / geo["lam"]) - 1) < 0.03]
     F.BF = bf
     D = F.load_real(os.path.join(salida, "datos", "prep.npz"))
@@ -575,7 +607,7 @@ def main():
             val[h] = (float(np.mean([v[0] for v in Rh.values()])), float(np.mean([v[1] for v in Rh.values()])), len(ho))
         np.save(os.path.join(salida, "objeto_mitadA.npy"), res["mitad0"][0])
         np.save(os.path.join(salida, "objeto_mitadB.npy"), res["mitad1"][0])
-    raw = np.real(F.fourier_upsample(np.sqrt(np.clip(D["I"][CENTRO_LED], 0, None)), geo["factor"]))
+    raw = np.real(F.fourier_upsample(np.sqrt(np.clip(D["I"][eje], 0, None)), geo["factor"]))
     figura(os.path.join(salida, "reconstruccion.png"), raw, obj, geo["hrpx"],
            f"{nombre}  —  {rec}  —  {a.epocas} épocas, color {color}")
     t_tot = time.time() - T_INI
@@ -592,7 +624,7 @@ def main():
     L.append(f"ROI cámara:         OffsetX {roi_x}, OffsetY {roi_y}  (origen: {roi_src})"
              + ("" if roi_ok else "\n                    ¡OJO! no viene de captura.json: puede no ser el ROI de esta toma"))
     L.append(f"offset LED:         y {off_y:+.3f} mm, x {off_x:+.3f} mm  ({mm_por_px:.6f} mm por px entre el centro del recorte en el sensor"
-             f" y el eje calibrado, ROI {ROI_CAL[0]},{ROI_CAL[1]} + {ROI_CAL[2] // 2} px)")
+             f" y el eje óptico en el sensor x {eje_x:.0f}, y {eje_y:.0f} px)")
     L.append(f"geometría:          z {z_mm:g} mm, píxel cámara en la muestra {geo['lrpx']:.3f} µm, NA {geo['na']:.4f}, "
              f"factor {geo['factor']}, píxel reconstruido {geo['hrpx']:.4f} µm")
     L.append(f"LEDs BF:            {bf}")
