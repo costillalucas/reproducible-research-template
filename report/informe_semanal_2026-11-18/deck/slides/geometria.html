@@ -1,0 +1,21 @@
+<section id="geometria" class="alt">
+<p class="eyebrow">GEOMETRÍA</p>
+<h2>El borde campo claro/oscuro funciona como medidor de z</h2>
+<div class="row" style="flex:1; align-items:flex-start;">
+<div class="col" style="flex:1.1;">
+<table>
+<tr><th style="width:52%;">Toma</th><th style="width:20%; text-align:right;">R (pasos)</th><th style="text-align:right;">z efectivo</th></tr>
+<tr><td>Esferas (tres chequeos)</td><td style="text-align:right;">1,768–1,769</td><td style="text-align:right;">143,5 mm</td></tr>
+<tr><td>Grilla, soportes 2,4 + 0,8 mm</td><td style="text-align:right;">1,807</td><td style="text-align:right;">146,7 mm</td></tr>
+<tr><td>Grilla dada vuelta</td><td style="text-align:right;">1,796</td><td style="text-align:right;">145,8 mm</td></tr>
+</table>
+<p class="source">R = radio del borde en pasos de LED (6 mm), ajustado por precaptura.py sobre la toma completa.</p>
+</div>
+<div class="col" style="flex:0.9;">
+<p class="lead">R · paso = z · tan θ(NA): con el NA fijo, el borde da z sin depender de la muestra.</p>
+<p>El desplazamiento medido (+3,2 mm) coincide con los espesores de los soportes. La regla había dado +2,4 mm.</p>
+<p>Cada captura guarda ahora z y el chequeo de centrado; el reconstructor toma el eje de ahí.</p>
+</div>
+</div>
+<aside>La matriz se subió a 143,5 mm (regla, ±1,5 mm). El radio del borde medido en pasos de LED da NA·z. Con dos alturas distintas se rompe la degeneración que arrastrábamos desde octubre. Sin el eje por captura, las tomas a la nueva altura se habrían reconstruido con un corrimiento falso de unos 0,8 mm.</aside>
+</section>

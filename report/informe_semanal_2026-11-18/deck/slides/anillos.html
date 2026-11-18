@@ -1,0 +1,41 @@
+<section id="anillos">
+<p class="eyebrow">RESIDUO POR ANILLO · LEDS NO VISTOS</p>
+<h2>Con 1025 ms el residuo crece fuera de la zona que mide C1</h2>
+<div class="row" style="align-items:flex-start;">
+<div class="chartwrap" style="width:1020px; height:540px;">
+<svg width="1020" height="470" viewBox="0 0 1020 470" aria-label="Residuo held-out por anillo, 1025 ms contra 2048 ms: iguales hasta el anillo 7; desde el anillo 8 la curva de 1025 ms sube hasta 0,78 y la de 2048 ms queda entre 0,53 y 0,64">
+<rect x="60" y="10" width="365" height="446" fill="#E3E8EF"/>
+<line x1="70" y1="456" x2="1010" y2="456" stroke="#C9C4B8" stroke-width="2"/>
+<line x1="70" y1="309.3" x2="1010" y2="309.3" stroke="#C9C4B8" stroke-width="1"/>
+<line x1="70" y1="162.7" x2="1010" y2="162.7" stroke="#C9C4B8" stroke-width="1"/>
+<line x1="70" y1="16" x2="1010" y2="16" stroke="#C9C4B8" stroke-width="1"/>
+<polyline fill="none" stroke="#2E6DB4" stroke-width="5" stroke-linejoin="round" points="80,410.5 156.7,408.3 233.3,383.4 310,383.4 386.7,425.2 463.3,408.3 540,399.5 616.7,408.3 693.3,379.7 770,382.7 846.7,338.7 923.3,331.3 1000,254.3"/>
+<polyline fill="none" stroke="#C46A1B" stroke-width="5" stroke-linejoin="round" points="80,420.1 156.7,424.5 233.3,409.1 310,412 386.7,415.7 463.3,386.3 540,347.5 616.7,329.9 693.3,268.3 770,228.7 846.7,164.9 923.3,106.2 1000,45.3"/>
+<circle cx="1000" cy="254.3" r="8" fill="#2E6DB4"/>
+<circle cx="1000" cy="45.3" r="8" fill="#C46A1B"/>
+</svg>
+<p class="ax" style="left:0; top:440px; width:56px;">0,50</p>
+<p class="ax" style="left:0; top:293px; width:56px;">0,60</p>
+<p class="ax" style="left:0; top:147px; width:56px;">0,70</p>
+<p class="ax" style="left:0; top:0; width:56px;">0,80</p>
+<p class="ax" style="left:72px; top:470px; width:30px;">2</p>
+<p class="ax" style="left:225px; top:470px; width:30px;">4</p>
+<p class="ax" style="left:379px; top:470px; width:30px;">6</p>
+<p class="ax" style="left:532px; top:470px; width:30px;">8</p>
+<p class="ax" style="left:680px; top:470px; width:40px;">10</p>
+<p class="ax" style="left:834px; top:470px; width:40px;">12</p>
+<p class="ax" style="left:987px; top:470px; width:40px;">14</p>
+<p class="ax" style="left:360px; top:504px; width:520px;">anillo (pasos de LED desde el eje)</p>
+<p class="band" style="left:84px; top:24px; width:330px;">C1 mide solo esta zona (anillos &lt; 7)</p>
+<p class="lbl o" style="left:700px; top:62px; width:160px;">1025 ms</p>
+<p class="lbl b" style="left:870px; top:352px; width:150px;">2048 ms</p>
+</div>
+<div class="col" style="flex:1; padding-top:8px;">
+<p class="big o" style="font-size:96px;">0,70 → 0,58</p>
+<p>Anillo 12: residuo con 1025 ms frente a 2048 ms. La diferencia (0,11) es diez veces la dispersión entre mitades.</p>
+<p>Confirma la hipótesis registrada antes del resultado: la exposición importa en los anillos exteriores.</p>
+<p class="source">Promedio de los dos NA (difieren ≤ 0,01). Un solo campo; sin piso de ruido (un frame por LED).</p>
+</div>
+</div>
+<aside>R por anillo calculado sobre todos los LEDs no vistos de cada mitad. Hasta el anillo 7 las dos exposiciones son iguales. Desde el 8, la de 1025 ms crece de forma monótona hasta 0,78; la de 2048 ms queda entre 0,53 y 0,64. La conclusión del 13/11, que la exposición no era el cuello de botella, dependía de mirar solo C1. Propuesta: reportar siempre el residuo por anillo junto con C1.</aside>
+</section>
