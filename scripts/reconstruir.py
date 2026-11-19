@@ -363,6 +363,8 @@ def main():
     ap.add_argument("--offset-roi", default=None, help="OffsetX,OffsetY del ROI de la cámara en esa toma (si no: scripts/leer_offset.py)")
     ap.add_argument("--anillo-max", type=int, default=None,
                     help="usar solo los LEDs con anillo = round(distancia al LED (17,15)) <= N (misma convención que precaptura)")
+    ap.add_argument("--lado-max", type=int, default=None,
+                    help="usar solo el subgrid N x N (N impar) centrado en el eje: max(|dfila|, |dcol|) <= (N-1)//2")
     ap.add_argument("--no-descartar", action="store_true", help="no descartar frames a oscuras (solo para comparar)")
     ap.add_argument("--na", type=float, default=None, help=f"NA del objetivo en el modelo (def. {NA_OBJ:.4f}, medido por FFT el 18/11; antes 0.0669)")
     ap.add_argument("--centro", default=None, help="centro.json de ./chequeo.sh para esta toma (def. 'centro' de captura.json)")
@@ -512,6 +514,10 @@ def main():
     if a.anillo_max is not None:
         keys = [k for k in keys if round(np.hypot(k[0] - eje[0], k[1] - eje[1])) <= a.anillo_max]
         msg(f"  --anillo-max {a.anillo_max}: se usan {len(keys)} de {len(SM)} LEDs")
+    if a.lado_max is not None:
+        h = (a.lado_max - 1) // 2
+        keys = [k for k in keys if max(abs(k[0] - eje[0]), abs(k[1] - eje[1])) <= h]
+        msg(f"  --lado-max {a.lado_max}: subgrid {a.lado_max}x{a.lado_max}, se usan {len(keys)} de {len(SM)} LEDs")
     S, Fl, V, SAT, TT, TF, NF, descartes, sat_leds = [], [], [], [], [], [], [], [], []
     for i, k in enumerate(keys):
         t = elegir_t(SM[k], rec)

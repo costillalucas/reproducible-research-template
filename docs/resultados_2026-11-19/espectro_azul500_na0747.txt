@@ -1,0 +1,7 @@
+objeto_complejo.npy    amplitud  pico/mediana  259.9  f=(-0.039,-0.516) |f|=0.517 µm⁻¹  T=1.934 µm
+objeto_complejo.npy    fase      pico/mediana  204.3  f=(-0.039,-0.516) |f|=0.517 µm⁻¹  T=1.934 µm
+objeto_mitadA.npy      amplitud  pico/mediana   95.3  f=(-0.027,-0.517) |f|=0.518 µm⁻¹  T=1.930 µm
+objeto_mitadA.npy      fase      pico/mediana   67.4  f=(-0.023,-0.490) |f|=0.491 µm⁻¹  T=2.037 µm
+objeto_mitadB.npy      amplitud  pico/mediana   67.5  f=(-0.047,-0.494) |f|=0.496 µm⁻¹  T=2.015 µm
+objeto_mitadB.npy      fase      pico/mediana   59.6  f=(-0.058,-0.531) |f|=0.534 µm⁻¹  T=1.872 µm
+C3 original 0.1171;  sin los órdenes de la red (radio 12k px de Fourier): 0.0162

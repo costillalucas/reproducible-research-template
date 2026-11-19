@@ -1,0 +1,43 @@
+=== 15:59 λ_prueba 0.470 -> z_modelo 145.6
+tiempo:             total 5.1 min (preprocesado 0.2, reconstrucción 4.8), 3 núcleo(s)
+R de ajuste (todos los LEDs que usó):  0.780
+C1 R held-out (validación por mitades): 0.900   (mitad A 0.897, mitad B 0.903; 145 LEDs de anillo < 7 no vistos)
+objeto_complejo.npy    amplitud  pico/mediana  260.8  f=(-0.039,-0.496) |f|=0.498 µm⁻¹  T=2.010 µm
+objeto_mitadA.npy      amplitud  pico/mediana   81.8  f=(-0.035,-0.523) |f|=0.524 µm⁻¹  T=1.907 µm
+objeto_mitadB.npy      amplitud  pico/mediana   53.6  f=(-0.054,-0.516) |f|=0.518 µm⁻¹  T=1.929 µm
+=== 16:04 λ_prueba 0.486 -> z_modelo 150.56
+tiempo:             total 5.3 min (preprocesado 0.2, reconstrucción 5.0), 3 núcleo(s)
+R de ajuste (todos los LEDs que usó):  0.779
+C1 R held-out (validación por mitades): 0.902   (mitad A 0.900, mitad B 0.904; 145 LEDs de anillo < 7 no vistos)
+objeto_complejo.npy    amplitud  pico/mediana  177.5  f=(-0.039,-0.473) |f|=0.474 µm⁻¹  T=2.108 µm
+objeto_mitadA.npy      amplitud  pico/mediana   62.9  f=(+0.035,+0.484) |f|=0.486 µm⁻¹  T=2.059 µm
+objeto_mitadB.npy      amplitud  pico/mediana   53.5  f=(+0.050,+0.496) |f|=0.499 µm⁻¹  T=2.005 µm
+=== 16:09 λ_prueba 0.460 -> z_modelo 142.5
+tiempo:             total 5.4 min (preprocesado 0.2, reconstrucción 5.1), 3 núcleo(s)
+R de ajuste (todos los LEDs que usó):  0.784
+C1 R held-out (validación por mitades): 0.900   (mitad A 0.897, mitad B 0.904; 145 LEDs de anillo < 7 no vistos)
+objeto_complejo.npy    amplitud  pico/mediana  208.6  f=(+0.031,+0.531) |f|=0.532 µm⁻¹  T=1.880 µm
+objeto_mitadA.npy      amplitud  pico/mediana   91.5  f=(-0.023,-0.527) |f|=0.528 µm⁻¹  T=1.895 µm
+objeto_mitadB.npy      amplitud  pico/mediana   56.1  f=(-0.058,-0.531) |f|=0.534 µm⁻¹  T=1.872 µm
+=== 16:15 λ_prueba 0.478 -> z_modelo 148.08
+tiempo:             total 5.6 min (preprocesado 0.2, reconstrucción 5.3), 3 núcleo(s)
+R de ajuste (todos los LEDs que usó):  0.777
+C1 R held-out (validación por mitades): 0.899   (mitad A 0.896, mitad B 0.901; 145 LEDs de anillo < 7 no vistos)
+objeto_complejo.npy    amplitud  pico/mediana  116.3  f=(-0.039,-0.492) |f|=0.494 µm⁻¹  T=2.025 µm
+objeto_mitadA.npy      amplitud  pico/mediana   87.2  f=(-0.016,-0.504) |f|=0.504 µm⁻¹  T=1.984 µm
+objeto_mitadB.npy      amplitud  pico/mediana   49.8  f=(-0.050,-0.516) |f|=0.518 µm⁻¹  T=1.931 µm
+=== 16:20 λ_prueba 0.494 -> z_modelo 153.03
+tiempo:             total 5.7 min (preprocesado 0.2, reconstrucción 5.4), 3 núcleo(s)
+R de ajuste (todos los LEDs que usó):  0.779
+C1 R held-out (validación por mitades): 0.898   (mitad A 0.895, mitad B 0.902; 145 LEDs de anillo < 7 no vistos)
+objeto_complejo.npy    amplitud  pico/mediana  244.6  f=(-0.035,-0.481) |f|=0.482 µm⁻¹  T=2.075 µm
+objeto_mitadA.npy      amplitud  pico/mediana   91.2  f=(-0.031,-0.488) |f|=0.489 µm⁻¹  T=2.044 µm
+objeto_mitadB.npy      amplitud  pico/mediana   59.4  f=(-0.050,-0.484) |f|=0.487 µm⁻¹  T=2.053 µm
+=== 16:26 λ_prueba 0.502 -> z_modelo 155.51
+tiempo:             total 5.2 min (preprocesado 0.2, reconstrucción 4.9), 3 núcleo(s)
+R de ajuste (todos los LEDs que usó):  0.765
+C1 R held-out (validación por mitades): 0.900   (mitad A 0.897, mitad B 0.903; 145 LEDs de anillo < 7 no vistos)
+objeto_complejo.npy    amplitud  pico/mediana  195.0  f=(+0.039,+0.477) |f|=0.478 µm⁻¹  T=2.091 µm
+objeto_mitadA.npy      amplitud  pico/mediana  112.6  f=(-0.019,-0.477) |f|=0.477 µm⁻¹  T=2.096 µm
+objeto_mitadB.npy      amplitud  pico/mediana   79.7  f=(+0.054,+0.477) |f|=0.480 µm⁻¹  T=2.084 µm
+=== 16:31 fin
