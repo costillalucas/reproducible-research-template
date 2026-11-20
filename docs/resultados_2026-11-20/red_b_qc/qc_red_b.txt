@@ -1,0 +1,32 @@
+== precaptura qc: /home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-11-20.2048ms-red.b
+   grilla esperada 29x29: filas 3-31, columnas 1-29
+  [OK]       841/841 LEDs con imágenes
+  [OK]       frames por LED y exposición: 1 en 841 carpetas
+  exposiciones usadas: 37 ms x 9 LEDs, 545 ms x 12 LEDs, 1691 ms x 16 LEDs, 2048 ms x 804 LEDs
+  [OK]       oscuros: 37 ms (4 fr), 545 ms (4 fr), 1691 ms (4 fr), 2048 ms (4 fr) -> cubren todas las exposiciones
+  [CORREGIR] saturación: 9 LEDs con píxeles saturados (peor (17, 16): 0.004 %): bajar su exposición
+
+  anillo  nLED  t[ms]          pico[c/ms]  pico[cuentas]  p99.9 crudo max  SNR_pico/frame  frames  N p/SNR>=3 (tope 4)  SNR_energía/frame
+      0     1  37                95.909         3529.5             3763          434.58       1  1                            38.06
+      1     8  37                91.485         3366.6             3758          424.35       1  1                            35.20
+      2    12  545                5.764         3140.4             3618          409.75       1  1                           184.08
+      3    16  1691               1.365         2307.6             3281          350.77       1  1                           110.64
+      4    32  2048               0.652         1334.8             2569          265.79       1  1                            74.47
+      5    28  2048               0.367          752.3             1149          198.20       1  1                            51.89
+      6    40  2048               0.212          434.9              863          149.02       1  1                            38.73
+      7    40  2048               0.136          279.1              618          117.67       1  1                            27.82
+      8    48  2048               0.091          187.1              517           94.53       1  1                            20.17
+      9    68  2048               0.061          125.7              423           75.42       1  1                            14.80
+     10    56  2048               0.045           91.3              389           62.43       1  1                            11.07
+     11    72  2048               0.033           68.0              374           52.05       1  1                             8.13
+     12    68  2048               0.025           50.4              401           42.93       1  1                             6.37
+     13    88  2048               0.019           38.7              424           35.88       1  1                             5.02
+     14    88  2048               0.015           30.0              437           30.02       1  1                             4.07
+     15    56  2048               0.012           24.5              342           25.81       1  1                             3.36
+     16    52  2048               0.009           18.6              342           20.92       1  1                             2.90
+     17    28  2048               0.007           13.7              337           16.39       1  1                             2.37
+     18    28  2048               0.006           11.7              337           14.43       1  1                             2.19
+     19     8  2048               0.005            9.4              334           11.92       1  1                             1.96
+     20     4  2048               0.004            8.6              329           11.12       1  1                             2.00
+  [OK]       SNR de pico por anillo (promedio de los frames tomados): >= 3 en todos
+  figura: docs/resultados_2026-11-20/red_b_qc/qc_red_b.png   (24.9 s)

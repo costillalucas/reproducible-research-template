@@ -1,0 +1,21 @@
+{
+ "ok": false,
+ "fecha": "2026-11-20 14:51",
+ "carpeta": "/home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-11-20.2048ms-red.b-sinmuestra",
+ "led": [
+  17,
+  15
+ ],
+ "desvio_pasos": [
+  -0.2232,
+  0.0493
+ ],
+ "offset_roi": [
+  4064,
+  842
+ ],
+ "offset_sugerido": [
+  3968,
+  1316
+ ]
+}

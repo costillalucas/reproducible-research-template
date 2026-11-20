@@ -1,0 +1,12 @@
+/home/chanoscopio/.local/lib/python3.10/site-packages/matplotlib/projections/__init__.py:63: UserWarning: Unable to import Axes3D. This may be due to multiple versions of Matplotlib being installed (e.g. as a system package and as a pip package). As a result, the 3D projection is not available.
+  warnings.warn("Unable to import Axes3D. This may be due to multiple versions of "
+== precaptura centro: /home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-11-20.2048ms-red.a
+   LED objetivo (17, 15), ROI actual OffsetX 4064, OffsetY 842, z 143.5 mm, paso 2515 px/LED, oscuro: carpeta
+  LEDs de borde a z 143.5 mm (radio BF esperado 1.77 pasos): [(15, 14), (15, 15), (15, 16), (16, 13), (16, 14), (16, 16), (16, 17), (17, 13), (17, 17), (18, 13), (18, 14), (18, 16), (18, 17), (19, 14), (19, 15), (19, 16)]
+  imágenes: central 34 ms; vecinos (15, 14):482ms, (15, 15):482ms, (15, 16):482ms, (16, 13):482ms, (16, 14):34ms, (16, 16):34ms, (16, 17):482ms, (17, 13):482ms, (17, 17):482ms, (18, 13):482ms, (18, 14):34ms, (18, 16):34ms, (18, 17):482ms, (19, 14):482ms, (19, 15):482ms, (19, 16):482ms
+  (a) modelo de borde, todos los vecinos: desvío (fila, col) = (-0.028, +0.002) pasos; R = 4600 px = 1.753 pasos (calibración 1.770 a z 143.5 mm), ancho w = 105 px, s = 2624 px/paso
+  (b) simetría de pares de la cruz: fila +0.033 (+-0.005 mitades), col +0.010 (+-0.005 mitades)
+  EJE ÓPTICO en LED fila 17.033, columna 15.010  ->  desvío (+0.033, +0.010) pasos = (+86, +25) px de ROI  [fuente: fila (b), col (b)]
+             (a) y (b) difieren 0.061 pasos: normal con el eje centrado (los arcos caen fuera del ROI y (a) es poco fiable); vale (b).
+  [OK]       eje centrado sobre (17, 15) (|desvío| = 0.034 < 0.05 paso). No tocar el ROI.
+  figura: /tmp/claude-1000/-home-chanoscopio-Documents-LucasC-reproducible-research-template/e20b67d4-45aa-41f7-87e9-c705d1933943/scratchpad/red_a/centro.png   (11.7 s)

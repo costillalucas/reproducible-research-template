@@ -1,0 +1,10 @@
+  (z 143.5 mm lejos de la calibración a 102 mm: se ajusta también px/paso)
+== precaptura centro: /home/chanoscopio/Documents/AleYLu/imagenes_tomadas/2026-11-20.2048ms-red.b-sinmuestra-prueba-1636
+   LED objetivo (17, 15), ROI actual OffsetX 4000, OffsetY 1942, z 143.5 mm, paso 2515 px/LED, oscuro: carpeta
+  LEDs de borde a z 143.5 mm (radio BF esperado 1.77 pasos): [(15, 14), (15, 15), (15, 16), (16, 13), (16, 14), (16, 16), (16, 17), (17, 13), (17, 17), (18, 13), (18, 14), (18, 16), (18, 17), (19, 14), (19, 15), (19, 16)]
+  imágenes: central 8 ms; vecinos (15, 14):128ms, (15, 15):128ms, (15, 16):128ms, (16, 13):128ms, (16, 14):8ms, (16, 16):8ms, (16, 17):128ms, (17, 13):128ms, (17, 17):128ms, (18, 13):128ms, (18, 14):8ms, (18, 16):8ms, (18, 17):128ms, (19, 14):128ms, (19, 15):128ms, (19, 16):128ms
+  (a) modelo de borde, todos los vecinos: desvío (fila, col) = (-0.065, -0.007) pasos; R = 4513 px = 1.749 pasos (calibración 1.770 a z 143.5 mm), ancho w = 99 px, s = 2581 px/paso
+  (b) simetría de pares de la cruz: fila -0.044 (+-0.002 mitades), col -0.017 (+-0.003 mitades)
+  EJE ÓPTICO en LED fila 16.956, columna 14.983  ->  desvío (-0.044, -0.017) pasos = (-114, -45) px de ROI  [fuente: fila (b), col (b)]
+  [OK]       eje centrado sobre (17, 15) (|desvío| = 0.047 < 0.05 paso). No tocar el ROI.
+  figura: docs/resultados_2026-11-20/red_b_qc/centro_red.b-sinmuestra-prueba-1636.png   (5.6 s)
