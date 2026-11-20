@@ -1,0 +1,71 @@
+=== 19/11 18:28 lado 29
+  filas 248:648, columnas 359:759  (400 px = 516 µm), lo más cerca posible del eje óptico (por defecto; el ROI no está centrado en el eje)
+  --lado-max 29: subgrid 29x29, se usan 841 de 841 LEDs
+recorte:            filas 248:648, columnas 359:759  (400 px = 516 µm), lo más cerca posible del eje óptico (por defecto; el ROI no está centrado en el eje)
+tiempo:             total 53.0 min (preprocesado 2.1, reconstrucción 50.6), 3 núcleo(s)
+R de ajuste (todos los LEDs que usó):  0.736
+C1 R held-out (validación por mitades): 0.771   (mitad A 0.769, mitad B 0.773; 145 LEDs de anillo < 7 no vistos)
+objeto_complejo.npy    amplitud  pico/mediana  473.9  f=(-0.039,-0.965) |f|=0.966 µm⁻¹  T=1.035 µm
+objeto_complejo.npy    fase      pico/mediana  225.6  f=(-0.041,-0.963) |f|=0.964 µm⁻¹  T=1.037 µm
+objeto_mitadA.npy      amplitud  pico/mediana  337.0  f=(-0.058,-0.963) |f|=0.965 µm⁻¹  T=1.036 µm
+objeto_mitadA.npy      fase      pico/mediana  162.4  f=(-0.054,-0.965) |f|=0.967 µm⁻¹  T=1.035 µm
+objeto_mitadB.npy      amplitud  pico/mediana  288.0  f=(-0.027,-0.963) |f|=0.964 µm⁻¹  T=1.038 µm
+objeto_mitadB.npy      fase      pico/mediana  161.2  f=(-0.037,-0.963) |f|=0.964 µm⁻¹  T=1.037 µm
+C3 original 0.0478;  sin los órdenes de la red (radio 12k px de Fourier): 0.0042
+=== 19/11 19:21 lado 27
+  filas 248:648, columnas 359:759  (400 px = 516 µm), lo más cerca posible del eje óptico (por defecto; el ROI no está centrado en el eje)
+  --lado-max 27: subgrid 27x27, se usan 729 de 841 LEDs
+recorte:            filas 248:648, columnas 359:759  (400 px = 516 µm), lo más cerca posible del eje óptico (por defecto; el ROI no está centrado en el eje)
+tiempo:             total 46.0 min (preprocesado 1.5, reconstrucción 44.1), 3 núcleo(s)
+R de ajuste (todos los LEDs que usó):  0.715
+C1 R held-out (validación por mitades): 0.771   (mitad A 0.768, mitad B 0.774; 145 LEDs de anillo < 7 no vistos)
+objeto_complejo.npy    amplitud  pico/mediana  561.3  f=(-0.043,-0.965) |f|=0.966 µm⁻¹  T=1.035 µm
+objeto_complejo.npy    fase      pico/mediana  251.7  f=(-0.043,-0.965) |f|=0.966 µm⁻¹  T=1.035 µm
+objeto_mitadA.npy      amplitud  pico/mediana  369.2  f=(-0.058,-0.961) |f|=0.963 µm⁻¹  T=1.038 µm
+objeto_mitadA.npy      fase      pico/mediana  147.9  f=(-0.054,-0.965) |f|=0.967 µm⁻¹  T=1.035 µm
+objeto_mitadB.npy      amplitud  pico/mediana  307.7  f=(-0.021,-0.965) |f|=0.965 µm⁻¹  T=1.036 µm
+objeto_mitadB.npy      fase      pico/mediana  127.4  f=(+0.021,+0.965) |f|=0.965 µm⁻¹  T=1.036 µm
+C3 original 0.0745;  sin los órdenes de la red (radio 12k px de Fourier): 0.0046
+=== 19/11 20:07 lado 25
+  filas 248:648, columnas 359:759  (400 px = 516 µm), lo más cerca posible del eje óptico (por defecto; el ROI no está centrado en el eje)
+  --lado-max 25: subgrid 25x25, se usan 625 de 841 LEDs
+recorte:            filas 248:648, columnas 359:759  (400 px = 516 µm), lo más cerca posible del eje óptico (por defecto; el ROI no está centrado en el eje)
+tiempo:             total 37.8 min (preprocesado 1.3, reconstrucción 36.2), 3 núcleo(s)
+R de ajuste (todos los LEDs que usó):  0.701
+C1 R held-out (validación por mitades): 0.771   (mitad A 0.768, mitad B 0.775; 145 LEDs de anillo < 7 no vistos)
+objeto_complejo.npy    amplitud  pico/mediana  396.2  f=(-0.045,-0.965) |f|=0.966 µm⁻¹  T=1.035 µm
+objeto_complejo.npy    fase      pico/mediana  204.6  f=(-0.045,-0.965) |f|=0.966 µm⁻¹  T=1.035 µm
+objeto_mitadA.npy      amplitud  pico/mediana  233.4  f=(+0.070,+0.959) |f|=0.962 µm⁻¹  T=1.040 µm
+objeto_mitadA.npy      fase      pico/mediana   99.1  f=(-0.064,-0.963) |f|=0.965 µm⁻¹  T=1.036 µm
+objeto_mitadB.npy      amplitud  pico/mediana  231.2  f=(+0.002,+0.953) |f|=0.953 µm⁻¹  T=1.049 µm
+objeto_mitadB.npy      fase      pico/mediana  106.3  f=(-0.054,-0.897) |f|=0.899 µm⁻¹  T=1.112 µm
+C3 original 0.0132;  sin los órdenes de la red (radio 12k px de Fourier): 0.0059
+=== 19/11 20:45 lado 23
+  filas 248:648, columnas 359:759  (400 px = 516 µm), lo más cerca posible del eje óptico (por defecto; el ROI no está centrado en el eje)
+  --lado-max 23: subgrid 23x23, se usan 529 de 841 LEDs
+recorte:            filas 248:648, columnas 359:759  (400 px = 516 µm), lo más cerca posible del eje óptico (por defecto; el ROI no está centrado en el eje)
+tiempo:             total 33.0 min (preprocesado 1.1, reconstrucción 31.6), 3 núcleo(s)
+R de ajuste (todos los LEDs que usó):  0.685
+C1 R held-out (validación por mitades): 0.771   (mitad A 0.768, mitad B 0.774; 145 LEDs de anillo < 7 no vistos)
+objeto_complejo.npy    amplitud  pico/mediana  424.9  f=(-0.050,-0.969) |f|=0.970 µm⁻¹  T=1.031 µm
+objeto_complejo.npy    fase      pico/mediana  184.8  f=(+0.047,+0.990) |f|=0.991 µm⁻¹  T=1.009 µm
+objeto_mitadA.npy      amplitud  pico/mediana  226.1  f=(-0.074,-0.957) |f|=0.960 µm⁻¹  T=1.041 µm
+objeto_mitadA.npy      fase      pico/mediana  100.5  f=(-0.058,-0.963) |f|=0.965 µm⁻¹  T=1.036 µm
+objeto_mitadB.npy      amplitud  pico/mediana  158.2  f=(-0.076,-0.969) |f|=0.972 µm⁻¹  T=1.029 µm
+objeto_mitadB.npy      fase      pico/mediana   66.9  f=(-0.025,-0.979) |f|=0.979 µm⁻¹  T=1.021 µm
+C3 original 0.0125;  sin los órdenes de la red (radio 12k px de Fourier): 0.0068
+=== 19/11 21:18 lado 21
+  filas 248:648, columnas 359:759  (400 px = 516 µm), lo más cerca posible del eje óptico (por defecto; el ROI no está centrado en el eje)
+  --lado-max 21: subgrid 21x21, se usan 441 de 841 LEDs
+recorte:            filas 248:648, columnas 359:759  (400 px = 516 µm), lo más cerca posible del eje óptico (por defecto; el ROI no está centrado en el eje)
+tiempo:             total 28.1 min (preprocesado 0.9, reconstrucción 26.9), 3 núcleo(s)
+R de ajuste (todos los LEDs que usó):  0.664
+C1 R held-out (validación por mitades): 0.771   (mitad A 0.770, mitad B 0.773; 145 LEDs de anillo < 7 no vistos)
+objeto_complejo.npy    amplitud  pico/mediana  282.2  f=(-0.033,-0.932) |f|=0.933 µm⁻¹  T=1.072 µm
+objeto_complejo.npy    fase      pico/mediana   86.7  f=(-0.033,-0.932) |f|=0.933 µm⁻¹  T=1.072 µm
+objeto_mitadA.npy      amplitud  pico/mediana  104.5  f=(+0.002,-0.911) |f|=0.911 µm⁻¹  T=1.098 µm
+objeto_mitadA.npy      fase      pico/mediana   31.0  f=(+0.006,-0.909) |f|=0.909 µm⁻¹  T=1.100 µm
+objeto_mitadB.npy      amplitud  pico/mediana  133.8  f=(-0.078,-0.886) |f|=0.889 µm⁻¹  T=1.125 µm
+objeto_mitadB.npy      fase      pico/mediana   39.8  f=(-0.076,-0.915) |f|=0.918 µm⁻¹  T=1.090 µm
+C3 original 0.0065;  sin los órdenes de la red (radio 12k px de Fourier): 0.0065
+=== 19/11 21:47 fin
